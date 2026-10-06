@@ -2,19 +2,55 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob:; style-src 'self' 'unsafe-inline'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'" />
     <title>Pastille — capture</title>
+    <link rel="stylesheet" href="./theme.css" />
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #000; cursor: crosshair; user-select: none; }
+      html, body { height: 100%; overflow: hidden; background: #000; user-select: none; }
+      /* Réticule blanc bordé de noir, lisible sur tous les fonds (point chaud au centre). */
+      body {
+        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none'%3E%3Cpath d='M14 2v8M14 18v8M2 14h8M18 14h8' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M14 2v8M14 18v8M2 14h8M18 14h8' stroke='%23111' stroke-width='1.3' stroke-linecap='round'/%3E%3Ccircle cx='14' cy='14' r='1.4' fill='%23111' stroke='%23fff'/%3E%3C/svg%3E") 14 14, crosshair;
+      }
       #frozen { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-      #zone { position: fixed; display: none; border: 2px solid #ff3b30; background: rgba(255, 59, 48, 0.08); pointer-events: none; }
-      #hover { position: fixed; display: none; border: 3px solid #0a84ff; background: rgba(10, 132, 255, 0.06); pointer-events: none; box-sizing: border-box; }
+      /* Ce qui sera capturé reste clair, le reste de l'écran est assombri par l'ombre du cadre. */
+      .target {
+        position: fixed; display: none; pointer-events: none; box-sizing: border-box;
+        box-shadow: 0 0 0 3px #ff6a3d, 0 0 0 100vmax rgba(8, 10, 14, 0.55);
+        border-radius: 10px;
+      }
+      #zone { border-radius: 2px; background: rgba(214, 58, 12, 0.08); box-shadow: 0 0 0 2px var(--accent), 0 0 0 100vmax rgba(8, 10, 14, 0.55); }
+      #label {
+        position: fixed; display: none; align-items: center; gap: 8px; height: 26px; padding: 0 10px; max-width: 60vw;
+        border-radius: 7px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); pointer-events: none; white-space: nowrap;
+      }
+      #label .name { overflow: hidden; text-overflow: ellipsis; }
+      #label .size { font-weight: 500; opacity: 0.85; font-variant-numeric: tabular-nums; }
+      /* Pastille fantôme : sa pointe touche le curseur, elle montre le numéro du prochain point. */
+      #ghost {
+        position: fixed; display: none; width: 26px; height: 26px; border-radius: 13px 13px 13px 3px;
+        background: var(--accent); border: 2px solid #fff; color: #fff; font-size: 12px; font-weight: 700;
+        align-items: center; justify-content: center; opacity: 0.6; pointer-events: none; font-variant-numeric: tabular-nums;
+      }
+      #hints {
+        position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px;
+        height: 44px; padding: 0 8px 0 16px; border-radius: 14px; background: rgba(28, 28, 30, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        color: #e5e5ea; font-size: 12.5px; white-space: nowrap; pointer-events: none;
+      }
+      #hints > span { display: flex; align-items: center; gap: 7px; }
+      #hints b { padding: 2px 7px; border-radius: 5px; background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 600; }
+      #hints i { width: 1px; height: 16px; background: rgba(255, 255, 255, 0.16); }
+      #hints .session { height: 30px; padding: 0 10px; margin-left: 4px; border-radius: 9px; background: rgba(255, 255, 255, 0.07); color: #aeaeb2; }
     </style>
   </head>
   <body>
     <img id="frozen" alt="" />
-    <div id="hover"></div>
-    <div id="zone"></div>
+    <div id="hover" class="target"></div>
+    <div id="zone" class="target"></div>
+    <div id="label"><span class="name"></span><span class="size"></span></div>
+    <div id="ghost"></div>
+    <div id="hints"></div>
     <script type="module" src="./overlay.ts"></script>
   </body>
 </html>

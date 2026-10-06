@@ -5,8 +5,12 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { drawAnnotations, pinPosition, type Annotation, type Capture, type Ctx2D, type Geometry } from '@pastille/shared';
+import { T } from '../texts.ts';
 
 const PIN_RADIUS = 13;
+const CARD_RADIUS = 10;
+// Marges autour de la capture ajustée : la barre d'aide occupe le bas.
+const PAD = { side: 28, top: 28, bottom: 72 };
 
 const emptyAnnotation: Annotation = {
   id: '',
@@ -41,7 +45,8 @@ export function Stage(props: {
   onSelect: (id: string | null, openBubble: boolean) => void;
   onAdd: (geometry: Geometry) => void;
   onMove: (id: string, geometry: Geometry) => void;
-  bubble: (pin: { x: number; y: number }) => ReactNode; // bulle du point sélectionné, positionnée par la scène
+  // Bulle du point sélectionné : centre de sa pastille et taille de la scène, pour la placer.
+  bubble: (pin: { x: number; y: number; r: number }, stage: { w: number; h: number }) => ReactNode;
 }) {
   const { capture } = props;
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -73,8 +78,9 @@ export function Stage(props: {
   // Image ajustée à la fenêtre à chaque changement de capture.
   useEffect(() => {
     if (!size.w || !size.h) return;
-    const scale = Math.min((size.w - 40) / capture.width, (size.h - 40) / capture.height);
-    setView({ scale, ox: (size.w - capture.width * scale) / 2, oy: (size.h - capture.height * scale) / 2 });
+    const w = size.w - 2 * PAD.side, h = size.h - PAD.top - PAD.bottom;
+    const scale = Math.min(w / capture.width, h / capture.height);
+    setView({ scale, ox: PAD.side + (w - capture.width * scale) / 2, oy: PAD.top + (h - capture.height * scale) / 2 });
   }, [capture.id, capture.width, capture.height, size.w > 0, size.h > 0]);
 
   const annotations: Annotation[] = capture.annotations.map((a) =>
@@ -95,11 +101,39 @@ export function Stage(props: {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, size.w, size.h);
     if (img) {
+      // La capture posée sur une carte : coins arrondis, ombre portée, liseré discret.
+      const { x, y, width, height } = imageView;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 50;
+      ctx.shadowOffsetY = 20;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, CARD_RADIUS);
+      ctx.fill();
+      ctx.restore();
+      ctx.save();
+      ctx.clip();
       ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, imageView.x, imageView.y, imageView.width, imageView.height);
+      ctx.drawImage(img, x, y, width, height);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x - 0.5, y - 0.5, width + 1, height + 1, CARD_RADIUS);
+      ctx.stroke();
     }
     drawAnnotations(ctx as unknown as Ctx2D, drawn, imageView, { radius: PIN_RADIUS, selectedId: props.selectedId ?? undefined });
   });
+
+  /** Zoom centré sur un point de la scène, borné entre 5 % et 800 %. */
+  function zoomAt(factor: number, mx: number, my: number) {
+    setView((v) => {
+      const scale = Math.min(8, Math.max(0.05, v.scale * factor));
+      const k = scale / v.scale;
+      return { scale, ox: mx - (mx - v.ox) * k, oy: my - (my - v.oy) * k };
+    });
+  }
 
   // Zoom à la molette, centré sur le curseur (écouteur non passif pour bloquer le défilement).
   useEffect(() => {
@@ -107,12 +141,7 @@ export function Stage(props: {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      setView((v) => {
-        const scale = Math.min(8, Math.max(0.05, v.scale * Math.exp(-e.deltaY * 0.002)));
-        const k = scale / v.scale;
-        return { scale, ox: mx - (mx - v.ox) * k, oy: my - (my - v.oy) * k };
-      });
+      zoomAt(Math.exp(-e.deltaY * 0.002), e.clientX - rect.left, e.clientY - rect.top);
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
@@ -143,7 +172,7 @@ export function Stage(props: {
 
   function hitTest(x: number, y: number): Annotation | undefined {
     return [...annotations].reverse().find((a) => {
-      const [px, py] = pinPosition(a.geometry, imageView);
+      const [px, py] = pinPosition(a.geometry, imageView, PIN_RADIUS);
       return Math.hypot(px - x, py - y) <= PIN_RADIUS + 3;
     });
   }
@@ -205,7 +234,7 @@ export function Stage(props: {
   }
 
   const selected = annotations.find((a) => a.id === props.selectedId);
-  const pin = selected && pinPosition(selected.geometry, imageView);
+  const pin = selected && pinPosition(selected.geometry, imageView, PIN_RADIUS);
 
   return (
     <div className="stage" ref={wrapRef}>
@@ -216,7 +245,22 @@ export function Stage(props: {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       />
-      {pin && props.bubble({ x: pin[0], y: pin[1] })}
+      {pin && props.bubble({ x: pin[0], y: pin[1], r: PIN_RADIUS }, size)}
+      <div className="stage-bar">
+        {T.editor.stageHints.map(([key, text]) => (
+          <span key={key}>
+            <b>{key}</b> {text}
+          </span>
+        ))}
+        <i />
+        <button type="button" aria-label={T.editor.zoomOut} onClick={() => zoomAt(1 / 1.25, size.w / 2, size.h / 2)}>
+          −
+        </button>
+        <span className="zoom">{Math.round(view.scale * 100)} %</span>
+        <button type="button" aria-label={T.editor.zoomIn} onClick={() => zoomAt(1.25, size.w / 2, size.h / 2)}>
+          +
+        </button>
+      </div>
     </div>
   );
 }

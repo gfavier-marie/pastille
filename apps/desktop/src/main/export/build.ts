@@ -45,7 +45,8 @@ export function screenTitle(index: number, capture: Capture): string {
   return [`Écran ${index}`, capture.source?.app, capture.source?.windowTitle].filter(Boolean).join(' — ');
 }
 
-function position(a: Annotation, c: Capture): string {
+/** Position lisible en pixels de la capture (« x 120, y 340 sur 1600 × 1000 »). */
+export function position(a: Annotation, c: Capture): string {
   const px = (v: number, size: number) => Math.round(v * size);
   const size = `sur ${c.width} × ${c.height}`;
   const g = a.geometry;
@@ -95,6 +96,16 @@ export function cropJpeg(img: Image, capture: Capture, a: Annotation, quality = 
   );
 }
 
+/** Capture entière avec toutes ses annotations, limitée à 2000 px de large (exports et MCP). */
+export function screenJpeg(img: Image, capture: Capture): Promise<Buffer> {
+  const scale = Math.min(1, MAX_SCREEN_WIDTH / capture.width);
+  const W = capture.width * scale, H = capture.height * scale;
+  return renderJpeg(W, H, (ctx) => {
+    ctx.drawImage(img, 0, 0, W, H);
+    drawAnnotations(asCtx(ctx), capture.annotations, { x: 0, y: 0, width: W, height: H }, { radius: Math.max(12, W / 90) });
+  });
+}
+
 // Le contexte de @napi-rs/canvas suit l'API Canvas 2D du navigateur.
 const asCtx = (ctx: SKRSContext2D) => ctx as unknown as Ctx2D;
 
@@ -115,11 +126,7 @@ export async function buildExport(
     const scale = Math.min(1, MAX_SCREEN_WIDTH / capture.width);
     const W = capture.width * scale, H = capture.height * scale;
     const image = `images/ecran-${index}.jpg`;
-    const full = await renderJpeg(W, H, (ctx) => {
-      ctx.drawImage(img, 0, 0, W, H);
-      drawAnnotations(asCtx(ctx), capture.annotations, { x: 0, y: 0, width: W, height: H }, { radius: Math.max(12, W / 90) });
-    });
-    await writeFile(join(outDir, image), full);
+    await writeFile(join(outDir, image), await screenJpeg(img, capture));
 
     const points: ExportPoint[] = [];
     for (const a of capture.annotations) {

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+    <title>Bienvenue dans Pastille</title>
+    <link rel="stylesheet" href="./theme.css" />
+    <style>
+      html, body, #root { height: 100%; background: var(--bg); }
+      .wizard { height: 100%; display: flex; flex-direction: column; }
+      .drag { height: 38px; flex: none; -webkit-app-region: drag; }
+      .win .drag { height: 16px; }
+      .body { flex: 1; padding: 6px 56px 0; display: flex; flex-direction: column; gap: 18px; min-height: 0; }
+      .progress-head { display: flex; align-items: center; gap: 14px; }
+      .bars { display: flex; gap: 6px; }
+      .bars span { width: 44px; height: 4px; border-radius: 4px; background: #e6e6ea; }
+      .bars span.on { background: var(--accent); }
+      .progress-head .label { color: var(--muted); font-size: 12px; }
+      .intro { display: flex; flex-direction: column; gap: 8px; }
+      h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+      .intro p { font-size: 14px; line-height: 1.5; color: var(--muted); max-width: 560px; }
+      .card { border: 1px solid #e6e6ea; border-radius: 12px; }
+      .card .row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+      .card .row + .row { border-top: 1px solid var(--divider); }
+      .card.pad { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+      .icon-box { width: 40px; height: 40px; flex: none; border-radius: 10px; background: var(--fill); display: flex; align-items: center; justify-content: center; }
+      .what { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+      .what b { font-size: 14px; font-weight: 600; }
+      .what span { font-size: 12.5px; color: var(--muted); }
+      .granted { display: flex; align-items: center; gap: 6px; color: var(--success-text); font-weight: 600; }
+      .aside { display: flex; align-items: flex-start; gap: 8px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+      .aside svg { flex: none; margin-top: 1px; }
+      .figures { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .keys { display: flex; align-items: center; gap: 10px; }
+      .keys kbd {
+        min-width: 64px; height: 60px; padding: 0 14px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-2);
+        border-bottom-width: 3px; border-radius: 12px; background: var(--bg); font-size: 26px; font-weight: 500; letter-spacing: 0;
+      }
+      .waiting { display: flex; align-items: center; gap: 8px; margin-left: 14px; color: var(--muted); }
+      .waiting i { width: 8px; height: 8px; border-radius: 999px; background: var(--accent); }
+      ol { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      ol li { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: var(--bg-soft); }
+      ol li b { font-weight: 600; }
+      ol li span:last-child { font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+      .pin { width: 22px; height: 22px; border-radius: 11px 11px 11px 3px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+      .check { display: flex; align-items: center; gap: 8px; }
+      .check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+      footer { flex: none; display: flex; align-items: center; gap: 12px; padding: 14px 20px 14px 56px; border-top: 1px solid var(--divider); }
+      footer .spacer { flex: 1; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./welcome/welcome.tsx"></script>
+  </body>
+</html>

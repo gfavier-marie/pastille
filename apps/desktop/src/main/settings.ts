@@ -18,6 +18,9 @@ export type Settings = {
   glossary: string; // prompt initial de Whisper
   instructions: string; // texte d'instructions en tête du PDF
   firstRunDone: boolean;
+  copyPdf: boolean; // PDF mis dans le presse-papiers après l'export
+  openAtLogin: boolean;
+  floatingBar: boolean; // barre flottante pendant une session
 };
 
 /** Ce que voit la fenêtre de réglages : jamais la clé elle-même. */
@@ -37,6 +40,9 @@ export function createSettings(dataDir: string, documentsDir: string) {
     glossary: UI_PROMPT,
     instructions: DEFAULT_INSTRUCTIONS,
     firstRunDone: false,
+    copyPdf: true,
+    openAtLogin: false,
+    floatingBar: false,
   };
   const stored = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
   let settings: Settings = { ...defaults, ...stored };

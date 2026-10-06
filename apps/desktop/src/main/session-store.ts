@@ -156,7 +156,13 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     for (const id of ids) {
       try {
         const s = JSON.parse(await readFile(join(dirOf(id), 'session.json'), 'utf8')) as Session;
-        list.push({ id: s.id, name: s.name, updatedAt: s.updatedAt, points: s.captures.reduce((n, c) => n + c.annotations.length, 0) });
+        list.push({
+          id: s.id,
+          name: s.name,
+          updatedAt: s.updatedAt,
+          points: s.captures.reduce((n, c) => n + c.annotations.length, 0),
+          screens: s.captures.length,
+        });
       } catch {
         // dossier incomplet : ignoré
       }

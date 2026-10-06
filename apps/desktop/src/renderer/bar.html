@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+    <title>Pastille — barre</title>
+    <link rel="stylesheet" href="./theme.css" />
+    <style>
+      /* Barre flottante : une pilule sombre centrée dans une fenêtre transparente. */
+      html, body, #root { height: 100%; background: transparent; overflow: hidden; user-select: none; }
+      #root { display: flex; align-items: center; justify-content: center; }
+      .pill {
+        display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 5px 0 12px; border-radius: 999px;
+        background: rgba(28, 28, 30, 0.94); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+        color: #f2f2f3; font-size: 12.5px; white-space: nowrap;
+      }
+      .pill.open { height: 46px; gap: 10px; padding: 0 6px 0 14px; border-radius: 14px; }
+      .pill .count { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+      .pill.open .count { font-size: 12.5px; }
+      .pill .sep { width: 1px; height: 18px; background: rgba(255, 255, 255, 0.16); }
+      .pill .state { display: flex; align-items: center; gap: 6px; color: #c7c7cc; font-variant-numeric: tabular-nums; }
+      .pill .dot { background: #30d158; }
+      .round { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.1); }
+      .round:hover { background: rgba(255, 255, 255, 0.18); }
+      .capture { height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 11px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 600; }
+      .capture:hover { background: #c4340a; }
+      .capture kbd { opacity: 0.85; }
+      .icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; }
+      .icon:hover { background: rgba(255, 255, 255, 0.1); }
+      .icon.hide { color: #aeaeb2; }
+      .done { font-weight: 600; }
+      .file { max-width: 180px; overflow: hidden; text-overflow: ellipsis; color: #aeaeb2; }
+      .reveal { height: 32px; padding: 0 11px; border: 0; border-radius: 8px; background: rgba(255, 255, 255, 0.1); font-weight: 600; }
+      .reveal:hover { background: rgba(255, 255, 255, 0.18); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./bar/bar.tsx"></script>
+  </body>
+</html>
