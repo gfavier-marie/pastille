@@ -90,6 +90,8 @@ export function createMenubar(opts: MenubarOptions) {
       win.hide();
       hiddenAt = Date.now();
     });
+    // Fermée (⌘W, fin de l'app) : elle sera recréée au prochain clic sur l'icône.
+    win.on('closed', () => (popover = null));
     opts.loadPage(win, 'menu');
     return win;
   }
@@ -147,6 +149,10 @@ export function createMenubar(opts: MenubarOptions) {
     win.setContentProtection(true);
     // Les zones transparentes laissent passer les clics ; la pilule les reprend au survol.
     win.setIgnoreMouseEvents(true, { forward: true });
+    win.on('closed', () => {
+      bar = null;
+      barReady = false;
+    });
     opts.loadPage(win, 'bar');
     win.once('ready-to-show', () => {
       barReady = true;
