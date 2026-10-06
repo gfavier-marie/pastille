@@ -106,3 +106,49 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 - [x] Serveur MCP local dans l'app (HTTP sur 127.0.0.1:3917, lecture seule) : `lister_sessions`, `lire_revue`, `voir_ecran` ; commande `claude mcp add` dans les réglages ; testé par `pnpm e2e`
 - [x] Branchement facile à trouver : onglet « Claude Code » dans les réglages (commande à copier, dernière connexion), « Brancher Claude Code… » dans le menu de l'icône
 - [ ] Essai réel : une revue appliquée par Claude Code sur un projet
+
+## Monétisation (demandé le 6 oct. 2026)
+
+Essai gratuit puis licence, le plus simplement possible : **Polar** encaisse (vendeur officiel, TVA, factures) et délivre une clé de licence que l'app active et vérifie directement par l'API publique de Polar, **sans serveur ni base de données à nous**. Achat unique ou abonnement : même code dans l'app (Polar révoque la clé d'un abonnement résilié), le modèle se choisit dans Polar et sur la page Tarifs. Après l'essai (`TRIAL_DAYS`, 14 jours par défaut, sans carte), seules les **nouvelles captures** sont bloquées ; sessions, exports et Claude Code restent accessibles. Dépôt **privé** ; téléchargements et mises à jour sur Cloudflare.
+
+Adresses (domaine **vibescreener.dev**, acheté sur Cloudflare le 6 oct.) : `<domaine>` site, `relay.<domaine>` relais + PWA (même Worker que `pastille.vibescreener.workers.dev`, gardé : mêmes rooms, rien ne casse), `dl.<domaine>` bucket R2 (`latest.json`, `install.sh`, .dmg).
+
+**M0 — Comptes et décisions (toi)**
+- [ ] Statut (micro-entreprise) et SIRET
+- [x] Prix (bac à sable) : licence à vie 19,99 € TTC, abonnement mensuel 1,99 € TTC (frais Polar 5 % + 0,50 $ par paiement : environ 1,10 € restent sur 1,99 €)
+- [x] Domaine vibescreener.dev sur Cloudflare
+- [x] Polar en bac à sable : organisation `vibescreener`, benefit « Licence VibeScreener » (3 activations), deux produits et leurs liens de paiement ; branchement vérifié (une fausse clé est refusée par Polar)
+- [x] Achat de test (carte 4242…) : la clé reçue s'active et se revérifie auprès de Polar avec le module de licence de l'app (activation de test retirée ensuite)
+- [x] Même essai dans l'app lancée (`PASTILLE_POLAR=sandbox PASTILLE_TRIAL_DAYS=0 pnpm dev`) : essai terminé, clé collée dans Réglages › Licence, licence active (6 oct.)
+- [ ] Polar en production : mêmes réglages (même slug `vibescreener`), compte bancaire, vérification d'identité, puis l'Organization ID dans `POLAR.production` et les liens de paiement sur le site
+
+**M1 — Dépôt privé et Cloudflare tenu proprement**
+- [ ] Dépôt privé, Releases v0.1.0 à v0.4.2 supprimées (personne n'a installé la version MIT)
+- [x] `LICENSE` → tous droits réservés
+- [x] `relay.vibescreener.dev` (domaine personnalisé, workers.dev gardé), `observability` : déployé le 6 oct. ; vérifié qu'un côté sur chaque adresse se retrouve dans la même room (0,5 s)
+- [x] Bucket R2 `vibescreener-downloads` sur `dl.vibescreener.dev` (vide jusqu'à la première version) ; site déployé sur `vibescreener.dev` (prix et mentions légales encore à compléter)
+- [x] Jeton API Cloudflare limité (Workers, R2, routes et DNS de vibescreener.dev) : secret `CLOUDFLARE_API_TOKEN` et variable `CLOUDFLARE_ACCOUNT_ID` dans le dépôt
+- [ ] `ci.yml` (déploiement au push sur main, R2 au tag, `check` sous ubuntu, macOS réservé aux tags) : actif une fois cette branche fusionnée ; passage sous Linux à vérifier au premier push
+
+**M2 — Licence dans l'app**
+- [x] `src/main/license.ts` + tests : essai, activation et vérification Polar (toutes les 24 h, 30 jours hors ligne), révocation ; `PASTILLE_TRIAL_DAYS`, `PASTILLE_POLAR=sandbox`
+- [x] Blocage dans `startCapture()`, onglet « Licence » des réglages, ligne d'essai dans le menu de l'icône, phrase dans l'assistant
+- [x] Organisation Polar du bac à sable et portails clients dans `POLAR` (`license.ts`) ; celle de production au lancement
+- [x] `updater.ts` et `install.sh` vers `dl.<domaine>` ; `RELAY_URL` → `relay.<domaine>` (`vibescreener.dev`)
+- [x] `pnpm e2e` photographie l'onglet Licence
+
+**M3 — Site** (`apps/site`, HTML/CSS statique)
+- [x] Landing : accroche, installation en une commande, démo, 3 étapes, tablette, Claude Code, confidentialité, **tarifs** (deux cartes, chacune retirable), FAQ ; vérifiée en local, de 375 px au bureau, clair et sombre
+- [x] Mentions légales, licence d'utilisation et remboursement, confidentialité, licences tierces (whisper.cpp, modèle Whisper, Electron : MIT) ; `/install.sh` redirigé vers `dl.<domaine>`
+- [x] Prix sur la page (19,99 € et 1,99 €/mois), pas encore republiée
+- [ ] Compléter les « À COMPLÉTER » : liens de paiement de production, e-mail de contact, identité, statut, SIRET et adresse (mentions légales)
+
+- [ ] Windows (branche `windows-deployment`, version 0.6.0, pas encore fusionnée) : après sa fusion, publier aussi le .exe et `install.ps1` sur R2 et faire lire `latest.json` à la mise à jour Windows
+
+**M4 — Lancement** (la 0.5.0 est déjà publiée et la 0.6.0 prise par Windows : vérifier `git ls-remote --tags` avant de choisir le numéro)
+- [ ] Polar en production, liens de paiement sur le site
+- [ ] Retirer la licence de test du bac à sable du Mac de dev (`license.json` dans les données de l'app), sinon la version payante la verra « plus valable »
+- [ ] Tag publié sur R2 (la CI remplace `gh release create`), installation par `curl -fsSL https://<domaine>/install.sh | sh`
+- [x] README et CLAUDE.md mis à jour (commandes, adresses provisoires)
+
+*Critère : sur un Mac vierge, installation depuis le site, essai, achat (sandbox puis réel), clé activée, capture débloquée ; abonnement résilié → capture bloquée à la vérification suivante.*

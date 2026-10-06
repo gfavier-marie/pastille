@@ -1,8 +1,14 @@
 // Relais WebSocket + hébergement de la PWA, en un seul Worker.
+// Deux adresses, mêmes rooms : relay.vibescreener.dev (domaine provisoire) pour les nouvelles
+// versions, et pastille.vibescreener.workers.dev pour les apps et tablettes appairées avant :
+// ne jamais retirer workers_dev ni renommer le Worker.
 {
   "name": "pastille",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "routes": [{ "pattern": "relay.vibescreener.dev", "custom_domain": true }],
+  "observability": { "enabled": true },
   "assets": {
     "directory": "../pwa/dist",
     "binding": "ASSETS",

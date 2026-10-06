@@ -121,6 +121,12 @@ function App() {
             <span>{W.permissions.relaunch}</span>
           </p>
         )}
+        {s.license.state === 'trial' && (
+          <p className="aside">
+            <I.Info size={15} />
+            <span>{W.trial(s.license.daysLeft)}</span>
+          </p>
+        )}
       </>
     );
     footer = (

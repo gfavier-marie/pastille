@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licences tierces · VibeScreener</title>
+<meta name="description" content="Les logiciels libres intégrés à VibeScreener et leurs licences : whisper.cpp, modèle Whisper, Electron, React…">
+<link rel="canonical" href="https://vibescreener.dev/licences-tierces">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161618" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="wrap top">
+  <a class="brand" href="/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
+  <nav class="nav" aria-label="Sections"><a href="/#tarifs">Tarifs</a><a href="/#faq">FAQ</a></nav>
+</header>
+
+<main class="wrap doc">
+  <h1>Licences tierces</h1>
+  <p class="updated">Dernière mise à jour&nbsp;: 6 octobre 2026</p>
+
+  <p>VibeScreener s'appuie sur ces logiciels libres. Merci à leurs auteurs.</p>
+
+  <h2>Dictée</h2>
+  <div class="scroll">
+    <table>
+      <tr><th>Composant</th><th>Rôle</th><th>Licence</th><th>Titulaire</th></tr>
+      <tr><td><a href="https://github.com/ggml-org/whisper.cpp">whisper.cpp</a> (whisper-server, ggml)</td><td>Transcription sur le Mac</td><td>MIT</td><td>The ggml authors</td></tr>
+      <tr><td><a href="https://github.com/openai/whisper">Modèle Whisper</a> large-v3-turbo, converti au format ggml (q5_0)</td><td>Modèle de dictée, téléchargé au premier lancement</td><td>MIT</td><td>OpenAI</td></tr>
+    </table>
+  </div>
+
+  <h2>Application</h2>
+  <div class="scroll">
+    <table>
+      <tr><th>Composant</th><th>Rôle</th><th>Licence</th><th>Titulaire</th></tr>
+      <tr><td><a href="https://www.electronjs.org">Electron</a></td><td>Socle de l'application</td><td>MIT</td><td>Electron contributors, GitHub Inc.</td></tr>
+      <tr><td><a href="https://www.chromium.org">Chromium</a>, inclus dans Electron</td><td>Affichage des fenêtres</td><td>BSD 3 clauses et licences de ses composants, dont FFmpeg (LGPL 2.1)</td><td>The Chromium Authors et autres</td></tr>
+      <tr><td><a href="https://nodejs.org">Node.js</a>, inclus dans Electron</td><td>Exécution de l'application</td><td>MIT</td><td>Node.js contributors</td></tr>
+      <tr><td><a href="https://react.dev">React</a> et React DOM</td><td>Interface</td><td>MIT</td><td>Meta Platforms, Inc. and affiliates</td></tr>
+      <tr><td><a href="https://github.com/Brooooooklyn/canvas">@napi-rs/canvas</a> (avec Skia, BSD 3 clauses)</td><td>Rendu des captures annotées (exports, Claude Code)</td><td>MIT</td><td>lynweklm@gmail.com</td></tr>
+      <tr><td><a href="https://github.com/gitbrent/PptxGenJS">PptxGenJS</a></td><td>Export PowerPoint</td><td>MIT</td><td>Brent Ely</td></tr>
+      <tr><td><a href="https://github.com/soldair/node-qrcode">qrcode</a></td><td>QR code d'appairage de la tablette</td><td>MIT</td><td>Ryan Day</td></tr>
+      <tr><td><a href="https://github.com/sindresorhus/get-windows">get-windows</a></td><td>Fenêtre visée par la capture</td><td>MIT</td><td>Sindre Sorhus</td></tr>
+      <tr><td><a href="https://github.com/steveruizok/perfect-freehand">perfect-freehand</a></td><td>Tracé des croquis sur la tablette</td><td>MIT</td><td>Stephen Ruiz Ltd</td></tr>
+    </table>
+  </div>
+  <p>La liste complète des licences des composants de Chromium accompagne chaque version d'Electron (fichier LICENSES.chromium.html).</p>
+
+  <h2>Texte de la licence MIT</h2>
+  <p>Commun aux composants sous licence MIT ci-dessus, chacun avec sa propre mention de copyright.</p>
+  <pre>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
+    <nav aria-label="Informations">
+      <a href="/mentions-legales">Mentions légales</a>
+      <a href="/licence">Licence d'utilisation</a>
+      <a href="/confidentialite">Confidentialité</a>
+      <a href="/licences-tierces">Licences tierces</a>
+    </nav>
+    <p>Contact : [À COMPLÉTER : e-mail]</p>
+  </div>
+</footer>
+</body>
+</html>

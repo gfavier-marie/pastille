@@ -125,6 +125,14 @@ function App() {
       )}
 
       <hr />
+      {s.license.state !== 'licensed' && (
+        // Essai en cours, ou captures bloquées : ouvre l'onglet Licence des réglages.
+        <button type="button" className={`item ${s.license.state === 'trial' ? '' : 'update'}`} onClick={() => act({ type: 'license' })}>
+          {s.license.state === 'trial' ? <I.Info /> : <I.Warning />}
+          <span>{s.license.state === 'trial' ? T.menu.trial(s.license.daysLeft) : T.menu.license[s.license.state]}</span>
+          <kbd>{T.menu.buy}</kbd>
+        </button>
+      )}
       {s.update && (
         <button type="button" className="item update" onClick={() => act({ type: 'update' })}>
           <I.Download />

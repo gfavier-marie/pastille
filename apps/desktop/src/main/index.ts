@@ -32,6 +32,7 @@ import { createSessionStore } from './session-store.ts';
 import { createTablet } from './tablet.ts';
 import QRCode from 'qrcode';
 import { encodeWav, wavDurationMs } from './wav.ts';
+import { createLicense, POLAR, SITE_URL, TRIAL_DAYS } from './license.ts';
 import { createSettings, type Settings } from './settings.ts';
 import { createTranscriber } from './transcriber.ts';
 import { checkForUpdate, installUpdate, type Update } from './updater.ts';
@@ -42,7 +43,8 @@ const repoRoot = join(app.getAppPath(), '..', '..');
 const preload = join(import.meta.dirname, '../preload/index.cjs');
 // Relais de la tablette : le relais partagé pour l'app installée, local en développement ;
 // PASTILLE_RELAY vise un autre relais (auto-hébergé).
-const RELAY_URL = process.env.PASTILLE_RELAY ?? (app.isPackaged ? 'https://pastille.vibescreener.workers.dev' : 'http://localhost:8787');
+// Le même Worker répond aussi sur https://pastille.vibescreener.workers.dev (apps et tablettes appairées avant).
+const RELAY_URL = process.env.PASTILLE_RELAY ?? (app.isPackaged ? 'https://relay.vibescreener.dev' : 'http://localhost:8787');
 // Tests sans interaction : « capture » (mesure de 5 captures), « editor » (session factice,
 // dictée, photo de l'éditeur, exports) ou « tablet » (attend un croquis sur le point #1).
 // Données dans un dossier temporaire.
@@ -98,6 +100,9 @@ const tablet = autotest && autotest !== 'tablet'
       },
     });
 const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
+// Essai puis licence Polar. PASTILLE_TRIAL_DAYS raccourcit l'essai et PASTILLE_POLAR=sandbox vise le bac à sable, pour les essais.
+const polar = process.env.PASTILLE_POLAR === 'sandbox' ? POLAR.sandbox : POLAR.production;
+const license = createLicense({ dataDir: app.getPath('userData'), trialDays: Number(process.env.PASTILLE_TRIAL_DAYS ?? TRIAL_DAYS), polar });
 const exportDir = () => (autotest ? join(app.getPath('userData'), 'exports') : settings.get().exportDir);
 const modelDir = join(app.getPath('userData'), 'models');
 // Serveur MCP pour Claude Code : son adresse, ou l'erreur affichée dans les réglages.
@@ -181,6 +186,11 @@ function showEditor(focus?: EditorFocus) {
 // ——— Captures ———
 
 function startCapture() {
+  // Essai fini sans licence : l'onglet Licence s'ouvre à la place. Sessions, exports et Claude Code restent libres.
+  if (!license.canCapture()) {
+    checkLicense(); // licence à revérifier : de nouveau en ligne, peut-être
+    return showSettings('license');
+  }
   welcomeWindow?.webContents.send('welcome:shortcut');
   // Le micro chauffe pendant que l'utilisateur vise : la dictée démarre sans délai au clic.
   editor?.webContents.send('editor:prepare-mic');
@@ -319,6 +329,7 @@ async function menuState(): Promise<MenuState> {
     shortcut: shortcutLabel(settings.get().shortcut),
     recents: recents.map(({ id, name, points, screens, updatedAt }) => ({ id, name, points, screens, updatedAt })),
     update: update?.version,
+    license: license.view(),
   };
 }
 
@@ -349,6 +360,9 @@ async function confirmUpdate() {
 }
 
 let lastExport: string | null = null;
+
+/** Revérifie la clé auprès de Polar (au plus une fois par jour) et affiche le résultat. */
+const checkLicense = () => void license.refresh().then(broadcastSettings);
 
 function onMenuAction(a: MenuAction) {
   switch (a.type) {
@@ -383,6 +397,8 @@ function onMenuAction(a: MenuAction) {
       return void store.open(a.id).then(() => exportFromMenu('pdf'));
     case 'update':
       return void confirmUpdate();
+    case 'license':
+      return showSettings('license');
   }
 }
 
@@ -506,6 +522,7 @@ function settingsState(): SettingsState {
     tabletPaired: tablet?.isPaired() ?? false,
     tabletConnected: tablet?.isConnected() ?? false,
     mcp: mcpStatus,
+    license: license.view(),
   };
 }
 
@@ -569,6 +586,12 @@ ipcMain.handle('tablet:revoke', async () => {
   broadcastSettings();
 });
 ipcMain.on('tablet:pair', () => showPairing());
+ipcMain.handle('license:activate', async (_e, key: string) => {
+  const r = await license.activate(key);
+  broadcastSettings();
+  return r;
+});
+ipcMain.on('license:open', (_e, page: 'buy' | 'portal') => void shell.openExternal(page === 'buy' ? `${SITE_URL}/#tarifs` : polar.portal));
 
 // ——— Fenêtre de mesures du lot 0 ———
 
@@ -740,6 +763,9 @@ async function runEditorAutotest() {
   settingsWindow!.webContents.send('settings:tab', 'claude');
   await wait(400);
   await writeFile(join(out, 'settings-claude.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
+  settingsWindow!.webContents.send('settings:tab', 'license');
+  await wait(400);
+  await writeFile(join(out, 'settings-license.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
   await photographScreens(out);
   console.log('AUTOTEST', JSON.stringify({ out, ...results }));
 }
@@ -904,7 +930,12 @@ void app.whenReady().then(async () => {
   }
   menubar.start();
   void lookForUpdate();
-  setInterval(() => void lookForUpdate(), 6 * 3600_000); // l'app reste lancée des jours
+  checkLicense();
+  // L'app reste lancée des jours ; la clé n'est revérifiée qu'une fois par jour.
+  setInterval(() => {
+    void lookForUpdate();
+    checkLicense();
+  }, 6 * 3600_000);
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
   void transcriber.restart().then(() => {

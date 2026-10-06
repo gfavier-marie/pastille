@@ -17,11 +17,13 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm install` puis `pnpm setup:whisper` : modèle + binaire whisper (Windows : téléchargé dans `vendor/`, macOS : `brew install whisper-cpp`).
 - `pnpm dev` : lance l'app desktop.
 - `pnpm bench:dictee` : mesure de transcription sur `apps/desktop/fixtures/dictee-fr.wav`.
-- `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour). L'app desktop vise `PASTILLE_RELAY`, sinon `http://localhost:8787` en développement et le relais partagé `https://pastille.vibescreener.workers.dev` une fois installée (`pnpm relay:deploy` le met à jour).
+- `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour). L'app desktop vise `PASTILLE_RELAY`, sinon `http://localhost:8787` en développement et le relais partagé `https://relay.vibescreener.dev` une fois installée (`pnpm relay:deploy` le met à jour ; le même Worker répond aussi sur `https://pastille.vibescreener.workers.dev`, à garder pour les apps et tablettes appairées avant).
+- `pnpm site` / `pnpm site:deploy` : site public statique (`apps/site`, landing, tarifs, pages légales).
+- Licence (`src/main/license.ts`) : essai de `TRIAL_DAYS` jours, puis clé Polar activée et vérifiée par l'API publique de Polar ; seules les nouvelles captures sont bloquées sans licence. Essais : `PASTILLE_TRIAL_DAYS=0`, `PASTILLE_POLAR=sandbox`. Domaine provisoire `vibescreener.dev` (à remplacer partout une fois acheté).
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
 - Fenêtre de mesures du lot 0 : `PASTILLE_POC=1 pnpm dev`.
 - Claude Code : `claude mcp add --transport http --scope user vibescreener http://127.0.0.1:3917/mcp` (serveur MCP de l'app, `src/main/mcp.ts`, VibeScreener lancée).
-- Dépôt public : `install.sh` (installation en une commande, `curl … | sh`) prend le .dmg de la dernière Release ; un tag `v*` poussé fait publier la Release par la CI (même numéro que `version` dans `apps/desktop/package.json` : l'app installée compare les deux pour proposer la mise à jour, `src/main/updater.ts`). Installeur Mac signé ad hoc (pas de compte Apple).
+- Publication : un tag `v*` poussé (même numéro que `version` dans `apps/desktop/package.json`, vérifié par la CI) fait construire le .dmg et l'envoyer sur le bucket R2 `dl.vibescreener.dev` avec `install.sh` et `latest.json`, que l'app installée compare à sa version pour proposer la mise à jour (`src/main/updater.ts`). Installation : `curl -fsSL https://vibescreener.dev/install.sh | sh`. Installeur Mac signé ad hoc (pas de compte Apple).
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 
 ## Conventions

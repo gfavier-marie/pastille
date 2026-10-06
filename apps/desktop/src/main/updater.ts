@@ -1,14 +1,15 @@
-// Mises à jour (Mac, app installée) : la dernière Release GitHub est comparée à la version de
-// l'app. « Mettre à jour » lance l'install.sh de cette Release, détaché : il télécharge le .dmg,
-// quitte l'app, la remplace et la rouvre. Sans signature Apple, macOS redemande ensuite
-// l'enregistrement de l'écran et le micro (limite de plateforme, voir install.sh).
+// Mises à jour (Mac, app installée) : la dernière version publiée (latest.json, écrit par la CI
+// au tag, sur le bucket R2 des téléchargements) est comparée à celle de l'app. « Mettre à jour »
+// lance install.sh, détaché : il télécharge le .dmg de cette version, quitte l'app, la remplace
+// et la rouvre. Sans signature Apple, macOS redemande ensuite l'enregistrement de l'écran et le
+// micro (limite de plateforme, voir install.sh). PASTILLE_DOWNLOADS vise un autre bucket (essais).
 
 import { spawn } from 'node:child_process';
 import { openSync } from 'node:fs';
 
-const REPO = 'gfavier-marie/vibescreener';
+const DOWNLOADS = process.env.PASTILLE_DOWNLOADS ?? 'https://dl.vibescreener.dev'; // domaine provisoire (M0)
 
-export type Update = { version: string; tag: string };
+export type Update = { version: string };
 
 /** « 0.10.0 » est plus récente que « 0.9.2 ». */
 export function isNewer(latest: string, current: string): boolean {
@@ -18,14 +19,13 @@ export function isNewer(latest: string, current: string): boolean {
   return false;
 }
 
-/** La dernière Release si elle est plus récente que `current`, sinon null (hors ligne compris). */
+/** La dernière version si elle est plus récente que `current`, sinon null (hors ligne compris). */
 export async function checkForUpdate(current: string): Promise<Update | null> {
   try {
-    const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' } });
+    const res = await fetch(`${DOWNLOADS}/latest.json`, { cache: 'no-store' });
     if (!res.ok) return null;
-    const tag = ((await res.json()) as { tag_name: string }).tag_name;
-    const version = tag.replace(/^v/, '');
-    return isNewer(version, current) ? { version, tag } : null;
+    const { version } = (await res.json()) as { version: string };
+    return isNewer(version, current) ? { version } : null;
   } catch {
     return null;
   }
@@ -33,10 +33,9 @@ export async function checkForUpdate(current: string): Promise<Update | null> {
 
 /** Lance l'installation, qui survit à la fermeture de l'app ; sa sortie va dans `logFile`. */
 export function installUpdate(update: Update, logFile: string) {
-  const script = `https://raw.githubusercontent.com/${REPO}/${update.tag}/install.sh`;
-  const dmg = `https://github.com/${REPO}/releases/download/${update.tag}/VibeScreener-arm64.dmg`;
+  const dmg = `${DOWNLOADS}/v${update.version}/VibeScreener-arm64.dmg`;
   const log = openSync(logFile, 'w');
-  spawn('/bin/sh', ['-c', `curl -fsSL "${script}" | PASTILLE_DMG_URL="${dmg}" sh`], {
+  spawn('/bin/sh', ['-c', `curl -fsSL "${DOWNLOADS}/install.sh" | PASTILLE_DMG_URL="${dmg}" sh`], {
     detached: true,
     stdio: ['ignore', log, log],
   }).unref();

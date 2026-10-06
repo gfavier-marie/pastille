@@ -1,5 +1,7 @@
-# Pas de PC Windows sous la main : la CI vérifie que tout compile et tourne sur Windows et macOS.
-# Un tag v* (git tag v0.1.0 && git push --tags) publie le .dmg dans une Release GitHub.
+# Dépôt privé : 2 000 min de CI par mois, une minute macOS en compte 10 (Windows 2). Les
+# vérifications de chaque push tournent donc sous Linux ; macOS ne sert qu'aux versions.
+# Un tag v* (git tag v0.5.0 && git push --tags) publie le .dmg sur le bucket R2 des téléchargements.
+# Déploiement Cloudflare (relais, site, R2) : secret CLOUDFLARE_API_TOKEN et variable CLOUDFLARE_ACCOUNT_ID.
 name: CI
 
 on:
@@ -7,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       bench:
-        description: 'Mesurer aussi la transcription (télécharge le modèle, 547 Mo)'
+        description: 'Mesurer aussi la transcription sous Windows (télécharge le modèle, 547 Mo)'
         type: boolean
         default: false
       dist:
@@ -17,11 +19,7 @@ on:
 
 jobs:
   check:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +30,23 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @pastille/desktop build
+
+  # Relais (+ PWA) et site, à chaque push sur main, une fois Cloudflare configuré.
+  deploy:
+    if: github.ref == 'refs/heads/main' && vars.CLOUDFLARE_ACCOUNT_ID != ''
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm relay:deploy && pnpm site:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   bench-windows:
     if: ${{ inputs.bench }}
@@ -52,12 +67,11 @@ jobs:
 
   dist:
     if: ${{ inputs.dist || startsWith(github.ref, 'refs/tags/v') }}
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        # Windows seulement à la demande : l'installeur .exe n'est pas encore testé sur un vrai PC.
+        os: ${{ fromJSON(inputs.dist && '["windows-latest", "macos-latest"]' || '["macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -77,8 +91,19 @@ jobs:
           path: |
             apps/desktop/dist/*.dmg
             apps/desktop/dist/*.exe
-      # Mac seulement : l'installeur Windows n'est pas encore testé sur un vrai PC.
+      # Publication : le .dmg (versionné, et le dernier pour le site), install.sh, puis latest.json en
+      # dernier, sans cache : l'app ne voit la nouvelle version qu'une fois tout en ligne.
       - if: runner.os == 'macOS' && startsWith(github.ref, 'refs/tags/v')
-        run: gh release create "$GITHUB_REF_NAME" apps/desktop/dist/VibeScreener-arm64.dmg --generate-notes
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          [ "$v" = "$(node -p "require('./apps/desktop/package.json').version")" ] || { echo "Le tag $GITHUB_REF_NAME ne correspond pas à la version de apps/desktop/package.json" >&2; exit 1; }
+          put() { pnpm exec wrangler r2 object put "vibescreener-downloads/$1" --file "$2" --remote --cache-control "$3"; }
+          dmg=apps/desktop/dist/VibeScreener-arm64.dmg
+          put "v$v/VibeScreener-arm64.dmg" "$dmg" "public, max-age=31536000, immutable"
+          put VibeScreener-arm64.dmg "$dmg" "public, max-age=300"
+          put install.sh install.sh "public, max-age=300"
+          printf '{"version":"%s"}\n' "$v" > latest.json
+          put latest.json latest.json "no-cache"
         env:
-          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

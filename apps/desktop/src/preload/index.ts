@@ -52,6 +52,8 @@ const api: PastilleApi = {
   openSettings: (tab) => ipcRenderer.send('settings:open', tab),
   copyText: (text) => ipcRenderer.send('clipboard:write', text),
   onShortcutPressed: (cb) => on('welcome:shortcut', cb),
+  activateLicense: (key) => ipcRenderer.invoke('license:activate', key),
+  openLicensePage: (page) => ipcRenderer.send('license:open', page),
 
   getMenuState: () => ipcRenderer.invoke('menu:state'),
   onMenuState: (cb) => on('menu:state', cb),

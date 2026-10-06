@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VibeScreener : la revue d'interface dictée, pour l'IA (Mac)</title>
+<meta name="description" content="Un raccourci fige l'écran, un clic pose un point numéroté, vous parlez : la revue part chez Claude, ChatGPT, Cursor ou Claude Code. Dictée transcrite sur le Mac. 14 jours d'essai gratuit, sans carte bancaire.">
+<link rel="canonical" href="https://vibescreener.dev/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vibescreener.dev/">
+<meta property="og:site_name" content="VibeScreener">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="VibeScreener : montrez à l'IA ce qui cloche">
+<meta property="og:description" content="Capture, points numérotés, dictée sur le Mac, croquis à l'iPad. Export PDF, Markdown ou PowerPoint, ou lecture directe par Claude Code.">
+<meta property="og:image" content="https://vibescreener.dev/editeur.png">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="1025">
+<meta property="og:image:alt" content="L'éditeur de VibeScreener : capture annotée de points numérotés, commentaires dictés et croquis">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161618" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="wrap top">
+  <a class="brand" href="/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
+  <nav class="nav" aria-label="Sections">
+    <a class="wide" href="#fonctionnement">Fonctionnement</a>
+    <a href="#tarifs">Tarifs</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div class="hero-head">
+      <h1>Montrez à l'IA<br>ce qui <span class="target">cloche<span class="pin" aria-hidden="true"><span>1</span></span></span>.</h1>
+      <div class="bubble" aria-hidden="true">
+        <div class="bubble-top">
+          <i class="rec"></i><span>#1</span>
+          <span class="wave"><i style="--h:.25"></i><i style="--h:.3"></i><i style="--h:.25"></i><i style="--h:.5"></i><i style="--h:.7"></i><i style="--h:.45"></i><i style="--h:.9"></i><i style="--h:.6"></i><i style="--h:1"></i><i style="--h:.75"></i><i style="--h:.4"></i><i style="--h:.85"></i><i style="--h:.55"></i><i style="--h:.3"></i></span>
+          <span class="time">0:04</span>
+        </div>
+        <p>Le bouton Payer doit passer en pleine largeur sur mobile.</p>
+      </div>
+    </div>
+    <p class="lead">Un raccourci fige l'écran. Un clic sur l'élément pose un point numéroté&#8239;; vous dites ce qui ne va pas, c'est transcrit sur votre Mac. La revue part ensuite chez Claude, ChatGPT, Cursor ou Claude Code.</p>
+
+    <div class="install" id="installer">
+      <p class="label">Installer depuis le Terminal</p>
+      <div class="cmd">
+        <code id="commande">curl -fsSL https://vibescreener.dev/install.sh <span class="nowrap">| sh</span></code>
+        <button class="btn primary copy" type="button" data-copy="commande">Copier</button>
+      </div>
+      <div class="actions">
+        <a class="btn" href="https://dl.vibescreener.dev/VibeScreener-arm64.dmg">Télécharger le .dmg</a>
+        <span>pour installer sans Terminal</span>
+      </div>
+      <p class="meta"><strong>14 jours d'essai gratuit, sans carte bancaire.</strong> Mac Apple Silicon (M1 ou plus récent), macOS 13 ou plus.</p>
+    </div>
+
+    <figure class="shot">
+      <img src="/editeur.png" width="1600" height="1025" alt="L'éditeur de VibeScreener : capture annotée de points numérotés, commentaires dictés et croquis">
+      <figcaption>L'éditeur&#8239;: chaque point garde sa capture, son commentaire dicté et son croquis.</figcaption>
+    </figure>
+  </section>
+
+  <section class="block" id="fonctionnement">
+    <div class="wrap">
+      <h2>Une revue en trois gestes</h2>
+      <p class="intro">VibeScreener vit dans la barre de menus. Rien à ouvrir avant de commencer&#8239;: le raccourci suffit.</p>
+      <ol class="steps">
+        <li>
+          <p class="keys"><span class="pin" aria-hidden="true">1</span><kbd>⇧</kbd><kbd>⌘</kbd><kbd>2</kbd></p>
+          <h3>Figez l'écran</h3>
+          <p>Le raccourci fige l'écran, quelle que soit l'app ouverte. Il se change dans les réglages.</p>
+        </li>
+        <li>
+          <p class="keys"><span class="pin" aria-hidden="true">2</span><kbd>Clic</kbd></p>
+          <h3>Pointez et parlez</h3>
+          <p>Un clic sur l'élément pose le point et ouvre le micro. Vous parlez, c'est transcrit. Glissez pour entourer une zone, ou tapez votre commentaire si vous préférez.</p>
+        </li>
+        <li>
+          <p class="keys"><span class="pin" aria-hidden="true">3</span><kbd>⌘</kbd><kbd>E</kbd></p>
+          <h3>Exportez pour l'IA</h3>
+          <ul class="formats">
+            <li><b>PDF</b>, à coller dans le chat de Claude ou de ChatGPT</li>
+            <li><b>Markdown et images</b>, pour Claude Code ou Cursor</li>
+            <li><b>PowerPoint</b></li>
+          </ul>
+        </li>
+      </ol>
+      <p class="after">Les captures suivantes s'ajoutent à la même session et les points continuent leur numérotation&#8239;: toute une revue d'écrans part en un seul export.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap duo">
+      <div>
+        <h2>Un croquis à l'iPad</h2>
+        <p class="intro">Ce qui se dessine mieux qu'il ne se dit&#8239;: tracé à l'Apple Pencil, le croquis rejoint le point en cours.</p>
+        <ul class="facts">
+          <li>Menu de l'icône &gt; «&#8239;Appairer une tablette&#8239;», puis le QR code scanné avec l'appareil photo de l'iPad.</li>
+          <li>Rien à installer&#8239;: Partager &gt; «&#8239;Sur l'écran d'accueil&#8239;».</li>
+          <li>En Wi-Fi comme en 4G, chiffré de bout en bout.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Claude Code lit la revue</h2>
+        <p class="intro">Sans export&#8239;: dans votre projet, demandez-lui simplement</p>
+        <p class="term">applique la revue VibeScreener</p>
+        <dl class="tools" aria-label="Outils lus par Claude Code, en lecture seule">
+          <div><dt>lister_sessions</dt><dd>les 20 sessions récentes</dd></div>
+          <div><dt>lire_revue</dt><dd>tous les retours d'une session, en texte</dd></div>
+          <div><dt>voir_ecran</dt><dd>la capture annotée, un zoom sur chaque point, les croquis</dd></div>
+        </dl>
+        <p class="note">L'installation branche VibeScreener à Claude Code s'il est présent&#8239;; sinon, la commande est dans les réglages, onglet «&#8239;Claude Code&#8239;». VibeScreener doit être lancée.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="confidentialite">
+    <div class="wrap">
+      <h2>Vos captures restent sur votre Mac</h2>
+      <p class="intro">Captures, sessions et dictée ne quittent pas votre Mac. Pas de compte à créer.</p>
+      <div class="trio">
+        <div>
+          <h3>Dictée hors ligne</h3>
+          <p>La transcription tourne sur le Mac (whisper.cpp). Le moteur par API, facultatif, envoie l'audio au service que vous choisissez.</p>
+        </div>
+        <div>
+          <h3>Tablette chiffrée</h3>
+          <p>Le relais ne voit que des messages chiffrés (AES-GCM). La clé est dans le QR code et ne passe jamais par le serveur.</p>
+        </div>
+        <div>
+          <h3>Claude Code en local</h3>
+          <p>Le serveur lu par Claude Code n'écoute que sur votre Mac (127.0.0.1) et refuse les requêtes venant d'un navigateur.</p>
+        </div>
+      </div>
+      <p class="more"><a href="/confidentialite">Politique de confidentialité</a></p>
+    </div>
+  </section>
+
+  <section class="block" id="tarifs">
+    <div class="wrap">
+      <h2>Tarifs</h2>
+      <p class="intro">Essayez VibeScreener 14 jours, gratuitement et sans carte bancaire. Ensuite, une licence.</p>
+      <div class="plans">
+        <!-- Offre « Licence à vie » : supprimer ce bloc <article> pour la retirer. -->
+        <article class="plan">
+          <h3>Licence à vie</h3>
+          <p class="price"><strong>19,99 €</strong><span>une fois</span></p>
+          <p>Un seul paiement, sans date de fin.</p>
+          <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
+          <a class="btn primary" href="#">Acheter la licence</a>
+        </article>
+        <!-- Offre « Abonnement mensuel » : supprimer ce bloc <article> pour la retirer. -->
+        <article class="plan">
+          <h3>Abonnement mensuel</h3>
+          <p class="price"><strong>1,99 €</strong><span>par mois</span></p>
+          <p>Renouvelé chaque mois, résiliable à tout moment.</p>
+          <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
+          <a class="btn primary" href="#">S'abonner</a>
+        </article>
+      </div>
+      <ul class="terms">
+        <li>Une licence s'active sur 3 Mac.</li>
+        <li>Prix TTC. Paiement par Polar, vendeur officiel&#8239;: TVA gérée, facture fournie.</li>
+        <li>Remboursement dans les 14 jours, sans justification.</li>
+        <li>Sans licence après l'essai, les nouvelles captures s'arrêtent&#8239;; vos sessions, exports et Claude Code restent accessibles.</li>
+      </ul>
+      <p class="note">Déjà abonné&#8239;? <a href="https://polar.sh/vibescreener/portal">Gérer mon abonnement</a>. Conditions&#8239;: <a href="/licence">licence d'utilisation</a>.</p>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <h2>Questions fréquentes</h2>
+      <div class="faq">
+        <details>
+          <summary>Que se passe-t-il à la fin de l'essai&#8239;?</summary>
+          <p>Sans licence, VibeScreener ne fait plus de nouvelles captures. Vous ne perdez rien&#8239;: vos sessions, vos exports et la lecture par Claude Code restent accessibles.</p>
+        </details>
+        <details>
+          <summary>Sur quels ordinateurs&#8239;?</summary>
+          <p>Un Mac Apple Silicon (M1 ou plus récent) sous macOS 13 ou plus. Une licence s'active sur 3 Mac. Windows est prévu, mais pas encore disponible.</p>
+        </details>
+        <details>
+          <summary>Faut-il une connexion Internet&#8239;?</summary>
+          <p>Pas pour capturer ni dicter&#8239;: la transcription se fait sur le Mac, une fois le modèle de dictée téléchargé au premier lancement (547&nbsp;Mo). Internet sert à la tablette, aux mises à jour et à la vérification de la licence.</p>
+        </details>
+        <details>
+          <summary>Pourquoi macOS bloque-t-il la première ouverture&#8239;?</summary>
+          <p>VibeScreener n'est pas signée par Apple. La commande d'installation évite ce blocage&#8239;; avec le .dmg, glissez l'app dans Applications, puis Réglages Système &gt; Confidentialité et sécurité &gt; «&#8239;Ouvrir quand même&#8239;». Pour la même raison, macOS redemande les autorisations écran et micro après chaque mise à jour.</p>
+        </details>
+        <details>
+          <summary>Comment me faire rembourser&#8239;?</summary>
+          <p>Dans les 14 jours suivant l'achat, écrivez à [À COMPLÉTER : e-mail]&#8239;: vous êtes remboursé, sans justification.</p>
+        </details>
+        <details>
+          <summary>Comment résilier l'abonnement&#8239;?</summary>
+          <p>À tout moment, depuis <a href="https://polar.sh/vibescreener/portal">votre espace client Polar</a>. Vos revues restent accessibles après la fin de l'abonnement.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
+    <nav aria-label="Informations">
+      <a href="/mentions-legales">Mentions légales</a>
+      <a href="/licence">Licence d'utilisation</a>
+      <a href="/confidentialite">Confidentialité</a>
+      <a href="/licences-tierces">Licences tierces</a>
+    </nav>
+    <p>Contact : [À COMPLÉTER : e-mail]</p>
+  </div>
+</footer>
+
+<script>
+  // Seul script du site : copier la commande d'installation (sinon, elle est sélectionnée pour ⌘C).
+  for (const button of document.querySelectorAll('[data-copy]')) {
+    const text = document.getElementById(button.dataset.copy);
+    button.addEventListener('click', () => {
+      navigator.clipboard.writeText(text.textContent).then(
+        () => {
+          button.textContent = 'Copié';
+          setTimeout(() => (button.textContent = 'Copier'), 1500);
+        },
+        () => getSelection().selectAllChildren(text),
+      );
+    });
+  }
+</script>
+</body>
+</html>

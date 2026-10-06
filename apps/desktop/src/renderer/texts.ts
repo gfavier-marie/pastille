@@ -48,6 +48,9 @@ export const T = {
     settings: 'Réglages…',
     quit: 'Quitter VibeScreener',
     update: (version: string) => `Mettre à jour (version ${version})`,
+    trial: (days: number) => `Essai gratuit : ${plural(days, 'jour restant', 'jours restants')}`,
+    buy: 'Acheter',
+    license: { expired: 'Essai terminé', revoked: 'Licence plus valable', unverified: 'Licence à vérifier' },
     pending: (n: number) => `${plural(n, 'transcription')} en cours`,
     errors: (n: number) => `${plural(n, 'transcription')} en erreur`,
   },
@@ -77,7 +80,7 @@ export const T = {
   },
 
   settings: {
-    tabs: { general: 'Général', transcription: 'Transcription', export: 'Export PDF', devices: 'Appareils', claude: 'Claude Code' },
+    tabs: { general: 'Général', transcription: 'Transcription', export: 'Export PDF', devices: 'Appareils', claude: 'Claude Code', license: 'Licence' },
     capture: 'Capture',
     shortcut: 'Raccourci de capture',
     shortcutAria: (label: string) => `Modifier le raccourci, actuellement ${label}`,
@@ -112,7 +115,7 @@ export const T = {
     engine: 'Moteur',
     engines: { local: 'Whisper local', api: 'API avec clé' },
     engineHints: {
-      local: "Gratuit, hors ligne : l'audio ne quitte pas cet ordinateur.",
+      local: "Hors ligne : l'audio ne quitte pas cet ordinateur.",
       api: "Secours : l'audio est envoyé au service choisi.",
     },
     model: 'Whisper large-v3-turbo',
@@ -147,6 +150,30 @@ export const T = {
     showQr: 'Afficher le QR',
     pair: 'Appairer…',
     revoke: 'Révoquer',
+    license: 'Licence',
+    licenseStates: {
+      trial: (days: number) => `Essai gratuit : ${plural(days, 'jour restant', 'jours restants')}`,
+      expired: () => 'Essai terminé',
+      licensed: () => 'Licence active',
+      revoked: () => 'Licence plus valable',
+      unverified: () => 'Licence à vérifier',
+    },
+    licenseDetails: {
+      trial: 'Toutes les fonctions, sans carte bancaire.',
+      expired: 'Achetez une licence pour reprendre les captures.',
+      licensed: 'Merci de soutenir VibeScreener !',
+      revoked: 'Abonnement terminé ou achat remboursé.',
+      unverified: 'Polar ne répond plus depuis 30 jours : connectez-vous à Internet.',
+    },
+    buy: 'Acheter',
+    portal: 'Gérer mon achat',
+    licenseKey: 'Clé de licence',
+    licenseKeyHint: "Elle figure dans l'e-mail reçu après l'achat.",
+    activate: 'Activer',
+    activating: 'Activation…',
+    activated: 'Licence activée sur ce Mac.',
+    licenseHint:
+      'Sans licence, après l’essai, les nouvelles captures sont bloquées. Vos sessions, vos exports et Claude Code restent accessibles.',
   },
 
   welcome: {
@@ -170,7 +197,7 @@ export const T = {
     model: {
       title: 'Le modèle de dictée se télécharge',
       titleReady: 'Le modèle de dictée est prêt',
-      intro: "Whisper transcrit sur cet ordinateur, sans connexion ni abonnement. Ce téléchargement n'a lieu qu'une fois.",
+      intro: "Whisper transcrit sur cet ordinateur, hors ligne. Ce téléchargement n'a lieu qu'une fois.",
       name: 'Whisper large-v3-turbo',
       detail: 'Quantifié q5_0 · 547 Mo · bon en français',
       progress: (percent: number) => `${Math.round((percent * 547) / 100)} Mo sur 547 Mo`,
@@ -193,6 +220,7 @@ export const T = {
       openAtLogin: `Ouvrir VibeScreener au démarrage ${isMac ? 'du Mac' : 'de l’ordinateur'}`,
       other: 'Choisir un autre raccourci',
     },
+    trial: (days: number) => `Essai gratuit : encore ${plural(days, 'jour')}, toutes les fonctions, sans carte bancaire.`,
   },
 
   pairing: {

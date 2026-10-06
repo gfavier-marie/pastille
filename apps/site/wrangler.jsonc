@@ -1,0 +1,7 @@
+// Site public (landing, tarifs, pages légales) : fichiers statiques seuls, sans code Worker.
+{
+  "name": "vibescreener-site",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "vibescreener.dev", "custom_domain": true }]
+}
