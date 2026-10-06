@@ -1,11 +1,11 @@
 #!/bin/sh
 # Installe (ou met à jour) VibeScreener sur Mac, branche Claude Code et lance l'app :
-#   curl -fsSL https://raw.githubusercontent.com/gfavier-marie/pastille/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/gfavier-marie/vibescreener/main/install.sh | sh
 # Téléchargé par curl, le .dmg n'est pas mis en quarantaine : pas d'alerte Gatekeeper
 # malgré l'absence de signature Apple. PASTILLE_DMG_URL choisit un autre .dmg (essais).
 set -e
 
-URL="${PASTILLE_DMG_URL:-https://github.com/gfavier-marie/pastille/releases/latest/download/VibeScreener-arm64.dmg}"
+URL="${PASTILLE_DMG_URL:-https://github.com/gfavier-marie/vibescreener/releases/latest/download/VibeScreener-arm64.dmg}"
 MCP_URL=http://127.0.0.1:3917/mcp
 
 if [ "$(uname -s)" != Darwin ] || [ "$(sysctl -n hw.optional.arm64 2>/dev/null)" != 1 ]; then

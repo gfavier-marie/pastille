@@ -6,7 +6,7 @@
 import { spawn } from 'node:child_process';
 import { openSync } from 'node:fs';
 
-const REPO = 'gfavier-marie/pastille';
+const REPO = 'gfavier-marie/vibescreener';
 
 export type Update = { version: string; tag: string };
 

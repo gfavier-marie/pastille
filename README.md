@@ -9,7 +9,7 @@ Revue d'interface par captures annotées, dictée et croquis, exportée pour l'I
 Sur un Mac Apple Silicon (M1 ou plus récent, macOS 13 ou plus), dans le Terminal :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gfavier-marie/pastille/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/gfavier-marie/vibescreener/main/install.sh | sh
 ```
 
 La commande installe VibeScreener dans Applications, la branche à Claude Code s'il est installé, puis la lance. Elle sert aussi aux mises à jour.
@@ -17,7 +17,7 @@ La commande installe VibeScreener dans Applications, la branche à Claude Code s
 <details>
 <summary>Sans Terminal : le .dmg</summary>
 
-Télécharger [VibeScreener-arm64.dmg](https://github.com/gfavier-marie/pastille/releases/latest/download/VibeScreener-arm64.dmg) et glisser VibeScreener dans Applications. L'app n'étant pas signée par Apple, la première ouverture est bloquée : Réglages Système > Confidentialité et sécurité > « Ouvrir quand même ».
+Télécharger [VibeScreener-arm64.dmg](https://github.com/gfavier-marie/vibescreener/releases/latest/download/VibeScreener-arm64.dmg) et glisser VibeScreener dans Applications. L'app n'étant pas signée par Apple, la première ouverture est bloquée : Réglages Système > Confidentialité et sécurité > « Ouvrir quand même ».
 </details>
 
 ## Premier lancement
