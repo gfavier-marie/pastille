@@ -12,7 +12,7 @@ import {
   type Rectangle,
 } from 'electron';
 import { openWindows, type Result as WindowInfo } from 'get-windows';
-import type { OverlayPick } from '../ipc.ts';
+import type { OverlayPick, OverlayShow, OverlayWindow } from '../ipc.ts';
 
 type Overlay = { display: Display; win: BrowserWindow; ready?: () => void };
 
@@ -43,6 +43,8 @@ export type CaptureOptions = {
   loadPage: (win: BrowserWindow, page: 'overlay') => void;
   onCapture: (c: CapturedImage) => Promise<void>;
   onError: (message: string) => void;
+  /** Ce que l'overlay annonce : session en cours, numéro de l'écran et du prochain point. */
+  info: () => Omit<OverlayShow, 'jpeg'>;
 };
 
 export function createCapture(opts: CaptureOptions) {
@@ -67,6 +69,9 @@ export function createCapture(opts: CaptureOptions) {
         skipTaskbar: true,
         alwaysOnTop: true,
         backgroundColor: '#000000',
+        // macOS 14+ refuse qu'une app se mette d'elle-même au premier plan : un panneau prend le
+        // clavier (Échap) sans activer l'app, et le premier clic compte au lieu d'activer l'app.
+        ...(process.platform === 'darwin' ? { type: 'panel' as const, acceptFirstMouse: true } : {}),
         webPreferences: { preload: opts.preload },
       });
       win.setAlwaysOnTop(true, 'screen-saver');
@@ -93,7 +98,7 @@ export function createCapture(opts: CaptureOptions) {
   screen.on('display-metrics-changed', rebuild);
   buildOverlays();
 
-  function showOverlay(o: Overlay, image: NativeImage): Promise<void> {
+  function showOverlay(o: Overlay, image: NativeImage, info: Omit<OverlayShow, 'jpeg'>): Promise<void> {
     return new Promise((resolve) => {
       o.ready = () => {
         o.ready = undefined;
@@ -102,7 +107,10 @@ export function createCapture(opts: CaptureOptions) {
         o.win.moveTop();
         resolve();
       };
-      o.win.webContents.send('overlay:show', { jpeg: image.toJPEG(85) });
+      // Curseur relatif à l'écran : l'overlay encadre la cible tout de suite, sans attendre un mouvement.
+      const c = screen.getCursorScreenPoint();
+      const cursor = { x: c.x - o.display.bounds.x, y: c.y - o.display.bounds.y };
+      o.win.webContents.send('overlay:show', { ...info, cursor, jpeg: image.toJPEG(85) } satisfies OverlayShow);
     });
   }
 
@@ -134,7 +142,7 @@ export function createCapture(opts: CaptureOptions) {
       if (src && !src.thumbnail.isEmpty()) frozen.set(o.display.id, src.thumbnail);
     });
     if (frozen.size < overlays.length) {
-      for (const w of hidden) w.showInactive();
+      for (const w of hidden) if (!w.isDestroyed()) w.showInactive();
       opts.onError(
         process.platform === 'darwin'
           ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance Pastille."
@@ -144,7 +152,8 @@ export function createCapture(opts: CaptureOptions) {
     }
 
     pending = { t0, frozen, windows, windowsMs, hidden, timings: { captureMs, overlayMs: 0 } };
-    await Promise.all(overlays.map((o) => showOverlay(o, frozen.get(o.display.id)!)));
+    const info = opts.info();
+    await Promise.all(overlays.map((o) => showOverlay(o, frozen.get(o.display.id)!, info)));
     pending.timings.overlayMs = performance.now() - t0;
 
     // Le focus va à l'overlay sous le curseur, pour qu'Échap fonctionne.
@@ -157,11 +166,12 @@ export function createCapture(opts: CaptureOptions) {
     void windows.then((list) => {
       if (pending?.t0 !== t0) return;
       for (const o of overlays) {
-        const rects = list
-          .filter(isCandidate)
-          .map((w) => onDisplay(toDip(w.bounds), o.display))
-          .filter((r): r is Rectangle => r !== null);
-        o.win.webContents.send('overlay:windows', rects);
+        const visible: OverlayWindow[] = [];
+        for (const w of list.filter(isCandidate)) {
+          const r = onDisplay(toDip(w.bounds), o.display);
+          if (r) visible.push({ ...r, app: w.owner.name, title: w.title });
+        }
+        o.win.webContents.send('overlay:windows', visible);
       }
     });
   }
@@ -172,7 +182,7 @@ export function createCapture(opts: CaptureOptions) {
     pending = null;
     const tPick = performance.now();
     for (const ov of overlays) ov.win.hide();
-    for (const w of p.hidden) w.showInactive();
+    for (const w of p.hidden) if (!w.isDestroyed()) w.showInactive();
     if (pick.kind === 'cancel') return;
 
     const d = o.display;

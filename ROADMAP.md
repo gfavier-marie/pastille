@@ -74,8 +74,28 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Réglages complets : raccourci (vérifié), mode de commentaire (auto, ⌥ maintenu, clavier seul), silence, langue, dossier d'export, instructions du PDF, glossaire, moteur API compatible OpenAI (clé chiffrée), révocation de la tablette
 - [x] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S] (à vérifier en vrai)
 - [x] Sessions récentes [S], icône d'état [S] (nombre de points, transcriptions en cours)
+- [x] Remarques générales (hors cahier des charges, demandé) : commentaires non rattachés à un point, repris dans les trois exports
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
 - [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
+- [x] Dépôt public : installation en une commande (`install.sh`, branche aussi Claude Code), installeur signé ad hoc, relais partagé visé par l'app installée, Release publiée par tag, licence MIT
 
 *Critère : installation sur une machine vierge, Mac et PC, en < 5 min modèle compris.*
+
+## Design
+
+Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfFPfoVjpYJ1PQbEDk) (13 écrans).
+
+- [x] Pastilles en goutte, couleur #D63A0C (éditeur, exports, PWA) ; thème et icônes communs, textes regroupés (`renderer/texts.ts`)
+- [x] Overlay (assombrissement, étiquette app + taille, pastille fantôme), éditeur sombre (bulle avec onde, panneau, vignettes, zoom)
+- [x] Menu en popover sous l'icône ; réglages en onglets ; assistant de premier lancement en 3 étapes ; fenêtre d'appairage ; PWA restylée
+- [x] Hors cahier des charges, validés le 6 oct. 2026 : **barre flottante** (option), **ouverture au démarrage**, **icône d'état dynamique** (dictée, transcriptions, erreur)
+- [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant et l'appairage
+- [x] Overlay en panneau macOS : Échap et premier clic marchent sans que l'app soit au premier plan (macOS 14+)
+- [ ] Validation réelle sur Mac : popover sous l'icône, barre flottante au survol, ouverture au démarrage
+- [ ] Raccourci par défaut : sur le Mac de test, ⇧⌘2 (et ⇧⌘0) n'arrivent jamais à Pastille, interceptés par une autre app ; ⌃⌥⌘P marche. L'enregistrement « réussit » quand même, donc rien n'est signalé. Choisir un défaut plus sûr
+
+## Hors lot — Serveur MCP pour Claude Code [C], demandé
+
+- [x] Serveur MCP local dans l'app (HTTP sur 127.0.0.1:3917, lecture seule) : `lister_sessions`, `lire_revue`, `voir_ecran` ; commande `claude mcp add` dans les réglages ; testé par `pnpm e2e`
+- [ ] Essai réel : une revue appliquée par Claude Code sur un projet

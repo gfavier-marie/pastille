@@ -1,6 +1,7 @@
 // Page HTML imprimée en PDF : texte réel (jamais rasterisé), A4 paysage,
 // récapitulatif complet avant les images, un point jamais coupé entre deux pages.
 
+import { PIN_COLOR } from '@pastille/shared';
 import type { ExportDoc, ExportScreen } from './build.ts';
 
 /** Partie d'un PDF découpé : le récapitulatif reste complet, seuls les écrans changent. */
@@ -26,7 +27,7 @@ tr { break-inside: avoid; }
 .screen > img { display: block; max-width: 100%; max-height: 165mm; margin: 0 auto; border: 0.3mm solid #ccc; }
 .point { break-inside: avoid; display: flow-root; padding: 2.5mm 0; border-top: 0.3mm solid #ddd; }
 .point .text { overflow: hidden; }
-.point .num { font-size: 22pt; font-weight: 700; color: #e5484d; }
+.point .num { font-size: 22pt; font-weight: 700; color: ${PIN_COLOR}; }
 .point .comment { font-size: 15pt; line-height: 1.35; margin: 1mm 0 3mm; }
 .point .pos { color: #666; font-size: 9pt; }
 .point .images { float: right; margin-left: 6mm; }
@@ -77,6 +78,7 @@ export function toPdfHtml(doc: ExportDoc, part?: PdfPart): string {
 ${doc.context ? `<p><b>Contexte :</b> ${multiline(doc.context)}</p>` : ''}
 <h2>Instructions</h2>
 <div class="instructions">${esc(doc.instructions)}</div>
+${doc.notes ? `<h2>Remarques générales</h2>\n<p>${multiline(doc.notes)}</p>` : ''}
 <h2>Récapitulatif</h2>
 <table><thead><tr><th>#</th><th>Écran</th><th>Commentaire</th><th>Croquis</th></tr></thead><tbody>${summary}</tbody></table>
 ${screens}

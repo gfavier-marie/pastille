@@ -5,7 +5,17 @@ import type { Settings, SettingsView } from './main/settings.ts';
 
 export type { Settings };
 
-export type OverlayShow = { jpeg: Uint8Array };
+/** Écran figé, et de quoi annoncer la capture : session, numéro d'écran, numéro du prochain point. */
+export type OverlayShow = {
+  jpeg: Uint8Array;
+  session: string;
+  screen: number;
+  nextNumber: number;
+  cursor?: { x: number; y: number }; // position du curseur sur cet écran, au moment du raccourci
+};
+
+/** Fenêtre visable sur l'écran de l'overlay (DIP), de l'avant vers l'arrière. */
+export type OverlayWindow = { x: number; y: number; width: number; height: number; app?: string; title?: string };
 
 /** Coordonnées en pixels logiques (DIP), relatives à l'écran de l'overlay. */
 export type OverlayPick =
@@ -51,8 +61,33 @@ export type SettingsState = SettingsView & {
   modelPresent: boolean;
   whisper: WhisperStatus;
   tabletPaired: boolean;
+  tabletConnected: boolean;
+  mcp: { url?: string; error?: string }; // serveur MCP pour Claude Code
 };
+
+/** Fenêtre d'appairage : le code QR (image) et l'état de la tablette. */
+export type PairingState = { qr: string; connected: boolean };
+
+export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
+
+/** Ce qu'affichent le menu de l'icône et la barre flottante. */
+export type MenuState = {
+  platform: 'mac' | 'win' | 'other';
+  session: { name: string; points: number; screens: number; createdAt: string } | null;
+  tablet: boolean; // tablette connectée
+  pending: number; // transcriptions en cours
+  errors: number; // transcriptions en erreur
+  shortcut: string; // raccourci de capture, affiché (« ⇧⌘2 »)
+  recents: { id: string; name: string; points: number; screens: number; updatedAt: string }[];
+};
+
+export type MenuAction =
+  | { type: 'capture' | 'editor' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' }
+  | { type: 'open-recent' | 'export-recent'; id: string };
+
+/** Message de la barre flottante après un export. */
+export type ExportNotice = { format: ExportFormat; file: string; copied: boolean };
 
 /** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */
 export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean };
@@ -65,13 +100,14 @@ export type PastilleApi = {
   addAnnotation(captureId: string, geometry: Geometry): Promise<string>;
   updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
   deleteAnnotation(id: string): void;
-  updateSession(patch: { name?: string; context?: string }): void;
+  updateSession(patch: { name?: string; context?: string; notes?: string }): void;
   exportSession(format: ExportFormat): Promise<ExportResult>;
   undo(): void;
   redo(): void;
   dictationAvailable(): Promise<boolean>;
   submitDictation(annotationId: string, samples: Float32Array): void;
   retryDictation(annotationId: string): void;
+  setRecording(recording: boolean): void;
   onPrepareMic(cb: () => void): () => void;
   setSelection(annotationId: string | null): void;
   deleteSketch(annotationId: string, sketchId: string): void;
@@ -87,7 +123,18 @@ export type PastilleApi = {
   askPermission(kind: 'screen' | 'microphone'): Promise<void>;
   revokeTablet(): Promise<void>;
   pairTablet(): void;
+  getPairing(): Promise<PairingState>;
   onSettingsChanged(cb: (s: SettingsState) => void): () => void;
+  onSettingsTab(cb: (tab: SettingsTab) => void): () => void;
+  openSettings(tab?: SettingsTab): void;
+  onShortcutPressed(cb: () => void): () => void; // assistant de premier lancement
+  // Menu de l'icône et barre flottante
+  getMenuState(): Promise<MenuState>;
+  onMenuState(cb: (s: MenuState) => void): () => void;
+  menuAction(action: MenuAction): void;
+  menuResize(height: number): void;
+  barHover(inside: boolean): void;
+  onExportNotice(cb: (n: ExportNotice) => void): () => void;
   // Fenêtre POC
   onCaptureResult(cb: (r: CaptureResult) => void): () => void;
   startCapture(): void;
@@ -97,7 +144,7 @@ export type PastilleApi = {
   transcribeSample(): Promise<TranscribeResult>;
   // Overlay
   onOverlayShow(cb: (data: OverlayShow) => void): void;
-  onOverlayWindows(cb: (rects: { x: number; y: number; width: number; height: number }[]) => void): void;
+  onOverlayWindows(cb: (windows: OverlayWindow[]) => void): void;
   overlayReady(): void;
   overlayPick(pick: OverlayPick): void;
 };

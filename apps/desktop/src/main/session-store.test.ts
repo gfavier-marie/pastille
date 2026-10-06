@@ -105,7 +105,9 @@ describe('sessions récentes', () => {
     await store.ensure();
     store.update((s) => (s.name = 'Récente'));
     await store.flush();
-    expect((await store.recent()).map((r) => r.name)).toEqual(['Récente', 'Ancienne']);
+    const recent = await store.recent();
+    expect(recent.map((r) => r.name)).toEqual(['Récente', 'Ancienne']);
+    expect(recent[0]).toMatchObject({ points: 0, screens: 0 });
     await store.open(first);
     expect(store.get()!.name).toBe('Ancienne');
   });
