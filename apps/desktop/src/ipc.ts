@@ -115,6 +115,8 @@ export type PastilleApi = {
   pairTablet(): void;
   onSettingsChanged(cb: (s: SettingsState) => void): () => void;
   onSettingsTab(cb: (tab: SettingsTab) => void): () => void;
+  openSettings(tab?: SettingsTab): void;
+  onShortcutPressed(cb: () => void): () => void; // assistant de premier lancement
   // Menu de l'icône et barre flottante
   getMenuState(): Promise<MenuState>;
   onMenuState(cb: (s: MenuState) => void): () => void;

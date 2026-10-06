@@ -136,6 +136,52 @@ export const T = {
     revoke: 'Révoquer',
   },
 
+  welcome: {
+    step: (n: number) => `Étape ${n} sur 3`,
+    continue: 'Continuer',
+    back: 'Retour',
+    finish: 'Terminer',
+    permissions: {
+      title: 'Deux autorisations pour commencer',
+      intro: "Pastille capture la fenêtre que vous relisez et écoute vos commentaires. Les images et l'audio restent sur cet ordinateur.",
+      screen: "Enregistrement de l'écran",
+      screenWhy: 'Pour capturer la fenêtre à relire en pleine résolution.',
+      mic: 'Microphone',
+      micWhy: 'Pour dicter un commentaire à chaque point posé.',
+      granted: 'Autorisée',
+      allow: 'Autoriser',
+      relaunch: "macOS peut demander de relancer Pastille après l'autorisation d'écran : cet assistant se rouvrira.",
+      keyboardOnly: 'Pas de micro ? Passer en clavier seul',
+      keyboardChosen: 'Clavier seul : le micro ne sera pas utilisé.',
+    },
+    model: {
+      title: 'Le modèle de dictée se télécharge',
+      titleReady: 'Le modèle de dictée est prêt',
+      intro: "Whisper transcrit sur cet ordinateur, sans connexion ni abonnement. Ce téléchargement n'a lieu qu'une fois.",
+      name: 'Whisper large-v3-turbo',
+      detail: 'Quantifié q5_0 · 547 Mo · bon en français',
+      progress: (percent: number) => `${Math.round((percent * 547) / 100)} Mo sur 547 Mo`,
+      ready: 'Prêt',
+      retry: 'Réessayer',
+      note: "Vous pouvez continuer sans attendre. La saisie au clavier marche déjà ; la dictée s'activera seule à la fin du téléchargement.",
+      useApi: 'Utiliser plutôt une API avec clé',
+      apiChosen: 'Transcription par API : la clé se règle dans les réglages.',
+    },
+    shortcut: {
+      title: 'Essayez le raccourci',
+      intro: (keys: number) =>
+        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces trois touches' : 'ce raccourci'}. Ensuite, Pastille se range dans ${isMac ? 'la barre de menus' : 'la zone de notification'}.`,
+      waiting: "En attente de l'appui…",
+      steps: [
+        ['Raccourci', "L'écran se fige."],
+        ["Clic sur l'élément", "Le point est posé, le micro s'ouvre."],
+        ['Parlez', "Puis cliquez l'élément suivant."],
+      ] as [string, string][],
+      openAtLogin: `Ouvrir Pastille au démarrage ${isMac ? 'du Mac' : 'de l’ordinateur'}`,
+      other: 'Choisir un autre raccourci',
+    },
+  },
+
   editor: {
     rename: 'Renommer la session',
     context: 'Contexte',

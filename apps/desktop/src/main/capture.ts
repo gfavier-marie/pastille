@@ -136,7 +136,7 @@ export function createCapture(opts: CaptureOptions) {
       if (src && !src.thumbnail.isEmpty()) frozen.set(o.display.id, src.thumbnail);
     });
     if (frozen.size < overlays.length) {
-      for (const w of hidden) w.showInactive();
+      for (const w of hidden) if (!w.isDestroyed()) w.showInactive();
       opts.onError(
         process.platform === 'darwin'
           ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance Pastille."
@@ -176,7 +176,7 @@ export function createCapture(opts: CaptureOptions) {
     pending = null;
     const tPick = performance.now();
     for (const ov of overlays) ov.win.hide();
-    for (const w of p.hidden) w.showInactive();
+    for (const w of p.hidden) if (!w.isDestroyed()) w.showInactive();
     if (pick.kind === 'cancel') return;
 
     const d = o.display;

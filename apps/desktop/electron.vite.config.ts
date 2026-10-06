@@ -24,6 +24,7 @@ export default defineConfig({
           overlay: resolve(import.meta.dirname, 'src/renderer/overlay.html'),
           menu: resolve(import.meta.dirname, 'src/renderer/menu.html'),
           bar: resolve(import.meta.dirname, 'src/renderer/bar.html'),
+          welcome: resolve(import.meta.dirname, 'src/renderer/welcome.html'),
         },
       },
     },

@@ -58,10 +58,10 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing';
-function loadPage(win: BrowserWindow, page: Page) {
+function loadPage(win: BrowserWindow, page: Page, hash = '') {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
-  if (devUrl) void win.loadURL(`${devUrl}/${page}.html`);
-  else void win.loadFile(join(import.meta.dirname, '../renderer', `${page}.html`));
+  if (devUrl) void win.loadURL(`${devUrl}/${page}.html${hash && `#${hash}`}`);
+  else void win.loadFile(join(import.meta.dirname, '../renderer', `${page}.html`), { hash });
 }
 
 const store = createSessionStore(app.getPath('userData'), (s) => {
@@ -154,6 +154,7 @@ function showEditor(focus?: EditorFocus) {
 // ——— Captures ———
 
 function startCapture() {
+  welcomeWindow?.webContents.send('welcome:shortcut');
   // Le micro chauffe pendant que l'utilisateur vise : la dictée démarre sans délai au clic.
   editor?.webContents.send('editor:prepare-mic');
   void capture.start();
@@ -378,6 +379,29 @@ function showSettings(tab?: SettingsTab) {
   if (isMac) app.focus({ steal: true });
 }
 
+let welcomeWindow: BrowserWindow | null = null;
+function showWelcome() {
+  if (!welcomeWindow) {
+    welcomeWindow = new BrowserWindow({
+      width: 720,
+      height: 520,
+      useContentSize: true,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      title: 'Bienvenue dans Pastille',
+      ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 13 } } : {}),
+      webPreferences: { preload },
+    });
+    welcomeWindow.setContentProtection(true);
+    welcomeWindow.on('closed', () => (welcomeWindow = null));
+    loadPage(welcomeWindow, 'welcome');
+  }
+  welcomeWindow.show();
+  if (isMac) app.focus({ steal: true });
+}
+
 function settingsState(): SettingsState {
   const permission = (kind: 'screen' | 'microphone') =>
     isMac || process.platform === 'win32' ? systemPreferences.getMediaAccessStatus(kind) : 'granted';
@@ -397,11 +421,13 @@ function settingsState(): SettingsState {
 function broadcastSettings() {
   const state = settingsState();
   settingsWindow?.webContents.send('settings:changed', state);
+  welcomeWindow?.webContents.send('settings:changed', state);
   editor?.webContents.send('settings:changed', state);
   updateTrayMenu();
 }
 
 ipcMain.handle('settings:get', () => settingsState());
+ipcMain.on('settings:open', (_e, tab?: SettingsTab) => showSettings(tab));
 ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
   const before = settings.get();
   if (patch.shortcut && patch.shortcut !== before.shortcut && !registerShortcut(patch.shortcut)) {
@@ -568,9 +594,9 @@ async function runEditorAutotest() {
 /** Photos des autres fenêtres, dans des fenêtres de test (rien n'est cliqué). */
 async function photographScreens(out: string) {
   const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  async function photo(name: string, page: Page, width: number, height: number, prepare?: (win: BrowserWindow) => Promise<void>) {
+  async function photo(name: string, page: Page, width: number, height: number, prepare?: (win: BrowserWindow) => Promise<void>, hash?: string) {
     const win = new BrowserWindow({ width, height, useContentSize: true, webPreferences: { preload } });
-    loadPage(win, page);
+    loadPage(win, page, hash);
     await new Promise<void>((r) => win.webContents.once('did-finish-load', () => r()));
     await wait(600);
     await prepare?.(win);
@@ -579,6 +605,7 @@ async function photographScreens(out: string) {
   }
   const move = (win: BrowserWindow, x: number, y: number) => win.webContents.sendInputEvent({ type: 'mouseMove', x, y });
 
+  for (const step of [1, 2, 3]) await photo(`welcome-${step}`, 'welcome', 720, 520, undefined, String(step));
   await photo('menu', 'menu', 330, 560);
   await photo('bar', 'bar', 640, 64);
   await photo('bar-open', 'bar', 640, 64, async (win) => {
@@ -714,8 +741,9 @@ void app.whenReady().then(async () => {
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
   void transcriber.restart().then(() => {
-    // Premier lancement (§4.9), ou modèle absent : l'assistant s'ouvre.
-    if (!settings.get().firstRunDone || transcriber.status().state === 'missing') showSettings();
+    // Premier lancement (§4.9) : l'assistant s'ouvre. Plus tard, un modèle manquant ouvre les réglages.
+    if (!settings.get().firstRunDone) showWelcome();
+    else if (settings.get().engine === 'local' && transcriber.status().state === 'missing') showSettings('transcription');
   });
   dictation.resume();
   void tablet?.start();
