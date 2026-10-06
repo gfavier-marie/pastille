@@ -280,7 +280,7 @@ function App() {
             <label className="hint" htmlFor="mcp" style={{ margin: 0 }}>
               {S.claudeCodeCommand}
             </label>
-            <input id="mcp" readOnly value={`claude mcp add --transport http --scope user pastille ${s.mcp.url}`} onFocus={(e) => e.currentTarget.select()} />
+            <input id="mcp" readOnly value={`claude mcp add --transport http --scope user vibescreener ${s.mcp.url}`} onFocus={(e) => e.currentTarget.select()} />
           </div>
         )}
       </Section>

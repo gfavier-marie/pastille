@@ -127,7 +127,7 @@ function App() {
 
   function copyMeasures() {
     const lines = [
-      `Pastille — mesures POC (${navigator.platform})`,
+      `VibeScreener — mesures POC (${navigator.platform})`,
       '',
       '| Capture | Taille | Écrans figés | Overlay affiché | Clic → image |',
       '| --- | --- | --- | --- | --- |',
@@ -149,7 +149,7 @@ function App() {
 
   return (
     <>
-      <h1>Pastille — POC du lot 0</h1>
+      <h1>VibeScreener — POC du lot 0</h1>
 
       <h2>Capture</h2>
       <p>

@@ -1,4 +1,4 @@
-# Cahier des charges — Pastille
+# Cahier des charges — VibeScreener (anciennement Pastille)
 
 *Outil de revue d'interface par captures annotées, dictée et croquis*
 

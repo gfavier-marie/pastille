@@ -145,7 +145,7 @@ export function createCapture(opts: CaptureOptions) {
       for (const w of hidden) if (!w.isDestroyed()) w.showInactive();
       opts.onError(
         process.platform === 'darwin'
-          ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance Pastille."
+          ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance VibeScreener."
           : "Capture impossible : l'écran n'a pas pu être lu.",
       );
       return;

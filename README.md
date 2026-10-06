@@ -1,27 +1,27 @@
-# Pastille
+# VibeScreener
 
 Revue d'interface par captures annotées, dictée et croquis, exportée pour l'IA. Un raccourci fige l'écran, un clic pose un point numéroté et lance la dictée, une tablette ajoute un croquis, puis on exporte en PDF, en Markdown ou en PowerPoint. Voir [docs/SPEC.md](docs/SPEC.md) et [ROADMAP.md](ROADMAP.md).
 
 ## Utiliser l'app
 
-1. Installer : `Pastille-…-arm64.dmg` sur Mac, `Pastille Setup ….exe` sur Windows. Les installeurs sont produits par `pnpm dist`, ou par la CI (action « CI », option « Construire les installeurs »).
+1. Installer : `VibeScreener-…-arm64.dmg` sur Mac, `VibeScreener Setup ….exe` sur Windows. Les installeurs sont produits par `pnpm dist`, ou par la CI (action « CI », option « Construire les installeurs »).
 2. Au premier lancement, la fenêtre « Réglages » guide les premiers pas :
-    - **macOS** : autoriser l'**enregistrement de l'écran** (Réglages Système > Confidentialité et sécurité), puis relancer Pastille. L'app n'étant pas signée, la première ouverture se fait par clic droit > Ouvrir.
+    - **macOS** : autoriser l'**enregistrement de l'écran** (Réglages Système > Confidentialité et sécurité), puis relancer VibeScreener. L'app n'étant pas signée, la première ouverture se fait par clic droit > Ouvrir.
     - **Micro** : autoriser quand le système le demande (Windows : Paramètres > Confidentialité > Microphone).
     - **Modèle Whisper** : bouton « Télécharger » (547 Mo, une seule fois, depuis Hugging Face).
 3. Sur l'écran à relire : **⌘⇧2** (Mac) ou **Ctrl+Shift+2** (Windows), puis clic sur l'élément et dictée. **⌘E** / **Ctrl+E** exporte le PDF.
 
-Pastille vit dans la barre de menus (Mac) ou la zone de notification (Windows). Son menu donne accès aux exports, aux sessions récentes, à l'appairage de la tablette et aux réglages.
+VibeScreener vit dans la barre de menus (Mac) ou la zone de notification (Windows). Son menu donne accès aux exports, aux sessions récentes, à l'appairage de la tablette et aux réglages.
 
 ## Connecter Claude Code
 
-Pastille embarque un serveur MCP local : Claude Code lit directement les revues, sans passer par un export. À faire une fois (la commande est aussi dans les réglages, section « Claude Code ») :
+VibeScreener embarque un serveur MCP local : Claude Code lit directement les revues, sans passer par un export. À faire une fois (la commande est aussi dans les réglages, section « Claude Code ») :
 
 ```bash
-claude mcp add --transport http --scope user pastille http://127.0.0.1:3917/mcp
+claude mcp add --transport http --scope user vibescreener http://127.0.0.1:3917/mcp
 ```
 
-Pastille doit être lancée. Il suffit ensuite de demander à Claude Code, dans le projet concerné, « applique la revue Pastille ». Trois outils, en lecture seule :
+VibeScreener doit être lancée. Il suffit ensuite de demander à Claude Code, dans le projet concerné, « applique la revue VibeScreener ». Trois outils, en lecture seule :
 
 | Outil | Rôle |
 | --- | --- |
@@ -62,6 +62,6 @@ pnpm --filter @pastille/relay exec wrangler login
 pnpm relay:deploy
 ```
 
-Lancer ensuite Pastille avec l'adresse du Worker, par exemple `PASTILLE_RELAY=https://pastille.<sous-domaine>.workers.dev pnpm dev`. Dans le menu de l'icône, « Appairer une tablette » affiche le QR code. Sur l'iPad, ouvrir le lien puis « Ajouter à l'écran d'accueil ».
+Lancer ensuite VibeScreener avec l'adresse du Worker, par exemple `PASTILLE_RELAY=https://pastille.<sous-domaine>.workers.dev pnpm dev`. Dans le menu de l'icône, « Appairer une tablette » affiche le QR code. Sur l'iPad, ouvrir le lien puis « Ajouter à l'écran d'accueil ».
 
 Le relais ne voit que des messages chiffrés (AES-GCM, clé transmise dans le QR, jamais envoyée au serveur).

@@ -28,7 +28,7 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
   pptx.title = doc.name;
-  pptx.author = 'Pastille';
+  pptx.author = 'VibeScreener';
 
   const title = pptx.addSlide();
   title.addText(doc.name, { x: 0.8, y: 2.4, w: W - 1.6, h: 1, fontFace: FONT, fontSize: 36, bold: true });
@@ -37,10 +37,13 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
   });
   if (doc.context) title.addText(doc.context, { x: 0.8, y: 4.1, w: W - 1.6, h: 1, fontFace: FONT, fontSize: 16 });
 
-  if (doc.notes) {
+  if (doc.notes.length) {
     const notes = pptx.addSlide();
     notes.addText('Remarques générales', { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
-    notes.addText(doc.notes, { x: 0.5, y: 1.1, w: W - 1, h: H - 1.6, fontFace: FONT, fontSize: 18, valign: 'top', fit: 'shrink' });
+    notes.addText(
+      doc.notes.map((text) => ({ text, options: { bullet: true, breakLine: true } })),
+      { x: 0.5, y: 1.1, w: W - 1, h: H - 1.6, fontFace: FONT, fontSize: 18, valign: 'top', fit: 'shrink', paraSpaceAfter: 8 },
+    );
   }
 
   const summary = pptx.addSlide();

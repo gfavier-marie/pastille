@@ -100,12 +100,15 @@ export type PastilleApi = {
   addAnnotation(captureId: string, geometry: Geometry): Promise<string>;
   updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
   deleteAnnotation(id: string): void;
-  updateSession(patch: { name?: string; context?: string; notes?: string }): void;
+  updateSession(patch: { name?: string; context?: string }): void;
+  addNote(): Promise<string>;
+  updateNote(id: string, text: string): void;
+  deleteNote(id: string): void;
   exportSession(format: ExportFormat): Promise<ExportResult>;
   undo(): void;
   redo(): void;
   dictationAvailable(): Promise<boolean>;
-  submitDictation(annotationId: string, samples: Float32Array): void;
+  submitDictation(annotationId: string, samples: Float32Array): void; // point ou remarque générale
   retryDictation(annotationId: string): void;
   setRecording(recording: boolean): void;
   onPrepareMic(cb: () => void): () => void;

@@ -35,7 +35,7 @@ export type ExportDoc = {
   name: string;
   date: string;
   context?: string;
-  notes?: string;
+  notes: string[]; // remarques générales non vides
   instructions: string;
   screens: ExportScreen[];
   points: ExportPoint[];
@@ -156,7 +156,7 @@ export async function buildExport(
     name: session.name,
     date: new Date(session.createdAt).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' }),
     context: session.context?.trim() || undefined,
-    notes: session.notes?.trim() || undefined,
+    notes: (session.notes ?? []).map((n) => n.text.trim()).filter(Boolean),
     instructions: instructionsTemplate.replaceAll('{N}', String(total)),
     screens,
     points: screens.flatMap((s) => s.points),

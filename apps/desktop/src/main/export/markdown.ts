@@ -12,7 +12,7 @@ export function toMarkdown(doc: ExportDoc): string {
   ];
   if (doc.context) lines.push('', `**Contexte** : ${doc.context}`);
   lines.push('', '## Instructions', '', doc.instructions);
-  if (doc.notes) lines.push('', '## Remarques générales', '', doc.notes);
+  if (doc.notes.length) lines.push('', '## Remarques générales', '', ...doc.notes.map((n) => `- ${n.replace(/\s*\n\s*/g, ' ')}`));
   lines.push('', '## Récapitulatif', '');
   lines.push('| # | Écran | Commentaire | Croquis |', '| --- | --- | --- | --- |');
   for (const p of doc.points) lines.push(`| #${p.number} | ${p.screen} | ${cell(p.text)} | ${p.sketches.length ? 'oui' : 'non'} |`);

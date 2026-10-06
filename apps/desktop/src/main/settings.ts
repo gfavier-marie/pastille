@@ -33,7 +33,7 @@ export function createSettings(dataDir: string, documentsDir: string) {
     commentMode: 'auto',
     silenceMs: 3000,
     language: 'fr',
-    exportDir: join(documentsDir, 'Pastille'),
+    exportDir: join(documentsDir, 'VibeScreener'),
     engine: 'local',
     apiUrl: 'https://api.openai.com/v1',
     apiModel: 'whisper-1',
@@ -45,6 +45,7 @@ export function createSettings(dataDir: string, documentsDir: string) {
     floatingBar: false,
   };
   const stored = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
+  if (stored.exportDir === join(documentsDir, 'Pastille')) delete stored.exportDir; // ancien nom de l'app
   let settings: Settings = { ...defaults, ...stored };
   let apiKey = stored.apiKey ?? '';
 
@@ -64,7 +65,13 @@ export function createSettings(dataDir: string, documentsDir: string) {
       apiKey = key && safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key).toString('base64') : '';
       save();
     },
-    apiKey: () => (apiKey ? safeStorage.decryptString(Buffer.from(apiKey, 'base64')) : ''),
+    apiKey: () => {
+      try {
+        return apiKey ? safeStorage.decryptString(Buffer.from(apiKey, 'base64')) : '';
+      } catch {
+        return ''; // chiffrée sous l'ancien nom de l'app : à saisir de nouveau
+      }
+    },
     defaults,
   };
 }

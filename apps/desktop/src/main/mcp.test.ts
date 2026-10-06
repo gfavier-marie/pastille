@@ -37,7 +37,7 @@ describe('serveur MCP', async () => {
 
   it('liste les sessions et signale celle qui est ouverte', async () => {
     const text = textOf(await call('lister_sessions'));
-    expect(text).toContain(`id : ${session.id} (ouverte dans Pastille)`);
+    expect(text).toContain(`id : ${session.id} (ouverte dans VibeScreener)`);
     expect(text).toContain(`id : ${older.id}`);
     expect(text).toContain('20 points');
   });
@@ -90,7 +90,7 @@ describe('serveur MCP', async () => {
       const res = await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-11-25' } });
       expect(res.status).toBe(200);
       expect(res.headers.get('content-type')).toBe('application/json');
-      expect(((await res.json()) as { result: { serverInfo: { name: string } } }).result.serverInfo.name).toBe('pastille');
+      expect(((await res.json()) as { result: { serverInfo: { name: string } } }).result.serverInfo.name).toBe('vibescreener');
       expect((await post({ jsonrpc: '2.0', method: 'notifications/initialized' })).status).toBe(202);
       expect((await fetch(url)).status).toBe(405);
     });

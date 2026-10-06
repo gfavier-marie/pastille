@@ -55,7 +55,7 @@ export function createMenubar(opts: MenubarOptions) {
     if (isMac) tray.setTitle(s.session ? String(s.session.points) : '');
     tray.setToolTip(
       [
-        s.session ? `Pastille — ${s.session.name} (${s.session.points} points)` : 'Pastille',
+        s.session ? `VibeScreener — ${s.session.name} (${s.session.points} points)` : 'VibeScreener',
         opts.recording() ? 'dictée en cours' : '',
         s.pending ? `${s.pending} transcription(s) en cours` : '',
         s.errors ? `${s.errors} transcription(s) en erreur` : '',

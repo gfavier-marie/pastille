@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Annotation } from '@pastille/shared';
+import { newNote, type Annotation } from '@pastille/shared';
 import { createDictation } from './dictation.ts';
 import { createSessionStore } from './session-store.ts';
 
@@ -55,7 +55,7 @@ describe('file de transcription', () => {
     });
     await dictation.submit('a', new Uint8Array([1]));
     await until(() => get('a').transcription === 'error');
-    expect(dictation.unfinished()).toEqual({ pending: [], error: [1] });
+    expect(dictation.unfinished()).toEqual({ pending: [], error: ['#1'] });
     fail = false;
     dictation.retry('a');
     await until(() => get('a').transcription === 'done');
@@ -73,5 +73,15 @@ describe('file de transcription', () => {
     createDictation(again, async () => 'repris').resume();
     await until(() => again.get()!.captures[0]!.annotations[0]!.transcription === 'done');
     expect(again.get()!.captures[0]!.annotations[0]!.text).toBe('repris');
+  });
+
+  it('dicte aussi une remarque générale', async () => {
+    const { store } = await setup();
+    store.update((s) => (s.notes = [{ ...newNote(), text: 'Contraste' }]));
+    const note = () => store.get()!.notes![0]!;
+    const dictation = createDictation(store, async () => 'trop faible partout');
+    await dictation.submit(note().id, new Uint8Array([1]));
+    await until(() => note().transcription === 'done');
+    expect(note()).toMatchObject({ text: 'Contraste trop faible partout', input: 'mixed' });
   });
 });

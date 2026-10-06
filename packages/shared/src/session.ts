@@ -1,6 +1,6 @@
 // Règles du modèle partagées : création de session, numérotation continue.
 
-import type { Annotation, Session } from './model.ts';
+import type { Annotation, Note, Session } from './model.ts';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -30,6 +30,23 @@ export function findAnnotation(session: Session, id: string) {
     if (annotation) return { capture, annotation };
   }
   return undefined;
+}
+
+export function newNote(now = new Date()): Note {
+  const iso = now.toISOString();
+  return { id: crypto.randomUUID(), text: '', input: 'typed', transcription: 'none', createdAt: iso, updatedAt: iso };
+}
+
+/** Commentaire dictable : celui d'un point ou une remarque générale. */
+export function findComment(session: Session, id: string): Annotation | Note | undefined {
+  return findAnnotation(session, id)?.annotation ?? session.notes?.find((n) => n.id === id);
+}
+
+/** Session lue sur le disque : les remarques générales étaient un seul texte avant d'être une liste. */
+export function upgradeSession(session: Session): Session {
+  const notes = session.notes as unknown;
+  if (typeof notes === 'string') session.notes = notes.trim() ? [{ ...newNote(new Date(session.updatedAt)), text: notes.trim() }] : [];
+  return session;
 }
 
 /** Nom de fichier sans accents ni caractères spéciaux. */

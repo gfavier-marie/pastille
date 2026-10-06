@@ -21,7 +21,7 @@ const pageCount = (pdf: Uint8Array) => Buffer.from(pdf).toString('latin1').match
 export type PrintHtml = (htmlFile: string) => Promise<Uint8Array>;
 
 export function exportBaseName(session: Session, now = new Date()): string {
-  return `pastille-${slugify(session.name)}-${stamp(now)}`;
+  return `vibescreener-${slugify(session.name)}-${stamp(now)}`;
 }
 
 /** Renvoie le chemin du fichier PDF (le premier s'il est découpé) ou PowerPoint, ou du dossier Markdown créé. */

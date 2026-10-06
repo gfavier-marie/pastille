@@ -4,7 +4,7 @@ export type Session = {
   id: string;
   name: string;
   context?: string;
-  notes?: string; // remarques générales, rattachées à aucun point
+  notes?: Note[]; // remarques générales, rattachées à aucun point
   createdAt: string;
   updatedAt: string;
   captures: Capture[];
@@ -41,3 +41,6 @@ export type Annotation = {
 };
 
 export type Sketch = { id: string; png: string; strokes: string; createdAt: string };
+
+/** Remarque générale : un commentaire sans point, tapé ou dicté comme celui d'un point. */
+export type Note = Pick<Annotation, 'id' | 'text' | 'input' | 'audio' | 'transcription' | 'createdAt' | 'updatedAt'>;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Annotation, Capture } from './model.ts';
-import { defaultSessionName, findAnnotation, newSession, renumber, slugify, stamp } from './session.ts';
+import { defaultSessionName, findAnnotation, findComment, newNote, newSession, renumber, slugify, stamp, upgradeSession } from './session.ts';
 
 const annotation = (id: string): Annotation => ({
   id,
@@ -50,5 +50,15 @@ describe('session', () => {
   it('slug de nom de fichier', () => {
     expect(slugify('Revue 2026-10-06 12h30 — Écran « Accueil »')).toBe('revue-2026-10-06-12h30-ecran-accueil');
     expect(slugify('!!!')).toBe('revue');
+  });
+
+  it('remarques générales : ancien texte unique repris en liste, retrouvées comme un commentaire', () => {
+    const old = { ...newSession(new Date(2026, 9, 6)), notes: '  Marges irrégulières ' } as unknown as Parameters<typeof upgradeSession>[0];
+    expect(upgradeSession(old).notes).toMatchObject([{ text: 'Marges irrégulières', transcription: 'none' }]);
+    const empty = { ...newSession(new Date(2026, 9, 6)), notes: ' ' } as unknown as Parameters<typeof upgradeSession>[0];
+    expect(upgradeSession(empty).notes).toEqual([]);
+    const s = newSession(new Date(2026, 9, 6));
+    s.notes = [newNote()];
+    expect(findComment(s, s.notes[0]!.id)).toBe(s.notes[0]);
   });
 });

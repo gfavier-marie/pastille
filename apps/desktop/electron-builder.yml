@@ -1,7 +1,7 @@
 # Installeurs : .dmg (macOS) et .exe (Windows). whisper-server est embarqué ;
 # le modèle (547 Mo) est téléchargé au premier lancement.
 appId: fr.pastille.desktop
-productName: Pastille
+productName: VibeScreener
 directories:
   output: dist
   buildResources: build
@@ -25,7 +25,7 @@ mac:
   identity: null # pas de compte Apple Developer : app non signée
   extendInfo:
     LSUIElement: true # application de barre de menus, sans icône dans le Dock
-    NSMicrophoneUsageDescription: Pastille utilise le micro pour dicter les commentaires.
+    NSMicrophoneUsageDescription: VibeScreener utilise le micro pour dicter les commentaires.
 win:
   target: nsis
 nsis:

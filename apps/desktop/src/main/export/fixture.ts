@@ -3,14 +3,17 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas } from '@napi-rs/canvas';
-import { newSession, renumber, type Annotation, type Geometry, type Session } from '@pastille/shared';
+import { newNote, newSession, renumber, type Annotation, type Geometry, type Session } from '@pastille/shared';
 
 const SCREENS = ['Tableau de bord', 'Connexion', 'Paramètres', 'Liste des commandes', 'Fiche produit'];
 
 /** Écrit la session dans `sessionsDir/<id>/` (session.json compris) ; renvoie la session et son dossier. */
 export async function createFakeSession(sessionsDir: string, pointsPerScreen = 4): Promise<{ session: Session; dir: string }> {
   const session = newSession(new Date(2026, 9, 6, 10, 30), 'Back-office React, page testée en local');
-  session.notes = 'Les marges sont irrégulières sur tout le site.';
+  session.notes = ['Les marges sont irrégulières sur tout le site.', 'Le vert des boutons manque de contraste.'].map((text) => ({
+    ...newNote(new Date(session.createdAt)),
+    text,
+  }));
   const dir = join(sessionsDir, session.id);
   await mkdir(join(dir, 'captures'), { recursive: true });
   for (const [i, title] of SCREENS.entries()) {

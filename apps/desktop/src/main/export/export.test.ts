@@ -18,7 +18,7 @@ describe('export', () => {
     const md = await readFile(join(dir, 'revue.md'), 'utf8');
     expect(md).toContain('Ce document liste 20 retours');
     expect(md).toContain('**Contexte** : Back-office React');
-    expect(md).toContain('## Remarques générales\n\nLes marges sont irrégulières');
+    expect(md).toContain('## Remarques générales\n\n- Les marges sont irrégulières sur tout le site.\n- Le vert des boutons');
     expect(md).toContain('## Écran 3 — Google Chrome — Paramètres');
     expect(md).toMatch(/\| #1 \| 1 \| .* \| oui \|/);
     expect(md).toContain('![Croquis 1 de #1](images/croquis-1.png)');
@@ -39,7 +39,8 @@ describe('export', () => {
     const doc = await buildExport(session, sessionDir, await mkdtemp(join(tmpdir(), 'pastille-out-')));
     const html = toPdfHtml(doc);
     expect(html.indexOf('Récapitulatif')).toBeLessThan(html.indexOf('class="screen"'));
-    expect(html).toContain('<h2>Remarques générales</h2>\n<p>Les marges sont irrégulières');
+    expect(html).toContain('<h2>Remarques générales</h2>\n<ol class="notes"><li>Les marges sont irrégulières');
+    expect(html).toContain('<svg class="logo"'); // logo de l'app en tête
     expect(html.match(/class="point"/g)).toHaveLength(10);
   });
 
@@ -68,7 +69,7 @@ describe('export', () => {
     const parts = htmls.slice(1);
     expect(parts).toHaveLength(3);
     expect(parts.map((h) => h.match(/class="screen"/g)?.length)).toEqual([2, 2, 1]);
-    for (const h of parts) expect(h.match(/<tr><td>#/g)).toHaveLength(20);
+    for (const h of parts) expect(h.match(/<tr><td class="n">/g)).toHaveLength(20);
     expect(parts[2]).toContain('partie 3/3');
   });
 });

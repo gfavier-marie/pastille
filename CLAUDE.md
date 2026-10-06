@@ -1,4 +1,4 @@
-# Pastille
+# VibeScreener
 
 Outil de revue d'interface : raccourci → capture → points numérotés dictés → export pour l'IA. Spécification : `docs/SPEC.md`. Avancement : `ROADMAP.md`.
 
@@ -20,7 +20,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour). L'app desktop vise `PASTILLE_RELAY` (défaut `http://localhost:8787`).
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
 - Fenêtre de mesures du lot 0 : `PASTILLE_POC=1 pnpm dev`.
-- Claude Code : `claude mcp add --transport http --scope user pastille http://127.0.0.1:3917/mcp` (serveur MCP de l'app, `src/main/mcp.ts`, Pastille lancée).
+- Claude Code : `claude mcp add --transport http --scope user vibescreener http://127.0.0.1:3917/mcp` (serveur MCP de l'app, `src/main/mcp.ts`, VibeScreener lancée).
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 
 ## Conventions

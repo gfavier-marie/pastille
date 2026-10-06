@@ -4,7 +4,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { newSession, renumber, type Capture, type Session } from '@pastille/shared';
+import { newSession, renumber, upgradeSession, type Capture, type Session } from '@pastille/shared';
 
 const SAVE_DELAY_MS = 300;
 const HISTORY_LIMIT = 200;
@@ -66,7 +66,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   async function restore(): Promise<Session | null> {
     if (existsSync(statePath)) state = JSON.parse(await readFile(statePath, 'utf8')) as State;
     const path = state.currentSessionId && join(dirOf(state.currentSessionId), 'session.json');
-    session = path && existsSync(path) ? (JSON.parse(await readFile(path, 'utf8')) as Session) : null;
+    session = path && existsSync(path) ? upgradeSession(JSON.parse(await readFile(path, 'utf8')) as Session) : null;
     onChange(session);
     return session;
   }
@@ -173,7 +173,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   /** Rouvre une session (pour la compléter ou la réexporter). */
   async function open(id: string) {
     await flush();
-    session = JSON.parse(await readFile(join(dirOf(id), 'session.json'), 'utf8')) as Session;
+    session = upgradeSession(JSON.parse(await readFile(join(dirOf(id), 'session.json'), 'utf8')) as Session);
     undoStack = [];
     redoStack = [];
     state.currentSessionId = id;

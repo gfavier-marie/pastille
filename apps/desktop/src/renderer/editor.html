@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' pastille: blob: data:; style-src 'self' 'unsafe-inline'" />
-    <title>Pastille</title>
+    <title>VibeScreener</title>
     <link rel="stylesheet" href="./theme.css" />
     <style>
       /* L'éditeur est toujours sombre : la capture claire ressort, les pastilles aussi.
@@ -130,13 +130,27 @@
       }
       .sketch:hover .remove { display: flex; }
       .sketches .count { color: var(--faint); font-size: 11.5px; }
-      .notes { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
-      .notes .title { font-weight: 600; }
-      .notes textarea {
-        width: 100%; min-height: 60px; max-height: 30vh; resize: none; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-2);
-        background: var(--stage); line-height: 1.45; outline: none; overflow-y: auto;
+      /* Remarques générales : une liste, chaque ligne tapée ou dictée. */
+      .notes { flex: none; max-height: 45%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 10px 10px; border-top: 1px solid var(--border); }
+      .notes .title { font-weight: 600; padding: 0 6px; }
+      .notes ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+      .remark { display: flex; gap: 8px; padding: 7px 6px; border-radius: 8px; }
+      .remark:hover { background: rgba(255, 255, 255, 0.03); }
+      .remark:focus-within, .remark.recording { background: var(--chip); }
+      .remark .num { flex: none; min-width: 16px; color: var(--faint); line-height: 1.45; text-align: right; font-variant-numeric: tabular-nums; }
+      .remark .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+      .remark textarea { width: 100%; padding: 0; border: 0; background: transparent; line-height: 1.45; resize: none; outline: none; overflow: hidden; }
+      .remark .tools { display: flex; gap: 2px; align-self: flex-start; visibility: hidden; }
+      .remark:hover .tools, .remark:focus-within .tools, .remark.recording .tools { visibility: visible; }
+      .remark .tools button { width: 22px; height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: var(--card); color: var(--muted); }
+      .remark .tools button:hover { color: var(--text); }
+      .remark .tools button.on { color: #ff453a; }
+      .add-note {
+        flex: none; display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; border: 1px dashed var(--border-3); border-radius: 8px;
+        background: transparent; color: var(--muted); text-align: left;
       }
-      .notes textarea:focus { border-color: var(--accent); }
+      .add-note:hover { color: var(--text); border-color: var(--muted); }
+      .add-note .hint { margin-left: auto; color: var(--faint); font-size: 11.5px; }
       .aside-foot { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); color: var(--faint); font-size: 12px; }
 
       /* Vignettes des écrans de la session. */

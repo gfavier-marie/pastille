@@ -8,7 +8,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
-import { allAnnotations, type Session } from '@pastille/shared';
+import { allAnnotations, upgradeSession, type Session } from '@pastille/shared';
 import { cropJpeg, DEFAULT_INSTRUCTIONS, position, screenJpeg, screenTitle } from './export/build.ts';
 import type { SessionStore } from './session-store.ts';
 
@@ -16,8 +16,8 @@ export const MCP_PORT = Number(process.env.PASTILLE_MCP_PORT) || 3917;
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const MAX_BODY = 1024 * 1024;
 
-const SERVER_INSTRUCTIONS = `Pastille enregistre des revues d'interface : des captures d'écran où chaque retour est un point numéroté (#1 à #N) avec un commentaire, souvent dicté, et parfois un croquis.
-Pour appliquer une revue au code : sans précision de l'utilisateur, prendre la session ouverte dans Pastille (choix par défaut), sinon la choisir avec lister_sessions. lire_revue donne tous les retours ; voir_ecran montre, écran par écran, la capture annotée, un zoom autour de chaque point et les croquis. Regarder chaque écran avant de modifier le code. Si un retour est ambigu, poser une question plutôt que deviner.`;
+const SERVER_INSTRUCTIONS = `VibeScreener enregistre des revues d'interface : des captures d'écran où chaque retour est un point numéroté (#1 à #N) avec un commentaire, souvent dicté, et parfois un croquis.
+Pour appliquer une revue au code : sans précision de l'utilisateur, prendre la session ouverte dans VibeScreener (choix par défaut), sinon la choisir avec lister_sessions. lire_revue donne tous les retours ; voir_ecran montre, écran par écran, la capture annotée, un zoom autour de chaque point et les croquis. Regarder chaque écran avant de modifier le code. Si un retour est ambigu, poser une question plutôt que deviner.`;
 
 type Json = Record<string, unknown>;
 type Content = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
@@ -26,7 +26,7 @@ type Message = { id?: string | number | null; method?: string; params?: Json };
 
 const SESSION_PARAM = {
   type: 'string',
-  description: 'Id de la session (voir lister_sessions). Par défaut : la session ouverte dans Pastille, sinon la plus récente.',
+  description: 'Id de la session (voir lister_sessions). Par défaut : la session ouverte dans VibeScreener, sinon la plus récente.',
 };
 
 // Pas d'outputSchema : avec un résultat structuré, Claude Code ne montre plus les images comme des images.
@@ -77,7 +77,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     if (id === undefined || id === '') {
       if (open) return { session: open, dir: store.dir(open) };
       const [latest] = await store.recent(1);
-      if (!latest) throw new ToolError('Aucune session : faire d’abord une capture avec Pastille.');
+      if (!latest) throw new ToolError('Aucune session : faire d’abord une capture avec VibeScreener.');
       id = latest.id;
     }
     // Un id ne contient ni « / » ni « .. » : on ne sort pas du dossier des sessions.
@@ -85,7 +85,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     if (open?.id === id) return { session: open, dir: store.dir(open) };
     const dir = join(store.sessionsDir, id);
     try {
-      return { session: JSON.parse(await readFile(join(dir, 'session.json'), 'utf8')) as Session, dir };
+      return { session: upgradeSession(JSON.parse(await readFile(join(dir, 'session.json'), 'utf8')) as Session), dir };
     } catch {
       throw new ToolError(`Session « ${id} » introuvable : voir lister_sessions.`);
     }
@@ -99,7 +99,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
       'Sessions, la plus récente d’abord :',
       ...list.map(
         (s) =>
-          `- ${s.name} · modifiée le ${dateFr(s.updatedAt)} · ${plural(s.points, 'point')} · id : ${s.id}${s.id === openId ? ' (ouverte dans Pastille)' : ''}`,
+          `- ${s.name} · modifiée le ${dateFr(s.updatedAt)} · ${plural(s.points, 'point')} · id : ${s.id}${s.id === openId ? ' (ouverte dans VibeScreener)' : ''}`,
       ),
     ].join('\n');
   }
@@ -112,6 +112,8 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     const untranscribed = allAnnotations(session).filter((a) => ['recording', 'pending', 'error'].includes(a.transcription));
     if (untranscribed.length)
       lines.push('', `Attention : dictée pas encore transcrite pour ${untranscribed.map((a) => `#${a.number}`).join(', ')} ; le commentaire peut être incomplet.`);
+    const notes = (session.notes ?? []).filter((n) => n.text.trim());
+    if (notes.length) lines.push('', '## Remarques générales', '', ...notes.map((n) => `- ${comment(n.text)}`));
     for (const [i, c] of session.captures.entries()) {
       lines.push('', `## ${screenTitle(i + 1, c)}`, '');
       if (!c.annotations.length) lines.push('(aucun point)');
@@ -148,7 +150,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
       if (name === 'lire_revue') return { content: [text(review((await loadSession(args.session)).session))] };
       return { content: await screen(await loadSession(args.session), args.ecran) };
     } catch (err) {
-      return { content: [text(err instanceof ToolError ? err.message : `Erreur de Pastille : ${String(err)}`)], isError: true };
+      return { content: [text(err instanceof ToolError ? err.message : `Erreur de VibeScreener : ${String(err)}`)], isError: true };
     }
   }
 
@@ -163,7 +165,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
         return reply({
           protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
           capabilities: { tools: {} },
-          serverInfo: { name: 'pastille', version: '1.0.0' },
+          serverInfo: { name: 'vibescreener', version: '1.0.0' },
           instructions: SERVER_INSTRUCTIONS,
         });
       }

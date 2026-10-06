@@ -1,7 +1,7 @@
 // Processus principal : toute la logique vit ici, les fenêtres ne font qu'afficher.
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { mkdtempSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, renameSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, normalize, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -20,7 +20,7 @@ import {
   shell,
   systemPreferences,
 } from 'electron';
-import { allAnnotations, findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
+import { allAnnotations, findAnnotation, newNote, type Annotation, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab } from '../ipc.ts';
 import { createCapture, type CapturedImage } from './capture.ts';
 import { createDictation } from './dictation.ts';
@@ -46,6 +46,16 @@ const RELAY_URL = process.env.PASTILLE_RELAY ?? 'http://localhost:8787';
 // Données dans un dossier temporaire.
 const autotest = process.env.PASTILLE_AUTOTEST as 'capture' | 'editor' | 'tablet' | undefined;
 if (autotest) app.setPath('userData', mkdtempSync(join(tmpdir(), 'pastille-autotest-')));
+else {
+  // Ancien nom de l'app (Pastille) : sessions, réglages, appairage et modèle sont repris une fois.
+  const legacy = join(app.getPath('appData'), 'Pastille');
+  for (const name of ['sessions', 'models', 'settings.json', 'state.json', 'pairing.json']) {
+    const from = join(legacy, name), to = join(app.getPath('userData'), name);
+    if (!existsSync(from) || existsSync(to)) continue;
+    mkdirSync(app.getPath('userData'), { recursive: true });
+    renameSync(from, to);
+  }
+}
 if (autotest === 'editor') {
   // Faux micro qui joue l'échantillon de dictée : la chaîne micro → Whisper → commentaire est testée sans personne.
   app.commandLine.appendSwitch('use-fake-device-for-media-stream');
@@ -133,7 +143,7 @@ function createEditor() {
     minWidth: 900,
     minHeight: 560,
     show: false,
-    title: 'Pastille',
+    title: 'VibeScreener',
     backgroundColor: '#161618',
     // macOS : l'en-tête sombre de l'éditeur sert de barre de titre.
     ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 18, y: 19 } } : {}),
@@ -231,7 +241,7 @@ async function runExport(format: ExportFormat): Promise<ExportResult> {
   if (!session || session.captures.length === 0) return { ok: false, error: 'Rien à exporter : aucune capture.' };
   const { pending, error } = dictation.unfinished();
   if (!autotest && (pending.length || error.length)) {
-    const list = (nums: number[]) => nums.map((n) => `#${n}`).join(', ');
+    const list = (labels: string[]) => labels.join(', ');
     const { response } = await dialog.showMessageBox({
       type: 'warning',
       message: 'Certaines dictées ne sont pas encore transcrites.',
@@ -388,7 +398,7 @@ function showSettings(tab?: SettingsTab) {
       height: 640,
       minWidth: 640,
       minHeight: 480,
-      title: 'Réglages de Pastille',
+      title: 'Réglages de VibeScreener',
       backgroundColor: '#F5F5F7',
       // macOS : titre et onglets dans une même barre d'outils.
       ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 14 } } : {}),
@@ -414,7 +424,7 @@ function showWelcome() {
       minimizable: false,
       maximizable: false,
       fullscreenable: false,
-      title: 'Bienvenue dans Pastille',
+      title: 'Bienvenue dans VibeScreener',
       ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 13 } } : {}),
       webPreferences: { preload },
     });
@@ -507,7 +517,7 @@ ipcMain.on('tablet:pair', () => showPairing());
 
 function showPoc() {
   if (!pocWindow) {
-    pocWindow = new BrowserWindow({ width: 560, height: 760, title: 'Pastille — mesures', webPreferences: { preload } });
+    pocWindow = new BrowserWindow({ width: 560, height: 760, title: 'VibeScreener — mesures', webPreferences: { preload } });
     pocWindow.setContentProtection(true);
     pocWindow.on('closed', () => (pocWindow = null));
     loadPage(pocWindow, 'poc');
@@ -545,9 +555,25 @@ ipcMain.on('annotation:delete', (_e, id: string) =>
     { undoable: true },
   ),
 );
-ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context' | 'notes'>) =>
+ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
   store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
 );
+// Remarques générales : une liste, chaque remarque tapée ou dictée comme un commentaire de point.
+ipcMain.handle('note:add', () => {
+  const note = newNote();
+  store.update((s) => (s.notes = [...(s.notes ?? []), note]), { undoable: true });
+  return note.id;
+});
+ipcMain.on('note:update', (_e, id: string, text: string) =>
+  store.update(
+    (s) => {
+      const n = s.notes?.find((x) => x.id === id);
+      if (n) Object.assign(n, { text, updatedAt: new Date().toISOString() });
+    },
+    { undoable: true, coalesceKey: `text:${id}` },
+  ),
+);
+ipcMain.on('note:delete', (_e, id: string) => store.update((s) => (s.notes = s.notes?.filter((n) => n.id !== id)), { undoable: true }));
 ipcMain.on('sketch:delete', (_e, annotationId: string, sketchId: string) =>
   store.update(
     (s) => {
@@ -648,7 +674,7 @@ async function photographScreens(out: string) {
     await wait(300);
   });
   await photo('bar-export', 'bar', 640, 64, async (win) => {
-    win.webContents.send('bar:export', { format: 'pdf', file: 'pastille-revue-2026-10-06-10h30-20261006-1452.pdf', copied: true });
+    win.webContents.send('bar:export', { format: 'pdf', file: 'vibescreener-revue-2026-10-06-10h30-20261006-1452.pdf', copied: true });
     await wait(300);
   });
   await photo('overlay', 'overlay', 1280, 800, async (win) => {
@@ -772,7 +798,7 @@ void app.whenReady().then(async () => {
     (err: NodeJS.ErrnoException) => ({
       error:
         err.code === 'EADDRINUSE'
-          ? `Le port ${MCP_PORT} est déjà pris (une autre copie de Pastille ?) : Claude Code ne peut pas se connecter.`
+          ? `Le port ${MCP_PORT} est déjà pris (une autre copie de VibeScreener ?) : Claude Code ne peut pas se connecter.`
           : `Serveur pour Claude Code indisponible : ${err.message}`,
     }),
   );
@@ -780,7 +806,7 @@ void app.whenReady().then(async () => {
     void dialog.showMessageBox({
       type: 'warning',
       message: `Le raccourci ${shortcutLabel(settings.get().shortcut)} est déjà pris par une autre application.`,
-      detail: 'Choisis-en un autre dans les réglages. Les captures restent possibles depuis l’icône de Pastille.',
+      detail: 'Choisis-en un autre dans les réglages. Les captures restent possibles depuis l’icône de VibeScreener.',
     });
   }
   menubar.start();

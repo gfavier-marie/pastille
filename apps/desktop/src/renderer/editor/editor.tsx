@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { allAnnotations, type Annotation, type Session } from '@pastille/shared';
+import { allAnnotations, type Annotation, type Note, type Session } from '@pastille/shared';
 import { imageUrl, type ExportFormat, type SettingsState } from '../../ipc.ts';
 import * as I from '../icons.tsx';
 import { T } from '../texts.ts';
@@ -49,9 +49,13 @@ function EditableText(props: {
 }) {
   const [text, setText] = useState(props.value);
   const focused = useRef(false);
+  const sent = useRef<string[]>([]); // frappes envoyées, qui reviennent du processus principal
   const ref = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    if (!focused.current) setText(props.value);
+    // Pendant la saisie, seul un changement venu d'ailleurs (transcription, ⌘Z) remplace le texte.
+    if (focused.current && sent.current.includes(props.value)) return;
+    sent.current = [];
+    setText(props.value);
   }, [props.value]);
   useEffect(() => {
     // Hauteur ajustée au contenu.
@@ -74,6 +78,7 @@ function EditableText(props: {
       onBlur={() => (focused.current = false)}
       onChange={(e) => {
         setText(e.target.value);
+        sent.current = [...sent.current, e.target.value].slice(-50);
         props.onChange(e.target.value);
       }}
       onKeyDown={props.onKeyDown}
@@ -95,6 +100,9 @@ function App() {
   const [shortcut, setShortcut] = useState(isMac ? '⇧⌘2' : 'Ctrl+Shift+2');
   const [tablet, setTablet] = useState(false);
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis agrandi
+  const [newNoteId, setNewNoteId] = useState<string | null>(null); // remarque juste ajoutée, à mettre au focus
+  const activeNote = useRef<string | null>(null); // remarque en cours de saisie
+  const [commentMode, setCommentMode] = useState<SettingsState['commentMode']>('auto');
   // Whisper présent (ou en cours de chargement) : sinon, saisie au clavier seulement.
   const [canDictate] = useState(() => api.dictationAvailable());
   // Mode de commentaire et délai de silence suivent les réglages.
@@ -134,6 +142,7 @@ function App() {
     void api.tabletStatus().then(setTablet);
     const applyPrefs = (s: SettingsState) => {
       prefs.current = { commentMode: s.commentMode, silenceMs: s.silenceMs };
+      setCommentMode(s.commentMode);
       setShortcut(s.shortcutLabel);
     };
     void api.getSettings().then(applyPrefs);
@@ -172,6 +181,15 @@ function App() {
     setBubbleOpen(openBubble);
   }
 
+  /** Nouvelle remarque générale : comme un point posé, le micro s'ouvre en dictée automatique. */
+  async function addNote() {
+    recorder.stop(true);
+    setBubbleOpen(false);
+    const id = await api.addNote();
+    setNewNoteId(id);
+    autoDictation(id);
+  }
+
   async function runExport(format: ExportFormat) {
     setExportMenu(false);
     setToast({ text: T.editor.exporting[format] });
@@ -183,10 +201,11 @@ function App() {
   // Mode « appuyer pour parler » : ⌥ (Alt) maintenu enregistre pour le point sélectionné.
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key !== 'Alt' || e.repeat || prefs.current.commentMode !== 'push' || !selectedId) return;
+      const target = activeNote.current ?? selectedId;
+      if (e.key !== 'Alt' || e.repeat || prefs.current.commentMode !== 'push' || !target) return;
       e.preventDefault();
-      setBubbleOpen(true);
-      startDictation(selectedId);
+      if (!activeNote.current) setBubbleOpen(true);
+      startDictation(target);
     };
     const up = (e: KeyboardEvent) => {
       if (e.key === 'Alt' && prefs.current.commentMode === 'push') recorder.stop(true);
@@ -280,15 +299,31 @@ function App() {
     }
   };
 
-  const recording = (a: Annotation) => (rec?.annotationId === a.id ? rec : null);
+  /** Clavier d'une remarque : comme la bulle, plus Échap qui retire une remarque vide et ⌘Z qui revient en arrière. */
+  const noteKeys = (n: Note) => (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    if (mod && e.key.toLowerCase() === 'z') {
+      // Annulation de la session (ajout, dictée, suppression compris), pas seulement de la frappe.
+      e.preventDefault();
+      e.currentTarget.blur();
+      if (e.shiftKey) api.redo();
+      else api.undo();
+    } else if (e.key === 'Escape' && !e.currentTarget.value.trim() && n.transcription !== 'pending') {
+      e.preventDefault();
+      recorder.stop(false);
+      api.deleteNote(n.id);
+    } else bubbleKeys(e);
+  };
+
+  const recording = (a: Note) => (rec?.annotationId === a.id ? rec : null);
   const kind = (a: Annotation) => T.editor.kinds[a.geometry.kind];
 
-  /** Ligne d'état d'un point : transcription en cours ou en erreur. */
-  const status = (a: Annotation) =>
+  /** Ligne d'état d'un point ou d'une remarque : transcription en cours ou en erreur. */
+  const status = (a: Note, what: string) =>
     a.transcription === 'pending' ? (
       <div className="status">
         <I.Spinner size={11} />
-        {kind(a)} · {T.editor.transcribing}
+        {what} · {T.editor.transcribing}
       </div>
     ) : a.transcription === 'error' ? (
       <div className="status error">
@@ -317,6 +352,7 @@ function App() {
       </div>
     );
 
+  const notes = session.notes ?? [];
   const index = captures.indexOf(capture);
   const pending = ordered.filter((a) => a.transcription === 'pending').length;
   const goTo = (i: number) => {
@@ -446,7 +482,7 @@ function App() {
                   onChange={(text) => api.updateAnnotation(selected.id, { text })}
                   onKeyDown={bubbleKeys}
                 />
-                {status(selected)}
+                {status(selected, kind(selected))}
                 {sketches(selected)}
                 {tablet && selected.sketches.length === 0 && (
                   <div className="meta">
@@ -525,7 +561,7 @@ function App() {
                     ) : (
                       <EditableText value={a.text} placeholder={T.editor.noComment} onChange={(text) => api.updateAnnotation(a.id, { text })} />
                     )}
-                    {status(a)}
+                    {status(a, kind(a))}
                     {!r && a.transcription !== 'pending' && a.transcription !== 'error' && meta.length > 0 && (
                       <div className="meta">
                         {a.input === 'typed' ? <I.Keyboard size={12} /> : <I.Mic size={12} />}
@@ -544,12 +580,76 @@ function App() {
 
           <section className="notes" aria-label={T.editor.notes}>
             <div className="title">{T.editor.notes}</div>
-            <EditableText
-              key={session.id}
-              value={session.notes ?? ''}
-              placeholder={T.editor.notesPlaceholder}
-              onChange={(notes) => api.updateSession({ notes })}
-            />
+            {notes.length > 0 && (
+              <ol>
+                {notes.map((n, i) => {
+                  const r = recording(n);
+                  return (
+                    <li
+                      key={n.id}
+                      className={`remark ${r ? 'recording' : ''}`}
+                      onFocus={() => (activeNote.current = n.id)}
+                      onBlur={() => (activeNote.current = null)}
+                    >
+                      <span className="num">{i + 1}.</span>
+                      <div className="body">
+                        {r && (
+                          <div className="status">
+                            <span className="rec-dot blink" />
+                            <Wave levels={levels.current} small />
+                            <span className="time">{clock(r.elapsedMs)}</span>
+                          </div>
+                        )}
+                        {n.transcription === 'pending' && !n.text ? (
+                          <div className="skeleton" aria-hidden="true">
+                            <i style={{ width: '80%' }} />
+                          </div>
+                        ) : (
+                          <EditableText
+                            value={n.text}
+                            autoFocus={n.id === newNoteId}
+                            placeholder={r ? T.editor.placeholderRecording : T.editor.notePlaceholder}
+                            onChange={(text) => api.updateNote(n.id, text)}
+                            onKeyDown={noteKeys(n)}
+                          />
+                        )}
+                        {status(n, T.editor.note)}
+                      </div>
+                      <div className="tools">
+                        {commentMode !== 'keyboard' && (
+                          <button
+                            type="button"
+                            className={r ? 'on' : ''}
+                            aria-label={r ? T.editor.stopDictation : T.editor.dictateNote}
+                            title={r ? T.editor.stopDictation : T.editor.dictateNote}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => (r ? recorder.stop(true) : startDictation(n.id))}
+                          >
+                            <I.Mic size={12} />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          aria-label={T.editor.deleteNote}
+                          title={T.editor.deleteNote}
+                          onClick={() => {
+                            if (r) recorder.stop(false);
+                            api.deleteNote(n.id);
+                          }}
+                        >
+                          <I.Close size={10} />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+            <button type="button" className="add-note" onClick={() => void addNote()}>
+              <I.Plus size={13} />
+              {T.editor.addNote}
+              <span className="hint">{notes.length ? '' : T.editor.notesHint}</span>
+            </button>
           </section>
 
           <div className="aside-foot">
