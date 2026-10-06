@@ -34,3 +34,4 @@ await icon(32, '#e5484d', join(out, 'tray.png')); // Windows
 await icon(192, '#e5484d', join(pwa, 'icon-192.png'), '#ffffff'); // PWA (écran d'accueil)
 await icon(512, '#e5484d', join(pwa, 'icon-512.png'), '#ffffff');
 await icon(180, '#e5484d', join(pwa, 'apple-touch-icon.png'), '#ffffff');
+await icon(1024, '#e5484d', join(import.meta.dirname, '..', 'build', 'icon.png'), '#ffffff'); // icône de l'app (installeurs)

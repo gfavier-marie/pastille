@@ -7,6 +7,7 @@ nodeLinker: hoisted
 
 allowBuilds:
   electron: false # le binaire est téléchargé au premier lancement
+  electron-winstaller: false # Squirrel, inutile (installeur NSIS)
   esbuild: true
   get-windows: true
   workerd: true

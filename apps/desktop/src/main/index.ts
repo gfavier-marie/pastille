@@ -51,7 +51,9 @@ if (autotest === 'editor') {
   // Faux micro qui joue l'échantillon de dictée : la chaîne micro → Whisper → commentaire est testée sans personne.
   app.commandLine.appendSwitch('use-fake-device-for-media-stream');
   app.commandLine.appendSwitch('use-fake-ui-for-media-stream');
-  app.commandLine.appendSwitch('use-file-for-fake-audio-capture', join(app.getAppPath(), 'fixtures', 'dictee-fr.wav'));
+  // Chromium ne lit pas dans l'archive asar : l'app empaquetée reçoit l'échantillon par PASTILLE_FAKE_AUDIO.
+  const sample = process.env.PASTILLE_FAKE_AUDIO ?? join(app.getAppPath(), 'fixtures', 'dictee-fr.wav');
+  app.commandLine.appendSwitch('use-file-for-fake-audio-capture', sample);
   app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess'); // sinon le bac à sable audio ne lit pas le fichier
 }
 
@@ -539,7 +541,7 @@ async function runEditorAutotest() {
     if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
   }
 
-  const results = { dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx') };
+  const results = { whisper: transcriber.status().state, dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx') };
 
   showSettings();
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));

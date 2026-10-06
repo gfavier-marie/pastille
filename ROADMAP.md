@@ -70,10 +70,12 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 
 ## Lot 4 — Finition + PowerPoint
 
-- [ ] Assistant de premier lancement (autorisations, téléchargement du modèle)
-- [ ] Réglages complets (instructions du PDF, glossaire, moteur API, appareils appairés)
-- [ ] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S]
-- [ ] Sessions récentes [S], icône d'état [S]
-- [ ] Installeurs .dmg et .exe (electron-builder, whisper-server embarqué)
+- [x] Premiers pas dans les réglages : autorisations écran et micro, téléchargement du modèle avec progression
+- [x] Réglages complets : raccourci (vérifié), mode de commentaire (auto, ⌥ maintenu, clavier seul), silence, langue, dossier d'export, instructions du PDF, glossaire, moteur API compatible OpenAI (clé chiffrée), révocation de la tablette
+- [x] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S] (à vérifier en vrai)
+- [x] Sessions récentes [S], icône d'état [S] (nombre de points, transcriptions en cours)
+- [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
+- [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC
+- [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
 
 *Critère : installation sur une machine vierge, Mac et PC, en < 5 min modèle compris.*
