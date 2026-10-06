@@ -86,13 +86,13 @@ jobs:
           Get-Content install.ps1 -Raw -Encoding UTF8 | Invoke-Expression
           Start-Sleep 15
           Get-Process VibeScreener | Format-Table Id, StartTime # échoue si l'app s'est arrêtée au démarrage
-          Get-ChildItem "$env:LOCALAPPDATA\Programs\VibeScreener\resources\whisper" -Filter *.dll | Format-Wide Name -Column 4
-          & "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe" --quit
+          Get-ChildItem "$env:LOCALAPPDATA\Programs\vibescreener\resources\whisper" -Filter *.dll | Format-Wide Name -Column 4
+          & "$env:LOCALAPPDATA\Programs\vibescreener\VibeScreener.exe" --quit
           Wait-Process VibeScreener -Timeout 15
       - if: runner.os == 'Windows'
         name: e2e (app installée)
         run: |
-          $env:PASTILLE_E2E_APP = "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe"
+          $env:PASTILLE_E2E_APP = "$env:LOCALAPPDATA\Programs\vibescreener\VibeScreener.exe"
           $env:PASTILLE_FAKE_AUDIO = "$PWD\apps\desktop\fixtures\dictee-fr.wav"
           $env:PASTILLE_WHISPER_MODEL = "$PWD\models\ggml-large-v3-turbo-q5_0.bin"
           $env:TEMP = (New-Item -ItemType Directory -Force e2e-output\tmp).FullName # sessions et exports gardés avec les photos
@@ -105,7 +105,7 @@ jobs:
           Start-Sleep 3
           $env:PASTILLE_AUTOTEST = 'capture'
           $env:TEMP = (New-Item -ItemType Directory -Force e2e-output\capture).FullName
-          $log = & "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe" | Out-String
+          $log = & "$env:LOCALAPPDATA\Programs\vibescreener\VibeScreener.exe" | Out-String
           $log
           if (([regex]::Matches($log, 'CAPTURE \{"ok":true')).Count -ne 5) { throw '5 captures attendues' }
       - if: runner.os == 'Windows' && always()

@@ -1,6 +1,6 @@
 # VibeScreener — roadmap
 
-Six étapes, chacune utilisable en vrai dès sa livraison. On ne passe à la suivante qu'après validation de son critère, mesuré sur Mac. **Pas de PC Windows pour l'instant** : le code reste multiplateforme, la CI GitHub le compile et le teste sous Windows, et la validation sur un vrai PC attendra. Cahier des charges : [docs/SPEC.md](docs/SPEC.md).
+Six étapes, chacune utilisable en vrai dès sa livraison. On ne passe à la suivante qu'après validation de son critère, mesuré sur Mac. **Pas de PC Windows pour l'instant** : le code reste multiplateforme ; la CI GitHub le compile, installe l'app sur un Windows et la teste (dictée, exports, capture). La validation sur un vrai PC attendra. Cahier des charges : [docs/SPEC.md](docs/SPEC.md).
 
 **Simplicité d'abord** : on fait les [M], les [S] placés ci-dessous, aucun [C], rien hors cahier des charges sauf l'export PowerPoint demandé.
 
@@ -82,7 +82,8 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Mise à jour depuis le menu de l'icône (demandé) : la dernière Release GitHub est proposée, install.sh la pose et relance l'app ; macOS redemande les autorisations (app non signée)
 - [x] Nom de l’app : VibeScreener (identifiants internes inchangés : `@pastille/*`, `PASTILLE_*`, `pastille://`, appId) ; PDF avec logo
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
-- [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC
+- [x] Windows publié (demandé) : `VibeScreener-Setup.exe` dans la Release, installation en une commande PowerShell (`install.ps1`, sans SmartScreen ni droits administrateur), runtime Visual C++ embarqué pour whisper-server, mise à jour depuis le menu de l'icône ; la CI installe l'app sur un Windows et la teste (e2e + 5 captures réelles)
+- [ ] Essai sur un vrai PC (ou une VM Windows 11 sur le Mac) : installation, raccourci Ctrl+Shift+2, overlay, dictée au micro, menu de la zone de notification, mise à jour
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
 - [x] Dépôt public : installation en une commande (`install.sh`, branche aussi Claude Code), installeur signé ad hoc, relais partagé visé par l'app installée, Release publiée par tag, licence MIT
 

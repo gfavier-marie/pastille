@@ -2,6 +2,8 @@
 # le modèle (547 Mo) est téléchargé au premier lancement.
 appId: fr.pastille.desktop
 productName: VibeScreener
+extraMetadata:
+  name: vibescreener # dossier d'installation Windows : %LOCALAPPDATA%\Programs\vibescreener (sinon « @pastilledesktop »)
 directories:
   output: dist
   buildResources: build
@@ -36,4 +38,4 @@ win:
   # (« Informations complémentaires » > « Exécuter quand même ») ; install.ps1 l'évite.
   artifactName: ${productName}-Setup.${ext} # lien stable : releases/latest/download/VibeScreener-Setup.exe
 nsis:
-  oneClick: true # installation pour l'utilisateur, sans droits administrateur, dans %LOCALAPPDATA%\Programs\VibeScreener
+  oneClick: true # installation pour l'utilisateur, sans droits administrateur

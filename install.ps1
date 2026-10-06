@@ -6,7 +6,7 @@
   $ErrorActionPreference = 'Stop'
   $url = if ($env:PASTILLE_EXE_URL) { $env:PASTILLE_EXE_URL } else { 'https://github.com/gfavier-marie/vibescreener/releases/latest/download/VibeScreener-Setup.exe' }
   $mcpUrl = 'http://127.0.0.1:3917/mcp'
-  $app = "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe" # installation pour l'utilisateur (NSIS)
+  $app = "$env:LOCALAPPDATA\Programs\vibescreener\VibeScreener.exe" # installation pour l'utilisateur (NSIS)
 
   if (-not [Environment]::Is64BitOperatingSystem) { Write-Host 'VibeScreener demande Windows 10 ou 11 en 64 bits.'; return }
 
