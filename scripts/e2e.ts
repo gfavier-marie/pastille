@@ -32,5 +32,6 @@ Dictée sur #1 : ${r.dictated || 'ÉCHEC (rien transcrit)'}
 PDF : ${r.pdf.path ?? 'ÉCHEC'}
 Markdown : ${r.markdown.path ?? 'ÉCHEC'}
 MCP, écran 1 : ${r.mcpImages} images (attendu : capture + 4 zooms + 1 croquis = 6)`);
-const dictationOk = /^done : .*padding/i.test(r.dictated); // « padding » ne vient que de la dictée
+// « padding » ne vient que de la dictée ; texte de départ (66 caractères) + une phrase, sans répétition en boucle.
+const dictationOk = /^done : .*padding/i.test(r.dictated) && r.dictated.length < 250;
 if (!r.pdf.ok || !r.markdown.ok || !dictationOk || r.mcpImages !== 6) process.exit(1);

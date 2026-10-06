@@ -54,6 +54,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Clic overlay = capture de fenêtre + point n°1 ; encadré au survol [S] ; ⇧+clic dernière zone [S] ; app et titre de fenêtre [S]
 - [x] Zones (glisser) et flèches (⇧ + glisser) [S], raccourcis du §4.6, annuler/rétablir (⌘Z / ⌘⇧Z, Ctrl+Y)
 - [x] `pnpm e2e` : un faux micro joue l'échantillon, la dictée est transcrite et ajoutée au point
+- [x] Dictée en boucle (vue par le test Windows, possible aussi sur Mac) : avec le contexte audio réduit, Whisper répétait parfois la fin ; un texte trop long pour la durée est refait avec le contexte complet
 - [ ] Validation réelle sur Mac : 30 retours dictés en < 5 min, un clic par retour
 
 *Critère : 30 retours dictés en < 5 min, un clic par retour, aucune attente perçue.*
