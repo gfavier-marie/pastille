@@ -3,12 +3,13 @@
 // de mesure puisse l'utiliser avec Node seul.
 
 import { spawn, execFileSync } from 'node:child_process';
-import { createWriteStream, existsSync, renameSync } from 'node:fs';
+import { createWriteStream, existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { availableParallelism } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { renameRetry } from './rename.ts';
 
 export const MODEL_FILE = 'ggml-large-v3-turbo-q5_0.bin';
 export const MODEL_URL = `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${MODEL_FILE}`;
@@ -67,7 +68,7 @@ export async function downloadFile(url: string, dest: string, onProgress?: (done
   const body = Readable.fromWeb(res.body as never);
   body.on('data', (chunk: Buffer) => onProgress?.((done += chunk.length), total));
   await pipeline(body, createWriteStream(dest + '.part'));
-  renameSync(dest + '.part', dest);
+  await renameRetry(dest + '.part', dest);
 }
 
 /** Moteur de secours : API compatible OpenAI (/audio/transcriptions), avec clé. L'audio quitte la machine. */

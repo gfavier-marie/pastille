@@ -2,9 +2,10 @@
 // atomique avec un anti-rebond de 300 ms. La session ouverte se rouvre au démarrage.
 
 import { existsSync } from 'node:fs';
-import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { newSession, renumber, upgradeSession, type Capture, type Session } from '@pastille/shared';
+import { renameRetry } from './rename.ts';
 
 const SAVE_DELAY_MS = 300;
 const HISTORY_LIMIT = 200;
@@ -38,7 +39,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
 
   async function writeAtomic(path: string, data: string) {
     await writeFile(path + '.tmp', data);
-    await rename(path + '.tmp', path);
+    await renameRetry(path + '.tmp', path);
   }
 
   /** Écritures de state.json l'une après l'autre : deux renommages du même .tmp en parallèle échouent. */
@@ -65,7 +66,8 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     const s = session;
     if (!s) return saving;
     const json = JSON.stringify(s, null, 2);
-    saving = saving.then(() => writeAtomic(join(dirOf(s.id), 'session.json'), json));
+    // Un échec est signalé à l'appelant sans bloquer les sauvegardes suivantes.
+    saving = saving.catch(() => {}).then(() => writeAtomic(join(dirOf(s.id), 'session.json'), json));
     return saving;
   }
 

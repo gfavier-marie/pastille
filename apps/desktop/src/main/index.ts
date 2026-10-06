@@ -703,7 +703,9 @@ async function runEditorAutotest() {
   const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   // Ouvre le point #1 : la dictée démarre seule, le faux micro « parle » pendant ~6 s, puis Entrée.
+  // Le micro met un temps variable à s'ouvrir : les 6 s comptent à partir du premier son reçu.
   showEditor({ captureId: first.id, annotationId: target.id, openBubble: true });
+  for (let i = 0; i < 100 && !recording; i++) await wait(100);
   await wait(2500);
   await writeFile(join(out, 'editor.png'), (await editor.webContents.capturePage()).toPNG());
   await wait(3500);
