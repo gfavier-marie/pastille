@@ -15,6 +15,7 @@ const api: PastilleApi = {
   addAnnotation: (captureId, geometry) => ipcRenderer.invoke('annotation:add', captureId, geometry),
   updateAnnotation: (id, patch) => ipcRenderer.send('annotation:update', id, patch),
   deleteAnnotation: (id) => ipcRenderer.send('annotation:delete', id),
+  discardAnnotation: (id) => ipcRenderer.send('annotation:discard', id),
   updateSession: (patch) => ipcRenderer.send('session:update', patch),
   deleteCapture: (id) => ipcRenderer.send('capture:delete', id),
   listSessions: () => ipcRenderer.invoke('sessions:list'),

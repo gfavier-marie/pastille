@@ -67,7 +67,7 @@ export const T = {
   overlay: {
     hints: [
       ['Clic', 'capture la fenêtre et pose le point {n}'],
-      ['Glisser', 'zone'],
+      ['Glisser', `zone, ${isMac ? '⌥' : 'Alt'} pour recadrer`],
       ['⇧ Clic', 'dernière zone'],
       ['Échap', 'annuler'],
     ] as [string, string][],
@@ -79,6 +79,7 @@ export const T = {
     ] as [string, string][],
     wholeScreen: 'Écran entier',
     zone: 'Zone',
+    crop: 'Recadrage',
     screen: (session: string, index: number) => `${session} · écran ${index}`,
     inspiration: (n: number) => `Inspiration du point #${n}`,
   },
@@ -133,6 +134,9 @@ export const T = {
     save: 'Enregistrer',
     glossary: 'Glossaire',
     glossaryHint: 'Vocabulaire à bien reconnaître (noms de composants, jargon du projet).',
+    context: 'Contexte du projet',
+    contextHint: "En tête des exports et de la revue lue par Claude Code. Il s'applique à la session ouverte et aux suivantes.",
+    contextPlaceholder: 'Projet, stack, page testée',
     instructions: "Instructions à l'IA",
     instructionsHint: 'En tête du PDF, du Markdown et de la revue lue par Claude Code. {N} est remplacé par le nombre de retours.',
     claudeCode: 'Claude Code',
@@ -190,7 +194,7 @@ export const T = {
     shortcut: {
       title: 'Essayez le raccourci',
       intro: (keys: number) =>
-        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces trois touches' : 'ce raccourci'}. Ensuite, VibeScreener se range dans ${isMac ? 'la barre de menus' : 'la zone de notification'}.`,
+        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces trois touches' : 'ce raccourci'}. Ensuite, VibeScreener reste dans ${isMac ? 'le Dock et la barre de menus' : 'la zone de notification'}.`,
       waiting: "En attente de l'appui…",
       steps: [
         ['Raccourci', "L'écran se fige."],
@@ -230,8 +234,6 @@ export const T = {
     exportSession: (name: string) => `Exporter le PDF de ${name}`,
     trashSession: (name: string) => `Mettre ${name} à la corbeille`,
     close: 'Fermer',
-    context: 'Contexte',
-    contextEmpty: 'projet, stack, page testée',
     tablet: 'Tablette connectée',
     export: 'Exporter',
     formats: { pdf: "PDF pour l'IA", markdown: 'Dossier Markdown + images', pptx: 'PowerPoint (présentation)' },
@@ -249,6 +251,8 @@ export const T = {
     next: 'Capture suivante',
     noPoints: 'Cliquez sur la capture pour poser un point.',
     undoAll: (mod: string) => `${mod}Z annule tout, même une suppression`,
+    panel: 'Points et remarques',
+    pointsTab: 'Points',
     notes: 'Remarques générales',
     note: 'Remarque',
     addNote: 'Ajouter une remarque',

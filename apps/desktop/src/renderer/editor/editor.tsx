@@ -161,7 +161,7 @@ function App() {
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [rec, setRec] = useState<RecorderState>(null);
   const levels = useRef<number[]>([]);
-  const [editingContext, setEditingContext] = useState(false);
+  const [tab, setTab] = useState<'points' | 'notes'>('points'); // onglet du panneau de droite
   const [shortcut, setShortcut] = useState(isMac ? '⇧⌘2' : 'Ctrl+Shift+2');
   const [tablet, setTablet] = useState(false);
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis ou inspiration agrandi
@@ -172,6 +172,8 @@ function App() {
   const [canDictate] = useState(() => api.dictationAvailable());
   // Mode de commentaire et délai de silence suivent les réglages.
   const prefs = useRef<Pick<SettingsState, 'commentMode' | 'silenceMs'>>({ commentMode: 'auto', silenceMs: 3000 });
+  // Dictées envoyées en transcription : « en attente » avant même que le processus principal le dise.
+  const submitted = useRef(new Set<string>());
   const [recorder] = useState(() =>
     createRecorder({
       silenceMs: () => prefs.current.silenceMs,
@@ -180,7 +182,10 @@ function App() {
         levels.current = state ? [...levels.current, state.level].slice(-WAVE_BARS) : [];
         setRec(state);
       },
-      onFinish: (id, samples) => api.submitDictation(id, samples),
+      onFinish: (id, samples) => {
+        submitted.current.add(id);
+        api.submitDictation(id, samples);
+      },
     }),
   );
 
@@ -199,6 +204,7 @@ function App() {
     void api.getSession().then(setSession);
     const offSession = api.onSession(setSession);
     const offFocus = api.onFocus((f) => {
+      setTab('points');
       setCaptureId(f.captureId);
       setSelectedId(f.annotationId ?? null);
       setBubbleOpen(!!f.openBubble);
@@ -214,9 +220,17 @@ function App() {
     const offSettings = api.onSettingsChanged(applyPrefs);
     const offTablet = api.onTabletStatus(setTablet);
     const offSessions = api.onShowSessions(() => setSessionsOpen(true));
-    const offMic = api.onPrepareMic(() => void canDictate.then((ok) => (ok ? recorder.open() : undefined)).catch(() => {}));
-    // Fenêtre cachée : la dictée en cours part en transcription et le micro est libéré.
-    const onVisibility = () => document.hidden && recorder.close();
+    // Micro préparé au raccourci : la capture masque l'éditeur, mais le micro reste ouvert pour la dictée qui suit.
+    let preparing = false;
+    const offMic = api.onPrepareMic(() => {
+      preparing = true;
+      void canDictate.then((ok) => (ok ? recorder.open() : undefined)).catch(() => {});
+    });
+    // Fenêtre cachée (hors capture) : la dictée en cours part en transcription et le micro est libéré.
+    const onVisibility = () => {
+      if (!document.hidden) preparing = false;
+      else if (!preparing) recorder.close();
+    };
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       offSession();
@@ -228,6 +242,13 @@ function App() {
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
+
+  // Onglet Points : plus de remarque en cours de saisie, ni à remettre au focus.
+  useEffect(() => {
+    if (tab !== 'points') return;
+    activeNote.current = null;
+    setNewNoteId(null);
+  }, [tab]);
 
   // La tablette dessine toujours pour le point sélectionné (§2).
   useEffect(() => api.setSelection(selectedId), [selectedId]);
@@ -246,6 +267,23 @@ function App() {
     if (owner) setCaptureId(owner.id);
     setSelectedId(a.id);
     setBubbleOpen(openBubble);
+    setTab('points');
+  }
+
+  /** Point sans rien : ni texte, ni dictée envoyée, en attente ou en erreur, ni croquis, ni inspiration. */
+  const isEmpty = (a: Annotation, text = a.text) =>
+    !text.trim() &&
+    a.transcription !== 'pending' &&
+    a.transcription !== 'error' &&
+    !submitted.current.has(a.id) &&
+    !a.sketches.length &&
+    !a.inspirations?.length;
+
+  /** Échap sur un point vide (posé par erreur) : il est retiré, sans étape d'annulation. */
+  function discard(id: string) {
+    api.discardAnnotation(id);
+    setSelectedId(null);
+    setBubbleOpen(false);
   }
 
   /** Nouvelle remarque générale : comme un point posé, le micro s'ouvre en dictée automatique. */
@@ -293,7 +331,10 @@ function App() {
       const target = activeNote.current ?? selectedId;
       if (e.key !== 'Alt' || e.repeat || prefs.current.commentMode !== 'push' || !target) return;
       e.preventDefault();
-      if (!activeNote.current) setBubbleOpen(true);
+      if (!activeNote.current) {
+        setBubbleOpen(true);
+        setTab('points');
+      }
       startDictation(target);
     };
     const up = (e: KeyboardEvent) => {
@@ -325,6 +366,7 @@ function App() {
         // Re-dicter : le texte s'ajoutera à la fin du commentaire.
         e.preventDefault();
         setBubbleOpen(true);
+        setTab('points');
         startDictation(selectedId);
         return;
       }
@@ -353,6 +395,7 @@ function App() {
         setBubbleOpen(true);
       } else if (e.key === 'Escape') {
         recorder.stop(false);
+        if (selected && isEmpty(selected)) discard(selected.id);
         setSelectedId(null);
         setBubbleOpen(false);
       } else if ((e.key === 'PageDown' || e.key === 'PageUp') && capture) {
@@ -406,6 +449,15 @@ function App() {
     };
   });
 
+  // « Nouvelle capture » : au bout des vignettes, et dans l'éditeur vide.
+  const newCapture = (
+    <button type="button" className="btn primary new-capture" onClick={() => api.startCapture()}>
+      <I.Plus size={14} />
+      {T.editor.newCapture}
+      <kbd>{shortcut}</kbd>
+    </button>
+  );
+
   if (!session || !capture) {
     return (
       <div className={`empty ${isMac ? 'mac' : ''}`}>
@@ -414,10 +466,13 @@ function App() {
         <p>
           {T.editor.emptyBefore} <kbd>{shortcut}</kbd> {T.editor.emptyAfter}
         </p>
-        <button type="button" className="btn" onClick={() => setSessionsOpen(true)}>
-          <I.Folder size={14} />
-          {T.editor.allSessions}
-        </button>
+        <div className="actions">
+          {newCapture}
+          <button type="button" className="btn" onClick={() => setSessionsOpen(true)}>
+            <I.Folder size={14} />
+            {T.editor.allSessions}
+          </button>
+        </div>
         {sessionsPanel}
       </div>
     );
@@ -433,6 +488,15 @@ function App() {
     } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
       recorder.stop(false); // taper au clavier annule la dictée et passe en saisie
     }
+  };
+
+  /** Clavier de la bulle : Échap retire aussi un point resté vide, comme une remarque vide. */
+  const pointKeys = (a: Annotation) => (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Escape' && isEmpty(a, e.currentTarget.value)) {
+      e.preventDefault();
+      recorder.stop(false);
+      discard(a.id);
+    } else bubbleKeys(e);
   };
 
   /** Clavier d'une remarque : comme la bulle, plus Échap qui retire une remarque vide et ⌘Z qui revient en arrière. */
@@ -578,23 +642,6 @@ function App() {
         <span className="count">
           {T.points(ordered.length)} · {T.screens(captures.length)}
         </span>
-        {editingContext ? (
-          <input
-            className="context-input"
-            aria-label={T.editor.context}
-            placeholder={T.editor.contextEmpty}
-            autoFocus
-            defaultValue={session.context ?? ''}
-            onChange={(e) => api.updateSession({ context: e.target.value })}
-            onBlur={() => setEditingContext(false)}
-            onKeyDown={(e) => (e.key === 'Enter' || e.key === 'Escape') && e.currentTarget.blur()}
-          />
-        ) : (
-          <button type="button" className={`context ${session.context ? '' : 'empty'}`} onClick={() => setEditingContext(true)}>
-            <span className="label">{T.editor.context}</span>
-            <span className="value">{session.context || T.editor.contextEmpty}</span>
-          </button>
-        )}
         <span className="spacer" />
         {tablet && (
           <span className="chip">
@@ -638,11 +685,13 @@ function App() {
             recorder.stop(true);
             setSelectedId(id);
             setBubbleOpen(open);
+            if (id) setTab('points');
           }}
           onAdd={async (geometry) => {
             const id = await api.addAnnotation(capture.id, geometry);
             setSelectedId(id);
             setBubbleOpen(true);
+            setTab('points');
             autoDictation(id);
           }}
           onMove={(id, geometry) => api.updateAnnotation(id, { geometry })}
@@ -669,7 +718,7 @@ function App() {
                   autoFocus
                   placeholder={r ? T.editor.placeholderRecording : T.editor.placeholder}
                   onChange={(text) => api.updateAnnotation(selected.id, { text })}
-                  onKeyDown={bubbleKeys}
+                  onKeyDown={pointKeys(selected)}
                 />
                 {status(selected, kind(selected))}
                 {gallery(selected, 'sketch')}
@@ -708,157 +757,170 @@ function App() {
           }}
         />
 
-        <aside aria-label={T.editor.screenTitle(index + 1, capture.annotations.length)}>
-          <div className="aside-head">
-            <div className="titles">
-              <div className="title">{T.editor.screenTitle(index + 1, capture.annotations.length)}</div>
-              {capture.source?.app && (
-                <div className="sub">{[capture.source.app, capture.source.windowTitle].filter(Boolean).join(' — ')}</div>
-              )}
-            </div>
-            <button type="button" className="nav-btn" aria-label={T.editor.previous} disabled={index === 0} onClick={() => goTo(index - 1)}>
-              <I.ChevronLeft size={13} />
+        <aside aria-label={T.editor.panel}>
+          <div className="segmented" role="tablist" aria-label={T.editor.panel}>
+            <button type="button" role="tab" aria-selected={tab === 'points'} onClick={() => setTab('points')}>
+              {T.editor.pointsTab}
             </button>
-            <button
-              type="button"
-              className="nav-btn"
-              aria-label={T.editor.next}
-              disabled={index === captures.length - 1}
-              onClick={() => goTo(index + 1)}
-            >
-              <I.ChevronRight size={13} />
+            <button type="button" role="tab" aria-selected={tab === 'notes'} onClick={() => setTab('notes')}>
+              {T.editor.notes}
+              {notes.length > 0 && <span className="tab-count">{notes.length}</span>}
             </button>
           </div>
 
-          <div className="points">
-            {capture.annotations.length === 0 && <p className="none">{T.editor.noPoints}</p>}
-            {capture.annotations.map((a) => {
-              const r = recording(a);
-              const meta = [a.geometry.kind !== 'point' && kind(a), a.text && (a.input === 'typed' ? T.editor.typed : T.editor.dictated)].filter(Boolean);
-              return (
-                <article
-                  key={a.id}
-                  className={`item ${a.id === selectedId ? 'selected' : ''}`}
-                  aria-current={a.id === selectedId || undefined}
-                  onMouseDown={() => {
-                    if (a.id !== selectedId) recorder.stop(true);
-                    setSelectedId(a.id);
-                    setBubbleOpen(false);
-                  }}
+          {tab === 'points' ? (
+            <>
+              <div className="aside-head">
+                <div className="titles">
+                  <div className="title">{T.editor.screenTitle(index + 1, capture.annotations.length)}</div>
+                  {capture.source?.app && (
+                    <div className="sub">{[capture.source.app, capture.source.windowTitle].filter(Boolean).join(' — ')}</div>
+                  )}
+                </div>
+                <button type="button" className="nav-btn" aria-label={T.editor.previous} disabled={index === 0} onClick={() => goTo(index - 1)}>
+                  <I.ChevronLeft size={13} />
+                </button>
+                <button
+                  type="button"
+                  className="nav-btn"
+                  aria-label={T.editor.next}
+                  disabled={index === captures.length - 1}
+                  onClick={() => goTo(index + 1)}
                 >
-                  <Badge a={a} />
-                  <div className="body">
-                    {r ? (
-                      <>
-                        <div className="status">
-                          <Wave levels={levels.current} small />
-                          <span className="time">{clock(r.elapsedMs)}</span>
-                        </div>
-                        <div className="status">
-                          {T.editor.recording}
-                          {tablet && ` · ${T.editor.tabletDraws}`}
-                        </div>
-                      </>
-                    ) : a.transcription === 'pending' && !a.text ? (
-                      <div className="skeleton" aria-hidden="true">
-                        <i style={{ width: '92%' }} />
-                        <i style={{ width: '60%' }} />
-                      </div>
-                    ) : (
-                      <EditableText value={a.text} placeholder={T.editor.noComment} onChange={(text) => api.updateAnnotation(a.id, { text })} />
-                    )}
-                    {status(a, kind(a))}
-                    {!r && a.transcription !== 'pending' && a.transcription !== 'error' && meta.length > 0 && (
-                      <div className="meta">
-                        {a.input === 'typed' ? <I.Keyboard size={12} /> : <I.Mic size={12} />}
-                        {meta.join(' · ')}
-                      </div>
-                    )}
-                    {gallery(a, 'sketch')}
-                    {gallery(a, 'inspiration')}
-                  </div>
-                  {micButton(a.id, r !== null)}
-                  <button type="button" className="delete" aria-label={T.editor.deletePoint} onClick={() => api.deleteAnnotation(a.id)}>
-                    <I.Close size={10} />
-                  </button>
-                </article>
-              );
-            })}
-          </div>
+                  <I.ChevronRight size={13} />
+                </button>
+              </div>
 
-          <section className="notes" aria-label={T.editor.notes}>
-            <div className="title">{T.editor.notes}</div>
-            {notes.length > 0 && (
-              <ol>
-                {notes.map((n, i) => {
-                  const r = recording(n);
+              <div className="points" role="tabpanel" aria-label={T.editor.screenTitle(index + 1, capture.annotations.length)}>
+                {capture.annotations.length === 0 && <p className="none">{T.editor.noPoints}</p>}
+                {capture.annotations.map((a) => {
+                  const r = recording(a);
+                  const meta = [a.geometry.kind !== 'point' && kind(a), a.text && (a.input === 'typed' ? T.editor.typed : T.editor.dictated)].filter(Boolean);
                   return (
-                    <li
-                      key={n.id}
-                      className={`remark ${r ? 'recording' : ''}`}
-                      onFocus={() => (activeNote.current = n.id)}
-                      onBlur={() => (activeNote.current = null)}
+                    <article
+                      key={a.id}
+                      className={`item ${a.id === selectedId ? 'selected' : ''}`}
+                      aria-current={a.id === selectedId || undefined}
+                      onMouseDown={() => {
+                        if (a.id !== selectedId) recorder.stop(true);
+                        setSelectedId(a.id);
+                        setBubbleOpen(false);
+                      }}
                     >
-                      <span className="num">{i + 1}.</span>
+                      <Badge a={a} />
                       <div className="body">
-                        {r && (
-                          <div className="status">
-                            <span className="rec-dot blink" />
-                            <Wave levels={levels.current} small />
-                            <span className="time">{clock(r.elapsedMs)}</span>
-                          </div>
-                        )}
-                        {n.transcription === 'pending' && !n.text ? (
+                        {r ? (
+                          <>
+                            <div className="status">
+                              <Wave levels={levels.current} small />
+                              <span className="time">{clock(r.elapsedMs)}</span>
+                            </div>
+                            <div className="status">
+                              {T.editor.recording}
+                              {tablet && ` · ${T.editor.tabletDraws}`}
+                            </div>
+                          </>
+                        ) : a.transcription === 'pending' && !a.text ? (
                           <div className="skeleton" aria-hidden="true">
-                            <i style={{ width: '80%' }} />
+                            <i style={{ width: '92%' }} />
+                            <i style={{ width: '60%' }} />
                           </div>
                         ) : (
-                          <EditableText
-                            value={n.text}
-                            autoFocus={n.id === newNoteId}
-                            placeholder={r ? T.editor.placeholderRecording : T.editor.notePlaceholder}
-                            onChange={(text) => api.updateNote(n.id, text)}
-                            onKeyDown={noteKeys(n)}
-                          />
+                          <EditableText value={a.text} placeholder={T.editor.noComment} onChange={(text) => api.updateAnnotation(a.id, { text })} />
                         )}
-                        {status(n, T.editor.note)}
-                      </div>
-                      <div className="tools">
-                        {commentMode !== 'keyboard' && (
-                          <button
-                            type="button"
-                            className={r ? 'on' : ''}
-                            aria-label={r ? T.editor.stopDictation : T.editor.dictateNote}
-                            title={r ? T.editor.stopDictation : T.editor.dictateNote}
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => (r ? recorder.stop(true) : startDictation(n.id))}
-                          >
-                            <I.Mic size={12} />
-                          </button>
+                        {status(a, kind(a))}
+                        {!r && a.transcription !== 'pending' && a.transcription !== 'error' && meta.length > 0 && (
+                          <div className="meta">
+                            {a.input === 'typed' ? <I.Keyboard size={12} /> : <I.Mic size={12} />}
+                            {meta.join(' · ')}
+                          </div>
                         )}
-                        <button
-                          type="button"
-                          aria-label={T.editor.deleteNote}
-                          title={T.editor.deleteNote}
-                          onClick={() => {
-                            if (r) recorder.stop(false);
-                            api.deleteNote(n.id);
-                          }}
-                        >
-                          <I.Close size={10} />
-                        </button>
+                        {gallery(a, 'sketch')}
+                        {gallery(a, 'inspiration')}
                       </div>
-                    </li>
+                      {micButton(a.id, r !== null)}
+                      <button type="button" className="delete" aria-label={T.editor.deletePoint} onClick={() => api.deleteAnnotation(a.id)}>
+                        <I.Close size={10} />
+                      </button>
+                    </article>
                   );
                 })}
-              </ol>
-            )}
-            <button type="button" className="add-note" onClick={() => void addNote()}>
-              <I.Plus size={13} />
-              {T.editor.addNote}
-              <span className="hint">{notes.length ? '' : T.editor.notesHint}</span>
-            </button>
-          </section>
+              </div>
+            </>
+          ) : (
+            <section className="notes" role="tabpanel" aria-label={T.editor.notes}>
+              {notes.length > 0 && (
+                <ol>
+                  {notes.map((n, i) => {
+                    const r = recording(n);
+                    return (
+                      <li
+                        key={n.id}
+                        className={`remark ${r ? 'recording' : ''}`}
+                        onFocus={() => (activeNote.current = n.id)}
+                        onBlur={() => (activeNote.current = null)}
+                      >
+                        <span className="num">{i + 1}.</span>
+                        <div className="body">
+                          {r && (
+                            <div className="status">
+                              <span className="rec-dot blink" />
+                              <Wave levels={levels.current} small />
+                              <span className="time">{clock(r.elapsedMs)}</span>
+                            </div>
+                          )}
+                          {n.transcription === 'pending' && !n.text ? (
+                            <div className="skeleton" aria-hidden="true">
+                              <i style={{ width: '80%' }} />
+                            </div>
+                          ) : (
+                            <EditableText
+                              value={n.text}
+                              autoFocus={n.id === newNoteId}
+                              placeholder={r ? T.editor.placeholderRecording : T.editor.notePlaceholder}
+                              onChange={(text) => api.updateNote(n.id, text)}
+                              onKeyDown={noteKeys(n)}
+                            />
+                          )}
+                          {status(n, T.editor.note)}
+                        </div>
+                        <div className="tools">
+                          {commentMode !== 'keyboard' && (
+                            <button
+                              type="button"
+                              className={r ? 'on' : ''}
+                              aria-label={r ? T.editor.stopDictation : T.editor.dictateNote}
+                              title={r ? T.editor.stopDictation : T.editor.dictateNote}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => (r ? recorder.stop(true) : startDictation(n.id))}
+                            >
+                              <I.Mic size={12} />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            aria-label={T.editor.deleteNote}
+                            title={T.editor.deleteNote}
+                            onClick={() => {
+                              if (r) recorder.stop(false);
+                              api.deleteNote(n.id);
+                            }}
+                          >
+                            <I.Close size={10} />
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+              <button type="button" className="add-note" onClick={() => void addNote()}>
+                <I.Plus size={13} />
+                {T.editor.addNote}
+                <span className="hint">{notes.length ? '' : T.editor.notesHint}</span>
+              </button>
+            </section>
+          )}
 
           <div className="aside-foot">
             <I.Undo size={13} />
@@ -887,13 +949,7 @@ function App() {
             </button>
           </div>
         ))}
-        <button type="button" className="thumb new" onClick={() => api.startCapture()}>
-          <span className="img">
-            <I.Capture size={18} />
-            <kbd>{shortcut}</kbd>
-          </span>
-          <span className="cap">{T.editor.newCapture}</span>
-        </button>
+        {newCapture}
       </nav>
 
       {exportMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 9 }} onMouseDown={() => setExportMenu(false)} />}

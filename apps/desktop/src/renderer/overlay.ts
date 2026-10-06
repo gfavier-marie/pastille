@@ -1,5 +1,6 @@
 // Overlay de capture : affiche l'écran figé. Clic = fenêtre sous le curseur (encadrée au survol,
-// le reste assombri), glisser = zone, ⇧ + clic = dernière zone, Échap = annuler.
+// le reste assombri), glisser = zone encadrée sur cette fenêtre, ⌥ + glisser = recadrer sur la zone,
+// ⇧ + clic = dernière zone, Échap = annuler.
 // Pour l'inspiration d'un point, la même capture ne pose aucun point.
 
 import type { OverlayWindow } from '../ipc.ts';
@@ -115,7 +116,7 @@ window.addEventListener('mousemove', (e) => {
   ghost.style.display = 'none';
   const rect = { x: r.x, y: r.y, width: r.w, height: r.h };
   place(zone, rect);
-  showLabel(rect, T.overlay.zone);
+  showLabel(rect, e.altKey ? T.overlay.crop : T.overlay.zone);
 });
 
 window.addEventListener('mouseup', (e) => {
@@ -124,7 +125,7 @@ window.addEventListener('mouseup', (e) => {
   start = null;
   if (r.w < DRAG_THRESHOLD && r.h < DRAG_THRESHOLD)
     window.pastille.overlayPick({ kind: 'click', x: e.clientX, y: e.clientY, shift: e.shiftKey });
-  else window.pastille.overlayPick({ kind: 'zone', ...r });
+  else window.pastille.overlayPick({ kind: 'zone', ...r, crop: e.altKey });
 });
 
 window.addEventListener('keydown', (e) => {

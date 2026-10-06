@@ -49,9 +49,9 @@ Chaque interaction se juge au nombre de gestes : rien ne doit obliger à choisir
 
 La boucle centrale ne coûte qu'un clic par commentaire ; le raccourci ne sert qu'à changer d'écran.
 
-1. Lancer Pastille : elle se loge dans la barre de menus ou la zone de notification.
+1. Lancer Pastille : elle se loge dans le Dock et la barre de menus, ou la zone de notification.
 2. Sur l'écran à relire, appuyer sur le raccourci : l'écran se fige.
-3. Cliquer sur l'élément à corriger : la fenêtre est capturée et l'éditeur s'ouvre avec le point #1 posé, micro ouvert. Glisser capture plutôt une zone précise, sans point.
+3. Cliquer sur l'élément à corriger : la fenêtre est capturée et l'éditeur s'ouvre avec le point #1 posé, micro ouvert. Glisser encadre plutôt une zone (#1, un rectangle) sur la fenêtre ; ⌥ + glisser recadre la capture sur la zone, sans point.
 4. Parler : « Ce bouton, radius de 8 px et un peu plus large. » Aucune validation.
 5. Cliquer sur l'élément suivant : la dictée précédente part en transcription et un nouveau point s'ouvre. Répéter.
 6. Si un dessin aide, le faire sur la tablette puis toucher « Envoyer » : il rejoint le point sélectionné.
@@ -60,7 +60,7 @@ La boucle centrale ne coûte qu'un clic par commentaire ; le raccourci ne sert q
 
 ## 4. Application desktop (macOS et Windows)
 
-L'application vit dans la barre de menus (Mac) ou la zone de notification (Windows) et se résume à trois écrans : l'overlay de capture, l'éditeur et les réglages.
+L'application vit dans le Dock et la barre de menus (Mac) ou la zone de notification (Windows, l'éditeur fermé reste réduit dans la barre des tâches) et se résume à trois écrans : l'overlay de capture, l'éditeur et les réglages.
 
 Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus tard.
 
@@ -69,7 +69,7 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 - **[M]** Une session = une revue = un PDF. Elle est créée automatiquement à la première capture si aucune n'est ouverte.
 - **[M]** Nom par défaut « Revue AAAA-MM-JJ HHhMM », renommable d'un clic sur le titre.
 - **[M]** Sauvegarde automatique à chaque modification. Une session interrompue (crash, fermeture) se rouvre intacte.
-- **[S]** Champ « Contexte » (projet, stack, page testée), pré-rempli avec celui de la session précédente et repris en tête du PDF.
+- **[S]** « Contexte du projet » (projet, stack, page testée), dans les réglages : repris par la session ouverte et les suivantes, et en tête du PDF.
 - **[S]** Sessions récentes accessibles depuis l'icône, pour rouvrir ou réexporter.
 
 ### 4.2 Capture d'écran
@@ -78,8 +78,8 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 - **[M]** À l'appui, l'app masque ses fenêtres, fige tous les écrans et affiche un overlay plein écran en moins de 200 ms.
 - Dans l'overlay :
     - **[M]** **Clic simple** : capture la cible sous le curseur, pose le point n°1 à l'endroit cliqué et lance la dictée. La cible est la fenêtre survolée **[S]**, à défaut l'écran entier du moniteur cliqué **[M]**.
-    - **[M]** **Glisser** : capture la zone tracée, sans poser de point. La zone est mémorisée.
-    - **[S]** **⇧ + clic** : réutilise la dernière zone tracée, pour revoir plusieurs fois la même fenêtre de navigateur.
+    - **[M]** **Glisser** : capture la fenêtre qui contient le centre de la zone tracée (à défaut l'écran), avec la zone comme point n°1 (rectangle), et lance la dictée. **⌥ + glisser** : recadre sur la zone, sans point. La zone est mémorisée.
+    - **[S]** **⇧ + clic** : réutilise la dernière zone tracée, dans le même mode, pour revoir plusieurs fois la même fenêtre de navigateur.
     - **[S]** **Survol** : la fenêtre sous le curseur est encadrée pour montrer ce que le clic va capturer.
     - **[M]** **Échap** : annule.
 - **[M]** Capture en résolution physique (Retina, 150 %…), multi-écrans à échelles différentes inclus.

@@ -51,17 +51,18 @@ describe('stockage des sessions', () => {
     expect(existsSync(file + '.tmp')).toBe(false);
   });
 
-  it('« Nouvelle session » reprend le contexte de la précédente', async () => {
+  it('une nouvelle session prend le contexte du projet réglé à ce moment', async () => {
     const root = await mkdtemp(join(tmpdir(), 'pastille-'));
-    const store = createSessionStore(root);
-    await store.ensure();
-    store.update((s) => (s.context = 'Site vitrine'));
-    const first = store.get()!.id;
+    let context = 'Site vitrine';
+    const store = createSessionStore(root, undefined, () => context);
+    const first = await store.ensure();
+    expect(first.context).toBe('Site vitrine');
     await store.close();
     expect(store.get()).toBeNull();
+    context = 'Back-office';
     const next = await store.ensure();
-    expect(next.id).not.toBe(first);
-    expect(next.context).toBe('Site vitrine');
+    expect(next.id).not.toBe(first.id);
+    expect(next.context).toBe('Back-office');
   });
 });
 
@@ -91,6 +92,30 @@ describe('annuler / rétablir', () => {
     store.redo();
     store.redo();
     expect(store.get()!.captures[0]!.annotations[0]!.text).toBe('bou');
+  });
+
+  it('un point vide retiré par Échap ne revient pas avec ⌘Z', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'pastille-'));
+    const store = createSessionStore(root);
+    await store.addCapture(new Uint8Array([0]), meta);
+    const a = point(0.1);
+    const empty = { ...point(0.2), text: '' };
+    store.update((s) => s.captures[0]!.annotations.push(a), { undoable: true });
+    store.update((s) => s.captures[0]!.annotations.push(empty), { undoable: true });
+    for (const text of ['x', '']) {
+      store.update((s) => (findAnnotation(s, empty.id)!.annotation.text = text), { undoable: true, coalesceKey: `text:${empty.id}` });
+    }
+    await store.addCapture(new Uint8Array([0]), meta); // non annulable, gardé
+
+    store.discard(empty.id);
+    expect(store.get()!.captures[0]!.annotations.map((x) => x.id)).toEqual([a.id]);
+    store.undo(); // directement avant le point a : le point vide n'existe plus nulle part
+    expect(store.get()!.captures[0]!.annotations).toHaveLength(0);
+    expect(store.get()!.captures).toHaveLength(2);
+    store.redo();
+    expect(store.get()!.captures[0]!.annotations.map((x) => x.id)).toEqual([a.id]);
+    store.redo(); // plus rien à rétablir
+    expect(store.get()!.captures[0]!.annotations.map((x) => x.id)).toEqual([a.id]);
   });
 });
 

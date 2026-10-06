@@ -20,11 +20,12 @@ export type UpdateOptions = {
   patchHistory?: boolean;
 };
 
-type State = { currentSessionId?: string; lastContext?: string };
+type State = { currentSessionId?: string };
 
 export type SessionStore = ReturnType<typeof createSessionStore>;
 
-export function createSessionStore(root: string, onChange: (s: Session | null) => void = () => {}) {
+/** `context` : contexte du projet (réglage), repris par chaque nouvelle session. */
+export function createSessionStore(root: string, onChange: (s: Session | null) => void = () => {}, context: () => string = () => '') {
   const sessionsDir = join(root, 'sessions');
   const statePath = join(root, 'state.json');
   let session: Session | null = null;
@@ -83,7 +84,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   /** La session ouverte, créée à la première capture si besoin. */
   async function ensure(): Promise<Session> {
     if (session) return session;
-    const s = newSession(new Date(), state.lastContext);
+    const s = newSession(new Date(), context() || undefined);
     await mkdir(join(dirOf(s.id), 'captures'), { recursive: true });
     session = s;
     state.currentSessionId = s.id;
@@ -112,10 +113,6 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     if (!session) return;
     renumber(session);
     session.updatedAt = new Date().toISOString();
-    if (session.context !== state.lastContext) {
-      state.lastContext = session.context;
-      void saveState();
-    }
     scheduleSave();
     onChange(session);
   }
@@ -155,6 +152,25 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
       },
       { undoable: true },
     );
+  }
+
+  /** Point resté vide (Échap) : retiré partout, historique compris, pour que ⌘Z ne le fasse pas revenir. */
+  function discard(annotationId: string) {
+    if (!session || !findAnnotation(session, annotationId)) return;
+    update(
+      (s) => {
+        for (const c of s.captures) c.annotations = c.annotations.filter((a) => a.id !== annotationId);
+        renumber(s);
+      },
+      { patchHistory: true },
+    );
+    // Les étapes devenues sans effet (création du point, frappe effacée) disparaissent : ⌘Z revient avant le point.
+    const same = (a: Session, b: Session) => JSON.stringify({ ...a, updatedAt: '' }) === JSON.stringify({ ...b, updatedAt: '' });
+    let next = session;
+    for (let i = undoStack.length - 1; i >= 0; i--) {
+      if (same(undoStack[i]!, next)) undoStack.splice(i, 1);
+      else next = undoStack[i]!;
+    }
   }
 
   /** Annuler (⌘Z) / rétablir (⌘⇧Z) : la session revient à l'état précédent. */
@@ -225,6 +241,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     restore,
     ensure,
     update,
+    discard,
     undo,
     redo,
     recent,

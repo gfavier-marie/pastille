@@ -36,7 +36,7 @@ Télécharger [VibeScreener-Setup.exe](https://github.com/gfavier-marie/vibescre
 
 ## Premier lancement
 
-VibeScreener vit dans la barre de menus (zone de notification sous Windows). Un assistant en trois étapes :
+VibeScreener vit dans le Dock et la barre de menus (zone de notification sous Windows). Un assistant en trois étapes :
 
 1. **Autorisations** : enregistrement de l'écran (Mac seulement, puis relancer VibeScreener) et micro.
 2. **Modèle de dictée** : téléchargé tout seul (547 Mo, une seule fois). La dictée se fait ensuite sur l'ordinateur, hors ligne.

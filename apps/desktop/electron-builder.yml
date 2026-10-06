@@ -30,7 +30,6 @@ mac:
   hardenedRuntime: false
   artifactName: ${productName}-${arch}.${ext} # lien stable : releases/latest/download/VibeScreener-arm64.dmg
   extendInfo:
-    LSUIElement: true # application de barre de menus, sans icône dans le Dock
     NSMicrophoneUsageDescription: VibeScreener utilise le micro pour dicter les commentaires.
 win:
   target: nsis

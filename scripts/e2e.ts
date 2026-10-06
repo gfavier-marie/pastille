@@ -1,6 +1,6 @@
 // Test de bout en bout : session factice (5 captures, 20 points), dictée sur le point #1
 // par un faux micro qui joue l'échantillon, photo de l'éditeur, export PDF et Markdown, écran 1 lu par le
-// serveur MCP. Résultats dans e2e-output/ (editor.png, sessions.png, settings.png, settings-claude.png, menu,
+// serveur MCP. Résultats dans e2e-output/ (editor.png, editor-notes.png, sessions.png, settings.png, settings-claude.png, menu,
 // barre, overlay normal et d'inspiration, assistant, appairage ; chemins des exports).
 // Usage : pnpm e2e
 // App installée (CI Windows) : PASTILLE_E2E_APP=…\VibeScreener.exe, avec PASTILLE_FAKE_AUDIO et

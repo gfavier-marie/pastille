@@ -67,6 +67,8 @@ if (autotest === 'editor') {
   const sample = process.env.PASTILLE_FAKE_AUDIO ?? join(app.getAppPath(), 'fixtures', 'dictee-fr.wav');
   app.commandLine.appendSwitch('use-file-for-fake-audio-capture', sample);
   app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess'); // sinon le bac à sable audio ne lit pas le fichier
+  // Fenêtre de l'éditeur recouverte par d'autres apps : elle reste « visible », sinon la dictée s'arrête (micro libéré).
+  app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 }
 
 protocol.registerSchemesAsPrivileged([
@@ -80,11 +82,16 @@ function loadPage(win: BrowserWindow, page: Page, hash = '') {
   else void win.loadFile(join(import.meta.dirname, '../renderer', `${page}.html`), { hash });
 }
 
-const store = createSessionStore(app.getPath('userData'), (s) => {
-  editor?.webContents.send('session:changed', s);
-  updateTrayMenu();
-  tablet?.refresh();
-});
+const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
+const store = createSessionStore(
+  app.getPath('userData'),
+  (s) => {
+    editor?.webContents.send('session:changed', s);
+    updateTrayMenu();
+    tablet?.refresh();
+  },
+  () => settings.get().context,
+);
 const tablet = autotest && autotest !== 'tablet'
   ? null
   : createTablet({
@@ -98,7 +105,6 @@ const tablet = autotest && autotest !== 'tablet'
         broadcastSettings();
       },
     });
-const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
 const exportDir = () => (autotest ? join(app.getPath('userData'), 'exports') : settings.get().exportDir);
 const modelDir = join(app.getPath('userData'), 'models');
 // Serveur MCP pour Claude Code : son adresse, ou l'erreur affichée dans les réglages.
@@ -160,11 +166,12 @@ function createEditor() {
     webPreferences: { preload },
   });
   win.setContentProtection(true);
-  // Fermer cache la fenêtre : elle reste prête pour la prochaine capture.
+  // Fermer cache la fenêtre, prête pour la prochaine capture. Windows : elle est réduite, pour rester dans la barre des tâches.
   win.on('close', (e) => {
     if (!quitting) {
       e.preventDefault();
-      win.hide();
+      if (isMac) win.hide();
+      else win.minimize();
     }
   });
   loadPage(win, 'editor');
@@ -175,6 +182,7 @@ function showEditor(focus?: EditorFocus) {
   inspirationFor = null; // revenir à l'éditeur annule l'inspiration en attente
   editor ??= createEditor();
   if (focus) editor.webContents.send('editor:focus', focus);
+  if (editor.isMinimized()) editor.restore();
   editor.show();
   if (isMac) app.focus({ steal: true });
   editor.focus();
@@ -212,8 +220,9 @@ async function onCapture(c: CapturedImage) {
     scaleFactor: c.scaleFactor,
     source: { app: c.app, windowTitle: c.title, displayId: c.displayId },
   });
-  let annotationId: string | undefined;
-  if (c.point) annotationId = addAnnotation(capture.id, { kind: 'point', ...c.point });
+  // Clic : un point ; zone glissée sans ⌥ : un rectangle. Dans les deux cas, bulle ouverte et dictée lancée.
+  const geometry: Geometry | undefined = c.point ? { kind: 'point', ...c.point } : c.zone && { kind: 'zone', ...c.zone };
+  const annotationId = geometry && addAnnotation(capture.id, geometry);
   showEditor({ captureId: capture.id, annotationId, openBubble: !!annotationId, dictate: !!annotationId });
   reportCapture({
     ok: true,
@@ -545,6 +554,8 @@ ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
     return { ok: false, error: `${shortcutLabel(patch.shortcut)} est déjà pris par une autre application.` };
   }
   const after = settings.update(patch);
+  // Contexte du projet : il s'applique aussi à la session ouverte (historique compris, ⌘Z ne le défait pas).
+  if (after.context !== before.context) store.update((s) => (s.context = after.context || undefined), { patchHistory: true });
   if (patch.openAtLogin !== undefined && !autotest) app.setLoginItemSettings({ openAtLogin: patch.openAtLogin });
   if (after.language !== before.language || after.glossary !== before.glossary) void transcriber.restart().then(broadcastSettings);
   broadcastSettings();
@@ -630,7 +641,8 @@ ipcMain.on('annotation:delete', (_e, id: string) =>
     { undoable: true },
   ),
 );
-ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
+ipcMain.on('annotation:discard', (_e, id: string) => store.discard(id));
+ipcMain.on('session:update', (_e, patch: Pick<Session, 'name'>) =>
   store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
 );
 // Écran supprimé avec ses points ; son image reste sur le disque pour que ⌘Z le fasse revenir.
@@ -767,6 +779,11 @@ async function runEditorAutotest() {
   await wait(600);
   await writeFile(join(out, 'sessions.png'), (await editor.webContents.capturePage()).toPNG());
   editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
+  // Onglet « Remarques générales » du panneau de droite.
+  await wait(300);
+  await editor.webContents.executeJavaScript(`document.querySelectorAll('[role="tab"]')[1].click()`);
+  await wait(300);
+  await writeFile(join(out, 'editor-notes.png'), (await editor.webContents.capturePage()).toPNG());
 
   showSettings();
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
@@ -848,6 +865,44 @@ async function runTabletAutotest() {
 
 // ——— Démarrage ———
 
+/** macOS : menu de l'app (visible avec l'icône du Dock). Édition garde copier, coller et annuler dans les champs ;
+ *  hors d'un champ, l'éditeur intercepte ⌘Z lui-même pour annuler dans la session. */
+function appMenu() {
+  return Menu.buildFromTemplate([
+    {
+      label: 'VibeScreener',
+      submenu: [
+        { role: 'about', label: 'À propos de VibeScreener' },
+        { type: 'separator' },
+        { label: 'Réglages…', accelerator: 'Command+,', click: () => showSettings() },
+        { type: 'separator' },
+        { role: 'hide', label: 'Masquer VibeScreener' },
+        { role: 'quit', label: 'Quitter VibeScreener' },
+      ],
+    },
+    {
+      label: 'Édition',
+      submenu: [
+        { role: 'undo', label: 'Annuler' },
+        { role: 'redo', label: 'Rétablir' },
+        { type: 'separator' },
+        { role: 'cut', label: 'Couper' },
+        { role: 'copy', label: 'Copier' },
+        { role: 'paste', label: 'Coller' },
+        { role: 'selectAll', label: 'Tout sélectionner' },
+      ],
+    },
+    {
+      label: 'Fenêtre',
+      role: 'window',
+      submenu: [
+        { role: 'minimize', label: 'Réduire' },
+        { role: 'close', label: 'Fermer' },
+      ],
+    },
+  ]);
+}
+
 let capture: ReturnType<typeof createCapture>;
 let quitting = false;
 
@@ -855,7 +910,7 @@ if (!autotest && !app.requestSingleInstanceLock()) app.quit();
 // « VibeScreener.exe --quit » : install.ps1 ferme proprement l'app avant de la remplacer.
 app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : showEditor()));
 app.on('window-all-closed', () => {
-  // Application de barre de menus : elle reste active sans fenêtre.
+  // L'app reste active sans fenêtre : icône de la barre de menus (zone de notification sous Windows).
 });
 app.on('before-quit', (e) => {
   if (quitting) return;
@@ -871,9 +926,11 @@ app.on('will-quit', () => {
 });
 
 void app.whenReady().then(async () => {
-  if (isMac) app.dock?.hide();
+  if (isMac) {
+    Menu.setApplicationMenu(appMenu());
+    if (!app.isPackaged) app.dock?.setIcon(join(app.getAppPath(), 'build', 'icon.png')); // l'app installée a la sienne
+  }
   // Windows : sans cela, chaque fenêtre porte le menu anglais par défaut d'Electron (File, Edit…).
-  // Sur Mac, ce menu garde copier/coller (⌘C, ⌘V) dans les champs.
   else Menu.setApplicationMenu(null);
 
   // Images de session servies par pastille://session/<id>/<chemin>, sans sortir du dossier des sessions.
@@ -961,6 +1018,7 @@ void app.whenReady().then(async () => {
   setInterval(() => void lookForUpdate(), 6 * 3600_000); // l'app reste lancée des jours
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
+  app.on('activate', () => showEditor()); // macOS : clic sur l'icône du Dock
   void transcriber.restart().then(() => {
     // Assistant de premier lancement (§4.9), rouvert si une autorisation manque. Sinon, un modèle manquant ouvre les réglages.
     if (setupNeeded()) showWelcome();

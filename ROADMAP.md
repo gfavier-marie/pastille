@@ -110,3 +110,62 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 - [x] Serveur MCP local dans l'app (HTTP sur 127.0.0.1:3917, lecture seule) : `lister_sessions`, `lire_revue`, `voir_ecran` ; commande `claude mcp add` dans les réglages ; testé par `pnpm e2e`
 - [x] Branchement facile à trouver : onglet « Claude Code » dans les réglages (commande à copier, dernière connexion), « Brancher Claude Code… » dans le menu de l'icône
 - [ ] Essai réel : une revue appliquée par Claude Code sur un projet
+
+## Corrections — revue « vibescreener » du 6 oct. 2026
+
+7 points sur le site, 6 remarques générales sur l'app (lues par le MCP). Choix validés le 6 oct. : la zone est montrée sur la fenêtre (⌥ pour recadrer), le Contexte passe dans les réglages, le bouton « Nouvelle capture » devient visible, et le panneau a deux onglets Points / Remarques.
+
+### Lot A — Site vibescreener.dev
+
+Le site n'existe que sur la branche locale `claude/monetization-trial-subscription-07be07` (`apps/site/public/index.html`, non fusionnée) : on y travaille et on redéploie le site (`wrangler deploy`) sur ton feu vert. Les points vont du plus rapide au plus long.
+
+- [x] **#7 Texte sous les tarifs** : supprimer les deux lignes (Polar, remboursement, fin d'essai), que la FAQ dit déjà. Garder « TTC » à côté du prix (« une fois, TTC »).
+- [x] **#2 Recherche qui déborde** : « Rechercher une commande » dépasse de son champ dans les 3 copies de l'app d'exemple. Mettre « Rechercher… » et couper le texte avec `overflow: hidden` et `text-overflow: ellipsis`.
+- [x] **#5 Logos** : mettre devant chaque nom le logo de Claude Code (logo Claude), Cursor, ChatGPT (logo OpenAI) et Claude, en SVG copiés dans la page depuis Simple Icons (CC0). Aucune requête vers un tiers ni dépendance. Remplacer « et toute IA qui lit un PDF » par « et toutes les autres IA ». Une ligne « marques citées » dans les mentions légales.
+- [x] **#3 Proposition de valeur** : réécrire le sous-titre du hero autour du temps gagné, plus une mini-comparaison chiffrée sur un cas, par exemple « Une revue de 20 retours : 10 min à la main, 2 min avec VibeScreener ». Reprendre aussi la meta description. Le titre ne change pas.
+- [x] **#4 Cadre orange** : supprimer le cadre épais affiché pendant toute l'animation du hero. À la place, un effet de capture bref repris de l'overlay de l'app : éclair, léger assombrissement et étiquette « Écran figé », qui disparaissent en 1 s.
+- [x] **#6 Calculateur de temps gagné** : il remplace la section « Arrêtez de décrire. Montrez. » (Sans / Avec).
+  - Trois curseurs : écrans par revue (10), retours par écran (3), revues par semaine (5).
+  - Hypothèses affichées : 30 s par retour à la main (capture, recadrage, collage, décrire l'endroit) contre 5 s avec VibeScreener (un clic, une phrase), et 2 min contre 5 s pour assembler et envoyer la revue.
+  - Résultat par revue (≈ 17 min contre 2 min 30) et par mois (≈ 5 h gagnées).
+  - Une trentaine de lignes de JS dans la page, `input type=range` étiquetés, résultat annoncé (`aria-live`). Sans JS, les valeurs par défaut restent écrites dans le HTML.
+- [x] **#1 Animation Claude Code + MCP** : un 2ᵉ acte au hero, toujours en CSS, cycle d'environ 26 s.
+  - Après « 3 demandes prêtes pour l'IA », un terminal Claude Code glisse par-dessus avec la demande « applique la revue VibeScreener ».
+  - Viennent ensuite les appels `vibescreener · lire_revue` (1 écran, 3 demandes) et `voir_ecran`, puis trois `Update(src/pages/Ventes.tsx)` cochés #1, #2, #3.
+  - Retour sur l'app corrigée : filtres 7 j / 30 j / 12 mois, tri, bouton CSV, recherche par e-mail.
+  - Les pourcentages des keyframes de l'acte 1 sont recalés sur la nouvelle durée. `prefers-reduced-motion` est respecté.
+- [x] Vérifié en local (serveur statique, navigateur à 1440, 860 et 375 px : hero, démo image par image, logos, calculateur), sans erreur console
+- [x] Site déployé sur vibescreener.dev le 6 oct. (commit `c852a2a` de la branche monétisation)
+
+### Lot B — App desktop
+
+Sur main, cette branche. Les remarques vont de la plus gênante à la plus lourde.
+
+- [x] **B1 Échap supprime un point vide** : sans texte, dictée en attente ou en erreur, croquis ni inspiration, Échap retire le point, depuis la bulle (`bubbleKeys`) comme depuis l'éditeur (branche Échap du clavier global).
+  - Même règle que les remarques générales vides (`editor.tsx`, `noteKeys`).
+  - Nouvelle méthode du store (IPC `annotation:discard`) qui retire le point et l'instantané d'annulation de sa création : ⌘Z ne fait pas revenir un point vide.
+  - Une dictée déjà envoyée (silence de 3 s) compte comme « en attente », pour ne pas la perdre.
+  - Test dans `session-store.test.ts`.
+- [x] **B2 Contexte dans les réglages** : retirer le champ de l'en-tête de l'éditeur (`editor.tsx`, `editor.html`, `texts.ts`).
+  - Nouveau réglage « Contexte du projet » dans l'onglet Export, à côté des instructions pour l'IA.
+  - Il s'applique à la session ouverte et aux suivantes, et remplace l'héritage caché `lastContext` (repris comme valeur de départ).
+  - Les exports et le MCP ne changent pas : ils lisent toujours `session.context`.
+- [x] **B3 « Nouvelle capture » visible** : la vignette ressemble à une capture. Elle devient un vrai bouton orange « ＋ Nouvelle capture ⇧⌘2 » au bout de la bande. Le même bouton s'affiche dans l'éditeur vide.
+  - À vérifier au passage : le micro préparé au clic est refermé quand l'éditeur se masque (`visibilitychange` → `recorder.close()`), ce qui fait perdre l'avance de la dictée.
+- [x] **B4 Onglets Points / Remarques générales** : deux onglets en haut du panneau de droite, chacun sur toute la hauteur, avec le compte de remarques sur l'onglet.
+  - La navigation d'écran n'apparaît que sur l'onglet Points.
+  - Sélectionner un point ou capturer bascule sur Points, « Ajouter une remarque » bascule sur Remarques.
+  - Variante sombre du contrôle `.segmented` de `theme.css`.
+- [x] **B5 Dock et barre des tâches** :
+  - **Mac** : icône dans le Dock en plus de l'icône de la barre des menus. On retire `LSUIElement` (`electron-builder.yml`) et `app.dock.hide()`, et un clic sur le Dock ouvre l'éditeur (`app.on('activate')`). Menu d'app minimal (VibeScreener, Édition, Fenêtre).
+  - **Windows** : l'icône reste dans la zone de notification. Fermer l'éditeur le réduit au lieu de le masquer, pour qu'il reste dans la barre des tâches.
+  - **Limite à signaler** : Windows n'affiche rien dans la barre des tâches sans fenêtre ouverte. L'épinglage reste possible via le menu Démarrer.
+  - Textes « barre des menus seulement » à revoir dans `texts.ts`, `README.md` et `docs/SPEC.md`.
+- [x] **B6 Zone montrée, ⌥ pour recadrer** : glisser dans l'overlay capture la fenêtre qui contient le centre de la zone, ou l'écran s'il n'y en a pas (même repérage que le clic).
+  - La zone devient le point #1, de type rectangle, déjà géré par l'éditeur, les exports et le MCP. Bulle ouverte et dictée lancée, comme pour un clic.
+  - ⌥ + glisser recadre comme aujourd'hui, avec l'aide « ⌥ Glisser : recadrer » dans l'overlay. ⇧ + clic reprend la dernière zone dans le même mode. Les inspirations restent recadrées.
+  - Fichiers : `overlay.ts`, `ipc.ts` (option de la zone), `capture.ts` (`finish`), `index.ts` (`onCapture`).
+- [x] `pnpm test` (37/37) et `pnpm typecheck` ; photos de l'éditeur (onglets, bouton) relues pendant le développement
+- [ ] `pnpm e2e` sur le code final : par la CI, plus sur le Mac de l'utilisateur (les fenêtres de test passaient devant tout)
+- [ ] Essai réel sur Mac : Échap puis ⌘Z, Dock et menu de l'app, zone avec et sans ⌥, retour de l'éditeur au premier plan après une capture ; Windows (Alt + glisser, éditeur réduit) par la CI puis sur un PC
+- [ ] Version suivante et Release (tag `v*`) sur ton feu vert.

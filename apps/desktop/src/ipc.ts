@@ -21,7 +21,7 @@ export type OverlayWindow = { x: number; y: number; width: number; height: numbe
 /** Coordonnées en pixels logiques (DIP), relatives à l'écran de l'overlay. */
 export type OverlayPick =
   | { kind: 'click'; x: number; y: number; shift?: boolean }
-  | { kind: 'zone'; x: number; y: number; w: number; h: number }
+  | { kind: 'zone'; x: number; y: number; w: number; h: number; crop?: boolean } // ⌥ : recadrer ; sinon zone montrée sur la fenêtre
   | { kind: 'cancel' };
 
 /** Mesures d'une capture, affichées par la fenêtre POC. */
@@ -105,7 +105,8 @@ export type PastilleApi = {
   addAnnotation(captureId: string, geometry: Geometry): Promise<string>;
   updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
   deleteAnnotation(id: string): void;
-  updateSession(patch: { name?: string; context?: string }): void;
+  discardAnnotation(id: string): void; // point resté vide (Échap) : retiré sans étape d'annulation
+  updateSession(patch: { name?: string }): void;
   deleteCapture(id: string): void; // annulable par ⌘Z
   listSessions(): Promise<SessionSummary[]>;
   openSession(id: string): Promise<void>;
