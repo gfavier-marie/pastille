@@ -162,7 +162,7 @@ function App() {
   const [rec, setRec] = useState<RecorderState>(null);
   const levels = useRef<number[]>([]);
   const [tab, setTab] = useState<'points' | 'notes'>('points'); // onglet du panneau de droite
-  const [shortcut, setShortcut] = useState(isMac ? '⇧⌘2' : 'Ctrl+Shift+2');
+  const [shortcut, setShortcut] = useState(isMac ? '⌃⌥⌘P' : 'Ctrl+Alt+P');
   const [tablet, setTablet] = useState(false);
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis ou inspiration agrandi
   const [newNoteId, setNewNoteId] = useState<string | null>(null); // remarque juste ajoutée, à mettre au focus

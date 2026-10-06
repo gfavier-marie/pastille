@@ -44,11 +44,11 @@ VibeScreener vit dans le Dock et la barre de menus (zone de notification sous Wi
 
 1. **Autorisations** : enregistrement de l'écran (Mac seulement, puis relancer VibeScreener) et micro.
 2. **Modèle de dictée** : téléchargé tout seul (547 Mo, une seule fois). La dictée se fait ensuite sur l'ordinateur, hors ligne.
-3. **Raccourci** : **⇧⌘2** (Windows : **Ctrl+Shift+2**) fige l'écran ; clic sur l'élément, on parle, c'est noté. **⌘E** (**Ctrl+E**) exporte.
+3. **Raccourci** : **⌃⌥⌘P** (Windows : **Ctrl+Alt+P**) fige l'écran ; clic sur l'élément, on parle, c'est noté. **⌘E** (**Ctrl+E**) exporte.
 
 ## Inspiration
 
-Pour montrer à quoi un point doit ressembler : dans la bulle du point, **Inspiration**. L'éditeur s'efface ; ouvrir la page modèle (un autre site, une autre app), puis **⇧⌘2** et cliquer la fenêtre ou glisser une zone. L'image rejoint le point, l'éditeur revient dessus (Échap : retour sans rien joindre). Une image peut aussi être collée (**⌘V**) ou déposée sur le point sélectionné. Les exports et Claude Code la présentent comme un modèle, pas comme l'écran à modifier.
+Pour montrer à quoi un point doit ressembler : dans la bulle du point, **Inspiration**. L'éditeur s'efface ; ouvrir la page modèle (un autre site, une autre app), puis **⌃⌥⌘P** et cliquer la fenêtre ou glisser une zone. L'image rejoint le point, l'éditeur revient dessus (Échap : retour sans rien joindre). Une image peut aussi être collée (**⌘V**) ou déposée sur le point sélectionné. Les exports et Claude Code la présentent comme un modèle, pas comme l'écran à modifier.
 
 ## Tablette (iPad + Apple Pencil)
 

@@ -155,7 +155,7 @@ function App() {
       <p>
         {shortcut?.registered ? (
           <>
-            Appuie sur <b>{isMac ? '⌘⇧2' : 'Ctrl+Shift+2'}</b> depuis n'importe quelle app, puis clique sur une
+            Appuie sur <b>{isMac ? '⌃⌥⌘P' : 'Ctrl+Alt+P'}</b> depuis n'importe quelle app, puis clique sur une
             fenêtre (ou glisse pour une zone, Échap pour annuler).
           </>
         ) : (

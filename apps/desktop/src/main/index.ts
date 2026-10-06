@@ -135,9 +135,9 @@ const dictation = createDictation(store, (wav) => transcriber.transcribe(wav));
 let shortcutRegistered = false;
 let recording = false; // une dictée est en cours dans l'éditeur
 
-/** « CommandOrControl+Shift+2 » → « ⇧⌘2 » ou « Ctrl+Shift+2 ». */
+/** « Command+Control+Alt+P » → « ⌃⌥⌘P » ; « Control+Alt+P » → « Ctrl+Alt+P ». */
 function shortcutLabel(accelerator: string) {
-  if (!isMac) return accelerator.replace('CommandOrControl', 'Ctrl').replace('CmdOrCtrl', 'Ctrl');
+  if (!isMac) return accelerator.replace(/CommandOrControl|CmdOrCtrl|Control/g, 'Ctrl');
   const symbols: Record<string, string> = { CommandOrControl: '⌘', CmdOrCtrl: '⌘', Command: '⌘', Cmd: '⌘', Shift: '⇧', Alt: '⌥', Option: '⌥', Control: '⌃', Ctrl: '⌃' };
   const order = '⌃⌥⇧⌘'; // ordre des menus de macOS
   const keys = accelerator.split('+').map((k) => symbols[k] ?? k);

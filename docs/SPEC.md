@@ -74,7 +74,7 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 
 ### 4.2 Capture d'écran
 
-- **[M]** Raccourci global configurable. Défaut proposé : ⌘⇧2 (Mac) et Ctrl+Shift+2 (Windows). Si l'enregistrement du raccourci échoue (déjà pris), l'app le signale et en demande un autre.
+- **[M]** Raccourci global configurable. Défaut : ⌃⌥⌘P (Mac) et Ctrl+Alt+P (Windows). Si l'enregistrement du raccourci échoue (déjà pris), l'app le signale et en demande un autre.
 - **[M]** À l'appui, l'app masque ses fenêtres, fige tous les écrans et affiche un overlay plein écran en moins de 200 ms.
 - Dans l'overlay :
     - **[M]** **Clic simple** : capture la cible sous le curseur, pose le point n°1 à l'endroit cliqué et lance la dictée. La cible est la fenêtre survolée **[S]**, à défaut l'écran entier du moniteur cliqué **[M]**.
@@ -120,7 +120,7 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 
 | Action | macOS | Windows |
 | --- | --- | --- |
-| Nouvelle capture (global) | ⌘⇧2 | Ctrl+Shift+2 |
+| Nouvelle capture (global) | ⌃⌥⌘P | Ctrl+Alt+P |
 | Valider le texte, arrêter la dictée | Entrée | Entrée |
 | Saut de ligne dans un commentaire | ⇧Entrée | Shift+Entrée |
 | Annuler la dictée, fermer la bulle | Échap | Échap |

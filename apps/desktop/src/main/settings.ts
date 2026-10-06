@@ -31,7 +31,8 @@ export type SettingsView = Settings & { hasApiKey: boolean };
 export function createSettings(dataDir: string, documentsDir: string) {
   const path = join(dataDir, 'settings.json');
   const defaults: Settings = {
-    shortcut: 'CommandOrControl+Shift+2',
+    // ⇧⌘2, l'ancien défaut, est intercepté par d'autres apps sur certains Mac sans que l'enregistrement échoue.
+    shortcut: process.platform === 'darwin' ? 'Command+Control+Alt+P' : 'Control+Alt+P',
     commentMode: 'auto',
     silenceMs: 3000,
     language: 'fr',
@@ -50,6 +51,7 @@ export function createSettings(dataDir: string, documentsDir: string) {
   };
   const stored = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
   if (stored.exportDir === join(documentsDir, 'Pastille')) delete stored.exportDir; // ancien nom de l'app
+  if (stored.shortcut === 'CommandOrControl+Shift+2') delete stored.shortcut; // ancien défaut, écrit par save() : prend le nouveau
   // Le contexte passait autrefois d'une session à la suivante (state.json) : il devient la valeur de départ du réglage.
   const statePath = join(dataDir, 'state.json');
   if (stored.context === undefined && existsSync(statePath)) {
