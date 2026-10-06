@@ -31,6 +31,7 @@ export async function exportSession(opts: {
   outDir: string;
   format: ExportFormat;
   printHtml: PrintHtml;
+  instructions?: string; // modèle du texte d'instructions, {N} = nombre de retours
 }): Promise<string> {
   const { session, sessionDir, outDir, format } = opts;
   const base = exportBaseName(session);
@@ -38,14 +39,14 @@ export async function exportSession(opts: {
 
   if (format === 'markdown') {
     const dir = join(outDir, base);
-    const doc = await buildExport(session, sessionDir, dir);
+    const doc = await buildExport(session, sessionDir, dir, opts.instructions);
     await writeFile(join(dir, 'revue.md'), toMarkdown(doc));
     return dir;
   }
 
   const work = await mkdtemp(join(tmpdir(), 'pastille-export-'));
   try {
-    const doc = await buildExport(session, sessionDir, work);
+    const doc = await buildExport(session, sessionDir, work, opts.instructions);
     if (format === 'pptx') {
       const file = join(outDir, `${base}.pptx`);
       await writeFile(file, await toPptx(doc, work));

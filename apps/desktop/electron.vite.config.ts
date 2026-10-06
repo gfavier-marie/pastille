@@ -20,6 +20,7 @@ export default defineConfig({
         input: {
           editor: resolve(import.meta.dirname, 'src/renderer/editor.html'),
           poc: resolve(import.meta.dirname, 'src/renderer/poc.html'),
+          settings: resolve(import.meta.dirname, 'src/renderer/settings.html'),
           overlay: resolve(import.meta.dirname, 'src/renderer/overlay.html'),
         },
       },

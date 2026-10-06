@@ -2,7 +2,7 @@
 // atomique avec un anti-rebond de 300 ms. La session ouverte se rouvre au démarrage.
 
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { newSession, renumber, type Capture, type Session } from '@pastille/shared';
 
@@ -149,6 +149,32 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     commit();
   }
 
+  /** Sessions récentes, la plus récente d'abord (menu de l'icône). */
+  async function recent(limit = 5) {
+    const ids = existsSync(sessionsDir) ? await readdir(sessionsDir) : [];
+    const list = [];
+    for (const id of ids) {
+      try {
+        const s = JSON.parse(await readFile(join(dirOf(id), 'session.json'), 'utf8')) as Session;
+        list.push({ id: s.id, name: s.name, updatedAt: s.updatedAt, points: s.captures.reduce((n, c) => n + c.annotations.length, 0) });
+      } catch {
+        // dossier incomplet : ignoré
+      }
+    }
+    return list.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, limit);
+  }
+
+  /** Rouvre une session (pour la compléter ou la réexporter). */
+  async function open(id: string) {
+    await flush();
+    session = JSON.parse(await readFile(join(dirOf(id), 'session.json'), 'utf8')) as Session;
+    undoStack = [];
+    redoStack = [];
+    state.currentSessionId = id;
+    await saveState();
+    onChange(session);
+  }
+
   /** « Nouvelle session » : la session actuelle est fermée, la suivante naîtra à la prochaine capture. */
   async function close() {
     await flush();
@@ -169,6 +195,8 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     update,
     undo,
     redo,
+    recent,
+    open,
     addCapture,
     flush,
     close,

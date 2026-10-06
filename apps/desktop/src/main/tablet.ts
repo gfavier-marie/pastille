@@ -2,7 +2,7 @@
 // Le desktop se connecte au relais en sortie ; tout est chiffré avec la clé du QR.
 
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadImage, type Image } from '@napi-rs/canvas';
 import {
@@ -153,6 +153,15 @@ export function createTablet(opts: {
       void sendFocus(false);
     },
     isConnected: () => connected,
+    isPaired: () => pairing !== null,
+    /** Révocation : la tablette ne peut plus rien envoyer ; un nouveau QR sera créé au prochain appairage. */
+    async revoke() {
+      link?.close();
+      link = null;
+      pairing = null;
+      setConnected(false);
+      await rm(pairingPath, { force: true });
+    },
     stop() {
       clearInterval(timer);
       link?.close();

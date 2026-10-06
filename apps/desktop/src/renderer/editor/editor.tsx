@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { allAnnotations, type Annotation, type Session } from '@pastille/shared';
-import { imageUrl, type ExportFormat } from '../../ipc.ts';
+import { imageUrl, type ExportFormat, type Settings } from '../../ipc.ts';
 import { createRecorder, type RecorderState } from './recorder.ts';
 import { Stage } from './Stage.tsx';
 
@@ -68,11 +68,22 @@ function App() {
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis agrandi
   // Whisper présent (ou en cours de chargement) : sinon, saisie au clavier seulement.
   const [canDictate] = useState(() => api.dictationAvailable());
+  // Mode de commentaire et délai de silence suivent les réglages.
+  const prefs = useRef<Pick<Settings, 'commentMode' | 'silenceMs'>>({ commentMode: 'auto', silenceMs: 3000 });
   const [recorder] = useState(() =>
-    createRecorder({ silenceMs: 3000, maxMs: 60_000, onState: setRec, onFinish: (id, samples) => api.submitDictation(id, samples) }),
+    createRecorder({
+      silenceMs: () => prefs.current.silenceMs,
+      maxMs: 60_000,
+      onState: setRec,
+      onFinish: (id, samples) => api.submitDictation(id, samples),
+    }),
   );
 
   /** Dictée automatique : poser un point lance l'enregistrement (§4.4). */
+  function autoDictation(annotationId: string) {
+    if (prefs.current.commentMode === 'auto') startDictation(annotationId);
+  }
+
   function startDictation(annotationId: string) {
     void canDictate
       .then((ok) => (ok ? recorder.start(annotationId) : undefined))
@@ -86,9 +97,12 @@ function App() {
       setCaptureId(f.captureId);
       setSelectedId(f.annotationId ?? null);
       setBubbleOpen(!!f.openBubble);
-      if (f.annotationId && f.openBubble) startDictation(f.annotationId);
+      if (f.annotationId && f.openBubble) autoDictation(f.annotationId);
     });
     void api.tabletStatus().then(setTablet);
+    const applyPrefs = (s: Settings) => (prefs.current = { commentMode: s.commentMode, silenceMs: s.silenceMs });
+    void api.getSettings().then(applyPrefs);
+    const offSettings = api.onSettingsChanged(applyPrefs);
     const offTablet = api.onTabletStatus(setTablet);
     const offMic = api.onPrepareMic(() => void canDictate.then((ok) => (ok ? recorder.open() : undefined)).catch(() => {}));
     // Fenêtre cachée : la dictée en cours part en transcription et le micro est libéré.
@@ -99,6 +113,7 @@ function App() {
       offFocus();
       offMic();
       offTablet();
+      offSettings();
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
@@ -127,6 +142,25 @@ function App() {
     setToast(r.ok ? { text: `Exporté : ${r.path}` } : { text: r.error, error: true });
     setTimeout(() => setToast(null), 5000);
   }
+
+  // Mode « appuyer pour parler » : ⌥ (Alt) maintenu enregistre pour le point sélectionné.
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key !== 'Alt' || e.repeat || prefs.current.commentMode !== 'push' || !selectedId) return;
+      e.preventDefault();
+      setBubbleOpen(true);
+      startDictation(selectedId);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.key === 'Alt' && prefs.current.commentMode === 'push') recorder.stop(true);
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+    };
+  });
 
   // Raccourcis (§4.6).
   useEffect(() => {
@@ -301,7 +335,7 @@ function App() {
             const id = await api.addAnnotation(capture.id, geometry);
             setSelectedId(id);
             setBubbleOpen(true);
-            startDictation(id);
+            autoDictation(id);
           }}
           onMove={(id, geometry) => api.updateAnnotation(id, { geometry })}
           bubble={(pin) =>

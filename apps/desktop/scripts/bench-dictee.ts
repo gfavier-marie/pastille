@@ -11,8 +11,8 @@ const repoRoot = join(import.meta.dirname, '..', '..', '..');
 const wavPath = process.argv[2] ?? join(import.meta.dirname, '..', 'fixtures', 'dictee-fr.wav');
 const RUNS = 4;
 
-const bin = findWhisperBin(repoRoot);
-const model = findModel(repoRoot);
+const bin = findWhisperBin([join(repoRoot, 'vendor', 'whisper')]);
+const model = findModel([join(repoRoot, 'models')]);
 if (!bin || !model) {
   console.error(`whisper-server ${bin ? 'trouvé' : 'introuvable'}, modèle ${model ? 'trouvé' : 'introuvable'}.`);
   console.error('Lance « pnpm setup:whisper » puis réessaie.');

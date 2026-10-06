@@ -5,35 +5,17 @@
 //  - Windows: binaire officiel whisper.cpp (CPU x64) dans vendor/whisper/
 
 import { execFileSync } from 'node:child_process';
-import { createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-import { MODEL_FILE, findWhisperBin } from '../apps/desktop/src/main/whisper.ts';
+import { downloadFile, findWhisperBin, MODEL_FILE, MODEL_URL } from '../apps/desktop/src/main/whisper.ts';
 
 const repoRoot = join(import.meta.dirname, '..');
-const MODEL_URL = `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${MODEL_FILE}`;
 const WIN_ZIP_URL = 'https://github.com/ggml-org/whisper.cpp/releases/download/b5130/whisper-bin-x64.zip';
 
-async function download(url: string, dest: string) {
-  const res = await fetch(url);
-  if (!res.ok || !res.body) throw new Error(`Téléchargement impossible (${res.status}) : ${url}`);
-  const total = Number(res.headers.get('content-length') ?? 0);
-  let done = 0;
-  let lastPct = -1;
-  const body = Readable.fromWeb(res.body as never);
-  body.on('data', (chunk: Buffer) => {
-    done += chunk.length;
-    const pct = total ? Math.floor((done / total) * 100) : 0;
-    if (pct !== lastPct && pct % 5 === 0) {
-      lastPct = pct;
-      process.stdout.write(`\r  ${pct} % (${Math.round(done / 1e6)} Mo)`);
-    }
-  });
-  await pipeline(body, createWriteStream(dest + '.part'));
-  renameSync(dest + '.part', dest);
-  process.stdout.write('\n');
-}
+const download = (url: string, dest: string) =>
+  downloadFile(url, dest, (done, total) => {
+    process.stdout.write(`\r  ${total ? Math.floor((done / total) * 100) : 0} % (${Math.round(done / 1e6)} Mo)`);
+  }).then(() => process.stdout.write('\n'));
 
 /** Cherche un fichier par nom dans une arborescence. */
 function findFile(dir: string, name: string): string | undefined {
@@ -58,7 +40,7 @@ if (existsSync(modelPath)) {
 }
 
 // 2. Binaire whisper-server
-const bin = findWhisperBin(repoRoot);
+const bin = findWhisperBin([join(repoRoot, 'vendor', 'whisper')]);
 if (bin) {
   console.log(`whisper-server présent : ${bin}`);
 } else if (process.platform === 'win32') {

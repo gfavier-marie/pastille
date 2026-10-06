@@ -3,12 +3,15 @@
 // de mesure puisse l'utiliser avec Node seul.
 
 import { spawn, execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { createWriteStream, existsSync, renameSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { availableParallelism } from 'node:os';
 import { join } from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 export const MODEL_FILE = 'ggml-large-v3-turbo-q5_0.bin';
+export const MODEL_URL = `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${MODEL_FILE}`;
 
 // Le prompt initial oriente Whisper vers le jargon d'interface.
 export const UI_PROMPT =
@@ -32,10 +35,10 @@ export type WhisperServer = {
   stop(): void;
 };
 
-/** Cherche whisper-server : variable d'env, dossier vendor/ du dépôt, puis PATH. */
-export function findWhisperBin(repoRoot: string): string | undefined {
+/** Cherche whisper-server : variable d'env, dossiers donnés (vendor/, ressources de l'app), puis PATH. */
+export function findWhisperBin(dirs: string[]): string | undefined {
   const exe = process.platform === 'win32' ? 'whisper-server.exe' : 'whisper-server';
-  const candidates = [process.env.PASTILLE_WHISPER_BIN, join(repoRoot, 'vendor', 'whisper', exe)];
+  const candidates = [process.env.PASTILLE_WHISPER_BIN, ...dirs.map((d) => join(d, exe))];
   for (const c of candidates) if (c && existsSync(c)) return c;
   try {
     const cmd = process.platform === 'win32' ? 'where' : 'which';
@@ -45,9 +48,40 @@ export function findWhisperBin(repoRoot: string): string | undefined {
   }
 }
 
-export function findModel(repoRoot: string): string | undefined {
-  const candidates = [process.env.PASTILLE_WHISPER_MODEL, join(repoRoot, 'models', MODEL_FILE)];
+export function findModel(dirs: string[]): string | undefined {
+  const candidates = [process.env.PASTILLE_WHISPER_MODEL, ...dirs.map((d) => join(d, MODEL_FILE))];
   return candidates.find((c): c is string => !!c && existsSync(c));
+}
+
+/** Téléchargement avec progression ; le fichier n'apparaît qu'une fois complet. */
+export async function downloadFile(url: string, dest: string, onProgress?: (done: number, total: number) => void) {
+  const res = await fetch(url);
+  if (!res.ok || !res.body) throw new Error(`Téléchargement impossible (${res.status}) : ${url}`);
+  const total = Number(res.headers.get('content-length') ?? 0);
+  let done = 0;
+  const body = Readable.fromWeb(res.body as never);
+  body.on('data', (chunk: Buffer) => onProgress?.((done += chunk.length), total));
+  await pipeline(body, createWriteStream(dest + '.part'));
+  renameSync(dest + '.part', dest);
+}
+
+/** Moteur de secours : API compatible OpenAI (/audio/transcriptions), avec clé. L'audio quitte la machine. */
+export async function transcribeWithApi(
+  wav: Uint8Array,
+  opts: { url: string; key: string; model: string; language: string; prompt: string },
+): Promise<string> {
+  const form = new FormData();
+  form.append('file', new Blob([wav.slice()], { type: 'audio/wav' }), 'audio.wav');
+  form.append('model', opts.model);
+  form.append('language', opts.language);
+  form.append('prompt', opts.prompt);
+  const res = await fetch(`${opts.url.replace(/\/$/, '')}/audio/transcriptions`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${opts.key}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error(`API de transcription : HTTP ${res.status} ${await res.text()}`);
+  return ((await res.json()) as { text?: string }).text ?? '';
 }
 
 function freePort(): Promise<number> {

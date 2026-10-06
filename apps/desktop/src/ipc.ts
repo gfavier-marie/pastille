@@ -1,6 +1,9 @@
 // Contrat IPC entre le processus principal et les fenêtres (exposé par le preload).
 
 import type { Geometry, Session } from '@pastille/shared';
+import type { Settings, SettingsView } from './main/settings.ts';
+
+export type { Settings };
 
 export type OverlayShow = { jpeg: Uint8Array };
 
@@ -38,6 +41,17 @@ export type WhisperStatus =
 export type TranscribeResult = { text: string; whisperMs: number; audioMs: number };
 
 export type ExportFormat = 'pdf' | 'markdown' | 'pptx';
+
+/** État affiché par la fenêtre de réglages et l'assistant de premier lancement. */
+export type SettingsState = SettingsView & {
+  platform: 'mac' | 'win' | 'other';
+  shortcutLabel: string;
+  shortcutOk: boolean;
+  permissions: { screen: string; microphone: string }; // granted, denied, not-determined…
+  modelPresent: boolean;
+  whisper: WhisperStatus;
+  tabletPaired: boolean;
+};
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
 /** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */
@@ -63,6 +77,17 @@ export type PastilleApi = {
   deleteSketch(annotationId: string, sketchId: string): void;
   tabletStatus(): Promise<boolean>;
   onTabletStatus(cb: (connected: boolean) => void): () => void;
+  // Réglages
+  getSettings(): Promise<SettingsState>;
+  updateSettings(patch: Partial<Settings>): Promise<{ ok: boolean; error?: string }>;
+  setApiKey(key: string): Promise<void>;
+  chooseExportDir(): Promise<string | undefined>;
+  downloadModel(): Promise<{ ok: boolean; error?: string }>;
+  onDownloadProgress(cb: (percent: number) => void): () => void;
+  askPermission(kind: 'screen' | 'microphone'): Promise<void>;
+  revokeTablet(): Promise<void>;
+  pairTablet(): void;
+  onSettingsChanged(cb: (s: SettingsState) => void): () => void;
   // Fenêtre POC
   onCaptureResult(cb: (r: CaptureResult) => void): () => void;
   startCapture(): void;

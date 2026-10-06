@@ -93,3 +93,20 @@ describe('annuler / rétablir', () => {
     expect(store.get()!.captures[0]!.annotations[0]!.text).toBe('bou');
   });
 });
+
+describe('sessions récentes', () => {
+  it('liste les sessions et en rouvre une', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'pastille-'));
+    const store = createSessionStore(root);
+    await store.ensure();
+    store.update((s) => (s.name = 'Ancienne'));
+    const first = store.get()!.id;
+    await store.close();
+    await store.ensure();
+    store.update((s) => (s.name = 'Récente'));
+    await store.flush();
+    expect((await store.recent()).map((r) => r.name)).toEqual(['Récente', 'Ancienne']);
+    await store.open(first);
+    expect(store.get()!.name).toBe('Ancienne');
+  });
+});

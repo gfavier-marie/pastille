@@ -28,6 +28,17 @@ const api: PastilleApi = {
   tabletStatus: () => ipcRenderer.invoke('tablet:status'),
   onTabletStatus: (cb) => on('tablet:status', cb),
 
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  updateSettings: (patch) => ipcRenderer.invoke('settings:update', patch),
+  setApiKey: (key) => ipcRenderer.invoke('settings:api-key', key),
+  chooseExportDir: () => ipcRenderer.invoke('settings:choose-export-dir'),
+  downloadModel: () => ipcRenderer.invoke('settings:download-model'),
+  onDownloadProgress: (cb) => on('settings:download-progress', cb),
+  askPermission: (kind) => ipcRenderer.invoke('settings:permission', kind),
+  revokeTablet: () => ipcRenderer.invoke('tablet:revoke'),
+  pairTablet: () => ipcRenderer.send('tablet:pair'),
+  onSettingsChanged: (cb) => on('settings:changed', cb),
+
   onCaptureResult: (cb) => on('capture:result', cb),
   startCapture: () => ipcRenderer.send('capture:start'),
   shortcutStatus: () => ipcRenderer.invoke('shortcut:status'),

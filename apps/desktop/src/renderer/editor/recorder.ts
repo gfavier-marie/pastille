@@ -10,7 +10,7 @@ const PRE_ROLL_CHUNKS = 2; // blocs de 100 ms gardés avant le clic
 type Recording = { annotationId: string; chunks: Float32Array[]; startedAt: number; lastVoiceAt: number; heardVoice: boolean };
 
 export function createRecorder(opts: {
-  silenceMs: number; // 0 = pas d'arrêt sur silence
+  silenceMs: () => number; // réglable ; 0 = pas d'arrêt sur silence
   maxMs: number;
   onState: (s: RecorderState) => void;
   onFinish: (annotationId: string, samples: Float32Array) => void;
@@ -35,7 +35,7 @@ export function createRecorder(opts: {
     }
     const elapsed = now - rec.startedAt;
     if (elapsed >= opts.maxMs) stop(true);
-    else if (opts.silenceMs && now - rec.lastVoiceAt >= opts.silenceMs) stop(true);
+    else if (opts.silenceMs() && now - rec.lastVoiceAt >= opts.silenceMs()) stop(true);
     else opts.onState({ annotationId: rec.annotationId, elapsedMs: elapsed, level });
   }
 
