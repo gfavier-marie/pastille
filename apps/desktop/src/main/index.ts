@@ -9,6 +9,7 @@ import {
   app,
   BrowserWindow,
   clipboard,
+  ClipboardItem,
   dialog,
   globalShortcut,
   ipcMain,
@@ -225,8 +226,12 @@ async function runExport(format: ExportFormat): Promise<ExportResult> {
 
 /** Le PDF est aussi mis dans le presse-papiers, pour le coller directement dans le chat de l'IA (§6.1). */
 function copyFileToClipboard(path: string) {
-  if (isMac) clipboard.writeBuffer('public.file-url', Buffer.from(pathToFileURL(path).href));
-  else if (process.platform === 'win32') clipboard.writeBuffer('FileNameW', Buffer.from(`${path}\0`, 'ucs2'));
+  // Format système brut : une référence de fichier, comme un copier depuis le Finder ou l'Explorateur.
+  const [format, data] = isMac
+    ? ['public.file-url', Buffer.from(pathToFileURL(path).href)]
+    : ['FileNameW', Buffer.from(`${path}\0`, 'ucs2')];
+  const raw = `electron application/osclipboard;format="${format}"`;
+  void clipboard.write([new ClipboardItem({ [raw]: new Blob([data]) })]).catch(() => {});
 }
 
 async function exportFromMenu(format: ExportFormat) {
