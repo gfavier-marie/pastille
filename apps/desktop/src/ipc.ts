@@ -65,7 +65,7 @@ export type PastilleApi = {
   addAnnotation(captureId: string, geometry: Geometry): Promise<string>;
   updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
   deleteAnnotation(id: string): void;
-  updateSession(patch: { name?: string; context?: string }): void;
+  updateSession(patch: { name?: string; context?: string; notes?: string }): void;
   exportSession(format: ExportFormat): Promise<ExportResult>;
   undo(): void;
   redo(): void;

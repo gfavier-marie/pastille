@@ -386,6 +386,15 @@ function App() {
               </button>
             </div>
           ))}
+
+          <h2 className="notes-title">Remarques générales</h2>
+          <EditableText
+            key={session.id}
+            className="notes"
+            value={session.notes ?? ''}
+            placeholder="Commentaires sans point précis : impressions d'ensemble, idées, questions…"
+            onChange={(notes) => api.updateSession({ notes })}
+          />
         </aside>
       </main>
 

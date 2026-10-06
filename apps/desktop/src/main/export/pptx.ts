@@ -1,4 +1,4 @@
-// Rendu PowerPoint, pour présenter la revue à des humains : titre, récapitulatif,
+// Rendu PowerPoint, pour présenter la revue à des humains : titre, remarques générales, récapitulatif,
 // une diapo par écran (capture annotée), puis une diapo par point (commentaire, zoom, croquis).
 
 import { join } from 'node:path';
@@ -36,6 +36,12 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
     x: 0.8, y: 3.4, w: W - 1.6, h: 0.5, fontFace: FONT, fontSize: 18, color: MUTED,
   });
   if (doc.context) title.addText(doc.context, { x: 0.8, y: 4.1, w: W - 1.6, h: 1, fontFace: FONT, fontSize: 16 });
+
+  if (doc.notes) {
+    const notes = pptx.addSlide();
+    notes.addText('Remarques générales', { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
+    notes.addText(doc.notes, { x: 0.5, y: 1.1, w: W - 1, h: H - 1.6, fontFace: FONT, fontSize: 18, valign: 'top', fit: 'shrink' });
+  }
 
   const summary = pptx.addSlide();
   summary.addText('Récapitulatif', { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });

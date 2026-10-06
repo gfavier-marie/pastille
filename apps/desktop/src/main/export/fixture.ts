@@ -10,6 +10,7 @@ const SCREENS = ['Tableau de bord', 'Connexion', 'Paramètres', 'Liste des comma
 /** Écrit la session dans `sessionsDir/<id>/` (session.json compris) ; renvoie la session et son dossier. */
 export async function createFakeSession(sessionsDir: string, pointsPerScreen = 4): Promise<{ session: Session; dir: string }> {
   const session = newSession(new Date(2026, 9, 6, 10, 30), 'Back-office React, page testée en local');
+  session.notes = 'Les marges sont irrégulières sur tout le site.';
   const dir = join(sessionsDir, session.id);
   await mkdir(join(dir, 'captures'), { recursive: true });
   for (const [i, title] of SCREENS.entries()) {

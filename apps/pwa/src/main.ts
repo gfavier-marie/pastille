@@ -94,6 +94,9 @@ if (pairing) {
     onMessage(msg: Message) {
       if (msg.type === 'hello' || msg.type === 'ping' || msg.type === 'focus' || msg.type === 'focus_none') desktop = true;
       if (msg.type === 'ping') void link.send({ type: 'pong', id: msg.id, t: msg.t });
+      // Nouveau point visé : la toile repart vierge, le croquis du point précédent ne le suit pas.
+      const focusId = msg.type === 'focus' ? msg.annotationId : msg.type === 'focus_none' ? '' : undefined;
+      if (focus && focusId !== undefined && focus.annotationId !== focusId) board.clear();
       if (msg.type === 'focus') {
         if (!focus || !('number' in focus) || focus.annotationId !== msg.annotationId || msg.background) {
           board.setCrop(msg.background);

@@ -74,6 +74,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Réglages complets : raccourci (vérifié), mode de commentaire (auto, ⌥ maintenu, clavier seul), silence, langue, dossier d'export, instructions du PDF, glossaire, moteur API compatible OpenAI (clé chiffrée), révocation de la tablette
 - [x] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S] (à vérifier en vrai)
 - [x] Sessions récentes [S], icône d'état [S] (nombre de points, transcriptions en cours)
+- [x] Remarques générales (hors cahier des charges, demandé) : commentaires non rattachés à un point, repris dans les trois exports
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
 - [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible

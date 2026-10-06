@@ -77,6 +77,7 @@ export function toPdfHtml(doc: ExportDoc, part?: PdfPart): string {
 ${doc.context ? `<p><b>Contexte :</b> ${multiline(doc.context)}</p>` : ''}
 <h2>Instructions</h2>
 <div class="instructions">${esc(doc.instructions)}</div>
+${doc.notes ? `<h2>Remarques générales</h2>\n<p>${multiline(doc.notes)}</p>` : ''}
 <h2>Récapitulatif</h2>
 <table><thead><tr><th>#</th><th>Écran</th><th>Commentaire</th><th>Croquis</th></tr></thead><tbody>${summary}</tbody></table>
 ${screens}

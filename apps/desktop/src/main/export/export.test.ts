@@ -18,6 +18,7 @@ describe('export', () => {
     const md = await readFile(join(dir, 'revue.md'), 'utf8');
     expect(md).toContain('Ce document liste 20 retours');
     expect(md).toContain('**Contexte** : Back-office React');
+    expect(md).toContain('## Remarques générales\n\nLes marges sont irrégulières');
     expect(md).toContain('## Écran 3 — Google Chrome — Paramètres');
     expect(md).toMatch(/\| #1 \| 1 \| .* \| oui \|/);
     expect(md).toContain('![Croquis 1 de #1](images/croquis-1.png)');
@@ -38,17 +39,18 @@ describe('export', () => {
     const doc = await buildExport(session, sessionDir, await mkdtemp(join(tmpdir(), 'pastille-out-')));
     const html = toPdfHtml(doc);
     expect(html.indexOf('Récapitulatif')).toBeLessThan(html.indexOf('class="screen"'));
+    expect(html).toContain('<h2>Remarques générales</h2>\n<p>Les marges sont irrégulières');
     expect(html.match(/class="point"/g)).toHaveLength(10);
   });
 
-  it('produit un PowerPoint : titre, récapitulatif, 5 écrans, 20 points', async () => {
+  it('produit un PowerPoint : titre, remarques, récapitulatif, 5 écrans, 20 points', async () => {
     const { session, dir: sessionDir } = await createFakeSession(await mkdtemp(join(tmpdir(), 'pastille-sessions-')));
     const outDir = await mkdtemp(join(tmpdir(), 'pastille-out-'));
     const file = await exportSession({ session, sessionDir, outDir, format: 'pptx', printHtml: async () => new Uint8Array() });
     expect(file).toMatch(/\.pptx$/);
     const zip = await readFile(file);
     const slides = new Set(zip.toString('latin1').match(/ppt\/slides\/slide\d+\.xml/g));
-    expect(slides.size).toBeGreaterThanOrEqual(1 + 1 + 5 + 20);
+    expect(slides.size).toBeGreaterThanOrEqual(1 + 1 + 1 + 5 + 20);
   });
 
   it('découpe le PDF au-delà de 100 pages, récapitulatif complet dans chaque partie', async () => {

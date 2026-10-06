@@ -11,7 +11,9 @@ export function toMarkdown(doc: ExportDoc): string {
     `${doc.date} · ${doc.screens.length} écran${doc.screens.length > 1 ? 's' : ''} · ${doc.points.length} point${doc.points.length > 1 ? 's' : ''}`,
   ];
   if (doc.context) lines.push('', `**Contexte** : ${doc.context}`);
-  lines.push('', '## Instructions', '', doc.instructions, '', '## Récapitulatif', '');
+  lines.push('', '## Instructions', '', doc.instructions);
+  if (doc.notes) lines.push('', '## Remarques générales', '', doc.notes);
+  lines.push('', '## Récapitulatif', '');
   lines.push('| # | Écran | Commentaire | Croquis |', '| --- | --- | --- | --- |');
   for (const p of doc.points) lines.push(`| #${p.number} | ${p.screen} | ${cell(p.text)} | ${p.sketches.length ? 'oui' : 'non'} |`);
 

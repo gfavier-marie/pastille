@@ -4,6 +4,7 @@ export type Session = {
   id: string;
   name: string;
   context?: string;
+  notes?: string; // remarques générales, rattachées à aucun point
   createdAt: string;
   updatedAt: string;
   captures: Capture[];

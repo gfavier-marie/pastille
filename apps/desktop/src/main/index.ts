@@ -484,7 +484,7 @@ ipcMain.on('annotation:delete', (_e, id: string) =>
     { undoable: true },
   ),
 );
-ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
+ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context' | 'notes'>) =>
   store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
 );
 ipcMain.on('sketch:delete', (_e, annotationId: string, sketchId: string) =>
