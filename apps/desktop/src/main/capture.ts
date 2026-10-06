@@ -69,6 +69,9 @@ export function createCapture(opts: CaptureOptions) {
         skipTaskbar: true,
         alwaysOnTop: true,
         backgroundColor: '#000000',
+        // macOS 14+ refuse qu'une app se mette d'elle-même au premier plan : un panneau prend le
+        // clavier (Échap) sans activer l'app, et le premier clic compte au lieu d'activer l'app.
+        ...(process.platform === 'darwin' ? { type: 'panel' as const, acceptFirstMouse: true } : {}),
         webPreferences: { preload: opts.preload },
       });
       win.setAlwaysOnTop(true, 'screen-saver');
@@ -104,7 +107,10 @@ export function createCapture(opts: CaptureOptions) {
         o.win.moveTop();
         resolve();
       };
-      o.win.webContents.send('overlay:show', { ...info, jpeg: image.toJPEG(85) } satisfies OverlayShow);
+      // Curseur relatif à l'écran : l'overlay encadre la cible tout de suite, sans attendre un mouvement.
+      const c = screen.getCursorScreenPoint();
+      const cursor = { x: c.x - o.display.bounds.x, y: c.y - o.display.bounds.y };
+      o.win.webContents.send('overlay:show', { ...info, cursor, jpeg: image.toJPEG(85) } satisfies OverlayShow);
     });
   }
 

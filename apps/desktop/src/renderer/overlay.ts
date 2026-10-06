@@ -16,8 +16,12 @@ const DRAG_THRESHOLD = 4;
 let url: string | null = null;
 let start: { x: number; y: number } | null = null;
 let windows: OverlayWindow[] = [];
+let pointer: { x: number; y: number } | null = null; // dernière position connue du curseur
 
-window.pastille.onOverlayWindows((list) => (windows = list));
+window.pastille.onOverlayWindows((list) => {
+  windows = list;
+  if (pointer && !start) showHover(pointer.x, pointer.y); // la fenêtre sous le curseur est maintenant connue
+});
 
 type Rect = { x: number; y: number; width: number; height: number };
 
@@ -36,6 +40,12 @@ function showLabel(r: Rect, name: string) {
 }
 
 function showHover(x: number, y: number) {
+  pointer = { x, y };
+  // Curseur sur un autre écran : rien à encadrer ici.
+  if (x < 0 || y < 0 || x >= window.innerWidth || y >= window.innerHeight) {
+    for (const el of [hover, label, ghost]) el.style.display = 'none';
+    return;
+  }
   const w = windows.find((r) => x >= r.x && y >= r.y && x < r.x + r.width && y < r.y + r.height);
   // Hors de toute fenêtre, le clic capture l'écran entier.
   const r = w ?? { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
@@ -63,7 +73,7 @@ function showHints(nextNumber: number, session: string) {
   hints.append(chip);
 }
 
-window.pastille.onOverlayShow(async ({ jpeg, nextNumber, session, screen }) => {
+window.pastille.onOverlayShow(async ({ jpeg, nextNumber, session, screen, cursor }) => {
   if (url) URL.revokeObjectURL(url);
   url = URL.createObjectURL(new Blob([jpeg as Uint8Array<ArrayBuffer>], { type: 'image/jpeg' }));
   frozen.src = url;
@@ -73,6 +83,8 @@ window.pastille.onOverlayShow(async ({ jpeg, nextNumber, session, screen }) => {
   for (const el of [zone, hover, label, ghost]) el.style.display = 'none';
   ghost.textContent = String(nextNumber);
   showHints(nextNumber, T.overlay.screen(session, screen));
+  pointer = null;
+  if (cursor) showHover(cursor.x, cursor.y);
   window.pastille.overlayReady();
 });
 

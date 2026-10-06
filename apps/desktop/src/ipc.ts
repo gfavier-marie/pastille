@@ -6,7 +6,13 @@ import type { Settings, SettingsView } from './main/settings.ts';
 export type { Settings };
 
 /** Écran figé, et de quoi annoncer la capture : session, numéro d'écran, numéro du prochain point. */
-export type OverlayShow = { jpeg: Uint8Array; session: string; screen: number; nextNumber: number };
+export type OverlayShow = {
+  jpeg: Uint8Array;
+  session: string;
+  screen: number;
+  nextNumber: number;
+  cursor?: { x: number; y: number }; // position du curseur sur cet écran, au moment du raccourci
+};
 
 /** Fenêtre visable sur l'écran de l'overlay (DIP), de l'avant vers l'arrière. */
 export type OverlayWindow = { x: number; y: number; width: number; height: number; app?: string; title?: string };
