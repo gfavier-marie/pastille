@@ -58,6 +58,24 @@ export type SettingsState = SettingsView & {
 };
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
+/** Ce qu'affichent le menu de l'icône et la barre flottante. */
+export type MenuState = {
+  platform: 'mac' | 'win' | 'other';
+  session: { name: string; points: number; screens: number; createdAt: string } | null;
+  tablet: boolean; // tablette connectée
+  pending: number; // transcriptions en cours
+  errors: number; // transcriptions en erreur
+  shortcut: string; // raccourci de capture, affiché (« ⇧⌘2 »)
+  recents: { id: string; name: string; points: number; screens: number; updatedAt: string }[];
+};
+
+export type MenuAction =
+  | { type: 'capture' | 'editor' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' }
+  | { type: 'open-recent' | 'export-recent'; id: string };
+
+/** Message de la barre flottante après un export. */
+export type ExportNotice = { format: ExportFormat; file: string; copied: boolean };
+
 /** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */
 export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean };
 
@@ -93,6 +111,13 @@ export type PastilleApi = {
   revokeTablet(): Promise<void>;
   pairTablet(): void;
   onSettingsChanged(cb: (s: SettingsState) => void): () => void;
+  // Menu de l'icône et barre flottante
+  getMenuState(): Promise<MenuState>;
+  onMenuState(cb: (s: MenuState) => void): () => void;
+  menuAction(action: MenuAction): void;
+  menuResize(height: number): void;
+  barHover(inside: boolean): void;
+  onExportNotice(cb: (n: ExportNotice) => void): () => void;
   // Fenêtre POC
   onCaptureResult(cb: (r: CaptureResult) => void): () => void;
   startCapture(): void;

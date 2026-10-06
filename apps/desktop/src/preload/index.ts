@@ -40,6 +40,13 @@ const api: PastilleApi = {
   pairTablet: () => ipcRenderer.send('tablet:pair'),
   onSettingsChanged: (cb) => on('settings:changed', cb),
 
+  getMenuState: () => ipcRenderer.invoke('menu:state'),
+  onMenuState: (cb) => on('menu:state', cb),
+  menuAction: (action) => ipcRenderer.send('menu:action', action),
+  menuResize: (height) => ipcRenderer.send('menu:resize', height),
+  barHover: (inside) => ipcRenderer.send('bar:hover', inside),
+  onExportNotice: (cb) => on('bar:export', cb),
+
   onCaptureResult: (cb) => on('capture:result', cb),
   startCapture: () => ipcRenderer.send('capture:start'),
   shortcutStatus: () => ipcRenderer.invoke('shortcut:status'),

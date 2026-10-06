@@ -3,7 +3,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, normalize, sep } from 'node:path';
+import { basename, join, normalize, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   app,
@@ -14,19 +14,17 @@ import {
   dialog,
   globalShortcut,
   ipcMain,
-  Menu,
-  nativeImage,
   net,
   protocol,
   session as electronSession,
   shell,
   systemPreferences,
-  Tray,
 } from 'electron';
 import { allAnnotations, findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
-import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, SettingsState } from '../ipc.ts';
+import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, SettingsState } from '../ipc.ts';
 import { createCapture, type CapturedImage } from './capture.ts';
 import { createDictation } from './dictation.ts';
+import { createMenubar } from './menubar.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
 import { createSessionStore } from './session-store.ts';
@@ -59,7 +57,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'pastille', privileges: { standard: true, secure: true, supportFetchAPI: true } },
 ]);
 
-type Page = 'editor' | 'poc' | 'overlay' | 'settings';
+type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing';
 function loadPage(win: BrowserWindow, page: Page) {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
   if (devUrl) void win.loadURL(`${devUrl}/${page}.html`);
@@ -93,17 +91,18 @@ const transcriber = createTranscriber({
 
 let editor: BrowserWindow | null = null;
 let pocWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
 // La file attend que le modèle soit chargé ; sans moteur, la dictée passe en erreur (audio conservé).
 const dictation = createDictation(store, (wav) => transcriber.transcribe(wav));
 let shortcutRegistered = false;
 let recording = false; // une dictée est en cours dans l'éditeur
 
-/** « CommandOrControl+Shift+2 » → « ⌘⇧2 » ou « Ctrl+Shift+2 ». */
+/** « CommandOrControl+Shift+2 » → « ⇧⌘2 » ou « Ctrl+Shift+2 ». */
 function shortcutLabel(accelerator: string) {
   if (!isMac) return accelerator.replace('CommandOrControl', 'Ctrl').replace('CmdOrCtrl', 'Ctrl');
   const symbols: Record<string, string> = { CommandOrControl: '⌘', CmdOrCtrl: '⌘', Command: '⌘', Cmd: '⌘', Shift: '⇧', Alt: '⌥', Option: '⌥', Control: '⌃', Ctrl: '⌃' };
-  return accelerator.split('+').map((k) => symbols[k] ?? k).join('');
+  const order = '⌃⌥⇧⌘'; // ordre des menus de macOS
+  const keys = accelerator.split('+').map((k) => symbols[k] ?? k);
+  return keys.sort((a, b) => (order.indexOf(a) + 1 || 9) - (order.indexOf(b) + 1 || 9)).join('');
 }
 
 /** Raccourci global ; s'il est déjà pris, l'ancien est gardé et l'échec signalé (§4.2). */
@@ -246,8 +245,11 @@ async function runExport(format: ExportFormat): Promise<ExportResult> {
       printHtml,
       instructions: settings.get().instructions,
     });
-    if (!autotest) shell.showItemInFolder(path);
-    if (!autotest && format === 'pdf') copyFileToClipboard(path);
+    const copied = !autotest && format === 'pdf' && settings.get().copyPdf;
+    if (copied) copyFileToClipboard(path);
+    lastExport = path;
+    // Barre flottante affichée : son message remplace l'ouverture du Finder.
+    if (!autotest && !menubar.notifyExport({ format, file: basename(path), copied })) shell.showItemInFolder(path);
     return { ok: true, path };
   } catch (err) {
     return { ok: false, error: String(err) };
@@ -269,75 +271,68 @@ async function exportFromMenu(format: ExportFormat) {
   if (!r.ok) void dialog.showMessageBox({ type: 'warning', message: r.error });
 }
 
-// ——— Icône et menu (§4.7) ———
+// ——— Icône, menu et barre flottante (§4.7) ———
 
-let recentSessions: Awaited<ReturnType<typeof store.recent>> = [];
-let trayTimer: ReturnType<typeof setTimeout> | null = null;
-
-/** Menu et état de l'icône ; regroupé pour ne pas reconstruire le menu à chaque frappe. */
-function updateTrayMenu() {
-  if (trayTimer) return;
-  trayTimer = setTimeout(() => {
-    trayTimer = null;
-    void store.recent().then((list) => {
-      recentSessions = list;
-      buildTrayMenu();
-    });
-  }, 300);
-}
-
-function buildTrayMenu() {
-  if (!tray) return;
+async function menuState(): Promise<MenuState> {
   const session = store.get();
-  const count = session?.captures.reduce((n, c) => n + c.annotations.length, 0) ?? 0;
-  const { pending } = dictation.unfinished();
-  // État de l'icône (§4.7) : nombre de points, transcriptions en cours, tablette.
-  if (isMac) tray.setTitle(session ? `${count}${pending.length ? ' …' : ''}` : '');
-  tray.setToolTip(
-    [
-      session ? `Pastille — ${session.name} (${count} points)` : 'Pastille',
-      pending.length ? `${pending.length} transcription(s) en cours` : '',
-      tablet?.isConnected() ? 'tablette connectée' : '',
-    ]
-      .filter(Boolean)
-      .join(' · '),
-  );
-  const others = recentSessions.filter((r) => r.id !== session?.id);
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: session ? `${session.name} · ${count} points` : 'Aucune session ouverte', enabled: false },
-      { type: 'separator' },
-      { label: `Nouvelle capture (${shortcutLabel(settings.get().shortcut)})`, click: () => startCapture() },
-      { label: 'Nouvelle session', click: () => void store.close() },
-      { label: "Ouvrir l'éditeur", click: () => showEditor() },
-      {
-        label: 'Sessions récentes',
-        enabled: others.length > 0,
-        submenu: others.map((r) => ({
-          label: `${r.name} · ${r.points} points`,
-          click: () => void store.open(r.id).then(() => showEditor()),
-        })),
-      },
-      { type: 'separator' },
-      { label: 'Exporter le PDF', enabled: !!session, click: () => void exportFromMenu('pdf') },
-      { label: 'Exporter en Markdown', enabled: !!session, click: () => void exportFromMenu('markdown') },
-      { label: 'Exporter en PowerPoint', enabled: !!session, click: () => void exportFromMenu('pptx') },
-      { type: 'separator' },
-      { label: tablet?.isConnected() ? 'Tablette connectée' : 'Appairer une tablette (QR)', click: () => void showPairing() },
-      { label: 'Réglages…', click: () => showSettings() },
-      { label: 'Mesures (POC)', click: () => showPoc() },
-      { type: 'separator' },
-      { label: 'Quitter', role: 'quit' },
-    ]),
-  );
+  const { pending, error } = dictation.unfinished();
+  const recents = (await store.recent(4)).filter((r) => r.id !== session?.id).slice(0, 3);
+  return {
+    platform: isMac ? 'mac' : process.platform === 'win32' ? 'win' : 'other',
+    session: session && {
+      name: session.name,
+      points: allAnnotations(session).length,
+      screens: session.captures.length,
+      createdAt: session.createdAt,
+    },
+    tablet: tablet?.isConnected() ?? false,
+    pending: pending.length,
+    errors: error.length,
+    shortcut: shortcutLabel(settings.get().shortcut),
+    recents: recents.map(({ id, name, points, screens, updatedAt }) => ({ id, name, points, screens, updatedAt })),
+  };
 }
 
-function createTray() {
-  const icon = nativeImage.createFromPath(join(app.getAppPath(), 'resources', isMac ? 'trayTemplate.png' : 'tray.png'));
-  if (isMac) icon.setTemplateImage(true);
-  tray = new Tray(icon);
-  updateTrayMenu();
+let lastExport: string | null = null;
+
+function onMenuAction(a: MenuAction) {
+  switch (a.type) {
+    case 'capture':
+      return startCapture();
+    case 'editor':
+      return showEditor();
+    case 'export':
+      return void exportFromMenu('pdf');
+    case 'new-session':
+      return void store.close();
+    case 'pair':
+      return void showPairing();
+    case 'settings':
+      return showSettings();
+    case 'quit':
+      return app.quit();
+    case 'hide-bar':
+      settings.update({ floatingBar: false });
+      return broadcastSettings();
+    case 'reveal':
+      if (lastExport) shell.showItemInFolder(lastExport);
+      return;
+    case 'open-recent':
+      return void store.open(a.id).then(() => showEditor());
+    case 'export-recent':
+      return void store.open(a.id).then(() => exportFromMenu('pdf'));
+  }
 }
+
+const menubar = createMenubar({
+  preload,
+  loadPage,
+  state: menuState,
+  recording: () => recording,
+  barEnabled: () => settings.get().floatingBar,
+  onAction: onMenuAction,
+});
+const updateTrayMenu = () => menubar.refresh();
 
 // ——— Appairage de la tablette (§5.1) ———
 
@@ -553,7 +548,43 @@ async function runEditorAutotest() {
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
   await wait(1000);
   await writeFile(join(out, 'settings.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
+  await photographScreens(out);
   console.log('AUTOTEST', JSON.stringify({ out, ...results }));
+}
+
+/** Photos des autres fenêtres, dans des fenêtres de test (rien n'est cliqué). */
+async function photographScreens(out: string) {
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  async function photo(name: string, page: Page, width: number, height: number, prepare?: (win: BrowserWindow) => Promise<void>) {
+    const win = new BrowserWindow({ width, height, useContentSize: true, webPreferences: { preload } });
+    loadPage(win, page);
+    await new Promise<void>((r) => win.webContents.once('did-finish-load', () => r()));
+    await wait(600);
+    await prepare?.(win);
+    await writeFile(join(out, `${name}.png`), (await win.webContents.capturePage()).toPNG());
+    win.destroy();
+  }
+  const move = (win: BrowserWindow, x: number, y: number) => win.webContents.sendInputEvent({ type: 'mouseMove', x, y });
+
+  await photo('menu', 'menu', 330, 560);
+  await photo('bar', 'bar', 640, 64);
+  await photo('bar-open', 'bar', 640, 64, async (win) => {
+    move(win, 320, 32);
+    await wait(300);
+  });
+  await photo('bar-export', 'bar', 640, 64, async (win) => {
+    win.webContents.send('bar:export', { format: 'pdf', file: 'pastille-revue-2026-10-06-10h30-20261006-1452.pdf', copied: true });
+    await wait(300);
+  });
+  await photo('overlay', 'overlay', 1280, 800, async (win) => {
+    const img = (await editor!.webContents.capturePage()).resize({ width: 1280, height: 800 }); // un écran à capturer
+    const session = store.get()!;
+    win.webContents.send('overlay:show', { jpeg: img.toJPEG(80), session: session.name, screen: 6, nextNumber: 21 });
+    await wait(300);
+    win.webContents.send('overlay:windows', [{ x: 300, y: 96, width: 900, height: 620, app: 'Google Chrome', title: 'Tableau de bord' }]);
+    move(win, 760, 300);
+    await wait(300);
+  });
 }
 
 async function runTabletAutotest() {
@@ -666,7 +697,8 @@ void app.whenReady().then(async () => {
       detail: 'Choisis-en un autre dans les réglages. Les captures restent possibles depuis l’icône de Pastille.',
     });
   }
-  createTray();
+  menubar.start();
+  if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
   void transcriber.restart().then(() => {
     // Premier lancement (§4.9), ou modèle absent : l'assistant s'ouvre.

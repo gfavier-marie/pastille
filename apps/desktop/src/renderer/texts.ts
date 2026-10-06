@@ -1,12 +1,65 @@
 // Textes de l'interface, regroupés par fenêtre pour une traduction future (français pour l'instant).
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n > 1 ? many : one}`;
+const isMac = typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac');
+
+/** « aujourd'hui », « hier » ou « 3 oct. ». */
+function day(iso: string) {
+  const d = new Date(iso);
+  const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86_400_000);
+  if (days === 0) return "aujourd'hui";
+  if (days === 1) return 'hier';
+  return new Intl.DateTimeFormat('fr', { day: 'numeric', month: 'short' }).format(d);
+}
+
+/** « depuis 18 min », « depuis 2 h », « depuis hier ». */
+function since(iso: string) {
+  const min = Math.floor((Date.now() - Date.parse(iso)) / 60_000);
+  if (min < 1) return "depuis à l'instant";
+  if (min < 60) return `depuis ${min} min`;
+  if (min < 24 * 60) return `depuis ${Math.floor(min / 60)} h`;
+  const d = day(iso);
+  return d === 'hier' ? 'depuis hier' : `depuis le ${d}`;
+}
 
 export const T = {
   plural,
+  day,
+  since,
   points: (n: number) => plural(n, 'point'),
   screens: (n: number) => plural(n, 'écran'),
   transcriptions: (n: number) => plural(n, 'transcription'),
+  reveal: isMac ? 'Afficher dans le Finder' : "Afficher dans l'Explorateur",
+
+  menu: {
+    label: 'Pastille',
+    noSession: 'Aucune session ouverte',
+    noSessionHint: 'La prochaine capture en ouvre une.',
+    tablet: 'Tablette connectée',
+    capture: 'Nouvelle capture',
+    editor: "Ouvrir l'éditeur",
+    exportPdf: 'Exporter le PDF',
+    newSession: 'Nouvelle session',
+    recents: 'Sessions récentes',
+    reexport: (name: string) => `Réexporter le PDF de ${name}`,
+    pair: 'Appairer une tablette…',
+    settings: 'Réglages…',
+    quit: 'Quitter Pastille',
+    pending: (n: number) => `${plural(n, 'transcription')} en cours`,
+    errors: (n: number) => `${plural(n, 'transcription')} en erreur`,
+  },
+
+  bar: {
+    label: 'Session Pastille',
+    capture: 'Capturer',
+    newCapture: 'Nouvelle capture',
+    editor: "Ouvrir l'éditeur",
+    exportPdf: 'Exporter le PDF',
+    hide: 'Masquer la barre',
+    tablet: 'Tablette',
+    exported: { pdf: 'PDF exporté', markdown: 'Dossier Markdown exporté', pptx: 'PowerPoint exporté' },
+    copied: 'PDF copié dans le presse-papiers',
+  },
 
   overlay: {
     hints: [

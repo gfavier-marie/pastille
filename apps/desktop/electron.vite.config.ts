@@ -22,6 +22,8 @@ export default defineConfig({
           poc: resolve(import.meta.dirname, 'src/renderer/poc.html'),
           settings: resolve(import.meta.dirname, 'src/renderer/settings.html'),
           overlay: resolve(import.meta.dirname, 'src/renderer/overlay.html'),
+          menu: resolve(import.meta.dirname, 'src/renderer/menu.html'),
+          bar: resolve(import.meta.dirname, 'src/renderer/bar.html'),
         },
       },
     },
