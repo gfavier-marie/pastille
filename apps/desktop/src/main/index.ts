@@ -97,6 +97,7 @@ let tray: Tray | null = null;
 // La file attend que le modèle soit chargé ; sans moteur, la dictée passe en erreur (audio conservé).
 const dictation = createDictation(store, (wav) => transcriber.transcribe(wav));
 let shortcutRegistered = false;
+let recording = false; // une dictée est en cours dans l'éditeur
 
 /** « CommandOrControl+Shift+2 » → « ⌘⇧2 » ou « Ctrl+Shift+2 ». */
 function shortcutLabel(accelerator: string) {
@@ -122,10 +123,13 @@ function createEditor() {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 800,
-    minHeight: 500,
+    minWidth: 900,
+    minHeight: 560,
     show: false,
     title: 'Pastille',
+    backgroundColor: '#161618',
+    // macOS : l'en-tête sombre de l'éditeur sert de barre de titre.
+    ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 18, y: 19 } } : {}),
     webPreferences: { preload },
   });
   win.setContentProtection(true);
@@ -501,6 +505,10 @@ ipcMain.on('session:redo', () => store.redo());
 ipcMain.handle('dictation:available', () => transcriber.available());
 ipcMain.on('dictation:submit', (_e, id: string, samples: Float32Array) => void dictation.submit(id, encodeWav(samples)));
 ipcMain.on('dictation:retry', (_e, id: string) => dictation.retry(id));
+ipcMain.on('dictation:recording', (_e, on: boolean) => {
+  recording = on;
+  updateTrayMenu();
+});
 ipcMain.handle('session:export', (_e, format: ExportFormat) => runExport(format));
 ipcMain.handle('shortcut:status', () => ({ accelerator: settings.get().shortcut, registered: shortcutRegistered }));
 ipcMain.handle('whisper:status', () => transcriber.status());

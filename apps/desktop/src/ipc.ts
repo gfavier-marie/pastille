@@ -76,6 +76,7 @@ export type PastilleApi = {
   dictationAvailable(): Promise<boolean>;
   submitDictation(annotationId: string, samples: Float32Array): void;
   retryDictation(annotationId: string): void;
+  setRecording(recording: boolean): void;
   onPrepareMic(cb: () => void): () => void;
   setSelection(annotationId: string | null): void;
   deleteSketch(annotationId: string, sketchId: string): void;
