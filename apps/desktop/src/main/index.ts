@@ -23,7 +23,7 @@ import {
   systemPreferences,
   Tray,
 } from 'electron';
-import { findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
+import { allAnnotations, findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, SettingsState } from '../ipc.ts';
 import { createCapture, type CapturedImage } from './capture.ts';
 import { createDictation } from './dictation.ts';
@@ -610,6 +610,14 @@ void app.whenReady().then(async () => {
     preload,
     loadPage,
     onCapture,
+    info: () => {
+      const session = store.get();
+      return {
+        session: session?.name ?? 'Nouvelle revue',
+        screen: (session?.captures.length ?? 0) + 1,
+        nextNumber: (session ? allAnnotations(session).length : 0) + 1,
+      };
+    },
     onError: (message) => {
       reportCapture({ ok: false, error: message });
       if (!autotest) void dialog.showMessageBox({ type: 'warning', message });

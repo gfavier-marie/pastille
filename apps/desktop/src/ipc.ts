@@ -5,7 +5,11 @@ import type { Settings, SettingsView } from './main/settings.ts';
 
 export type { Settings };
 
-export type OverlayShow = { jpeg: Uint8Array };
+/** Écran figé, et de quoi annoncer la capture : session, numéro d'écran, numéro du prochain point. */
+export type OverlayShow = { jpeg: Uint8Array; session: string; screen: number; nextNumber: number };
+
+/** Fenêtre visable sur l'écran de l'overlay (DIP), de l'avant vers l'arrière. */
+export type OverlayWindow = { x: number; y: number; width: number; height: number; app?: string; title?: string };
 
 /** Coordonnées en pixels logiques (DIP), relatives à l'écran de l'overlay. */
 export type OverlayPick =
@@ -97,7 +101,7 @@ export type PastilleApi = {
   transcribeSample(): Promise<TranscribeResult>;
   // Overlay
   onOverlayShow(cb: (data: OverlayShow) => void): void;
-  onOverlayWindows(cb: (rects: { x: number; y: number; width: number; height: number }[]) => void): void;
+  onOverlayWindows(cb: (windows: OverlayWindow[]) => void): void;
   overlayReady(): void;
   overlayPick(pick: OverlayPick): void;
 };
