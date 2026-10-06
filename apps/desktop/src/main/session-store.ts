@@ -41,9 +41,16 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     await rename(path + '.tmp', path);
   }
 
-  async function saveState() {
-    await mkdir(root, { recursive: true });
-    await writeAtomic(statePath, JSON.stringify(state, null, 2));
+  /** Écritures de state.json l'une après l'autre : deux renommages du même .tmp en parallèle échouent. */
+  let savingState = Promise.resolve();
+  function saveState() {
+    savingState = savingState
+      .catch(() => {})
+      .then(async () => {
+        await mkdir(root, { recursive: true });
+        await writeAtomic(statePath, JSON.stringify(state, null, 2));
+      });
+    return savingState;
   }
 
   function scheduleSave() {

@@ -45,6 +45,7 @@ export const T = {
     pair: 'Appairer une tablette…',
     settings: 'Réglages…',
     quit: 'Quitter VibeScreener',
+    update: (version: string) => `Mettre à jour (version ${version})`,
     pending: (n: number) => `${plural(n, 'transcription')} en cours`,
     errors: (n: number) => `${plural(n, 'transcription')} en erreur`,
   },

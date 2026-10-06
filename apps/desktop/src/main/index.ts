@@ -34,6 +34,7 @@ import QRCode from 'qrcode';
 import { encodeWav, wavDurationMs } from './wav.ts';
 import { createSettings, type Settings } from './settings.ts';
 import { createTranscriber } from './transcriber.ts';
+import { checkForUpdate, installUpdate, type Update } from './updater.ts';
 import { downloadFile, MODEL_FILE, MODEL_URL } from './whisper.ts';
 
 const isMac = process.platform === 'darwin';
@@ -310,7 +311,34 @@ async function menuState(): Promise<MenuState> {
     errors: error.length,
     shortcut: shortcutLabel(settings.get().shortcut),
     recents: recents.map(({ id, name, points, screens, updatedAt }) => ({ id, name, points, screens, updatedAt })),
+    update: update?.version,
   };
+}
+
+// ——— Mises à jour (app installée sur Mac) ———
+
+let update: Update | null = null;
+
+async function lookForUpdate() {
+  if (!app.isPackaged || !isMac || autotest) return;
+  update = await checkForUpdate(app.getVersion());
+  updateTrayMenu();
+}
+
+async function confirmUpdate() {
+  if (!update) return;
+  const { response } = await dialog.showMessageBox({
+    message: `Mettre à jour VibeScreener vers la version ${update.version} ?`,
+    detail:
+      "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés.\n" +
+      "L'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro.",
+    buttons: ['Mettre à jour', 'Plus tard'],
+    defaultId: 0,
+    cancelId: 1,
+  });
+  if (response !== 0) return;
+  await store.flush();
+  installUpdate(update, join(app.getPath('userData'), 'update.log'));
 }
 
 let lastExport: string | null = null;
@@ -341,6 +369,8 @@ function onMenuAction(a: MenuAction) {
       return void store.open(a.id).then(() => showEditor());
     case 'export-recent':
       return void store.open(a.id).then(() => exportFromMenu('pdf'));
+    case 'update':
+      return void confirmUpdate();
   }
 }
 
@@ -811,6 +841,8 @@ void app.whenReady().then(async () => {
     });
   }
   menubar.start();
+  void lookForUpdate();
+  setInterval(() => void lookForUpdate(), 6 * 3600_000); // l'app reste lancée des jours
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
   void transcriber.restart().then(() => {

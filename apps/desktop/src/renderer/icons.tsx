@@ -50,6 +50,11 @@ export const Export = (p: Props) => (
     <path d="M8 2v8M5 5l3-3 3 3M3 10v2.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V10" />
   </Stroke>
 );
+export const Download = (p: Props) => (
+  <Stroke {...p}>
+    <path d="M8 2v8M5 7l3 3 3-3M3 10v2.5A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5V10" />
+  </Stroke>
+);
 export const Plus = (p: Props) => (
   <Stroke {...p}>
     <path d="M8 3v10M3 8h10" />

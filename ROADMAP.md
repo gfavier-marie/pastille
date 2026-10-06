@@ -75,6 +75,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S] (à vérifier en vrai)
 - [x] Sessions récentes [S], icône d'état [S] (nombre de points, transcriptions en cours)
 - [x] Remarques générales (hors cahier des charges, demandé) : liste de commentaires non rattachés à un point, tapés ou dictés, annulables (⌘Z), repris dans les trois exports et le MCP
+- [x] Mise à jour depuis le menu de l'icône (demandé) : la dernière Release GitHub est proposée, install.sh la pose et relance l'app ; macOS redemande les autorisations (app non signée)
 - [x] Nom de l’app : VibeScreener (identifiants internes inchangés : `@pastille/*`, `PASTILLE_*`, `pastille://`, appId) ; PDF avec logo
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
 - [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC

@@ -121,6 +121,12 @@ function App() {
       )}
 
       <hr />
+      {s.update && (
+        <button type="button" className="item update" onClick={() => act({ type: 'update' })}>
+          <I.Download />
+          <span>{T.menu.update(s.update)}</span>
+        </button>
+      )}
       <button type="button" className="item" onClick={() => act({ type: 'pair' })}>
         <I.Qr />
         <span>{T.menu.pair}</span>

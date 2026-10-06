@@ -21,7 +21,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
 - Fenêtre de mesures du lot 0 : `PASTILLE_POC=1 pnpm dev`.
 - Claude Code : `claude mcp add --transport http --scope user vibescreener http://127.0.0.1:3917/mcp` (serveur MCP de l'app, `src/main/mcp.ts`, VibeScreener lancée).
-- Dépôt public : `install.sh` (installation en une commande, `curl … | sh`) prend le .dmg de la dernière Release ; un tag `v*` poussé fait publier la Release par la CI. Installeur Mac signé ad hoc (pas de compte Apple).
+- Dépôt public : `install.sh` (installation en une commande, `curl … | sh`) prend le .dmg de la dernière Release ; un tag `v*` poussé fait publier la Release par la CI (même numéro que `version` dans `apps/desktop/package.json` : l'app installée compare les deux pour proposer la mise à jour, `src/main/updater.ts`). Installeur Mac signé ad hoc (pas de compte Apple).
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 
 ## Conventions

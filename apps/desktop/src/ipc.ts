@@ -80,10 +80,11 @@ export type MenuState = {
   errors: number; // transcriptions en erreur
   shortcut: string; // raccourci de capture, affiché (« ⇧⌘2 »)
   recents: { id: string; name: string; points: number; screens: number; updatedAt: string }[];
+  update?: string; // version plus récente publiée sur GitHub
 };
 
 export type MenuAction =
-  | { type: 'capture' | 'editor' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' }
+  | { type: 'capture' | 'editor' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' }
   | { type: 'open-recent' | 'export-recent'; id: string };
 
 /** Message de la barre flottante après un export. */
