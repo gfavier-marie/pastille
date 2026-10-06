@@ -1,5 +1,5 @@
 // Réglages (§4.8), en onglets : général (capture, commentaire, export, démarrage),
-// transcription (moteur, modèle, glossaire), instructions du PDF, tablette.
+// transcription (moteur, modèle, glossaire), contexte du projet et instructions du PDF, tablette.
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -11,9 +11,14 @@ const api = window.pastille;
 const isMac = navigator.userAgent.includes('Mac');
 const S = T.settings;
 
-/** Touche pressée → accélérateur Electron (« CommandOrControl+Shift+2 »). */
+/** Touche pressée → accélérateur Electron (« CommandOrControl+Shift+2 »). Electron vise la position
+ *  physique de la touche sur Mac (e.code), mais la lettre du clavier sous Windows (code virtuel) :
+ *  en AZERTY, la touche A doit donner « A », pas « Q ». */
 function accelerator(e: React.KeyboardEvent): string | null {
-  const key = e.code.startsWith('Key') ? e.code.slice(3) : e.code.startsWith('Digit') ? e.code.slice(5) : /^F\d+$/.test(e.code) ? e.code : null;
+  const vk = e.keyCode;
+  const key = !isMac
+    ? (vk >= 65 && vk <= 90) || (vk >= 48 && vk <= 57) ? String.fromCharCode(vk) : vk >= 112 && vk <= 123 ? `F${vk - 111}` : null
+    : e.code.startsWith('Key') ? e.code.slice(3) : e.code.startsWith('Digit') ? e.code.slice(5) : /^F\d+$/.test(e.code) ? e.code : null;
   if (!key) return null;
   const mods = [
     (e.metaKey && isMac) || (e.ctrlKey && !isMac) ? 'CommandOrControl' : null,
@@ -118,17 +123,20 @@ function App() {
             className="btn shortcut"
             aria-pressed={listening}
             aria-label={S.shortcutAria(s.shortcutLabel)}
-            onClick={() => setListening(true)}
+            onClick={() => {
+              setError(undefined);
+              setListening(true);
+            }}
             onBlur={() => setListening(false)}
             onKeyDown={(e) => {
               if (!listening) return;
               e.preventDefault();
               if (e.key === 'Escape') return setListening(false);
+              if (['Control', 'Shift', 'Alt', 'AltGraph', 'Meta'].includes(e.key)) return; // la combinaison n'est pas finie
               const acc = accelerator(e);
-              if (acc) {
-                void update({ shortcut: acc });
-                setListening(false);
-              }
+              if (!acc) return setError(S.shortcutUnsupported); // sinon rien ne se passe, sans explication
+              void update({ shortcut: acc });
+              setListening(false);
             }}
           >
             {listening ? S.shortcutListening : s.shortcutLabel}
@@ -279,6 +287,21 @@ function App() {
 
   const exportPdf = (
     <>
+      <Section title={S.context}>
+        <div className="row stack">
+          <label className="hint" htmlFor="context" style={{ margin: 0 }}>
+            {S.contextHint}
+          </label>
+          <textarea
+            id="context"
+            rows={2}
+            key={s.context}
+            defaultValue={s.context}
+            placeholder={S.contextPlaceholder}
+            onBlur={(e) => void update({ context: e.target.value.trim() })}
+          />
+        </div>
+      </Section>
       <Section title={S.instructions}>
         <div className="row stack">
           <label className="hint" htmlFor="instructions" style={{ margin: 0 }}>

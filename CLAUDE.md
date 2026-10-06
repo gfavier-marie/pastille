@@ -23,7 +23,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
 - Fenêtre de mesures du lot 0 : `PASTILLE_POC=1 pnpm dev`.
 - Claude Code : `claude mcp add --transport http --scope user vibescreener http://127.0.0.1:3917/mcp` (serveur MCP de l'app, `src/main/mcp.ts`, VibeScreener lancée).
-- Publication : un tag `v*` poussé (même numéro que `version` dans `apps/desktop/package.json`, vérifié par la CI) fait construire le .dmg et l'envoyer sur le bucket R2 `dl.vibescreener.dev` avec `install.sh` et `latest.json`, que l'app installée compare à sa version pour proposer la mise à jour (`src/main/updater.ts`). Installation : `curl -fsSL https://vibescreener.dev/install.sh | sh`. Installeur Mac signé ad hoc (pas de compte Apple).
+- Publication : un tag `v*` poussé (même numéro que `version` dans `apps/desktop/package.json`, vérifié par la CI) fait construire le .dmg et le .exe, installer et tester l'app sur Windows, puis envoyer les installeurs sur le bucket R2 `dl.vibescreener.dev` avec `install.sh`, `install.ps1` et `latest.json`, que l'app installée compare à sa version pour proposer la mise à jour (`src/main/updater.ts`) ; une Release GitHub est aussi créée pour les apps ≤ 0.7.0, qui la lisent encore. Installation : `curl -fsSL https://vibescreener.dev/install.sh | sh` (Mac), `irm https://vibescreener.dev/install.ps1 | iex` (Windows). Installeur Mac signé ad hoc (pas de compte Apple), installeur Windows non signé.
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 
 ## Conventions

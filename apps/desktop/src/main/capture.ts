@@ -1,5 +1,5 @@
 // Capture d'écran : un overlay par écran, préchargé et caché ; au raccourci on fige
-// tous les écrans, on affiche l'image figée, puis on recadre selon le clic.
+// tous les écrans, on affiche l'image figée, puis on recadre selon le clic ou la zone.
 
 import {
   app,
@@ -22,6 +22,7 @@ type Pending = {
   windows: Promise<WindowInfo[]>;
   windowsMs: Promise<number>;
   hidden: BrowserWindow[]; // nos fenêtres masquées pendant la capture
+  inspiration: boolean; // capture de l'inspiration d'un point : une zone est toujours recadrée
   timings: { captureMs: number; overlayMs: number };
 };
 
@@ -35,6 +36,7 @@ export type CapturedImage = {
   app?: string;
   title?: string;
   point?: { x: number; y: number }; // normalisé 0–1, pour un clic
+  zone?: { x: number; y: number; w: number; h: number }; // normalisé 0–1, zone glissée montrée sur la fenêtre (sans ⌥)
   timings: { captureMs: number; windowsMs: number; overlayMs: number; pickToSavedMs: number };
 };
 
@@ -42,6 +44,7 @@ export type CaptureOptions = {
   preload: string;
   loadPage: (win: BrowserWindow, page: 'overlay') => void;
   onCapture: (c: CapturedImage) => Promise<void>;
+  onCancel: () => void; // Échap dans l'overlay
   onError: (message: string) => void;
   /** Ce que l'overlay annonce : session en cours, numéro de l'écran et du prochain point. */
   info: () => Omit<OverlayShow, 'jpeg'>;
@@ -50,7 +53,7 @@ export type CaptureOptions = {
 export function createCapture(opts: CaptureOptions) {
   let overlays: Overlay[] = [];
   let pending: Pending | null = null;
-  let lastZone: { displayId: number; rect: Rectangle } | null = null; // pour ⇧ + clic
+  let lastZone: { displayId: number; rect: Rectangle; crop: boolean } | null = null; // pour ⇧ + clic, même mode
 
   function buildOverlays() {
     for (const o of overlays) o.win.destroy();
@@ -123,7 +126,7 @@ export function createCapture(opts: CaptureOptions) {
     const windowsMs = windows.then(() => performance.now() - t0);
 
     // Nos fenêtres ne doivent jamais apparaître dans la capture.
-    const hidden = BrowserWindow.getAllWindows().filter((w) => w.isVisible() && !overlays.some((o) => o.win === w));
+    const hidden = BrowserWindow.getAllWindows().filter((w) => w.isVisible() && !w.isMinimized() && !overlays.some((o) => o.win === w));
     for (const w of hidden) w.hide();
     if (hidden.length) await new Promise((r) => setTimeout(r, 50)); // le temps que l'écran se redessine
 
@@ -151,8 +154,8 @@ export function createCapture(opts: CaptureOptions) {
       return;
     }
 
-    pending = { t0, frozen, windows, windowsMs, hidden, timings: { captureMs, overlayMs: 0 } };
     const info = opts.info();
+    pending = { t0, frozen, windows, windowsMs, hidden, inspiration: info.inspiration !== undefined, timings: { captureMs, overlayMs: 0 } };
     await Promise.all(overlays.map((o) => showOverlay(o, frozen.get(o.display.id)!, info)));
     pending.timings.overlayMs = performance.now() - t0;
 
@@ -183,7 +186,7 @@ export function createCapture(opts: CaptureOptions) {
     const tPick = performance.now();
     for (const ov of overlays) ov.win.hide();
     for (const w of p.hidden) if (!w.isDestroyed()) w.showInactive();
-    if (pick.kind === 'cancel') return;
+    if (pick.kind === 'cancel') return opts.onCancel();
 
     const d = o.display;
     const image = p.frozen.get(d.id)!;
@@ -192,19 +195,24 @@ export function createCapture(opts: CaptureOptions) {
     const sy = size.height / d.bounds.height;
     const full: Rectangle = { x: 0, y: 0, width: d.bounds.width, height: d.bounds.height };
 
+    // Zone glissée, ou la dernière (⇧ + clic) : recadrée avec ⌥, sinon montrée sur la fenêtre qui contient son centre.
+    let zone: { rect: Rectangle; crop: boolean } | null = null;
+    if (pick.kind === 'zone') {
+      zone = { rect: { x: pick.x, y: pick.y, width: pick.w, height: pick.h }, crop: !!pick.crop };
+      lastZone = { displayId: d.id, ...zone };
+    } else if (pick.shift && lastZone?.displayId === d.id) zone = lastZone;
+
     let rect = full;
     let target: 'window' | 'screen' | 'zone' = 'screen';
     let hit: WindowInfo | undefined;
-    if (pick.kind === 'zone') {
-      rect = { x: pick.x, y: pick.y, width: pick.w, height: pick.h };
-      target = 'zone';
-      lastZone = { displayId: d.id, rect };
-    } else if (pick.shift && lastZone?.displayId === d.id) {
-      rect = lastZone.rect; // ⇧ + clic : même zone que la dernière fois
+    if (zone && (zone.crop || p.inspiration)) {
+      rect = zone.rect;
       target = 'zone';
     } else {
-      const gx = d.bounds.x + pick.x;
-      const gy = d.bounds.y + pick.y;
+      // Fenêtre sous le clic, ou sous le centre de la zone ; à défaut, l'écran entier.
+      const at = zone ? { x: zone.rect.x + zone.rect.width / 2, y: zone.rect.y + zone.rect.height / 2 } : pick;
+      const gx = d.bounds.x + at.x;
+      const gy = d.bounds.y + at.y;
       hit = (await p.windows).find((w) => {
         const b = toDip(w.bounds);
         return isCandidate(w) && gx >= b.x && gy >= b.y && gx < b.x + b.width && gy < b.y + b.height;
@@ -236,9 +244,10 @@ export function createCapture(opts: CaptureOptions) {
       app: target === 'window' ? hit?.owner.name : undefined,
       title: target === 'window' ? hit?.title : undefined,
       point:
-        pick.kind === 'click' && inside(pick, rect)
+        pick.kind === 'click' && !zone && inside(pick, rect)
           ? { x: (pick.x - rect.x) / rect.width, y: (pick.y - rect.y) / rect.height }
           : undefined,
+      zone: zone && target !== 'zone' ? relative(zone.rect, rect) : undefined,
       timings: { ...p.timings, windowsMs: await p.windowsMs, pickToSavedMs: performance.now() - tPick },
     });
   }
@@ -266,6 +275,12 @@ function onDisplay(r: Rectangle, d: Display): Rectangle | null {
     { ...r, x: r.x - d.bounds.x, y: r.y - d.bounds.y },
     { x: 0, y: 0, width: d.bounds.width, height: d.bounds.height },
   );
+}
+
+/** Zone en coordonnées 0–1 de l'image capturée, bornée à celle-ci. */
+function relative(z: Rectangle, r: Rectangle) {
+  const i = intersect(z, r);
+  return i ? { x: (i.x - r.x) / r.width, y: (i.y - r.y) / r.height, w: i.width / r.width, h: i.height / r.height } : undefined;
 }
 
 const inside = (p: { x: number; y: number }, r: Rectangle) =>

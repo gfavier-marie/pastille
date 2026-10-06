@@ -17,6 +17,7 @@ export type Settings = {
   apiModel: string;
   glossary: string; // prompt initial de Whisper
   instructions: string; // texte d'instructions en tête du PDF
+  context: string; // contexte du projet (projet, stack, page testée), repris par la session ouverte et les suivantes
   firstRunDone: boolean;
   copyPdf: boolean; // PDF mis dans le presse-papiers après l'export
   openAtLogin: boolean;
@@ -40,6 +41,7 @@ export function createSettings(dataDir: string, documentsDir: string) {
     apiModel: 'whisper-1',
     glossary: UI_PROMPT,
     instructions: DEFAULT_INSTRUCTIONS,
+    context: '',
     firstRunDone: false,
     copyPdf: true,
     openAtLogin: false,
@@ -48,6 +50,13 @@ export function createSettings(dataDir: string, documentsDir: string) {
   };
   const stored = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
   if (stored.exportDir === join(documentsDir, 'Pastille')) delete stored.exportDir; // ancien nom de l'app
+  // Le contexte passait autrefois d'une session à la suivante (state.json) : il devient la valeur de départ du réglage.
+  const statePath = join(dataDir, 'state.json');
+  if (stored.context === undefined && existsSync(statePath)) {
+    try {
+      stored.context = (JSON.parse(readFileSync(statePath, 'utf8')) as { lastContext?: string }).lastContext ?? '';
+    } catch {} // state.json illisible : pas de contexte de départ
+  }
   let settings: Settings = { ...defaults, ...stored };
   let apiKey = stored.apiKey ?? '';
 

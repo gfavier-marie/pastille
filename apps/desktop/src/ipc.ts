@@ -13,6 +13,7 @@ export type OverlayShow = {
   screen: number;
   nextNumber: number;
   cursor?: { x: number; y: number }; // position du curseur sur cet écran, au moment du raccourci
+  inspiration?: number; // capture d'une inspiration pour ce point : rien n'est posé
 };
 
 /** Fenêtre visable sur l'écran de l'overlay (DIP), de l'avant vers l'arrière. */
@@ -21,7 +22,7 @@ export type OverlayWindow = { x: number; y: number; width: number; height: numbe
 /** Coordonnées en pixels logiques (DIP), relatives à l'écran de l'overlay. */
 export type OverlayPick =
   | { kind: 'click'; x: number; y: number; shift?: boolean }
-  | { kind: 'zone'; x: number; y: number; w: number; h: number }
+  | { kind: 'zone'; x: number; y: number; w: number; h: number; crop?: boolean } // ⌥ : recadrer ; sinon zone montrée sur la fenêtre
   | { kind: 'cancel' };
 
 /** Mesures d'une capture, affichées par la fenêtre POC. */
@@ -96,8 +97,8 @@ export type MenuAction =
 /** Message de la barre flottante après un export. */
 export type ExportNotice = { format: ExportFormat; file: string; copied: boolean };
 
-/** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */
-export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean };
+/** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte (dictée lancée ou non). */
+export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean; dictate?: boolean };
 
 export type PastilleApi = {
   // Éditeur
@@ -107,7 +108,8 @@ export type PastilleApi = {
   addAnnotation(captureId: string, geometry: Geometry): Promise<string>;
   updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
   deleteAnnotation(id: string): void;
-  updateSession(patch: { name?: string; context?: string }): void;
+  discardAnnotation(id: string): void; // point resté vide (Échap) : retiré sans étape d'annulation
+  updateSession(patch: { name?: string }): void;
   deleteCapture(id: string): void; // annulable par ⌘Z
   listSessions(): Promise<SessionSummary[]>;
   openSession(id: string): Promise<void>;
@@ -126,6 +128,9 @@ export type PastilleApi = {
   onPrepareMic(cb: () => void): () => void;
   setSelection(annotationId: string | null): void;
   deleteSketch(annotationId: string, sketchId: string): void;
+  captureInspiration(annotationId: string): void; // éditeur masqué, la prochaine capture devient l'inspiration du point
+  importInspiration(annotationId: string, png: Uint8Array): void; // image collée ou déposée
+  deleteInspiration(annotationId: string, inspirationId: string): void;
   tabletStatus(): Promise<boolean>;
   onTabletStatus(cb: (connected: boolean) => void): () => void;
   // Réglages

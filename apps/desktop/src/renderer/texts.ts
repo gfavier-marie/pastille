@@ -70,13 +70,21 @@ export const T = {
   overlay: {
     hints: [
       ['Clic', 'capture la fenêtre et pose le point {n}'],
-      ['Glisser', 'zone'],
+      ['Glisser', `zone, ${isMac ? '⌥' : 'Alt'} pour recadrer`],
       ['⇧ Clic', 'dernière zone'],
       ['Échap', 'annuler'],
     ] as [string, string][],
+    inspirationHints: [
+      ['Clic', 'capture la fenêtre'],
+      ['Glisser', 'zone'],
+      ['⇧ Clic', 'dernière zone'],
+      ['Échap', 'retour au point'],
+    ] as [string, string][],
     wholeScreen: 'Écran entier',
     zone: 'Zone',
+    crop: 'Recadrage',
     screen: (session: string, index: number) => `${session} · écran ${index}`,
+    inspiration: (n: number) => `Inspiration du point #${n}`,
   },
 
   settings: {
@@ -89,6 +97,9 @@ export const T = {
       ? 'Évite ⇧⌘3, ⇧⌘4 et ⇧⌘5, réservés par macOS. Cliquez puis tapez la nouvelle combinaison.'
       : 'Cliquez puis tapez la nouvelle combinaison.',
     shortcutTaken: 'Ce raccourci est indisponible : choisissez-en un autre.',
+    shortcutUnsupported: isMac
+      ? 'Combinaison non prise en charge : ⌘, ⌥, ⇧ ou ⌃ avec une lettre, un chiffre ou F1 à F12.'
+      : 'Combinaison non prise en charge : Ctrl, Alt ou Shift avec une lettre, un chiffre du haut du clavier (pas du pavé numérique) ou F1 à F12.',
     comment: 'Commentaire',
     mode: 'Mode',
     modes: { auto: 'Dictée auto', push: 'Appuyer pour parler', keyboard: 'Clavier seul' },
@@ -129,6 +140,9 @@ export const T = {
     save: 'Enregistrer',
     glossary: 'Glossaire',
     glossaryHint: 'Vocabulaire à bien reconnaître (noms de composants, jargon du projet).',
+    context: 'Contexte du projet',
+    contextHint: "En tête des exports et de la revue lue par Claude Code. Il s'applique à la session ouverte et aux suivantes.",
+    contextPlaceholder: 'Projet, stack, page testée',
     instructions: "Instructions à l'IA",
     instructionsHint: 'En tête du PDF, du Markdown et de la revue lue par Claude Code. {N} est remplacé par le nombre de retours.',
     claudeCode: 'Claude Code',
@@ -182,7 +196,7 @@ export const T = {
     back: 'Retour',
     finish: 'Terminer',
     permissions: {
-      title: 'Deux autorisations pour commencer',
+      title: isMac ? 'Deux autorisations pour commencer' : 'Une autorisation pour commencer', // Windows : micro seulement
       intro: "VibeScreener capture la fenêtre que vous relisez et écoute vos commentaires. Les images et l'audio restent sur cet ordinateur.",
       screen: "Enregistrement de l'écran",
       screenWhy: 'Pour capturer la fenêtre à relire en pleine résolution.',
@@ -210,7 +224,7 @@ export const T = {
     shortcut: {
       title: 'Essayez le raccourci',
       intro: (keys: number) =>
-        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces trois touches' : 'ce raccourci'}. Ensuite, VibeScreener se range dans ${isMac ? 'la barre de menus' : 'la zone de notification'}.`,
+        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces trois touches' : 'ce raccourci'}. Ensuite, VibeScreener reste dans ${isMac ? 'le Dock et la barre de menus' : 'la zone de notification'}.`,
       waiting: "En attente de l'appui…",
       steps: [
         ['Raccourci', "L'écran se fige."],
@@ -251,8 +265,6 @@ export const T = {
     exportSession: (name: string) => `Exporter le PDF de ${name}`,
     trashSession: (name: string) => `Mettre ${name} à la corbeille`,
     close: 'Fermer',
-    context: 'Contexte',
-    contextEmpty: 'projet, stack, page testée',
     tablet: 'Tablette connectée',
     export: 'Exporter',
     formats: { pdf: "PDF pour l'IA", markdown: 'Dossier Markdown + images', pptx: 'PowerPoint (présentation)' },
@@ -270,6 +282,8 @@ export const T = {
     next: 'Capture suivante',
     noPoints: 'Cliquez sur la capture pour poser un point.',
     undoAll: (mod: string) => `${mod}Z annule tout, même une suppression`,
+    panel: 'Points et remarques',
+    pointsTab: 'Points',
     notes: 'Remarques générales',
     note: 'Remarque',
     addNote: 'Ajouter une remarque',
@@ -291,6 +305,15 @@ export const T = {
     sketches: (n: number) => `${plural(n, 'croquis', 'croquis')} · tablette`,
     zoomSketch: 'Agrandir le croquis',
     deleteSketch: 'Supprimer le croquis',
+    inspiration: 'Inspiration',
+    inspirationTitle: (shortcut: string, mod: string) =>
+      `Joindre l'exemple d'un autre site : l'éditeur s'efface, ouvrez la page modèle et appuyez sur ${shortcut}. Ou collez une image (${mod}V).`,
+    inspirationHint: (shortcut: string, mod: string) => `puis ${shortcut} sur la page modèle, ou ${mod}V`,
+    inspirations: (n: number) => plural(n, 'inspiration'),
+    zoomInspiration: "Agrandir l'inspiration",
+    deleteInspiration: "Supprimer l'inspiration",
+    imageNeedsPoint: "Sélectionnez d'abord un point : l'image deviendra son inspiration.",
+    unreadableImage: 'Image illisible.',
     deletePoint: 'Supprimer le point',
     noComment: 'Sans commentaire',
     bubbleLabel: (n: number) => `Commentaire du point ${n}`,
@@ -314,6 +337,6 @@ export const T = {
     emptyBefore: "Sur l'écran à relire, appuyez sur",
     emptyAfter: "puis cliquez sur l'élément à corriger.",
     micError: (err: unknown) => `Micro indisponible : ${err}`,
-    sketchZoomed: 'Croquis agrandi',
+    zoomedImage: 'Image agrandie',
   },
 };

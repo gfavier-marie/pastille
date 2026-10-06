@@ -3,12 +3,13 @@
 // de mesure puisse l'utiliser avec Node seul.
 
 import { spawn, execFileSync } from 'node:child_process';
-import { createWriteStream, existsSync, renameSync } from 'node:fs';
+import { createWriteStream, existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { availableParallelism } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { renameRetry } from './rename.ts';
 
 export const MODEL_FILE = 'ggml-large-v3-turbo-q5_0.bin';
 export const MODEL_URL = `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${MODEL_FILE}`;
@@ -27,6 +28,11 @@ export function audioContextFor(durationMs: number): number {
   const frames = (durationMs / 1000) * 50 * 1.5; // 50 trames par seconde
   return Math.min(1500, Math.max(768, Math.ceil(frames / 256) * 256));
 }
+
+/** Avec un contexte réduit, Whisper répète parfois la fin en boucle (vu sur 5,8 s de dictée : 800
+ *  caractères au lieu de 86). Un texte bien plus long que ce qu'on dit en ce temps-là est refait
+ *  avec le contexte complet. On parle environ 15 caractères par seconde. */
+export const looksRepeated = (text: string, durationMs: number) => text.length > 30 * (durationMs / 1000) + 30;
 
 export type WhisperServer = {
   url: string;
@@ -62,7 +68,7 @@ export async function downloadFile(url: string, dest: string, onProgress?: (done
   const body = Readable.fromWeb(res.body as never);
   body.on('data', (chunk: Buffer) => onProgress?.((done += chunk.length), total));
   await pipeline(body, createWriteStream(dest + '.part'));
-  renameSync(dest + '.part', dest);
+  await renameRetry(dest + '.part', dest);
 }
 
 /** Moteur de secours : API compatible OpenAI (/audio/transcriptions), avec clé. L'audio quitte la machine. */
@@ -139,17 +145,24 @@ export async function startWhisperServer(opts: {
     url,
     loadMs,
     async transcribe(wav) {
-      const form = new FormData();
-      form.append('file', new Blob([wav.slice()], { type: 'audio/wav' }), 'audio.wav');
-      form.append('response_format', 'json');
-      form.append('temperature', '0.0');
-      form.append('audio_ctx', String(audioContextFor(((wav.byteLength - 44) / 32000) * 1000)));
+      const durationMs = ((wav.byteLength - 44) / 32000) * 1000;
+      const infer = async (audioCtx: number) => {
+        const form = new FormData();
+        form.append('file', new Blob([wav.slice()], { type: 'audio/wav' }), 'audio.wav');
+        form.append('response_format', 'json');
+        form.append('temperature', '0.0');
+        form.append('audio_ctx', String(audioCtx));
+        const res = await fetch(url + '/inference', { method: 'POST', body: form });
+        if (!res.ok) throw new Error(`whisper-server : HTTP ${res.status} ${await res.text()}`);
+        const body = (await res.json()) as { text?: string; error?: string };
+        if (body.error) throw new Error(`whisper-server : ${body.error}`);
+        return (body.text ?? '').trim();
+      };
       const t = performance.now();
-      const res = await fetch(url + '/inference', { method: 'POST', body: form });
-      if (!res.ok) throw new Error(`whisper-server : HTTP ${res.status} ${await res.text()}`);
-      const body = (await res.json()) as { text?: string; error?: string };
-      if (body.error) throw new Error(`whisper-server : ${body.error}`);
-      return { text: (body.text ?? '').trim(), ms: performance.now() - t };
+      const audioCtx = audioContextFor(durationMs);
+      let text = await infer(audioCtx);
+      if (audioCtx < 1500 && looksRepeated(text, durationMs)) text = await infer(1500);
+      return { text, ms: performance.now() - t };
     },
     stop() {
       child.kill();

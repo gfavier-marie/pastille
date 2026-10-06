@@ -20,9 +20,14 @@ describe('export', () => {
     expect(md).toContain('**Contexte** : Back-office React');
     expect(md).toContain('## Remarques générales\n\n- Les marges sont irrégulières sur tout le site.\n- Le vert des boutons');
     expect(md).toContain('## Écran 3 — Google Chrome — Paramètres');
-    expect(md).toMatch(/\| #1 \| 1 \| .* \| oui \|/);
+    expect(md).toMatch(/\| #1 \| 1 \| .* \| oui \| oui \|/);
+    expect(md).toMatch(/\| #2 \| 1 \| .* \| non \| non \|/);
     expect(md).toContain('![Croquis 1 de #1](images/croquis-1.png)');
     expect(existsSync(join(dir, 'images/croquis-1.png'))).toBe(true);
+    // L'inspiration est dite modèle à suivre, avec sa source, et convertie en JPEG.
+    expect(md).toContain("**Inspiration 1 de #1** (Google Chrome — Exemple — Tarifs) : capture d'un autre site, modèle du résultat souhaité");
+    expect(md).toContain('![Inspiration 1 de #1](images/inspiration-1.jpg)');
+    expect(existsSync(join(dir, 'images/inspiration-1.jpg'))).toBe(true);
     for (let n = 1; n <= 20; n++) {
       expect(md).toContain(`### #${n}\n`);
       expect(existsSync(join(dir, `images/point-${n}.jpg`))).toBe(true);
@@ -42,16 +47,18 @@ describe('export', () => {
     expect(html).toContain('<h2>Remarques générales</h2>\n<ol class="notes"><li>Les marges sont irrégulières');
     expect(html).toContain('<svg class="logo"'); // logo de l'app en tête
     expect(html.match(/class="point"/g)).toHaveLength(10);
+    expect(html.match(/class="inspirations"/g)).toHaveLength(1);
+    expect(html).toContain('<img src="images/inspiration-1.jpg" alt="Inspiration 1 de #1"><figcaption>Google Chrome — Exemple — Tarifs</figcaption>');
   });
 
-  it('produit un PowerPoint : titre, remarques, récapitulatif, 5 écrans, 20 points', async () => {
+  it('produit un PowerPoint : titre, remarques, récapitulatif, 5 écrans, 20 points, 1 inspiration', async () => {
     const { session, dir: sessionDir } = await createFakeSession(await mkdtemp(join(tmpdir(), 'pastille-sessions-')));
     const outDir = await mkdtemp(join(tmpdir(), 'pastille-out-'));
     const file = await exportSession({ session, sessionDir, outDir, format: 'pptx', printHtml: async () => new Uint8Array() });
     expect(file).toMatch(/\.pptx$/);
     const zip = await readFile(file);
     const slides = new Set(zip.toString('latin1').match(/ppt\/slides\/slide\d+\.xml/g));
-    expect(slides.size).toBeGreaterThanOrEqual(1 + 1 + 1 + 5 + 20);
+    expect(slides.size).toBeGreaterThanOrEqual(1 + 1 + 1 + 5 + 20 + 1);
   });
 
   it('découpe le PDF au-delà de 100 pages, récapitulatif complet dans chaque partie', async () => {

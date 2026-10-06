@@ -15,6 +15,7 @@ const api: PastilleApi = {
   addAnnotation: (captureId, geometry) => ipcRenderer.invoke('annotation:add', captureId, geometry),
   updateAnnotation: (id, patch) => ipcRenderer.send('annotation:update', id, patch),
   deleteAnnotation: (id) => ipcRenderer.send('annotation:delete', id),
+  discardAnnotation: (id) => ipcRenderer.send('annotation:discard', id),
   updateSession: (patch) => ipcRenderer.send('session:update', patch),
   deleteCapture: (id) => ipcRenderer.send('capture:delete', id),
   listSessions: () => ipcRenderer.invoke('sessions:list'),
@@ -34,6 +35,9 @@ const api: PastilleApi = {
   onPrepareMic: (cb) => on('editor:prepare-mic', cb),
   setSelection: (id) => ipcRenderer.send('editor:selection', id),
   deleteSketch: (annotationId, sketchId) => ipcRenderer.send('sketch:delete', annotationId, sketchId),
+  captureInspiration: (id) => ipcRenderer.send('inspiration:capture', id),
+  importInspiration: (id, png) => ipcRenderer.send('inspiration:import', id, png),
+  deleteInspiration: (annotationId, inspirationId) => ipcRenderer.send('inspiration:delete', annotationId, inspirationId),
   tabletStatus: () => ipcRenderer.invoke('tablet:status'),
   onTabletStatus: (cb) => on('tablet:status', cb),
 

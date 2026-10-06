@@ -14,6 +14,7 @@ import {
   dialog,
   globalShortcut,
   ipcMain,
+  Menu,
   net,
   protocol,
   session as electronSession,
@@ -68,6 +69,8 @@ if (autotest === 'editor') {
   const sample = process.env.PASTILLE_FAKE_AUDIO ?? join(app.getAppPath(), 'fixtures', 'dictee-fr.wav');
   app.commandLine.appendSwitch('use-file-for-fake-audio-capture', sample);
   app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess'); // sinon le bac à sable audio ne lit pas le fichier
+  // Fenêtre de l'éditeur recouverte par d'autres apps : elle reste « visible », sinon la dictée s'arrête (micro libéré).
+  app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 }
 
 protocol.registerSchemesAsPrivileged([
@@ -81,11 +84,16 @@ function loadPage(win: BrowserWindow, page: Page, hash = '') {
   else void win.loadFile(join(import.meta.dirname, '../renderer', `${page}.html`), { hash });
 }
 
-const store = createSessionStore(app.getPath('userData'), (s) => {
-  editor?.webContents.send('session:changed', s);
-  updateTrayMenu();
-  tablet?.refresh();
-});
+const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
+const store = createSessionStore(
+  app.getPath('userData'),
+  (s) => {
+    editor?.webContents.send('session:changed', s);
+    updateTrayMenu();
+    tablet?.refresh();
+  },
+  () => settings.get().context,
+);
 const tablet = autotest && autotest !== 'tablet'
   ? null
   : createTablet({
@@ -99,7 +107,6 @@ const tablet = autotest && autotest !== 'tablet'
         broadcastSettings();
       },
     });
-const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
 // Essai puis licence Polar. PASTILLE_TRIAL_DAYS raccourcit l'essai et PASTILLE_POLAR=sandbox vise le bac à sable, pour les essais.
 const polar = process.env.PASTILLE_POLAR === 'sandbox' ? POLAR.sandbox : POLAR.production;
 const license = createLicense({ dataDir: app.getPath('userData'), trialDays: Number(process.env.PASTILLE_TRIAL_DAYS ?? TRIAL_DAYS), polar });
@@ -164,11 +171,12 @@ function createEditor() {
     webPreferences: { preload },
   });
   win.setContentProtection(true);
-  // Fermer cache la fenêtre : elle reste prête pour la prochaine capture.
+  // Fermer cache la fenêtre, prête pour la prochaine capture. Windows : elle est réduite, pour rester dans la barre des tâches.
   win.on('close', (e) => {
     if (!quitting) {
       e.preventDefault();
-      win.hide();
+      if (isMac) win.hide();
+      else win.minimize();
     }
   });
   loadPage(win, 'editor');
@@ -176,14 +184,26 @@ function createEditor() {
 }
 
 function showEditor(focus?: EditorFocus) {
+  inspirationFor = null; // revenir à l'éditeur annule l'inspiration en attente
   editor ??= createEditor();
   if (focus) editor.webContents.send('editor:focus', focus);
+  if (editor.isMinimized()) editor.restore();
   editor.show();
   if (isMac) app.focus({ steal: true });
   editor.focus();
 }
 
 // ——— Captures ———
+
+// Inspiration d'un point : l'éditeur s'efface pour laisser chercher une page modèle, et la prochaine
+// capture (raccourci, menu, barre) est jointe au point au lieu de devenir un écran.
+let inspirationFor: string | null = null;
+
+/** Point qui attend son inspiration, s'il existe toujours dans la session ouverte. */
+function inspirationTarget() {
+  const s = store.get();
+  return inspirationFor && s ? findAnnotation(s, inspirationFor) : undefined;
+}
 
 function startCapture() {
   // Essai fini sans licence : l'onglet Licence s'ouvre à la place. Sessions, exports et Claude Code restent libres.
@@ -193,20 +213,27 @@ function startCapture() {
   }
   welcomeWindow?.webContents.send('welcome:shortcut');
   // Le micro chauffe pendant que l'utilisateur vise : la dictée démarre sans délai au clic.
-  editor?.webContents.send('editor:prepare-mic');
+  if (!inspirationTarget()) editor?.webContents.send('editor:prepare-mic');
   void capture.start();
 }
 
 async function onCapture(c: CapturedImage) {
+  const target = inspirationTarget();
+  if (target) {
+    // L'éditeur revient sur le point, bulle ouverte, sans relancer la dictée.
+    await store.addInspiration(target.annotation.id, c.png, c.target === 'window' ? { app: c.app, windowTitle: c.title } : undefined);
+    return showEditor({ captureId: target.capture.id, annotationId: target.annotation.id, openBubble: true });
+  }
   const capture = await store.addCapture(c.png, {
     width: c.width,
     height: c.height,
     scaleFactor: c.scaleFactor,
     source: { app: c.app, windowTitle: c.title, displayId: c.displayId },
   });
-  let annotationId: string | undefined;
-  if (c.point) annotationId = addAnnotation(capture.id, { kind: 'point', ...c.point });
-  showEditor({ captureId: capture.id, annotationId, openBubble: !!annotationId });
+  // Clic : un point ; zone glissée sans ⌥ : un rectangle. Dans les deux cas, bulle ouverte et dictée lancée.
+  const geometry: Geometry | undefined = c.point ? { kind: 'point', ...c.point } : c.zone && { kind: 'zone', ...c.zone };
+  const annotationId = geometry && addAnnotation(capture.id, geometry);
+  showEditor({ captureId: capture.id, annotationId, openBubble: !!annotationId, dictate: !!annotationId });
   reportCapture({
     ok: true,
     width: c.width,
@@ -333,12 +360,12 @@ async function menuState(): Promise<MenuState> {
   };
 }
 
-// ——— Mises à jour (app installée sur Mac) ———
+// ——— Mises à jour (app installée sur Mac ou Windows) ———
 
 let update: Update | null = null;
 
 async function lookForUpdate() {
-  if (!app.isPackaged || !isMac || autotest) return;
+  if (!app.isPackaged || !(isMac || process.platform === 'win32') || autotest) return;
   update = await checkForUpdate(app.getVersion());
   updateTrayMenu();
 }
@@ -348,8 +375,8 @@ async function confirmUpdate() {
   const { response } = await dialog.showMessageBox({
     message: `Mettre à jour VibeScreener vers la version ${update.version} ?`,
     detail:
-      "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés.\n" +
-      "L'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro.",
+      "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés." +
+      (isMac ? "\nL'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro." : ''),
     buttons: ['Mettre à jour', 'Plus tard'],
     defaultId: 0,
     cancelId: 1,
@@ -544,6 +571,8 @@ ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
     return { ok: false, error: `${shortcutLabel(patch.shortcut)} est déjà pris par une autre application.` };
   }
   const after = settings.update(patch);
+  // Contexte du projet : il s'applique aussi à la session ouverte (historique compris, ⌘Z ne le défait pas).
+  if (after.context !== before.context) store.update((s) => (s.context = after.context || undefined), { patchHistory: true });
   if (patch.openAtLogin !== undefined && !autotest) app.setLoginItemSettings({ openAtLogin: patch.openAtLogin });
   if (after.language !== before.language || after.glossary !== before.glossary) void transcriber.restart().then(broadcastSettings);
   broadcastSettings();
@@ -635,7 +664,8 @@ ipcMain.on('annotation:delete', (_e, id: string) =>
     { undoable: true },
   ),
 );
-ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
+ipcMain.on('annotation:discard', (_e, id: string) => store.discard(id));
+ipcMain.on('session:update', (_e, patch: Pick<Session, 'name'>) =>
   store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
 );
 // Écran supprimé avec ses points ; son image reste sur le disque pour que ⌘Z le fasse revenir.
@@ -688,6 +718,20 @@ ipcMain.on('sketch:delete', (_e, annotationId: string, sketchId: string) =>
     { undoable: true },
   ),
 );
+ipcMain.on('inspiration:capture', (_e, id: string) => {
+  editor?.hide();
+  inspirationFor = id;
+});
+ipcMain.on('inspiration:import', (_e, id: string, png: Uint8Array) => void store.addInspiration(id, png));
+ipcMain.on('inspiration:delete', (_e, annotationId: string, inspirationId: string) =>
+  store.update(
+    (s) => {
+      const a = findAnnotation(s, annotationId)?.annotation;
+      if (a) a.inspirations = a.inspirations?.filter((k) => k.id !== inspirationId);
+    },
+    { undoable: true },
+  ),
+);
 ipcMain.on('editor:selection', (_e, annotationId: string | null) => tablet?.setFocus(annotationId));
 ipcMain.handle('tablet:status', () => tablet?.isConnected() ?? false);
 ipcMain.on('session:undo', () => store.undo());
@@ -725,19 +769,22 @@ async function runEditorAutotest() {
   const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   // Ouvre le point #1 : la dictée démarre seule, le faux micro « parle » pendant ~6 s, puis Entrée.
-  showEditor({ captureId: first.id, annotationId: target.id, openBubble: true });
+  // Le micro met un temps variable à s'ouvrir : les 6 s comptent à partir du premier son reçu.
+  showEditor({ captureId: first.id, annotationId: target.id, openBubble: true, dictate: true });
+  for (let i = 0; i < 100 && !recording; i++) await wait(100);
   await wait(2500);
   await writeFile(join(out, 'editor.png'), (await editor.webContents.capturePage()).toPNG());
   await wait(3500);
   editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Enter' });
   let dictated = '';
-  for (let i = 0; i < 300 && !dictated; i++) {
+  // Jusqu'à 2 min : le runner Windows de la CI met ~40 s à transcrire (moins d'1 s sur M1 Pro).
+  for (let i = 0; i < 1200 && !dictated; i++) {
     await wait(100);
     const a = store.get() && findAnnotation(store.get()!, target.id)?.annotation;
     if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
   }
 
-  // Claude Code par le serveur MCP : l'écran 1 doit arriver avec sa capture, ses zooms et le croquis.
+  // Claude Code par le serveur MCP : l'écran 1 doit arriver avec sa capture, ses zooms, le croquis et l'inspiration.
   const mcpUrl = await mcp.listen(0);
   mcpStatus = { url: mcpUrl };
   const post = async (body: unknown) =>
@@ -755,6 +802,11 @@ async function runEditorAutotest() {
   await wait(600);
   await writeFile(join(out, 'sessions.png'), (await editor.webContents.capturePage()).toPNG());
   editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
+  // Onglet « Remarques générales » du panneau de droite.
+  await wait(300);
+  await editor.webContents.executeJavaScript(`document.querySelectorAll('[role="tab"]')[1].click()`);
+  await wait(300);
+  await writeFile(join(out, 'editor-notes.png'), (await editor.webContents.capturePage()).toPNG());
 
   showSettings();
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
@@ -805,6 +857,15 @@ async function photographScreens(out: string) {
     move(win, 760, 300);
     await wait(300);
   });
+  // Capture de l'inspiration du point #3 : pas de pastille fantôme, rappel du point visé.
+  await photo('overlay-inspiration', 'overlay', 1280, 800, async (win) => {
+    const img = (await editor!.webContents.capturePage()).resize({ width: 1280, height: 800 });
+    win.webContents.send('overlay:show', { jpeg: img.toJPEG(80), session: store.get()!.name, screen: 6, nextNumber: 21, inspiration: 3 });
+    await wait(300);
+    win.webContents.send('overlay:windows', [{ x: 300, y: 96, width: 900, height: 620, app: 'Google Chrome', title: 'Exemple — Tarifs' }]);
+    move(win, 760, 300);
+    await wait(300);
+  });
 }
 
 async function runTabletAutotest() {
@@ -830,13 +891,52 @@ async function runTabletAutotest() {
 
 // ——— Démarrage ———
 
+/** macOS : menu de l'app (visible avec l'icône du Dock). Édition garde copier, coller et annuler dans les champs ;
+ *  hors d'un champ, l'éditeur intercepte ⌘Z lui-même pour annuler dans la session. */
+function appMenu() {
+  return Menu.buildFromTemplate([
+    {
+      label: 'VibeScreener',
+      submenu: [
+        { role: 'about', label: 'À propos de VibeScreener' },
+        { type: 'separator' },
+        { label: 'Réglages…', accelerator: 'Command+,', click: () => showSettings() },
+        { type: 'separator' },
+        { role: 'hide', label: 'Masquer VibeScreener' },
+        { role: 'quit', label: 'Quitter VibeScreener' },
+      ],
+    },
+    {
+      label: 'Édition',
+      submenu: [
+        { role: 'undo', label: 'Annuler' },
+        { role: 'redo', label: 'Rétablir' },
+        { type: 'separator' },
+        { role: 'cut', label: 'Couper' },
+        { role: 'copy', label: 'Copier' },
+        { role: 'paste', label: 'Coller' },
+        { role: 'selectAll', label: 'Tout sélectionner' },
+      ],
+    },
+    {
+      label: 'Fenêtre',
+      role: 'window',
+      submenu: [
+        { role: 'minimize', label: 'Réduire' },
+        { role: 'close', label: 'Fermer' },
+      ],
+    },
+  ]);
+}
+
 let capture: ReturnType<typeof createCapture>;
 let quitting = false;
 
 if (!autotest && !app.requestSingleInstanceLock()) app.quit();
-app.on('second-instance', () => showEditor());
+// « VibeScreener.exe --quit » : install.ps1 ferme proprement l'app avant de la remplacer.
+app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : showEditor()));
 app.on('window-all-closed', () => {
-  // Application de barre de menus : elle reste active sans fenêtre.
+  // L'app reste active sans fenêtre : icône de la barre de menus (zone de notification sous Windows).
 });
 app.on('before-quit', (e) => {
   if (quitting) return;
@@ -852,7 +952,12 @@ app.on('will-quit', () => {
 });
 
 void app.whenReady().then(async () => {
-  if (isMac) app.dock?.hide();
+  if (isMac) {
+    Menu.setApplicationMenu(appMenu());
+    if (!app.isPackaged) app.dock?.setIcon(join(app.getAppPath(), 'build', 'icon.png')); // l'app installée a la sienne
+  }
+  // Windows : sans cela, chaque fenêtre porte le menu anglais par défaut d'Electron (File, Edit…).
+  else Menu.setApplicationMenu(null);
 
   // Images de session servies par pastille://session/<id>/<chemin>, sans sortir du dossier des sessions.
   protocol.handle('pastille', (request) => {
@@ -871,12 +976,18 @@ void app.whenReady().then(async () => {
     preload,
     loadPage,
     onCapture,
+    onCancel: () => {
+      // Échap pendant une inspiration : retour au point, rien n'est joint.
+      const target = inspirationTarget();
+      if (target) showEditor({ captureId: target.capture.id, annotationId: target.annotation.id, openBubble: true });
+    },
     info: () => {
       const session = store.get();
       return {
         session: session?.name ?? 'Nouvelle revue',
         screen: (session?.captures.length ?? 0) + 1,
         nextNumber: (session ? allAnnotations(session).length : 0) + 1,
+        inspiration: inspirationTarget()?.annotation.number,
       };
     },
     onError: (message) => {
@@ -938,6 +1049,7 @@ void app.whenReady().then(async () => {
   }, 6 * 3600_000);
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
+  app.on('activate', () => showEditor()); // macOS : clic sur l'icône du Dock
   void transcriber.restart().then(() => {
     // Assistant de premier lancement (§4.9), rouvert si une autorisation manque. Sinon, un modèle manquant ouvre les réglages.
     if (setupNeeded()) showWelcome();

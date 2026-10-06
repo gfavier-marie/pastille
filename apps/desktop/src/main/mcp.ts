@@ -1,5 +1,5 @@
 // Serveur MCP local pour Claude Code (§11) : liste les sessions, lit une revue et montre ses
-// écrans (capture annotée, zooms, croquis), en lecture seule. Sous-ensemble du transport
+// écrans (capture annotée, zooms, croquis, inspirations), en lecture seule. Sous-ensemble du transport
 // « Streamable HTTP » : sans état, une réponse JSON par requête, sur 127.0.0.1 uniquement.
 // Aucun import d'Electron ici : testable et lançable avec node.
 
@@ -9,15 +9,15 @@ import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
 import { allAnnotations, upgradeSession, type Session } from '@pastille/shared';
-import { cropJpeg, DEFAULT_INSTRUCTIONS, position, screenJpeg, screenTitle } from './export/build.ts';
+import { cropJpeg, DEFAULT_INSTRUCTIONS, INSPIRATION_NOTE, inspirationJpeg, position, screenJpeg, screenTitle, sourceLabel } from './export/build.ts';
 import type { SessionStore } from './session-store.ts';
 
 export const MCP_PORT = Number(process.env.PASTILLE_MCP_PORT) || 3917;
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const MAX_BODY = 1024 * 1024;
 
-const SERVER_INSTRUCTIONS = `VibeScreener enregistre des revues d'interface : des captures d'écran où chaque retour est un point numéroté (#1 à #N) avec un commentaire, souvent dicté, et parfois un croquis.
-Pour appliquer une revue au code : sans précision de l'utilisateur, prendre la session ouverte dans VibeScreener (choix par défaut), sinon la choisir avec lister_sessions. lire_revue donne tous les retours ; voir_ecran montre, écran par écran, la capture annotée, un zoom autour de chaque point et les croquis. Regarder chaque écran avant de modifier le code. Si un retour est ambigu, poser une question plutôt que deviner.`;
+const SERVER_INSTRUCTIONS = `VibeScreener enregistre des revues d'interface : des captures d'écran où chaque retour est un point numéroté (#1 à #N) avec un commentaire, souvent dicté, et parfois un croquis ou une inspiration (capture d'un autre site qui montre le résultat souhaité, pas l'écran à modifier).
+Pour appliquer une revue au code : sans précision de l'utilisateur, prendre la session ouverte dans VibeScreener (choix par défaut), sinon la choisir avec lister_sessions. lire_revue donne tous les retours ; voir_ecran montre, écran par écran, la capture annotée, un zoom autour de chaque point, les croquis et les inspirations. Regarder chaque écran avant de modifier le code. Si un retour est ambigu, poser une question plutôt que deviner.`;
 
 type Json = Record<string, unknown>;
 type Content = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
@@ -39,13 +39,13 @@ const TOOLS = [
   {
     name: 'lire_revue',
     description:
-      "Tous les retours d'une session, en texte : contexte, instructions, puis chaque point (numéro, écran, commentaire, position, croquis). Les images s'obtiennent avec voir_ecran.",
+      "Tous les retours d'une session, en texte : contexte, instructions, puis chaque point (numéro, écran, commentaire, position, croquis, inspirations). Les images s'obtiennent avec voir_ecran.",
     inputSchema: { type: 'object', properties: { session: SESSION_PARAM } },
   },
   {
     name: 'voir_ecran',
     description:
-      "Un écran d'une session : la capture avec ses points numérotés, puis pour chaque point son commentaire, un zoom autour de l'élément visé et ses croquis.",
+      "Un écran d'une session : la capture avec ses points numérotés, puis pour chaque point son commentaire, un zoom autour de l'élément visé, ses croquis et ses inspirations (captures d'autres sites, modèles du résultat souhaité).",
     inputSchema: {
       type: 'object',
       properties: {
@@ -119,11 +119,12 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
       if (!c.annotations.length) lines.push('(aucun point)');
       for (const a of c.annotations) {
         const sketches = a.sketches.length ? ` · ${a.sketches.length} croquis` : '';
-        lines.push(`- #${a.number} · ${comment(a.text)} · ${position(a, c)}${sketches}`);
+        const inspirations = a.inspirations?.length ? ` · ${plural(a.inspirations.length, 'inspiration')}` : '';
+        lines.push(`- #${a.number} · ${comment(a.text)} · ${position(a, c)}${sketches}${inspirations}`);
       }
     }
     if (session.captures.length)
-      lines.push('', `Pour voir la capture annotée, le zoom de chaque point et les croquis : voir_ecran avec ecran de 1 à ${session.captures.length}.`);
+      lines.push('', `Pour voir la capture annotée, le zoom de chaque point, les croquis et les inspirations : voir_ecran avec ecran de 1 à ${session.captures.length}.`);
     return lines.join('\n');
   }
 
@@ -139,6 +140,11 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
       for (const [k, sketch] of a.sketches.entries()) {
         content.push(text(`Croquis ${k + 1} de #${a.number} :`));
         content.push(image(await readFile(join(dir, sketch.png)), 'image/png'));
+      }
+      for (const [k, inspiration] of (a.inspirations ?? []).entries()) {
+        const source = sourceLabel(inspiration.source);
+        content.push(text(`Inspiration ${k + 1} de #${a.number}${source ? ` (${source})` : ''} : ${INSPIRATION_NOTE}.`));
+        content.push(image(await inspirationJpeg(await loadImage(join(dir, inspiration.image))), 'image/jpeg'));
       }
     }
     return content;

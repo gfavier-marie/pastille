@@ -2,9 +2,10 @@
 // atomique avec un anti-rebond de 300 ms. La session ouverte se rouvre au démarrage.
 
 import { existsSync } from 'node:fs';
-import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { newSession, renumber, upgradeSession, type Capture, type Session } from '@pastille/shared';
+import { findAnnotation, newSession, renumber, upgradeSession, type Capture, type Inspiration, type Session } from '@pastille/shared';
+import { renameRetry } from './rename.ts';
 
 const SAVE_DELAY_MS = 300;
 const HISTORY_LIMIT = 200;
@@ -19,11 +20,12 @@ export type UpdateOptions = {
   patchHistory?: boolean;
 };
 
-type State = { currentSessionId?: string; lastContext?: string };
+type State = { currentSessionId?: string };
 
 export type SessionStore = ReturnType<typeof createSessionStore>;
 
-export function createSessionStore(root: string, onChange: (s: Session | null) => void = () => {}) {
+/** `context` : contexte du projet (réglage), repris par chaque nouvelle session. */
+export function createSessionStore(root: string, onChange: (s: Session | null) => void = () => {}, context: () => string = () => '') {
   const sessionsDir = join(root, 'sessions');
   const statePath = join(root, 'state.json');
   let session: Session | null = null;
@@ -38,7 +40,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
 
   async function writeAtomic(path: string, data: string) {
     await writeFile(path + '.tmp', data);
-    await rename(path + '.tmp', path);
+    await renameRetry(path + '.tmp', path);
   }
 
   /** Écritures de state.json l'une après l'autre : deux renommages du même .tmp en parallèle échouent. */
@@ -65,7 +67,8 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     const s = session;
     if (!s) return saving;
     const json = JSON.stringify(s, null, 2);
-    saving = saving.then(() => writeAtomic(join(dirOf(s.id), 'session.json'), json));
+    // Un échec est signalé à l'appelant sans bloquer les sauvegardes suivantes.
+    saving = saving.catch(() => {}).then(() => writeAtomic(join(dirOf(s.id), 'session.json'), json));
     return saving;
   }
 
@@ -81,7 +84,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   /** La session ouverte, créée à la première capture si besoin. */
   async function ensure(): Promise<Session> {
     if (session) return session;
-    const s = newSession(new Date(), state.lastContext);
+    const s = newSession(new Date(), context() || undefined);
     await mkdir(join(dirOf(s.id), 'captures'), { recursive: true });
     session = s;
     state.currentSessionId = s.id;
@@ -110,10 +113,6 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     if (!session) return;
     renumber(session);
     session.updatedAt = new Date().toISOString();
-    if (session.context !== state.lastContext) {
-      state.lastContext = session.context;
-      void saveState();
-    }
     scheduleSave();
     onChange(session);
   }
@@ -136,6 +135,42 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     // Une capture n'est pas annulable : elle est ajoutée aussi à l'historique.
     update((x) => x.captures.push(structuredClone(capture)), { patchHistory: true });
     return capture;
+  }
+
+  /** Inspiration jointe à un point (annulable) ; l'image reste sur le disque pour que ⌘Z puisse la rétablir. */
+  async function addInspiration(annotationId: string, png: Uint8Array, source?: Inspiration['source']) {
+    const s = session;
+    if (!s || !findAnnotation(s, annotationId)) return;
+    const id = crypto.randomUUID();
+    const inspiration: Inspiration = { id, image: `inspirations/${id}.png`, createdAt: new Date().toISOString(), source };
+    await mkdir(join(dirOf(s.id), 'inspirations'), { recursive: true });
+    await writeFile(join(dirOf(s.id), inspiration.image), png);
+    update(
+      (x) => {
+        const a = findAnnotation(x, annotationId)?.annotation;
+        if (a) a.inspirations = [...(a.inspirations ?? []), { ...inspiration }];
+      },
+      { undoable: true },
+    );
+  }
+
+  /** Point resté vide (Échap) : retiré partout, historique compris, pour que ⌘Z ne le fasse pas revenir. */
+  function discard(annotationId: string) {
+    if (!session || !findAnnotation(session, annotationId)) return;
+    update(
+      (s) => {
+        for (const c of s.captures) c.annotations = c.annotations.filter((a) => a.id !== annotationId);
+        renumber(s);
+      },
+      { patchHistory: true },
+    );
+    // Les étapes devenues sans effet (création du point, frappe effacée) disparaissent : ⌘Z revient avant le point.
+    const same = (a: Session, b: Session) => JSON.stringify({ ...a, updatedAt: '' }) === JSON.stringify({ ...b, updatedAt: '' });
+    let next = session;
+    for (let i = undoStack.length - 1; i >= 0; i--) {
+      if (same(undoStack[i]!, next)) undoStack.splice(i, 1);
+      else next = undoStack[i]!;
+    }
   }
 
   /** Annuler (⌘Z) / rétablir (⌘⇧Z) : la session revient à l'état précédent. */
@@ -206,11 +241,13 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     restore,
     ensure,
     update,
+    discard,
     undo,
     redo,
     recent,
     open,
     addCapture,
+    addInspiration,
     flush,
     close,
   };

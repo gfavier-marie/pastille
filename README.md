@@ -20,17 +20,35 @@ La commande installe VibeScreener dans Applications, la branche à Claude Code s
 Télécharger [VibeScreener-arm64.dmg](https://dl.vibescreener.dev/VibeScreener-arm64.dmg) et glisser VibeScreener dans Applications. L'app n'étant pas signée par Apple, la première ouverture est bloquée : Réglages Système > Confidentialité et sécurité > « Ouvrir quand même ».
 </details>
 
+Sur un PC Windows 10 ou 11 (64 bits), dans PowerShell (menu Démarrer > « PowerShell ») :
+
+```powershell
+irm https://vibescreener.dev/install.ps1 | iex
+```
+
+Même rôle que sur Mac, sans droits administrateur : l'app s'installe pour l'utilisateur et vit dans la zone de notification (en bas à droite).
+
+<details>
+<summary>Sans PowerShell : le .exe</summary>
+
+Télécharger [VibeScreener-Setup.exe](https://dl.vibescreener.dev/VibeScreener-Setup.exe) et l'ouvrir. L'installeur n'étant pas signé, Windows affiche « Windows a protégé votre ordinateur » : « Informations complémentaires » > « Exécuter quand même ».
+</details>
+
 ## Essai et licence
 
 14 jours d'essai gratuit, toutes les fonctions, sans carte bancaire. Ensuite, une licence achetée sur [vibescreener.dev](https://vibescreener.dev/#tarifs) (paiement par Polar) : la clé reçue par e-mail se colle dans Réglages > Licence. Sans licence, les nouvelles captures sont bloquées ; sessions, exports et Claude Code restent accessibles.
 
 ## Premier lancement
 
-VibeScreener vit dans la barre de menus. Un assistant en trois étapes :
+VibeScreener vit dans le Dock et la barre de menus (zone de notification sous Windows). Un assistant en trois étapes :
 
-1. **Autorisations** : enregistrement de l'écran (puis relancer VibeScreener) et micro.
-2. **Modèle de dictée** : téléchargé tout seul (547 Mo, une seule fois). La dictée se fait ensuite sur le Mac, hors ligne.
-3. **Raccourci** : **⇧⌘2** fige l'écran ; clic sur l'élément, on parle, c'est noté. **⌘E** exporte.
+1. **Autorisations** : enregistrement de l'écran (Mac seulement, puis relancer VibeScreener) et micro.
+2. **Modèle de dictée** : téléchargé tout seul (547 Mo, une seule fois). La dictée se fait ensuite sur l'ordinateur, hors ligne.
+3. **Raccourci** : **⇧⌘2** (Windows : **Ctrl+Shift+2**) fige l'écran ; clic sur l'élément, on parle, c'est noté. **⌘E** (**Ctrl+E**) exporte.
+
+## Inspiration
+
+Pour montrer à quoi un point doit ressembler : dans la bulle du point, **Inspiration**. L'éditeur s'efface ; ouvrir la page modèle (un autre site, une autre app), puis **⇧⌘2** et cliquer la fenêtre ou glisser une zone. L'image rejoint le point, l'éditeur revient dessus (Échap : retour sans rien joindre). Une image peut aussi être collée (**⌘V**) ou déposée sur le point sélectionné. Les exports et Claude Code la présentent comme un modèle, pas comme l'écran à modifier.
 
 ## Tablette (iPad + Apple Pencil)
 
@@ -50,20 +68,21 @@ VibeScreener doit être lancée. Il suffit ensuite de demander à Claude Code, d
 | --- | --- |
 | `lister_sessions` | Les 20 sessions récentes, avec leur id ; la session ouverte est signalée |
 | `lire_revue` | Tous les retours d'une session en texte (la session ouverte par défaut) |
-| `voir_ecran` | Un écran : capture annotée, zoom autour de chaque point, croquis |
+| `voir_ecran` | Un écran : capture annotée, zoom autour de chaque point, croquis, inspirations |
 
 Port pris : les réglages le signalent ; `PASTILLE_MCP_PORT` en choisit un autre (à reporter dans la commande ci-dessus).
 
 ## Confidentialité
 
-- Captures, sessions et dictée restent sur le Mac (transcription locale par [whisper.cpp](https://github.com/ggml-org/whisper.cpp)). Le moteur par API, optionnel, envoie l'audio au service choisi.
+- Captures, sessions et dictée restent sur l'ordinateur (transcription locale par [whisper.cpp](https://github.com/ggml-org/whisper.cpp)). Le moteur par API, optionnel, envoie l'audio au service choisi.
 - La tablette passe par un relais partagé (Cloudflare) qui ne voit que des messages chiffrés (AES-GCM) : la clé est dans le QR code et ne passe jamais par le serveur.
 - Le serveur MCP n'écoute que sur `127.0.0.1` et refuse les requêtes venant d'un navigateur.
 - Licence : la clé et un identifiant d'installation aléatoire sont envoyés à Polar pour l'activer, puis la vérifier une fois par jour. La recherche de mise à jour lit `dl.vibescreener.dev/latest.json`.
 
 ## Limites
 
-- **Mac Apple Silicon uniquement** pour l'instant. Windows est prévu : le code est multiplateforme, mais rien n'a encore été testé sur un vrai PC.
+- **Mac Apple Silicon et Windows 10/11 64 bits.** La version Windows est en test : installée et vérifiée automatiquement sur un Windows de GitHub (dictée, exports, capture), pas encore sur un vrai PC. Dictée plus lente sur PC que sur Mac (pas d'accélération GPU) ; sur un PC ARM, l'app tourne en émulation x64.
+- **Installeur Windows non signé** : SmartScreen avertit si le .exe est téléchargé par le navigateur (la commande PowerShell l'évite).
 - **Pas de signature Apple** : après chaque mise à jour, macOS redemande les autorisations écran et micro.
 
 ## Développer
@@ -85,13 +104,13 @@ pnpm dev             # lance l'app (depuis ton propre Terminal sur Mac, pour l'a
 | `pnpm site` | Site public (landing, tarifs, pages légales) en local, servi comme sur Cloudflare |
 | `pnpm bench:synchro [url]` | QR d'appairage et aller-retour chiffré desktop ↔ tablette |
 | `pnpm build:whisper-mac` | whisper-server autonome (statique, Metal) pour l'installeur Mac ; nécessite cmake |
-| `pnpm dist` | Installeur de la plateforme courante (`apps/desktop/dist/`) |
+| `pnpm dist` | Installeur de la plateforme courante (`apps/desktop/dist/` ; Windows : `pnpm setup:whisper` avant, pour embarquer whisper-server) |
 
 Le menu de l'icône garde une entrée « Mesures (POC) » pour remesurer la capture et la dictée.
 
 ### Publier une version
 
-Monter la version dans `apps/desktop/package.json`, puis `git tag vX.Y.Z && git push --tags` : la CI construit le .dmg et l'envoie sur le bucket R2 `vibescreener-downloads` (`dl.vibescreener.dev`), avec `install.sh` et, en dernier, `latest.json`, que les apps installées lisent pour proposer la mise à jour.
+Monter la version dans `apps/desktop/package.json`, puis `git tag vX.Y.Z && git push --tags` : la CI construit le .dmg et le .exe, installe et teste l'app sur Windows, puis envoie les installeurs sur le bucket R2 `vibescreener-downloads` (`dl.vibescreener.dev`), avec `install.sh`, `install.ps1` et, en dernier, `latest.json`, que les apps installées lisent pour proposer la mise à jour. Elle crée aussi une Release GitHub, que lisent encore les apps ≤ 0.7.0 (le temps qu'elles passent à une version qui lit R2). Sans tag, « Run workflow » avec « Construire les installeurs » fait tout sauf la publication (installeurs dans les artefacts du run).
 
 ### Cloudflare
 
@@ -101,7 +120,7 @@ Tout est sur le compte Cloudflare du projet (domaine provisoire `vibescreener.de
 | --- | --- | --- |
 | `vibescreener.dev` | Site (`apps/site`, statique) | `pnpm site:deploy` |
 | `relay.vibescreener.dev` | Relais + PWA de la tablette (`apps/relay`). Le même Worker répond sur `pastille.vibescreener.workers.dev` pour les apps et tablettes appairées avant : ne pas retirer. | `pnpm relay:deploy` |
-| `dl.vibescreener.dev` | Bucket R2 public `vibescreener-downloads` : .dmg, `install.sh`, `latest.json` | CI, au tag |
+| `dl.vibescreener.dev` | Bucket R2 public `vibescreener-downloads` : .dmg, .exe, `install.sh`, `install.ps1`, `latest.json` | CI, au tag |
 
 La CI déploie le relais et le site à chaque push sur `main`, et publie sur R2 au tag, dès que le dépôt a le secret `CLOUDFLARE_API_TOKEN` (jeton limité : Workers, R2, routes du domaine) et la variable `CLOUDFLARE_ACCOUNT_ID`. À la main : `pnpm --filter @pastille/relay exec wrangler login`.
 
