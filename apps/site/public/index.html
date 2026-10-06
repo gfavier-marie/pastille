@@ -36,41 +36,52 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @supports (animation-timeline: view()){.vs-reveal{animation:vs-rise linear both;animation-timeline:view();animation-range:entry 5% entry 45%}}
 @keyframes vs-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
-/* Démo du hero, cycle de 26 s : acte 1 (0-15 s) la revue, acte 2 (15-26 s) Claude Code l'applique. */
-@keyframes vs-keys{0%{opacity:0;transform:translate(-50%,-50%) scale(.92)}0.69%,2.6%{opacity:1;transform:translate(-50%,-50%) scale(1)}3.46%,100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
-@keyframes vs-flash{0%,3.46%{opacity:0}3.65%{opacity:.75}5.38%,100%{opacity:0}}
-@keyframes vs-chip{0%,3.85%{opacity:0;transform:translate(-50%,-1cqw)}5%,11.54%{opacity:1;transform:translate(-50%,0)}13.08%,100%{opacity:0;transform:translate(-50%,0)}}
-@keyframes vs-cursor{0%,3.46%{left:90cqw;top:62cqw;opacity:1}6.35%,20.19%{left:37cqw;top:32.3cqw}23.65%,36.92%{left:91.5cqw;top:55.3cqw}40.38%,50.77%{left:61cqw;top:11.6cqw}53.65%{left:90cqw;top:62cqw;opacity:1}55.38%,98.08%{left:90cqw;top:62cqw;opacity:0}100%{left:90cqw;top:62cqw;opacity:1}}
-@keyframes vs-r1{0%,6.35%{transform:scale(0);opacity:0}6.63%{transform:scale(.2);opacity:.7}8.65%,100%{transform:scale(1);opacity:0}}
-@keyframes vs-r2{0%,23.65%{transform:scale(0);opacity:0}23.94%{transform:scale(.2);opacity:.7}25.96%,100%{transform:scale(1);opacity:0}}
-@keyframes vs-r3{0%,40.38%{transform:scale(0);opacity:0}40.67%{transform:scale(.2);opacity:.7}42.69%,100%{transform:scale(1);opacity:0}}
-@keyframes vs-p1{0%,6.63%{transform:scale(0);opacity:0}7.27%{transform:scale(1.2);opacity:1}7.85%,55.38%{transform:scale(1);opacity:1}57.12%,100%{transform:scale(.6);opacity:0}}
-@keyframes vs-p2{0%,23.94%{transform:scale(0);opacity:0}24.58%{transform:scale(1.2);opacity:1}25.15%,55.38%{transform:scale(1);opacity:1}57.12%,100%{transform:scale(.6);opacity:0}}
-@keyframes vs-p3{0%,40.67%{transform:scale(0);opacity:0}41.31%{transform:scale(1.2);opacity:1}41.88%,55.38%{transform:scale(1);opacity:1}57.12%,100%{transform:scale(.6);opacity:0}}
-@keyframes vs-b1{0%,7.5%{opacity:0;transform:translateY(1.5cqw)}8.94%,20.19%{opacity:1;transform:translateY(0)}21.92%,100%{opacity:0;transform:translateY(0)}}
-@keyframes vs-b2{0%,24.81%{opacity:0;transform:translateY(1.5cqw)}26.25%,36.92%{opacity:1;transform:translateY(0)}38.65%,100%{opacity:0;transform:translateY(0)}}
-@keyframes vs-b3{0%,41.54%{opacity:0;transform:translateY(1.5cqw)}42.98%,50.19%{opacity:1;transform:translateY(0)}51.92%,100%{opacity:0;transform:translateY(0)}}
-@keyframes vs-t1{0%,9.23%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(46,end)}15.58%,100%{clip-path:inset(0 0 0 0)}}
-@keyframes vs-t2{0%,26.54%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}32.88%,100%{clip-path:inset(0 0 0 0)}}
-@keyframes vs-t3{0%,43.27%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}49.04%,100%{clip-path:inset(0 0 0 0)}}
-@keyframes vs-pill{0%,51.35%{opacity:0;transform:translate(-50%,2cqw)}53.08%,55.38%{opacity:1;transform:translate(-50%,0)}57.12%,100%{opacity:0;transform:translate(-50%,0)}}
-@keyframes vs-dim{0%,55.38%{opacity:0}57.31%,81.54%{opacity:1}83.46%,100%{opacity:0}}
-@keyframes vs-term{0%,55.77%{opacity:0;transform:translateY(4cqw) scale(.97)}57.69%,81.15%{opacity:1;transform:none}83.08%,100%{opacity:0;transform:translateY(-2cqw) scale(.98)}}
-@keyframes vs-prompt{0%,58.46%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(32,end)}63.08%,100%{clip-path:inset(0 0 0 0)}}
-@keyframes vs-c1{0%,64.62%{opacity:0;transform:translateY(.6cqw)}65.58%,100%{opacity:1;transform:none}}
-@keyframes vs-c2{0%,66.15%{opacity:0;transform:translateY(.6cqw)}67.12%,100%{opacity:1;transform:none}}
-@keyframes vs-c3{0%,68.08%{opacity:0;transform:translateY(.6cqw)}69.04%,100%{opacity:1;transform:none}}
-@keyframes vs-c4{0%,69.62%{opacity:0;transform:translateY(.6cqw)}70.58%,100%{opacity:1;transform:none}}
-@keyframes vs-c5{0%,71.92%{opacity:0;transform:translateY(.6cqw)}72.88%,100%{opacity:1;transform:none}}
-@keyframes vs-c6{0%,73.85%{opacity:0;transform:translateY(.6cqw)}74.81%,100%{opacity:1;transform:none}}
-@keyframes vs-c7{0%,75.38%{opacity:0;transform:translateY(.6cqw)}76.35%,100%{opacity:1;transform:none}}
-@keyframes vs-c8{0%,76.92%{opacity:0;transform:translateY(.6cqw)}77.88%,100%{opacity:1;transform:none}}
-@keyframes vs-c9{0%,78.85%{opacity:0;transform:translateY(.6cqw)}79.81%,100%{opacity:1;transform:none}}
-@keyframes vs-after{0%,82.31%{opacity:0}84.23%,97.31%{opacity:1}99.23%,100%{opacity:0}}
-@keyframes vs-k1{0%,83.85%{transform:scale(0);opacity:0}85%{transform:scale(1.2);opacity:1}85.58%,97.31%{transform:scale(1);opacity:1}99.23%,100%{transform:scale(.6);opacity:0}}
-@keyframes vs-k2{0%,85%{transform:scale(0);opacity:0}86.15%{transform:scale(1.2);opacity:1}86.73%,97.31%{transform:scale(1);opacity:1}99.23%,100%{transform:scale(.6);opacity:0}}
-@keyframes vs-k3{0%,86.15%{transform:scale(0);opacity:0}87.31%{transform:scale(1.2);opacity:1}87.88%,97.31%{transform:scale(1);opacity:1}99.23%,100%{transform:scale(.6);opacity:0}}
-@keyframes vs-done{0%,86.92%{opacity:0;transform:translate(-50%,2cqw)}88.46%,96.92%{opacity:1;transform:translate(-50%,0)}98.85%,100%{opacity:0;transform:translate(-50%,0)}}
+/* Démo du hero, cycle de 30 s : 1 capture (0-5 s), 2 commentaires (5-18,4 s), 3 Claude Code lit la revue par le MCP (18,4-25,4 s), 4 résultat (25,4-30 s). */
+@keyframes vs-keys{0%,3.33%{opacity:0;transform:translate(-50%,-50%) scale(.92)}4.17%,9.33%{opacity:1;transform:translate(-50%,-50%) scale(1)}10.33%,100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes vs-flash{0%,15.67%{opacity:0}15.83%{opacity:.75}17.33%,100%{opacity:0}}
+@keyframes vs-chip{0%,16.67%{opacity:0;transform:translate(-50%,-1cqw)}17.67%,23.33%{opacity:1;transform:translate(-50%,0)}24.67%,100%{opacity:0;transform:translate(-50%,0)}}
+@keyframes vs-cursor{0%{left:90cqw;top:62cqw;opacity:1}4%,10%{left:74cqw;top:52cqw}13%,16.33%{left:70cqw;top:47cqw}18.84%,30.83%{left:37cqw;top:32.3cqw}33.83%,45.33%{left:91.5cqw;top:55.3cqw}48.33%,57.33%{left:61cqw;top:11.6cqw}59.83%{left:90cqw;top:62cqw;opacity:1}61.33%,98.34%{left:90cqw;top:62cqw;opacity:0}100%{left:90cqw;top:62cqw;opacity:1}}
+@keyframes vs-r1{0%,18.84%{transform:scale(0);opacity:0}19.08%{transform:scale(.2);opacity:.7}20.83%,100%{transform:scale(1);opacity:0}}
+@keyframes vs-r2{0%,33.83%{transform:scale(0);opacity:0}34.08%{transform:scale(.2);opacity:.7}35.83%,100%{transform:scale(1);opacity:0}}
+@keyframes vs-r3{0%,48.33%{transform:scale(0);opacity:0}48.58%{transform:scale(.2);opacity:.7}50.33%,100%{transform:scale(1);opacity:0}}
+@keyframes vs-p1{0%,19.08%{transform:scale(0);opacity:0}19.63%{transform:scale(1.2);opacity:1}20.14%,61.33%{transform:scale(1);opacity:1}62.84%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-p2{0%,34.08%{transform:scale(0);opacity:0}34.64%{transform:scale(1.2);opacity:1}35.13%,61.33%{transform:scale(1);opacity:1}62.84%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-p3{0%,48.58%{transform:scale(0);opacity:0}49.14%{transform:scale(1.2);opacity:1}49.63%,61.33%{transform:scale(1);opacity:1}62.84%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-b1{0%,19.83%{opacity:0;transform:translateY(1.5cqw)}21.08%,30.83%{opacity:1;transform:translateY(0)}32.33%,100%{opacity:0;transform:translateY(0)}}
+@keyframes vs-b2{0%,34.84%{opacity:0;transform:translateY(1.5cqw)}36.08%,45.33%{opacity:1;transform:translateY(0)}46.83%,100%{opacity:0;transform:translateY(0)}}
+@keyframes vs-b3{0%,49.33%{opacity:0;transform:translateY(1.5cqw)}50.58%,56.83%{opacity:1;transform:translateY(0)}58.33%,100%{opacity:0;transform:translateY(0)}}
+@keyframes vs-t1{0%,21.33%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(46,end)}26.84%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t2{0%,36.33%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}41.83%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t3{0%,50.83%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}55.83%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-pill{0%,57.84%{opacity:0;transform:translate(-50%,2cqw)}59.34%,61.33%{opacity:1;transform:translate(-50%,0)}62.84%,100%{opacity:0;transform:translate(-50%,0)}}
+@keyframes vs-dim{0%,61.33%{opacity:0}63%,84%{opacity:1}85.67%,100%{opacity:0}}
+@keyframes vs-term{0%,61.67%{opacity:0;transform:translateY(4cqw) scale(.97)}63.33%,83.66%{opacity:1;transform:none}85.34%,100%{opacity:0;transform:translateY(-2cqw) scale(.98)}}
+@keyframes vs-prompt{0%,64%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(32,end)}68%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-c1{0%,69.34%{opacity:0;transform:translateY(.6cqw)}70.17%,100%{opacity:1;transform:none}}
+@keyframes vs-c2{0%,70.66%{opacity:0;transform:translateY(.6cqw)}71.5%,100%{opacity:1;transform:none}}
+@keyframes vs-c3{0%,72.34%{opacity:0;transform:translateY(.6cqw)}73.17%,100%{opacity:1;transform:none}}
+@keyframes vs-c4{0%,73.67%{opacity:0;transform:translateY(.6cqw)}74.5%,100%{opacity:1;transform:none}}
+@keyframes vs-c5{0%,75.66%{opacity:0;transform:translateY(.6cqw)}76.5%,100%{opacity:1;transform:none}}
+@keyframes vs-c6{0%,77.34%{opacity:0;transform:translateY(.6cqw)}78.17%,100%{opacity:1;transform:none}}
+@keyframes vs-c7{0%,78.66%{opacity:0;transform:translateY(.6cqw)}79.5%,100%{opacity:1;transform:none}}
+@keyframes vs-c8{0%,80%{opacity:0;transform:translateY(.6cqw)}80.83%,100%{opacity:1;transform:none}}
+@keyframes vs-c9{0%,81.67%{opacity:0;transform:translateY(.6cqw)}82.5%,100%{opacity:1;transform:none}}
+@keyframes vs-after{0%,84.67%{opacity:0}86.33%,97.67%{opacity:1}99.33%,100%{opacity:0}}
+@keyframes vs-k1{0%,86%{transform:scale(0);opacity:0}87%{transform:scale(1.2);opacity:1}87.5%,97.67%{transform:scale(1);opacity:1}99.33%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-k2{0%,87%{transform:scale(0);opacity:0}88%{transform:scale(1.2);opacity:1}88.5%,97.67%{transform:scale(1);opacity:1}99.33%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-k3{0%,88%{transform:scale(0);opacity:0}89%{transform:scale(1.2);opacity:1}89.5%,97.67%{transform:scale(1);opacity:1}99.33%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-done{0%,88.66%{opacity:0;transform:translate(-50%,2cqw)}90%,97.33%{opacity:1;transform:translate(-50%,0)}99%,100%{opacity:0;transform:translate(-50%,0)}}
+@keyframes vs-frame{0%,10%{opacity:0}11%,15.83%{opacity:1}16.67%,100%{opacity:0}}
+@keyframes vs-rc{0%,15.33%{transform:scale(0);opacity:0}15.58%{transform:scale(.2);opacity:.7}17.33%,100%{transform:scale(1);opacity:0}}
+/* Bandeau des 4 étapes, surligné en synchro : capture 0-5 s, commentaires 5-18,4 s, Claude Code 18,4-25,4 s, résultat 25,4-29,7 s. */
+@keyframes vs-s1{0%,16.67%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}17.67%,99%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}100%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}}
+@keyframes vs-s2{0%,16.67%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}17.67%,61.33%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}62.33%,100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
+@keyframes vs-s3{0%,61.33%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}62.33%,84.67%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}85.67%,100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
+@keyframes vs-s4{0%,84.67%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}85.67%,99%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
+.vs-etapes{margin:16px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vs-etapes li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent;font-size:14px;font-weight:600;line-height:1.25}
+.vs-etapes span{flex:none;width:22px;height:22px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px}
+@media (max-width:600px){.vs-etapes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @keyframes vs-draw{0%{stroke-dashoffset:1;opacity:1}40%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw2{0%,30%{stroke-dashoffset:1;opacity:1}58%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw3{0%,52%{stroke-dashoffset:1;opacity:1}72%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
@@ -80,7 +91,6 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-l2{0%,28%{opacity:0;transform:translateY(6px)}34%,88%{opacity:1;transform:none}96%,100%{opacity:0}}
 @keyframes vs-l3{0%,48%{opacity:0;transform:translateY(6px)}54%,88%{opacity:1;transform:none}96%,100%{opacity:0}}
 @keyframes vs-pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes vs-grow{from{transform:scaleX(0)}to{transform:none}}
 [hidden]{display:none!important}
 .vs-carte{position:relative;display:grid;min-height:400px;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
 .vs-carte.ouverte{transform:rotateY(180deg)}
@@ -128,17 +138,6 @@ details[open] .vs-plus{transform:rotate(45deg)}
         </div>
         <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(44px, 5.4vw, 76px); line-height: 0.98; letter-spacing: -0.045em; animation: vs-rise .7s .12s cubic-bezier(.2,.7,.2,1) both">Montrez à votre IA <span style="color: #D63A0C">ce qu'il faut changer.</span></h1>
         <p style="margin: 0; max-width: 500px; font-size: 20px; line-height: 1.45; color: #3A3A40; animation: vs-rise .7s .2s cubic-bezier(.2,.7,.2,1) both">Cliquez sur ce qui cloche dans votre app et dites ce que vous voulez. La capture, l'endroit exact et votre phrase partent ensemble à votre IA&nbsp;: plus rien à recadrer, coller ni rédiger.</p>
-        <a href="#gain" aria-label="Exemple : une revue de 20 retours prend 12 minutes à la main et 1 minute 45 avec VibeScreener. Calculer votre gain." style="max-width: 500px; display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 14px; background: #F5F5F7; color: inherit; text-decoration: none; font-size: 14px; animation: vs-rise .7s .24s cubic-bezier(.2,.7,.2,1) both">
-          <span style="display: flex; justify-content: space-between; gap: 12px; color: #5E5E66"><span>Exemple&nbsp;: une revue de 20&nbsp;retours</span><span style="font-weight: 600; color: #B8300A; white-space: nowrap">Votre gain →</span></span>
-          <span aria-hidden="true" style="display: grid; grid-template-columns: 128px minmax(0, 1fr) 64px; align-items: center; gap: 4px 12px">
-            <span style="color: #3A3A40">À la main</span>
-            <span style="height: 10px; border-radius: 999px; background: #B8B8C0; transform-origin: left; animation: vs-grow 1.4s .6s cubic-bezier(.2,.7,.2,1) both"></span>
-            <span style="font-weight: 600; text-align: right; font-variant-numeric: tabular-nums">12 min</span>
-            <span style="font-weight: 600">Avec VibeScreener</span>
-            <span><span style="display: block; width: 14.6%; height: 10px; border-radius: 999px; background: #D63A0C; transform-origin: left; animation: vs-grow .5s .6s cubic-bezier(.2,.7,.2,1) both"></span></span>
-            <span style="font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; color: #B8300A">1 min 45</span>
-          </span>
-        </a>
         <div id="installer" style="display: flex; flex-direction: column; gap: 12px; animation: vs-rise .7s .28s cubic-bezier(.2,.7,.2,1) both">
           <div style="display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 16px; border-radius: 12px; background: #17171A; max-width: 520px">
             <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
@@ -153,7 +152,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
       </div>
 
       <div style="flex: 1.35 1 560px; min-width: 0; animation: vs-rise .9s .3s cubic-bezier(.2,.7,.2,1) both">
-        <div role="img" aria-label="Démonstration sur une app de ventes : ⇧⌘2 fige l'écran, puis trois clics posent trois points avec une demande dictée chacun (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail), puis Claude Code lit la revue par le serveur MCP de VibeScreener et applique les trois demandes" style="position: relative; container-type: inline-size; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px rgba(23,23,26,0.08), 0 40px 80px -28px rgba(23,23,26,0.45)">
+        <div role="img" aria-label="Démonstration en quatre étapes sur une app de ventes. Un : le raccourci Contrôle Option Commande P (⌃⌥⌘P) fige l'écran, un clic sur la fenêtre la capture. Deux : trois clics posent trois points, chacun avec une demande dictée (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail). Trois : Claude Code lit la revue par le serveur MCP de VibeScreener. Quatre : les trois demandes sont appliquées dans l'app." style="position: relative; container-type: inline-size; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px rgba(23,23,26,0.08), 0 40px 80px -28px rgba(23,23,26,0.45)">
           <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
   <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
 
@@ -266,18 +265,20 @@ details[open] .vs-plus{transform:rotate(45deg)}
   </div>
 </div></div>
 
-          <span aria-hidden="true" style="position: absolute; inset: 0; background: #FFFFFF; pointer-events: none; opacity: 0; animation: vs-flash 26s linear infinite"></span>
-          <span aria-hidden="true" style="position: absolute; left: 50%; top: 8cqw; display: flex; align-items: center; gap: 1cqw; padding: 1cqw 1.8cqw; border-radius: 999px; background: rgba(23,23,26,0.88); color: #FFFFFF; font-size: 1.7cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 1cqw 3cqw rgba(0,0,0,0.25); opacity: 0; animation: vs-chip 26s ease-out infinite"><span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #D63A0C"></span>Écran figé · cliquez sur ce qui cloche</span>
+          <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(23,23,26,0.12); opacity: 0; animation: vs-frame 30s ease-out infinite"><span style="position: absolute; inset: 0.8cqw; border: 0.5cqw solid #D63A0C; border-radius: 1.2cqw; background: rgba(214,58,12,0.06)"></span></span>
+          <span aria-hidden="true" style="position: absolute; left: 67cqw; top: 44cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-rc 30s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; inset: 0; background: #FFFFFF; pointer-events: none; opacity: 0; animation: vs-flash 30s linear infinite"></span>
+          <span aria-hidden="true" style="position: absolute; left: 50%; top: 8cqw; display: flex; align-items: center; gap: 1cqw; padding: 1cqw 1.8cqw; border-radius: 999px; background: rgba(23,23,26,0.88); color: #FFFFFF; font-size: 1.7cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 1cqw 3cqw rgba(0,0,0,0.25); opacity: 0; animation: vs-chip 30s ease-out infinite"><span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #D63A0C"></span>Écran capturé · cliquez sur ce qui cloche</span>
 
-          <span aria-hidden="true" style="position: absolute; left: 34cqw; top: 29.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r1 26s ease-out infinite"></span>
-          <span aria-hidden="true" style="position: absolute; left: 88.5cqw; top: 52.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r2 26s ease-out infinite"></span>
-          <span aria-hidden="true" style="position: absolute; left: 58cqw; top: 8.6cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r3 26s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; left: 34cqw; top: 29.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r1 30s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; left: 88.5cqw; top: 52.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r2 30s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; left: 58cqw; top: 8.6cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r3 30s ease-out infinite"></span>
 
-          <span aria-hidden="true" style="position: absolute; left: 37cqw; top: 28.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p1 26s ease-out infinite">1</span>
-          <span aria-hidden="true" style="position: absolute; left: 91.5cqw; top: 51.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p2 26s ease-out infinite">2</span>
-          <span aria-hidden="true" style="position: absolute; left: 61cqw; top: 7.4cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p3 26s ease-out infinite">3</span>
+          <span aria-hidden="true" style="position: absolute; left: 37cqw; top: 28.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p1 30s ease-out infinite">1</span>
+          <span aria-hidden="true" style="position: absolute; left: 91.5cqw; top: 51.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p2 30s ease-out infinite">2</span>
+          <span aria-hidden="true" style="position: absolute; left: 61cqw; top: 7.4cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p3 30s ease-out infinite">3</span>
 
-          <div aria-hidden="true" style="position: absolute; left: 34cqw; top: 36cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); animation: vs-b1 26s ease-out infinite">
+          <div aria-hidden="true" style="position: absolute; left: 34cqw; top: 36cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); animation: vs-b1 30s ease-out infinite">
             <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600">
               <span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#1
               <span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">
@@ -304,10 +305,10 @@ details[open] .vs-plus{transform:rotate(45deg)}
               </span>
               <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:04</span>
             </div>
-            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t1 26s linear infinite">Ajoute un filtre : 7 jours, 30 jours, 12 mois.</span></div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t1 30s linear infinite">Ajoute un filtre : 7 jours, 30 jours, 12 mois.</span></div>
           </div>
 
-          <div aria-hidden="true" style="position: absolute; left: 38cqw; top: 36.5cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b2 26s ease-out infinite">
+          <div aria-hidden="true" style="position: absolute; left: 38cqw; top: 36.5cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b2 30s ease-out infinite">
             <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600">
               <span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#2
               <span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">
@@ -334,10 +335,10 @@ details[open] .vs-plus{transform:rotate(45deg)}
               </span>
               <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:05</span>
             </div>
-            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t2 26s linear infinite">Trie par montant, et ajoute un export CSV.</span></div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t2 30s linear infinite">Trie par montant, et ajoute un export CSV.</span></div>
           </div>
 
-          <div aria-hidden="true" style="position: absolute; left: 40cqw; top: 16cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b3 26s ease-out infinite">
+          <div aria-hidden="true" style="position: absolute; left: 40cqw; top: 16cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b3 30s ease-out infinite">
             <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600">
               <span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#3
               <span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">
@@ -364,24 +365,25 @@ details[open] .vs-plus{transform:rotate(45deg)}
               </span>
               <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:04</span>
             </div>
-            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t3 26s linear infinite">La recherche doit aussi trouver les e-mails.</span></div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t3 30s linear infinite">La recherche doit aussi trouver les e-mails.</span></div>
           </div>
 
-          <span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 1.4cqw; opacity: 0; animation: vs-keys 26s ease-out infinite">
-            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">⇧</span>
+          <span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 1.4cqw; opacity: 0; animation: vs-keys 30s ease-out infinite">
+            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">⌃</span>
+            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">⌥</span>
             <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">⌘</span>
-            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; font-weight: 600; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">2</span>
+            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; font-weight: 600; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">P</span>
           </span>
 
-          <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.6cqw 1.2cqw 1.2cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-pill 26s ease-out infinite">
+          <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.6cqw 1.2cqw 1.2cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-pill 30s ease-out infinite">
             <span style="padding: 0.3cqw 0.9cqw; border-radius: 0.7cqw; background: #2E2E33; font-weight: 500">⌘E</span>
             <svg viewBox="0 0 16 16" style="width: 2.4cqw; height: 2.4cqw" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#30D158"></circle><path d="M4.8 8.2 7 10.4l4.2-4.6" fill="none" stroke="#0B2E16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             3 demandes prêtes pour l'IA
           </span>
 
-          <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(14,14,16,0.45); opacity: 0; animation: vs-dim 26s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(14,14,16,0.45); opacity: 0; animation: vs-dim 30s ease-out infinite"></span>
 
-          <div aria-hidden="true" style="position: absolute; left: 9cqw; top: 7cqw; width: 82cqw; box-sizing: border-box; border-radius: 1.6cqw; overflow: hidden; background: #1C1B19; color: #ECEAE4; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 3cqw 6cqw rgba(0,0,0,0.45); opacity: 0; animation: vs-term 26s cubic-bezier(.2,.7,.2,1) infinite">
+          <div aria-hidden="true" style="position: absolute; left: 9cqw; top: 7cqw; width: 82cqw; box-sizing: border-box; border-radius: 1.6cqw; overflow: hidden; background: #1C1B19; color: #ECEAE4; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 3cqw 6cqw rgba(0,0,0,0.45); opacity: 0; animation: vs-term 30s cubic-bezier(.2,.7,.2,1) infinite">
             <div style="height: 4.6cqw; display: flex; align-items: center; gap: 1cqw; padding: 0 2cqw; background: #262522; border-bottom: 1px solid #33322E">
               <span style="width: 1.3cqw; height: 1.3cqw; border-radius: 999px; background: #FF5F57"></span>
               <span style="width: 1.3cqw; height: 1.3cqw; border-radius: 999px; background: #FEBC2E"></span>
@@ -390,33 +392,39 @@ details[open] .vs-plus{transform:rotate(45deg)}
             </div>
             <div style="display: flex; flex-direction: column; gap: 1cqw; padding: 2.2cqw 2.6cqw 2.6cqw; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 1.65cqw; line-height: 1.45; white-space: pre">
               <div style="display: flex; align-items: center; gap: 1.2cqw; margin-bottom: 0.6cqw; font-family: 'Instrument Sans', sans-serif; font-size: 1.9cqw; font-weight: 700; white-space: nowrap"><svg viewBox="0 0 24 24" style="width: 2.6cqw; height: 2.6cqw"><use href="#logo-claude"></use></svg>Claude Code<span style="font-weight: 500; color: #8E8E96">· MCP vibescreener branché</span></div>
-              <div style="padding: 0.9cqw 1.4cqw; border-radius: 0.9cqw; background: #2A2925; overflow: hidden"><span style="display: inline-block; animation: vs-prompt 26s linear infinite"><span style="color: #8E8E96">&gt; </span>Applique la revue VibeScreener</span></div>
-              <div style="opacity: 0; animation: vs-c1 26s ease-out infinite"><span style="color: #4EBA65">⏺</span> vibescreener - lire_revue<span style="color: #8E8E96"> (MCP)</span></div>
-              <div style="opacity: 0; animation: vs-c2 26s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">1 écran · 3 demandes</span></div>
-              <div style="opacity: 0; animation: vs-c3 26s ease-out infinite"><span style="color: #4EBA65">⏺</span> vibescreener - voir_ecran<span style="color: #8E8E96"> (MCP)(ecran: 1)</span></div>
-              <div style="opacity: 0; animation: vs-c4 26s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">capture annotée et 3 zooms</span></div>
-              <div style="opacity: 0; animation: vs-c5 26s ease-out infinite"><span style="color: #4EBA65">⏺</span> Update<span style="color: #8E8E96">(src/pages/Ventes.tsx)</span></div>
-              <div style="opacity: 0; animation: vs-c6 26s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #1 Filtre 7 j · 30 j · 12 mois</div>
-              <div style="opacity: 0; animation: vs-c7 26s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #2 Tri par montant, export CSV</div>
-              <div style="opacity: 0; animation: vs-c8 26s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #3 Recherche par e-mail</div>
-              <div style="opacity: 0; animation: vs-c9 26s ease-out infinite; margin-top: 0.6cqw"><span style="color: #D97757">✻</span> Les 3 demandes sont appliquées.</div>
+              <div style="padding: 0.9cqw 1.4cqw; border-radius: 0.9cqw; background: #2A2925; overflow: hidden"><span style="display: inline-block; animation: vs-prompt 30s linear infinite"><span style="color: #8E8E96">&gt; </span>Applique la revue VibeScreener</span></div>
+              <div style="opacity: 0; animation: vs-c1 30s ease-out infinite"><span style="color: #4EBA65">⏺</span> vibescreener - lire_revue<span style="color: #8E8E96"> (MCP)</span></div>
+              <div style="opacity: 0; animation: vs-c2 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">1 écran · 3 demandes</span></div>
+              <div style="opacity: 0; animation: vs-c3 30s ease-out infinite"><span style="color: #4EBA65">⏺</span> vibescreener - voir_ecran<span style="color: #8E8E96"> (MCP)(ecran: 1)</span></div>
+              <div style="opacity: 0; animation: vs-c4 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">capture annotée et 3 zooms</span></div>
+              <div style="opacity: 0; animation: vs-c5 30s ease-out infinite"><span style="color: #4EBA65">⏺</span> Update<span style="color: #8E8E96">(src/pages/Ventes.tsx)</span></div>
+              <div style="opacity: 0; animation: vs-c6 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #1 Filtre 7 j · 30 j · 12 mois</div>
+              <div style="opacity: 0; animation: vs-c7 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #2 Tri par montant, export CSV</div>
+              <div style="opacity: 0; animation: vs-c8 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #3 Recherche par e-mail</div>
+              <div style="opacity: 0; animation: vs-c9 30s ease-out infinite; margin-top: 0.6cqw"><span style="color: #D97757">✻</span> Les 3 demandes sont appliquées.</div>
             </div>
           </div>
 
-          <span aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; opacity: 0; animation: vs-after 26s ease-out infinite">Commande ou e-mail…</span>
-          <span aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; opacity: 0; animation: vs-after 26s ease-out infinite"><span style="padding: 0.4cqw 1.1cqw">7 j</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">30 j</span><span style="padding: 0.4cqw 1.1cqw">12 mois</span></span>
-          <span aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; opacity: 0; animation: vs-after 26s ease-out infinite"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">↓ Exporter CSV</span></span>
-          <span aria-hidden="true" style="position: absolute; left: 87.6cqw; top: 54.4cqw; font-size: 1.3cqw; font-weight: 700; color: #0E7C66; opacity: 0; animation: vs-after 26s ease-out infinite">↓</span>
-          <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 55.6cqw; top: 29.4cqw; animation: vs-k1 26s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
-          <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 94.2cqw; top: 49.6cqw; animation: vs-k2 26s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
-          <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 76.6cqw; top: 8.2cqw; animation: vs-k3 26s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
-          <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.8cqw 1.2cqw 1.4cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-done 26s ease-out infinite">
+          <span aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; opacity: 0; animation: vs-after 30s ease-out infinite">Commande ou e-mail…</span>
+          <span aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; opacity: 0; animation: vs-after 30s ease-out infinite"><span style="padding: 0.4cqw 1.1cqw">7 j</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">30 j</span><span style="padding: 0.4cqw 1.1cqw">12 mois</span></span>
+          <span aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; opacity: 0; animation: vs-after 30s ease-out infinite"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">↓ Exporter CSV</span></span>
+          <span aria-hidden="true" style="position: absolute; left: 87.6cqw; top: 54.4cqw; font-size: 1.3cqw; font-weight: 700; color: #0E7C66; opacity: 0; animation: vs-after 30s ease-out infinite">↓</span>
+          <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 55.6cqw; top: 29.4cqw; animation: vs-k1 30s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 94.2cqw; top: 49.6cqw; animation: vs-k2 30s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 76.6cqw; top: 8.2cqw; animation: vs-k3 30s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.8cqw 1.2cqw 1.4cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-done 30s ease-out infinite">
             <svg viewBox="0 0 24 24" style="width: 2.4cqw; height: 2.4cqw"><use href="#logo-claude"></use></svg>
             Claude Code a appliqué les 3 demandes
           </span>
 
-          <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 26s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+          <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 30s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
         </div>
+        <ol class="vs-etapes" aria-label="Les quatre étapes de la démonstration">
+          <li style="animation: vs-s1 30s linear infinite"><span>1</span>Capture d'écran</li>
+          <li style="animation: vs-s2 30s linear infinite"><span>2</span>Commentez</li>
+          <li style="animation: vs-s3 30s linear infinite"><span>3</span>Claude Code lit la revue (MCP)</li>
+          <li style="animation: vs-s4 30s linear infinite"><span>4</span>Résultat</li>
+        </ol>
       </div>
     </div>
   </section>
