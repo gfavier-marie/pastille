@@ -9,6 +9,10 @@ on:
         description: 'Mesurer aussi la transcription (télécharge le modèle, 547 Mo)'
         type: boolean
         default: false
+      dist:
+        description: 'Construire les installeurs (.dmg et .exe)'
+        type: boolean
+        default: false
 
 jobs:
   check:
@@ -44,3 +48,29 @@ jobs:
           key: whisper-large-v3-turbo-q5_0
       - run: pnpm setup:whisper
       - run: pnpm bench:dictee
+
+  dist:
+    if: ${{ inputs.dist }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - if: runner.os == 'Windows'
+        run: pnpm setup:whisper --bin-only
+      - if: runner.os == 'macOS'
+        run: pnpm build:whisper-mac
+      - run: pnpm dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pastille-${{ runner.os }}
+          path: |
+            apps/desktop/dist/*.dmg
+            apps/desktop/dist/*.exe

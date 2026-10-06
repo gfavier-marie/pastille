@@ -15,7 +15,9 @@
     "bench:synchro": "node apps/desktop/scripts/bench-synchro.ts",
     "relay": "pnpm --filter @pastille/relay dev",
     "relay:deploy": "pnpm --filter @pastille/relay run deploy",
-    "e2e": "pnpm --filter @pastille/desktop build && node scripts/e2e.ts"
+    "e2e": "pnpm --filter @pastille/desktop build && node scripts/e2e.ts",
+    "build:whisper-mac": "node scripts/build-whisper-mac.ts",
+    "dist": "pnpm --filter @pastille/desktop dist"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",

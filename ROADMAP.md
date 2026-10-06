@@ -70,11 +70,13 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 
 ## Lot 4 — Finition + PowerPoint
 
-- [ ] Assistant de premier lancement (autorisations, téléchargement du modèle)
-- [ ] Réglages complets (instructions du PDF, glossaire, moteur API, appareils appairés)
-- [ ] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S]
-- [ ] Sessions récentes [S], icône d'état [S]
-- [ ] Installeurs .dmg et .exe (electron-builder, whisper-server embarqué)
+- [x] Premiers pas dans les réglages : autorisations écran et micro, téléchargement du modèle avec progression
+- [x] Réglages complets : raccourci (vérifié), mode de commentaire (auto, ⌥ maintenu, clavier seul), silence, langue, dossier d'export, instructions du PDF, glossaire, moteur API compatible OpenAI (clé chiffrée), révocation de la tablette
+- [x] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S] (à vérifier en vrai)
+- [x] Sessions récentes [S], icône d'état [S] (nombre de points, transcriptions en cours)
+- [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
+- [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC
+- [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
 
 *Critère : installation sur une machine vierge, Mac et PC, en < 5 min modèle compris.*
 
@@ -87,4 +89,6 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 - [x] Menu en popover sous l'icône ; réglages en onglets ; assistant de premier lancement en 3 étapes ; fenêtre d'appairage ; PWA restylée
 - [x] Hors cahier des charges, validés le 6 oct. 2026 : **barre flottante** (option), **ouverture au démarrage**, **icône d'état dynamique** (dictée, transcriptions, erreur)
 - [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant et l'appairage
+- [x] Overlay en panneau macOS : Échap et premier clic marchent sans que l'app soit au premier plan (macOS 14+)
 - [ ] Validation réelle sur Mac : popover sous l'icône, barre flottante au survol, ouverture au démarrage
+- [ ] Raccourci par défaut : sur le Mac de test, ⇧⌘2 (et ⇧⌘0) n'arrivent jamais à Pastille, interceptés par une autre app ; ⌃⌥⌘P marche. L'enregistrement « réussit » quand même, donc rien n'est signalé. Choisir un défaut plus sûr

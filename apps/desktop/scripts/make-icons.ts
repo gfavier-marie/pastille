@@ -90,3 +90,4 @@ const logo: Draw = (ctx) => {
 await png(28, 28, 192 / 28, logo, join(pwa, 'icon-192.png'));
 await png(28, 28, 512 / 28, logo, join(pwa, 'icon-512.png'));
 await png(28, 28, 180 / 28, logo, join(pwa, 'apple-touch-icon.png'));
+await png(28, 28, 1024 / 28, logo, join(import.meta.dirname, '..', 'build', 'icon.png')); // icône de l'app (installeurs)

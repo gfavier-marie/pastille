@@ -29,9 +29,11 @@ function findFile(dir: string, name: string): string | undefined {
   return undefined;
 }
 
-// 1. Modèle
+// 1. Modèle (sauf « --bin-only », pour construire l'installeur : le modèle est téléchargé au premier lancement)
 const modelPath = join(repoRoot, 'models', MODEL_FILE);
-if (existsSync(modelPath)) {
+if (process.argv.includes('--bin-only')) {
+  console.log('Modèle ignoré (--bin-only).');
+} else if (existsSync(modelPath)) {
   console.log(`Modèle présent : ${modelPath}`);
 } else {
   mkdirSync(join(repoRoot, 'models'), { recursive: true });
