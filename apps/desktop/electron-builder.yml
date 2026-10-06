@@ -22,7 +22,11 @@ mac:
     - target: dmg
       arch: [arm64]
   category: public.app-category.developer-tools
-  identity: null # pas de compte Apple Developer : app non signée
+  # Pas de compte Apple Developer : signature ad hoc (sans elle, macOS dit « endommagé »
+  # pour une app téléchargée). install.sh évite l'alerte Gatekeeper.
+  identity: '-'
+  hardenedRuntime: false
+  artifactName: ${productName}-${arch}.${ext} # lien stable : releases/latest/download/VibeScreener-arm64.dmg
   extendInfo:
     LSUIElement: true # application de barre de menus, sans icône dans le Dock
     NSMicrophoneUsageDescription: VibeScreener utilise le micro pour dicter les commentaires.

@@ -11,3 +11,6 @@ vendor/
 # Sorties des POC
 poc-output/
 e2e-output/
+
+# État local de wrangler (relais en développement)
+.wrangler/
