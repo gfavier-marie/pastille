@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; media-src 'self' mediastream:" />
+    <title>Pastille — POC</title>
+    <style>
+      :root { color-scheme: light dark; font: 14px/1.45 system-ui, sans-serif; }
+      body { margin: 0; padding: 16px 20px; }
+      h1 { font-size: 18px; margin: 0 0 12px; }
+      h2 { font-size: 15px; margin: 20px 0 8px; }
+      table { border-collapse: collapse; width: 100%; font-size: 12px; }
+      th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent); vertical-align: top; }
+      button { font: inherit; padding: 6px 12px; margin-right: 8px; }
+      .muted { opacity: 0.65; }
+      .ok { color: #1a7f37; } .ko { color: #cf222e; }
+      @media (prefers-color-scheme: dark) { .ok { color: #3fb950; } .ko { color: #f85149; } }
+      blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid color-mix(in srgb, currentColor 30%, transparent); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./poc.tsx"></script>
+  </body>
+</html>

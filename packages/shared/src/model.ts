@@ -1,0 +1,42 @@
+// Modèle de données d'une session de revue (cahier des charges §8.2).
+
+export type Session = {
+  id: string;
+  name: string;
+  context?: string;
+  createdAt: string;
+  updatedAt: string;
+  captures: Capture[];
+};
+
+export type Capture = {
+  id: string;
+  createdAt: string;
+  image: string; // chemin relatif au dossier de session
+  width: number; // pixels physiques
+  height: number;
+  scaleFactor: number;
+  source?: { app?: string; windowTitle?: string; displayId?: string };
+  annotations: Annotation[];
+};
+
+// Coordonnées normalisées 0–1, relatives à l'image
+export type Geometry =
+  | { kind: 'point'; x: number; y: number }
+  | { kind: 'zone'; x: number; y: number; w: number; h: number }
+  | { kind: 'arrow'; x1: number; y1: number; x2: number; y2: number };
+
+export type Annotation = {
+  id: string; // stable
+  number: number; // affiché, recalculé sur toute la session
+  geometry: Geometry;
+  text: string;
+  input: 'typed' | 'dictated' | 'mixed';
+  audio?: string;
+  transcription: 'none' | 'recording' | 'pending' | 'done' | 'error';
+  sketches: Sketch[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Sketch = { id: string; png: string; strokes: string; createdAt: string };

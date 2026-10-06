@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+
+# electron-builder et les modules natifs préfèrent un node_modules à plat.
+nodeLinker: hoisted
+
+allowBuilds:
+  electron: false # le binaire est téléchargé au premier lancement
+  esbuild: true
+  get-windows: true
+
+minimumReleaseAgeExclude:
+  - vite@7.3.7

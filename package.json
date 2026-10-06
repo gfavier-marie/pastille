@@ -1,0 +1,21 @@
+{
+  "name": "pastille",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @pastille/desktop dev",
+    "test": "vitest run",
+    "typecheck": "pnpm -r typecheck",
+    "setup:whisper": "node scripts/setup-whisper.ts",
+    "bench:dictee": "node apps/desktop/scripts/bench-dictee.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

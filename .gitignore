@@ -1,0 +1,12 @@
+node_modules/
+out/
+dist/
+*.log
+.DS_Store
+
+# Modèle Whisper (547 Mo) et binaires téléchargés
+models/
+vendor/
+
+# Sorties des POC
+poc-output/
