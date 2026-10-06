@@ -7,6 +7,17 @@ import { join } from 'node:path';
 import { newSession, renumber, type Capture, type Session } from '@pastille/shared';
 
 const SAVE_DELAY_MS = 300;
+const HISTORY_LIMIT = 200;
+const COALESCE_MS = 1500;
+
+export type UpdateOptions = {
+  /** Modification de l'utilisateur, annulable avec ⌘Z. */
+  undoable?: boolean;
+  /** Deux modifications de même clé rapprochées (frappe dans un commentaire) ne font qu'une étape. */
+  coalesceKey?: string;
+  /** Résultat arrivé en différé (transcription) : appliqué aussi à l'historique pour ne pas être perdu par ⌘Z. */
+  patchHistory?: boolean;
+};
 
 type State = { currentSessionId?: string; lastContext?: string };
 
@@ -18,6 +29,9 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   let session: Session | null = null;
   let state: State = {};
   let timer: ReturnType<typeof setTimeout> | null = null;
+  let undoStack: Session[] = [];
+  let redoStack: Session[] = [];
+  let lastPush = { key: '', at: 0 };
   let saving = Promise.resolve();
 
   const dirOf = (id: string) => join(sessionsDir, id);
@@ -71,9 +85,22 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   }
 
   /** Toute modification passe par ici : numérotation, horodatage, sauvegarde, notification. */
-  function update(mutate: (s: Session) => void) {
+  function update(mutate: (s: Session) => void, opts: UpdateOptions = {}) {
     if (!session) return;
+    if (opts.undoable) {
+      const now = Date.now();
+      const coalesce = opts.coalesceKey && opts.coalesceKey === lastPush.key && now - lastPush.at < COALESCE_MS;
+      if (!coalesce) undoStack = [...undoStack, structuredClone(session)].slice(-HISTORY_LIMIT);
+      lastPush = { key: opts.coalesceKey ?? '', at: now };
+      redoStack = [];
+    }
+    if (opts.patchHistory) for (const snapshot of [...undoStack, ...redoStack]) mutate(snapshot);
     mutate(session);
+    commit();
+  }
+
+  function commit() {
+    if (!session) return;
     renumber(session);
     session.updatedAt = new Date().toISOString();
     if (session.context !== state.lastContext) {
@@ -99,13 +126,34 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     capture.image = `captures/${capture.id}.png`;
     await mkdir(join(dirOf(s.id), 'captures'), { recursive: true });
     await writeFile(join(dirOf(s.id), capture.image), png);
-    update((x) => x.captures.push(capture));
+    // Une capture n'est pas annulable : elle est ajoutée aussi à l'historique.
+    update((x) => x.captures.push(structuredClone(capture)), { patchHistory: true });
     return capture;
+  }
+
+  /** Annuler (⌘Z) / rétablir (⌘⇧Z) : la session revient à l'état précédent. */
+  function undo() {
+    const previous = undoStack.pop();
+    if (!session || !previous) return;
+    redoStack.push(session);
+    session = previous;
+    lastPush = { key: '', at: 0 };
+    commit();
+  }
+
+  function redo() {
+    const next = redoStack.pop();
+    if (!session || !next) return;
+    undoStack.push(session);
+    session = next;
+    commit();
   }
 
   /** « Nouvelle session » : la session actuelle est fermée, la suivante naîtra à la prochaine capture. */
   async function close() {
     await flush();
+    undoStack = [];
+    redoStack = [];
     session = null;
     state.currentSessionId = undefined;
     await saveState();
@@ -119,6 +167,8 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     restore,
     ensure,
     update,
+    undo,
+    redo,
     addCapture,
     flush,
     close,

@@ -48,6 +48,7 @@ export type CaptureOptions = {
 export function createCapture(opts: CaptureOptions) {
   let overlays: Overlay[] = [];
   let pending: Pending | null = null;
+  let lastZone: { displayId: number; rect: Rectangle } | null = null; // pour ⇧ + clic
 
   function buildOverlays() {
     for (const o of overlays) o.win.destroy();
@@ -151,6 +152,18 @@ export function createCapture(opts: CaptureOptions) {
     const target = overlays.find((o) => o.display.id === screen.getDisplayNearestPoint(cursor).id);
     if (process.platform === 'darwin') app.focus({ steal: true });
     target?.win.focus();
+
+    // Encadré au survol : chaque overlay reçoit les fenêtres de son écran, de l'avant vers l'arrière.
+    void windows.then((list) => {
+      if (pending?.t0 !== t0) return;
+      for (const o of overlays) {
+        const rects = list
+          .filter(isCandidate)
+          .map((w) => onDisplay(toDip(w.bounds), o.display))
+          .filter((r): r is Rectangle => r !== null);
+        o.win.webContents.send('overlay:windows', rects);
+      }
+    });
   }
 
   async function finish(o: Overlay, pick: OverlayPick): Promise<void> {
@@ -175,21 +188,21 @@ export function createCapture(opts: CaptureOptions) {
     if (pick.kind === 'zone') {
       rect = { x: pick.x, y: pick.y, width: pick.w, height: pick.h };
       target = 'zone';
+      lastZone = { displayId: d.id, rect };
+    } else if (pick.shift && lastZone?.displayId === d.id) {
+      rect = lastZone.rect; // ⇧ + clic : même zone que la dernière fois
+      target = 'zone';
     } else {
       const gx = d.bounds.x + pick.x;
       const gy = d.bounds.y + pick.y;
       hit = (await p.windows).find((w) => {
-        if (w.owner.processId === process.pid) return false;
         const b = toDip(w.bounds);
-        return b.width > 40 && b.height > 40 && gx >= b.x && gy >= b.y && gx < b.x + b.width && gy < b.y + b.height;
+        return isCandidate(w) && gx >= b.x && gy >= b.y && gx < b.x + b.width && gy < b.y + b.height;
       });
-      if (hit) {
-        const b = toDip(hit.bounds);
-        const inter = intersect({ ...b, x: b.x - d.bounds.x, y: b.y - d.bounds.y }, full);
-        if (inter) {
-          rect = inter;
-          target = 'window';
-        }
+      const inter = hit && onDisplay(toDip(hit.bounds), d);
+      if (inter) {
+        rect = inter;
+        target = 'window';
       }
     }
 
@@ -213,7 +226,7 @@ export function createCapture(opts: CaptureOptions) {
       app: target === 'window' ? hit?.owner.name : undefined,
       title: target === 'window' ? hit?.title : undefined,
       point:
-        pick.kind === 'click'
+        pick.kind === 'click' && inside(pick, rect)
           ? { x: (pick.x - rect.x) / rect.width, y: (pick.y - rect.y) / rect.height }
           : undefined,
       timings: { ...p.timings, windowsMs: await p.windowsMs, pickToSavedMs: performance.now() - tPick },
@@ -230,6 +243,23 @@ export function createCapture(opts: CaptureOptions) {
 
   return { start, autoPick, isBusy: () => pending !== null };
 }
+
+/** Fenêtres visées par un clic : pas les nôtres, pas les minuscules (icônes, menus). */
+function isCandidate(w: WindowInfo): boolean {
+  const b = toDip(w.bounds);
+  return w.owner.processId !== process.pid && b.width > 40 && b.height > 40;
+}
+
+/** Partie d'un rectangle global visible sur un écran, en coordonnées relatives à cet écran. */
+function onDisplay(r: Rectangle, d: Display): Rectangle | null {
+  return intersect(
+    { ...r, x: r.x - d.bounds.x, y: r.y - d.bounds.y },
+    { x: 0, y: 0, width: d.bounds.width, height: d.bounds.height },
+  );
+}
+
+const inside = (p: { x: number; y: number }, r: Rectangle) =>
+  p.x >= r.x && p.y >= r.y && p.x <= r.x + r.width && p.y <= r.y + r.height;
 
 /** Les bornes de get-windows sont en pixels physiques sous Windows, en points sous macOS. */
 function toDip(b: Rectangle): Rectangle {

@@ -1,18 +1,31 @@
 // Zone centrale : la capture et ses annotations, dessinées par la fonction de rendu partagée.
-// Clic = nouveau point ; clic sur une pastille = sélection + bulle ; glisser une pastille = déplacement.
+// Clic = nouveau point ; glisser = zone ; ⇧ + glisser = flèche ; clic sur une pastille = sélection + bulle ;
+// glisser une pastille = déplacement.
 // Molette = zoom, Espace maintenu + glisser = déplacement de la vue.
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { drawAnnotations, pinPosition, type Annotation, type Capture, type Ctx2D, type Geometry } from '@pastille/shared';
 
 const PIN_RADIUS = 13;
+
+const emptyAnnotation: Annotation = {
+  id: '',
+  number: 0,
+  geometry: { kind: 'point', x: 0, y: 0 },
+  text: '',
+  input: 'typed',
+  transcription: 'none',
+  sketches: [],
+  createdAt: '',
+  updatedAt: '',
+};
 const DRAG_THRESHOLD = 3;
 
 type ViewState = { scale: number; ox: number; oy: number };
 type Gesture =
   | { kind: 'pan'; x: number; y: number; ox: number; oy: number }
   | { kind: 'drag'; id: string; x: number; y: number; geometry: Geometry; moved: boolean }
-  | { kind: 'add'; x: number; y: number };
+  | { kind: 'add'; x: number; y: number; shift: boolean };
 
 function translate(g: Geometry, dx: number, dy: number): Geometry {
   if (g.kind === 'point') return { ...g, x: g.x + dx, y: g.y + dy };
@@ -23,6 +36,7 @@ function translate(g: Geometry, dx: number, dy: number): Geometry {
 export function Stage(props: {
   capture: Capture;
   imageUrl: string;
+  nextNumber: number; // numéro affiché pendant le tracé d'une zone ou d'une flèche
   selectedId: string | null;
   onSelect: (id: string | null, openBubble: boolean) => void;
   onAdd: (geometry: Geometry) => void;
@@ -36,6 +50,7 @@ export function Stage(props: {
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [view, setView] = useState<ViewState>({ scale: 1, ox: 0, oy: 0 });
   const [preview, setPreview] = useState<{ id: string; geometry: Geometry } | null>(null);
+  const [draft, setDraft] = useState<Geometry | null>(null);
   const gesture = useRef<Gesture | null>(null);
   const space = useRef(false);
 
@@ -65,6 +80,9 @@ export function Stage(props: {
   const annotations: Annotation[] = capture.annotations.map((a) =>
     preview && a.id === preview.id ? { ...a, geometry: preview.geometry } : a,
   );
+  const drawn: Annotation[] = draft
+    ? [...annotations, { ...emptyAnnotation, id: 'draft', number: props.nextNumber, geometry: draft }]
+    : annotations;
   const imageView = { x: view.ox, y: view.oy, width: capture.width * view.scale, height: capture.height * view.scale };
 
   // Dessin.
@@ -80,7 +98,7 @@ export function Stage(props: {
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, imageView.x, imageView.y, imageView.width, imageView.height);
     }
-    drawAnnotations(ctx as unknown as Ctx2D, annotations, imageView, { radius: PIN_RADIUS, selectedId: props.selectedId ?? undefined });
+    drawAnnotations(ctx as unknown as Ctx2D, drawn, imageView, { radius: PIN_RADIUS, selectedId: props.selectedId ?? undefined });
   });
 
   // Zoom à la molette, centré sur le curseur (écouteur non passif pour bloquer le défilement).
@@ -140,7 +158,7 @@ export function Stage(props: {
     if (e.button !== 0) return;
     const hit = hitTest(p.x, p.y);
     if (hit) gesture.current = { kind: 'drag', id: hit.id, ...p, geometry: hit.geometry, moved: false };
-    else gesture.current = { kind: 'add', ...p };
+    else gesture.current = { kind: 'add', ...p, shift: e.shiftKey };
   }
 
   function onPointerMove(e: React.PointerEvent) {
@@ -152,6 +170,16 @@ export function Stage(props: {
       g.moved = true;
       setPreview({ id: g.id, geometry: translate(g.geometry, (p.x - g.x) / imageView.width, (p.y - g.y) / imageView.height) });
     }
+    if (g.kind === 'add' && (draft || Math.hypot(p.x - g.x, p.y - g.y) > DRAG_THRESHOLD)) setDraft(shape(g, p));
+  }
+
+  /** Zone (glisser) ou flèche (⇧ + glisser), en coordonnées normalisées bornées à l'image. */
+  function shape(g: { x: number; y: number; shift: boolean }, p: { x: number; y: number }): Geometry {
+    const nx = (x: number) => Math.min(1, Math.max(0, (x - imageView.x) / imageView.width));
+    const ny = (y: number) => Math.min(1, Math.max(0, (y - imageView.y) / imageView.height));
+    if (g.shift) return { kind: 'arrow', x1: nx(g.x), y1: ny(g.y), x2: nx(p.x), y2: ny(p.y) };
+    const x = Math.min(nx(g.x), nx(p.x)), y = Math.min(ny(g.y), ny(p.y));
+    return { kind: 'zone', x, y, w: Math.abs(nx(p.x) - nx(g.x)), h: Math.abs(ny(p.y) - ny(g.y)) };
   }
 
   function onPointerUp(e: React.PointerEvent) {
@@ -164,7 +192,10 @@ export function Stage(props: {
       else props.onSelect(g.id, true);
       setPreview(null);
     }
-    if (g.kind === 'add') {
+    if (g.kind === 'add' && draft) {
+      setDraft(null);
+      props.onAdd(shape(g, p));
+    } else if (g.kind === 'add') {
       const x = (p.x - imageView.x) / imageView.width;
       const y = (p.y - imageView.y) / imageView.height;
       const inside = x >= 0 && x <= 1 && y >= 0 && y <= 1;

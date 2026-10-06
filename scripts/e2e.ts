@@ -1,5 +1,5 @@
-// Test de bout en bout : session factice (5 captures, 20 points), photo de l'éditeur,
-// export PDF et Markdown. Résultats dans e2e-output/ (editor.png, chemins des exports).
+// Test de bout en bout : session factice (5 captures, 20 points), dictée sur le point #1
+// par un faux micro qui joue l'échantillon, photo de l'éditeur, export PDF et Markdown. Résultats dans e2e-output/ (editor.png, chemins des exports).
 // Usage : pnpm e2e
 
 import { execFileSync } from 'node:child_process';
@@ -16,6 +16,14 @@ const log = execFileSync(electron, [join(root, 'apps/desktop')], {
 });
 const line = log.split('\n').find((l) => l.startsWith('AUTOTEST '));
 if (!line) throw new Error(`Pas de résultat :\n${log}`);
-const r = JSON.parse(line.slice(9)) as { pdf: { ok: boolean; path?: string }; markdown: { ok: boolean; path?: string } };
-console.log(`Éditeur : ${join(out, 'editor.png')}\nPDF : ${r.pdf.path ?? 'ÉCHEC'}\nMarkdown : ${r.markdown.path ?? 'ÉCHEC'}`);
-if (!r.pdf.ok || !r.markdown.ok) process.exit(1);
+const r = JSON.parse(line.slice(9)) as {
+  dictated: string;
+  pdf: { ok: boolean; path?: string };
+  markdown: { ok: boolean; path?: string };
+};
+console.log(`Éditeur : ${join(out, 'editor.png')}
+Dictée sur #1 : ${r.dictated || 'ÉCHEC (rien transcrit)'}
+PDF : ${r.pdf.path ?? 'ÉCHEC'}
+Markdown : ${r.markdown.path ?? 'ÉCHEC'}`);
+const dictationOk = /^done : .*padding/i.test(r.dictated); // « padding » ne vient que de la dictée
+if (!r.pdf.ok || !r.markdown.ok || !dictationOk) process.exit(1);

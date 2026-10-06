@@ -3,7 +3,7 @@ import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Session } from '@pastille/shared';
+import { findAnnotation, type Session } from '@pastille/shared';
 import { createSessionStore } from './session-store.ts';
 
 const meta = { width: 200, height: 100, scaleFactor: 2 };
@@ -62,5 +62,34 @@ describe('stockage des sessions', () => {
     const next = await store.ensure();
     expect(next.id).not.toBe(first);
     expect(next.context).toBe('Site vitrine');
+  });
+});
+
+describe('annuler / rétablir', () => {
+  it('annule une étape, regroupe la frappe, garde les captures et les transcriptions', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'pastille-'));
+    const store = createSessionStore(root);
+    await store.addCapture(new Uint8Array([0]), meta);
+    const a = point(0.1);
+    store.update((s) => s.captures[0]!.annotations.push({ ...a, text: '' }), { undoable: true });
+    for (const text of ['b', 'bo', 'bou']) {
+      store.update((s) => (s.captures[0]!.annotations[0]!.text = text), { undoable: true, coalesceKey: `text:${a.id}` });
+    }
+    await store.addCapture(new Uint8Array([0]), meta); // non annulable
+    // Comme le vrai code : on cherche l'annotation par id, absente de certains états de l'historique.
+    store.update((s) => {
+      const found = findAnnotation(s, a.id);
+      if (found) found.annotation.transcription = 'done';
+    }, { patchHistory: true });
+
+    store.undo(); // toute la frappe d'un coup
+    expect(store.get()!.captures[0]!.annotations[0]!.text).toBe('');
+    expect(store.get()!.captures).toHaveLength(2);
+    expect(store.get()!.captures[0]!.annotations[0]!.transcription).toBe('done');
+    store.undo(); // le point
+    expect(store.get()!.captures[0]!.annotations).toHaveLength(0);
+    store.redo();
+    store.redo();
+    expect(store.get()!.captures[0]!.annotations[0]!.text).toBe('bou');
   });
 });

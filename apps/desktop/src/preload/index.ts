@@ -17,6 +17,12 @@ const api: PastilleApi = {
   deleteAnnotation: (id) => ipcRenderer.send('annotation:delete', id),
   updateSession: (patch) => ipcRenderer.send('session:update', patch),
   exportSession: (format) => ipcRenderer.invoke('session:export', format),
+  undo: () => ipcRenderer.send('session:undo'),
+  redo: () => ipcRenderer.send('session:redo'),
+  dictationAvailable: () => ipcRenderer.invoke('dictation:available'),
+  submitDictation: (id, samples) => ipcRenderer.send('dictation:submit', id, samples),
+  retryDictation: (id) => ipcRenderer.send('dictation:retry', id),
+  onPrepareMic: (cb) => on('editor:prepare-mic', cb),
 
   onCaptureResult: (cb) => on('capture:result', cb),
   startCapture: () => ipcRenderer.send('capture:start'),
@@ -26,6 +32,7 @@ const api: PastilleApi = {
   transcribeSample: () => ipcRenderer.invoke('dictee:sample'),
 
   onOverlayShow: (cb) => void on('overlay:show', cb),
+  onOverlayWindows: (cb) => void on('overlay:windows', cb),
   overlayReady: () => ipcRenderer.send('overlay:ready'),
   overlayPick: (pick) => ipcRenderer.send('overlay:pick', pick),
 };

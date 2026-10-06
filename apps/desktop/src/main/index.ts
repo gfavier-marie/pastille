@@ -23,6 +23,7 @@ import {
 import { findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, WhisperStatus } from '../ipc.ts';
 import { createCapture, type CapturedImage } from './capture.ts';
+import { createDictation } from './dictation.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
 import { createSessionStore } from './session-store.ts';
@@ -37,6 +38,13 @@ const SHORTCUT = 'CommandOrControl+Shift+2';
 // photo de l'éditeur, exports PDF et Markdown). Données dans un dossier temporaire.
 const autotest = process.env.PASTILLE_AUTOTEST as 'capture' | 'editor' | undefined;
 if (autotest) app.setPath('userData', mkdtempSync(join(tmpdir(), 'pastille-autotest-')));
+if (autotest === 'editor') {
+  // Faux micro qui joue l'échantillon de dictée : la chaîne micro → Whisper → commentaire est testée sans personne.
+  app.commandLine.appendSwitch('use-fake-device-for-media-stream');
+  app.commandLine.appendSwitch('use-fake-ui-for-media-stream');
+  app.commandLine.appendSwitch('use-file-for-fake-audio-capture', join(app.getAppPath(), 'fixtures', 'dictee-fr.wav'));
+  app.commandLine.appendSwitch('disable-features', 'AudioServiceOutOfProcess'); // sinon le bac à sable audio ne lit pas le fichier
+}
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'pastille', privileges: { standard: true, secure: true, supportFetchAPI: true } },
@@ -60,6 +68,14 @@ let pocWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let whisper: WhisperServer | null = null;
 let whisperStatus: WhisperStatus = { state: 'loading' };
+let whisperReady: Promise<void> = Promise.resolve();
+
+// La file attend que le modèle soit chargé ; sans Whisper, la dictée passe en erreur (audio conservé).
+const dictation = createDictation(store, async (wav) => {
+  await whisperReady;
+  if (!whisper) throw new Error('Transcription indisponible : ' + JSON.stringify(whisperStatus));
+  return (await whisper.transcribe(wav)).text;
+});
 let shortcutRegistered = false;
 
 // ——— Éditeur ———
@@ -95,6 +111,12 @@ function showEditor(focus?: EditorFocus) {
 }
 
 // ——— Captures ———
+
+function startCapture() {
+  // Le micro chauffe pendant que l'utilisateur vise : la dictée démarre sans délai au clic.
+  editor?.webContents.send('editor:prepare-mic');
+  void capture.start();
+}
 
 async function onCapture(c: CapturedImage) {
   const capture = await store.addCapture(c.png, {
@@ -138,7 +160,7 @@ function addAnnotation(captureId: string, geometry: Geometry): string {
     createdAt: now,
     updatedAt: now,
   };
-  store.update((s) => s.captures.find((c) => c.id === captureId)?.annotations.push(annotation));
+  store.update((s) => s.captures.find((c) => c.id === captureId)?.annotations.push(annotation), { undoable: true });
   return annotation.id;
 }
 
@@ -157,6 +179,21 @@ async function printHtml(htmlFile: string): Promise<Uint8Array> {
 async function runExport(format: ExportFormat): Promise<ExportResult> {
   const session = store.get();
   if (!session || session.captures.length === 0) return { ok: false, error: 'Rien à exporter : aucune capture.' };
+  const { pending, error } = dictation.unfinished();
+  if (!autotest && (pending.length || error.length)) {
+    const list = (nums: number[]) => nums.map((n) => `#${n}`).join(', ');
+    const { response } = await dialog.showMessageBox({
+      type: 'warning',
+      message: 'Certaines dictées ne sont pas encore transcrites.',
+      detail: [pending.length && `En cours : ${list(pending)}`, error.length && `En erreur : ${list(error)}`]
+        .filter(Boolean)
+        .join('\n'),
+      buttons: ['Exporter quand même', 'Annuler'],
+      defaultId: 1,
+      cancelId: 1,
+    });
+    if (response === 1) return { ok: false, error: 'Export annulé.' };
+  }
   try {
     await store.flush();
     const path = await exportSession({ session, sessionDir: store.dir(session), outDir: exportDir, format, printHtml });
@@ -183,7 +220,7 @@ function updateTrayMenu() {
     Menu.buildFromTemplate([
       { label: session ? `${session.name} · ${count} points` : 'Aucune session ouverte', enabled: false },
       { type: 'separator' },
-      { label: `Nouvelle capture (${isMac ? '⌘⇧2' : 'Ctrl+Shift+2'})`, click: () => void capture.start() },
+      { label: `Nouvelle capture (${isMac ? '⌘⇧2' : 'Ctrl+Shift+2'})`, click: () => startCapture() },
       { label: 'Nouvelle session', click: () => void store.close() },
       { label: "Ouvrir l'éditeur", click: () => showEditor() },
       { label: 'Exporter le PDF', enabled: !!session, click: () => void exportFromMenu('pdf') },
@@ -216,7 +253,11 @@ function showPoc() {
   pocWindow.show();
 }
 
-async function startWhisper() {
+function startWhisper() {
+  whisperReady = loadWhisper();
+}
+
+async function loadWhisper() {
   const bin = findWhisperBin(repoRoot);
   const model = findModel(repoRoot);
   if (!bin || !model) {
@@ -242,18 +283,32 @@ async function transcribe(wav: Uint8Array) {
 ipcMain.handle('session:get', () => store.get());
 ipcMain.handle('annotation:add', (_e, captureId: string, geometry: Geometry) => addAnnotation(captureId, geometry));
 ipcMain.on('annotation:update', (_e, id: string, patch: { text?: string; geometry?: Geometry }) =>
-  store.update((s) => {
-    const found = findAnnotation(s, id);
-    if (!found) return;
-    Object.assign(found.annotation, patch, { updatedAt: new Date().toISOString() });
-  }),
+  store.update(
+    (s) => {
+      const found = findAnnotation(s, id);
+      if (!found) return;
+      Object.assign(found.annotation, patch, { updatedAt: new Date().toISOString() });
+    },
+    // La frappe dans un même commentaire ne fait qu'une étape d'annulation.
+    { undoable: true, coalesceKey: patch.text !== undefined ? `text:${id}` : undefined },
+  ),
 );
 ipcMain.on('annotation:delete', (_e, id: string) =>
-  store.update((s) => {
-    for (const c of s.captures) c.annotations = c.annotations.filter((a) => a.id !== id);
-  }),
+  store.update(
+    (s) => {
+      for (const c of s.captures) c.annotations = c.annotations.filter((a) => a.id !== id);
+    },
+    { undoable: true },
+  ),
 );
-ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) => store.update((s) => Object.assign(s, patch)));
+ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
+  store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
+);
+ipcMain.on('session:undo', () => store.undo());
+ipcMain.on('session:redo', () => store.redo());
+ipcMain.handle('dictation:available', () => whisperStatus.state === 'loading' || whisperStatus.state === 'ready');
+ipcMain.on('dictation:submit', (_e, id: string, samples: Float32Array) => void dictation.submit(id, encodeWav(samples)));
+ipcMain.on('dictation:retry', (_e, id: string) => dictation.retry(id));
 ipcMain.handle('session:export', (_e, format: ExportFormat) => runExport(format));
 ipcMain.handle('shortcut:status', () => ({ accelerator: SHORTCUT, registered: shortcutRegistered }));
 ipcMain.handle('whisper:status', () => whisperStatus);
@@ -261,7 +316,7 @@ ipcMain.handle('dictee:transcribe', (_e, samples: Float32Array) => transcribe(en
 ipcMain.handle('dictee:sample', async () =>
   transcribe(new Uint8Array(await readFile(join(app.getAppPath(), 'fixtures', 'dictee-fr.wav')))),
 );
-ipcMain.on('capture:start', () => void capture.start());
+ipcMain.on('capture:start', () => startCapture());
 
 // ——— Test de bout en bout sans interaction ———
 
@@ -272,14 +327,28 @@ async function runEditorAutotest() {
   await writeFile(join(app.getPath('userData'), 'state.json'), JSON.stringify({ currentSessionId: session.id }));
   await store.restore();
 
+  startWhisper();
+  await whisperReady;
   editor = createEditor();
   await new Promise<void>((r) => editor!.webContents.once('did-finish-load', () => r()));
   const first = session.captures[0]!;
-  showEditor({ captureId: first.id, annotationId: first.annotations[0]!.id, openBubble: true });
-  await new Promise((r) => setTimeout(r, 1500));
-  await writeFile(join(out, 'editor.png'), (await editor.webContents.capturePage()).toPNG());
+  const target = first.annotations[0]!;
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  const results = { pdf: await runExport('pdf'), markdown: await runExport('markdown') };
+  // Ouvre le point #1 : la dictée démarre seule, le faux micro « parle » pendant ~6 s, puis Entrée.
+  showEditor({ captureId: first.id, annotationId: target.id, openBubble: true });
+  await wait(2500);
+  await writeFile(join(out, 'editor.png'), (await editor.webContents.capturePage()).toPNG());
+  await wait(3500);
+  editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Enter' });
+  let dictated = '';
+  for (let i = 0; i < 300 && !dictated; i++) {
+    await wait(100);
+    const a = store.get() && findAnnotation(store.get()!, target.id)?.annotation;
+    if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
+  }
+
+  const results = { dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown') };
   console.log('AUTOTEST', JSON.stringify({ out, ...results }));
 }
 
@@ -351,7 +420,7 @@ void app.whenReady().then(async () => {
     return;
   }
 
-  shortcutRegistered = globalShortcut.register(SHORTCUT, () => void capture.start());
+  shortcutRegistered = globalShortcut.register(SHORTCUT, () => startCapture());
   if (!shortcutRegistered) {
     void dialog.showMessageBox({
       type: 'warning',
@@ -361,6 +430,7 @@ void app.whenReady().then(async () => {
   }
   createTray();
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
-  if (isMac) await systemPreferences.askForMediaAccess('microphone');
-  void startWhisper();
+  startWhisper();
+  dictation.resume();
+  if (isMac) void systemPreferences.askForMediaAccess('microphone');
 });

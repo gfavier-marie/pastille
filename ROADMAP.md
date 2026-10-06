@@ -49,10 +49,12 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 
 ## Lot 2 — Dictée et vitesse
 
-- [ ] Dictée automatique (arrêt au point suivant, Entrée, silence), Échap, bascule clavier, re-dictée ⌘M
-- [ ] File de transcription persistée, « Réessayer »
-- [ ] Clic overlay = capture de fenêtre + point n°1 ; encadré au survol [S] ; ⇧+clic dernière zone [S] ; app et titre de fenêtre [S]
-- [ ] Zones et flèches [S], raccourcis du §4.6, annuler/rétablir
+- [x] Dictée automatique (arrêt au point suivant, Entrée, silence de 3 s, 60 s max), Échap, bascule clavier, re-dictée ⌘M ; micro préparé dès le raccourci, 200 ms gardées avant le clic
+- [x] File de transcription persistée (reprise au redémarrage), « Réessayer », avertissement avant export
+- [x] Clic overlay = capture de fenêtre + point n°1 ; encadré au survol [S] ; ⇧+clic dernière zone [S] ; app et titre de fenêtre [S]
+- [x] Zones (glisser) et flèches (⇧ + glisser) [S], raccourcis du §4.6, annuler/rétablir (⌘Z / ⌘⇧Z, Ctrl+Y)
+- [x] `pnpm e2e` : un faux micro joue l'échantillon, la dictée est transcrite et ajoutée au point
+- [ ] Validation réelle sur Mac : 30 retours dictés en < 5 min, un clic par retour
 
 *Critère : 30 retours dictés en < 5 min, un clic par retour, aucune attente perçue.*
 

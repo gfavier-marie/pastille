@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { allAnnotations, type Annotation, type Session } from '@pastille/shared';
 import { imageUrl, type ExportFormat } from '../../ipc.ts';
+import { createRecorder, type RecorderState } from './recorder.ts';
 import { Stage } from './Stage.tsx';
 
 const api = window.pastille;
@@ -62,6 +63,19 @@ function App() {
   const [renaming, setRenaming] = useState(false);
   const [exportMenu, setExportMenu] = useState(false);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
+  const [rec, setRec] = useState<RecorderState>(null);
+  // Whisper présent (ou en cours de chargement) : sinon, saisie au clavier seulement.
+  const [canDictate] = useState(() => api.dictationAvailable());
+  const [recorder] = useState(() =>
+    createRecorder({ silenceMs: 3000, maxMs: 60_000, onState: setRec, onFinish: (id, samples) => api.submitDictation(id, samples) }),
+  );
+
+  /** Dictée automatique : poser un point lance l'enregistrement (§4.4). */
+  function startDictation(annotationId: string) {
+    void canDictate
+      .then((ok) => (ok ? recorder.start(annotationId) : undefined))
+      .catch((err) => setToast({ text: `Micro indisponible : ${err}`, error: true }));
+  }
 
   useEffect(() => {
     void api.getSession().then(setSession);
@@ -70,10 +84,17 @@ function App() {
       setCaptureId(f.captureId);
       setSelectedId(f.annotationId ?? null);
       setBubbleOpen(!!f.openBubble);
+      if (f.annotationId && f.openBubble) startDictation(f.annotationId);
     });
+    const offMic = api.onPrepareMic(() => void canDictate.then((ok) => (ok ? recorder.open() : undefined)).catch(() => {}));
+    // Fenêtre cachée : la dictée en cours part en transcription et le micro est libéré.
+    const onVisibility = () => document.hidden && recorder.close();
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       offSession();
       offFocus();
+      offMic();
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 
@@ -84,6 +105,7 @@ function App() {
 
   function select(a: Annotation | undefined, openBubble: boolean) {
     if (!a || !session) return;
+    recorder.stop(true);
     const owner = session.captures.find((c) => c.annotations.some((x) => x.id === a.id));
     if (owner) setCaptureId(owner.id);
     setSelectedId(a.id);
@@ -107,6 +129,13 @@ function App() {
         void runExport('pdf');
         return;
       }
+      if (mod && e.key.toLowerCase() === 'm' && selectedId) {
+        // Re-dicter : le texte s'ajoutera à la fin du commentaire.
+        e.preventDefault();
+        setBubbleOpen(true);
+        startDictation(selectedId);
+        return;
+      }
       if (e.key === 'Tab' && ordered.length) {
         e.preventDefault();
         const i = ordered.findIndex((a) => a.id === selectedId);
@@ -115,7 +144,15 @@ function App() {
         return;
       }
       if (isTyping(e.target)) return;
-      if ((e.key === 'Backspace' || e.key === 'Delete') && selectedId) {
+      if (mod && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) api.redo();
+        else api.undo();
+      } else if (!isMac && e.ctrlKey && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        api.redo();
+      } else if ((e.key === 'Backspace' || e.key === 'Delete') && selectedId) {
+        if (recorder.current() === selectedId) recorder.stop(false);
         api.deleteAnnotation(selectedId);
         setSelectedId(null);
         setBubbleOpen(false);
@@ -123,6 +160,7 @@ function App() {
         e.preventDefault();
         setBubbleOpen(true);
       } else if (e.key === 'Escape') {
+        recorder.stop(false);
         setSelectedId(null);
         setBubbleOpen(false);
       } else if ((e.key === 'PageDown' || e.key === 'PageUp') && capture) {
@@ -153,11 +191,29 @@ function App() {
 
   const bubbleKeys = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.key === 'Enter' && !e.shiftKey) || e.key === 'Escape') {
+      // Entrée : la dictée part en transcription ; Échap : elle est jetée.
       e.preventDefault();
+      recorder.stop(e.key === 'Enter');
       setBubbleOpen(false);
       e.currentTarget.blur();
+    } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey) {
+      recorder.stop(false); // taper au clavier annule la dictée et passe en saisie
     }
   };
+
+  const status = (a: Annotation) =>
+    rec?.annotationId === a.id ? (
+      <span className="rec">
+        ● {Math.floor(rec.elapsedMs / 1000)} s<i style={{ width: `${Math.min(100, rec.level * 600)}%` }} />
+      </span>
+    ) : a.transcription === 'pending' ? (
+      <span className="pending">transcription…</span>
+    ) : a.transcription === 'error' ? (
+      <span className="error">
+        transcription en erreur{' '}
+        <button onClick={() => api.retryDictation(a.id)}>Réessayer</button>
+      </span>
+    ) : null;
 
   return (
     <div className="editor">
@@ -209,7 +265,9 @@ function App() {
           capture={capture}
           imageUrl={imageUrl(session, capture.image)}
           selectedId={selectedId}
+          nextNumber={captures.slice(0, captures.indexOf(capture) + 1).reduce((n, c) => n + c.annotations.length, 0) + 1}
           onSelect={(id, open) => {
+            recorder.stop(true);
             setSelectedId(id);
             setBubbleOpen(open);
           }}
@@ -217,19 +275,23 @@ function App() {
             const id = await api.addAnnotation(capture.id, geometry);
             setSelectedId(id);
             setBubbleOpen(true);
+            startDictation(id);
           }}
           onMove={(id, geometry) => api.updateAnnotation(id, { geometry })}
           bubble={(pin) =>
             bubbleOpen && selected ? (
               <div className="bubble" style={{ left: pin.x + 20, top: pin.y - 18 }} key={selected.id}>
                 <span className="num">#{selected.number}</span>
-                <EditableText
-                  value={selected.text}
-                  autoFocus
-                  placeholder="Ton commentaire… (Entrée pour valider)"
-                  onChange={(text) => api.updateAnnotation(selected.id, { text })}
-                  onKeyDown={bubbleKeys}
-                />
+                <div className="body">
+                  <EditableText
+                    value={selected.text}
+                    autoFocus
+                    placeholder={rec?.annotationId === selected.id ? 'Parle… ou tape pour écrire' : 'Ton commentaire… (Entrée pour valider)'}
+                    onChange={(text) => api.updateAnnotation(selected.id, { text })}
+                    onKeyDown={bubbleKeys}
+                  />
+                  {status(selected)}
+                </div>
               </div>
             ) : null
           }
@@ -243,16 +305,20 @@ function App() {
               key={a.id}
               className={`item ${a.id === selectedId ? 'selected' : ''}`}
               onMouseDown={() => {
+                if (a.id !== selectedId) recorder.stop(true);
                 setSelectedId(a.id);
                 setBubbleOpen(false);
               }}
             >
               <span className="num">#{a.number}</span>
-              <EditableText
-                value={a.text}
-                placeholder="(sans commentaire)"
-                onChange={(text) => api.updateAnnotation(a.id, { text })}
-              />
+              <div className="body">
+                <EditableText
+                  value={a.text}
+                  placeholder="(sans commentaire)"
+                  onChange={(text) => api.updateAnnotation(a.id, { text })}
+                />
+                {status(a)}
+              </div>
               <button className="delete" title="Supprimer le point" onClick={() => api.deleteAnnotation(a.id)}>
                 ×
               </button>
