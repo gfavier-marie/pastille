@@ -1,8 +1,6 @@
 // Capture d'écran : un overlay par écran, préchargé et caché ; au raccourci on fige
 // tous les écrans, on affiche l'image figée, puis on recadre selon le clic.
 
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import {
   app,
   BrowserWindow,
@@ -14,7 +12,7 @@ import {
   type Rectangle,
 } from 'electron';
 import { openWindows, type Result as WindowInfo } from 'get-windows';
-import type { CaptureResult, OverlayPick } from '../ipc.ts';
+import type { OverlayPick } from '../ipc.ts';
 
 type Overlay = { display: Display; win: BrowserWindow; ready?: () => void };
 
@@ -27,11 +25,24 @@ type Pending = {
   timings: { captureMs: number; overlayMs: number };
 };
 
+export type CapturedImage = {
+  png: Buffer;
+  width: number; // pixels physiques
+  height: number;
+  scaleFactor: number;
+  displayId: string;
+  target: 'window' | 'screen' | 'zone';
+  app?: string;
+  title?: string;
+  point?: { x: number; y: number }; // normalisé 0–1, pour un clic
+  timings: { captureMs: number; windowsMs: number; overlayMs: number; pickToSavedMs: number };
+};
+
 export type CaptureOptions = {
   preload: string;
   loadPage: (win: BrowserWindow, page: 'overlay') => void;
-  outDir: string;
-  onResult: (r: CaptureResult) => void;
+  onCapture: (c: CapturedImage) => Promise<void>;
+  onError: (message: string) => void;
 };
 
 export function createCapture(opts: CaptureOptions) {
@@ -123,13 +134,11 @@ export function createCapture(opts: CaptureOptions) {
     });
     if (frozen.size < overlays.length) {
       for (const w of hidden) w.showInactive();
-      opts.onResult({
-        ok: false,
-        error:
-          process.platform === 'darwin'
-            ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance l'app."
-            : "Capture impossible : l'écran n'a pas pu être lu.",
-      });
+      opts.onError(
+        process.platform === 'darwin'
+          ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance Pastille."
+          : "Capture impossible : l'écran n'a pas pu être lu.",
+      );
       return;
     }
 
@@ -191,17 +200,15 @@ export function createCapture(opts: CaptureOptions) {
       height: Math.round(rect.height * sy),
     };
     const cropped = target === 'screen' ? image : image.crop(px);
-    const file = join(opts.outDir, `capture-${Date.now()}.png`);
-    await mkdir(opts.outDir, { recursive: true });
-    await writeFile(file, cropped.toPNG());
     const realSize = cropped.getSize();
+    const png = cropped.toPNG();
 
-    opts.onResult({
-      ok: true,
-      file,
+    await opts.onCapture({
+      png,
       width: realSize.width,
       height: realSize.height,
       scaleFactor: d.scaleFactor,
+      displayId: String(d.id),
       target,
       app: target === 'window' ? hit?.owner.name : undefined,
       title: target === 'window' ? hit?.title : undefined,

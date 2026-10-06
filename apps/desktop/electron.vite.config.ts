@@ -18,6 +18,7 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
+          editor: resolve(import.meta.dirname, 'src/renderer/editor.html'),
           poc: resolve(import.meta.dirname, 'src/renderer/poc.html'),
           overlay: resolve(import.meta.dirname, 'src/renderer/overlay.html'),
         },

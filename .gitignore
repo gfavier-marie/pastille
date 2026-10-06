@@ -10,3 +10,4 @@ vendor/
 
 # Sorties des POC
 poc-output/
+e2e-output/

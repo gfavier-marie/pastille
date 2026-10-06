@@ -129,7 +129,7 @@ function App() {
     const lines = [
       `Pastille — mesures POC (${navigator.platform})`,
       '',
-      '| Capture | Taille | Écrans figés | Overlay affiché | Clic → PNG |',
+      '| Capture | Taille | Écrans figés | Overlay affiché | Clic → image |',
       '| --- | --- | --- | --- | --- |',
       ...captures.map((c) =>
         c.ok
@@ -170,13 +170,13 @@ function App() {
             <th>Taille</th>
             <th>Écrans figés</th>
             <th>Overlay (&lt; 200 ms)</th>
-            <th>Clic → PNG</th>
+            <th>Clic → image</th>
           </tr>
         </thead>
         <tbody>
           {captures.map((c, i) =>
             c.ok ? (
-              <tr key={i} title={c.file}>
+              <tr key={i}>
                 <td>
                   {c.target}
                   {c.app && <div className="muted">{c.app} — {c.title}</div>}

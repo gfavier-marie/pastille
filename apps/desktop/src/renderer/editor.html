@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' pastille: blob: data:; style-src 'self' 'unsafe-inline'" />
+    <title>Pastille</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff; --panel: #f4f4f5; --border: #e4e4e7; --text: #18181b; --muted: #71717a;
+        --stage: #e4e4e7; --accent: #0a84ff; --pin: #e5484d;
+        font: 13px/1.4 -apple-system, "Segoe UI", system-ui, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #18181b; --panel: #232326; --border: #3f3f46; --text: #f4f4f5; --muted: #a1a1aa; --stage: #0f0f11; }
+      }
+      * { box-sizing: border-box; }
+      html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+      .editor { display: grid; grid-template-rows: auto 1fr auto; height: 100%; }
+      header { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+      header h1 { font-size: 15px; margin: 0; cursor: text; white-space: nowrap; }
+      header .name { font: 600 15px inherit; width: 260px; }
+      header .context { flex: 1; min-width: 120px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+      header .count { color: var(--muted); white-space: nowrap; }
+      button { font: inherit; color: inherit; }
+      .primary { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+      .export { position: relative; }
+      .export .menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 10; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 4px; box-shadow: 0 8px 24px rgba(0,0,0,.15); display: grid; min-width: 240px; }
+      .export .menu button { text-align: left; background: none; border: 0; padding: 7px 10px; border-radius: 5px; cursor: pointer; }
+      .export .menu button:hover { background: var(--panel); }
+      main { display: grid; grid-template-columns: 1fr 300px; min-height: 0; }
+      .stage { position: relative; overflow: hidden; background: var(--stage); }
+      .stage canvas { display: block; touch-action: none; }
+      .bubble { position: absolute; z-index: 5; display: flex; gap: 6px; align-items: flex-start; width: 320px; padding: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+      .bubble textarea { flex: 1; }
+      textarea { font: inherit; color: inherit; background: transparent; border: 0; outline: none; resize: none; padding: 2px 0; width: 100%; overflow: hidden; }
+      .num { flex: none; font-weight: 700; color: var(--pin); min-width: 28px; padding-top: 2px; }
+      aside { border-left: 1px solid var(--border); overflow-y: auto; padding: 8px; background: var(--panel); }
+      aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 4px 4px 8px; }
+      .item { display: flex; gap: 6px; align-items: flex-start; padding: 6px; border-radius: 8px; border: 1px solid transparent; }
+      .item.selected { border-color: var(--accent); background: var(--bg); }
+      .item .delete { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; visibility: hidden; }
+      .item:hover .delete { visibility: visible; }
+      footer { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--border); overflow-x: auto; }
+      .thumb { position: relative; flex: none; padding: 0; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; }
+      .thumb.selected { border-color: var(--accent); }
+      .thumb img { display: block; height: 56px; border-radius: 4px; }
+      .thumb span { position: absolute; right: 3px; bottom: 3px; background: var(--pin); color: #fff; font-size: 11px; font-weight: 700; border-radius: 9px; padding: 0 6px; }
+      .muted { color: var(--muted); padding: 0 4px; }
+      .empty { height: 100%; display: grid; place-content: center; text-align: center; color: var(--muted); font-size: 15px; }
+      kbd { font: inherit; font-weight: 600; color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+      .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: #18181b; color: #fff; padding: 8px 14px; border-radius: 8px; max-width: 80%; word-break: break-all; }
+      .toast.error { background: #b42318; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./editor/editor.tsx"></script>
+  </body>
+</html>

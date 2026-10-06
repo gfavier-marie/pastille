@@ -1,5 +1,7 @@
 // Contrat IPC entre le processus principal et les fenêtres (exposé par le preload).
 
+import type { Geometry, Session } from '@pastille/shared';
+
 export type OverlayShow = { jpeg: Uint8Array };
 
 /** Coordonnées en pixels logiques (DIP), relatives à l'écran de l'overlay. */
@@ -8,22 +10,21 @@ export type OverlayPick =
   | { kind: 'zone'; x: number; y: number; w: number; h: number }
   | { kind: 'cancel' };
 
+/** Mesures d'une capture, affichées par la fenêtre POC. */
 export type CaptureResult =
   | {
       ok: true;
-      file: string;
       width: number; // pixels physiques
       height: number;
       scaleFactor: number;
       target: 'window' | 'screen' | 'zone';
       app?: string;
       title?: string;
-      point?: { x: number; y: number }; // normalisé 0–1
       timings: {
         captureMs: number; // raccourci → écrans figés
         windowsMs: number; // raccourci → liste des fenêtres
         overlayMs: number; // raccourci → overlay affiché
-        pickToSavedMs: number; // clic → PNG écrit
+        pickToSavedMs: number; // clic → image prête
       };
     }
   | { ok: false; error: string };
@@ -36,7 +37,22 @@ export type WhisperStatus =
 
 export type TranscribeResult = { text: string; whisperMs: number; audioMs: number };
 
+export type ExportFormat = 'pdf' | 'markdown';
+export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
+
+/** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */
+export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean };
+
 export type PastilleApi = {
+  // Éditeur
+  getSession(): Promise<Session | null>;
+  onSession(cb: (s: Session | null) => void): () => void;
+  onFocus(cb: (f: EditorFocus) => void): () => void;
+  addAnnotation(captureId: string, geometry: Geometry): Promise<string>;
+  updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
+  deleteAnnotation(id: string): void;
+  updateSession(patch: { name?: string; context?: string }): void;
+  exportSession(format: ExportFormat): Promise<ExportResult>;
   // Fenêtre POC
   onCaptureResult(cb: (r: CaptureResult) => void): () => void;
   startCapture(): void;
@@ -49,6 +65,9 @@ export type PastilleApi = {
   overlayReady(): void;
   overlayPick(pick: OverlayPick): void;
 };
+
+/** Les images de session sont servies par le protocole pastille:// (voir main/index.ts). */
+export const imageUrl = (session: Session, relativePath: string) => `pastille://session/${session.id}/${relativePath}`;
 
 declare global {
   interface Window {

@@ -39,10 +39,11 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 
 ## Lot 1 — Boucle de base au clavier + exports PDF et Markdown
 
-- [ ] Sessions : création auto, nom par défaut, renommage, champ Contexte [S], sauvegarde atomique (anti-rebond 300 ms), réouverture après crash
-- [ ] Icône et menu (§4.7) ; overlay : zone et écran entier
-- [ ] Éditeur : zoom/déplacement, points glissables, bulle de saisie, numérotation #1 à #N, liste et vignettes
-- [ ] `buildExport` + PDF + Markdown
+- [x] Sessions : création auto, nom par défaut, renommage, champ Contexte [S], sauvegarde atomique (anti-rebond 300 ms), réouverture après crash
+- [x] Icône et menu (§4.7) ; overlay : clic (fenêtre + point n°1), zone, écran entier
+- [x] Éditeur : zoom/déplacement, points glissables, bulle de saisie, numérotation #1 à #N, liste et vignettes, raccourcis de base (Tab, Suppr, Page préc./suiv., ⌘E)
+- [x] `buildExport` + PDF + Markdown ; test de bout en bout `pnpm e2e` (session factice, photo de l'éditeur, PDF de 17 pages pour 20 points)
+- [ ] Validation réelle sur Mac : 20 points sur 5 captures en < 3 min, puis PDF et Markdown donnés à Claude
 
 *Critère : 20 points sur 5 captures en < 3 min au clavier ; avec le PDF comme avec le Markdown, Claude restitue les 20 retours sans erreur.*
 
