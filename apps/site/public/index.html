@@ -87,15 +87,47 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-face{position:relative;grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .vs-round{transition:transform .2s ease, background .2s ease}
 .vs-round:hover{transform:scale(1.08)}
-.vs-hot{transition:box-shadow .15s ease, background .15s ease}
-.vs-hot:hover{box-shadow:inset 0 0 0 0.3cqw rgba(214,58,12,.7);background:rgba(214,58,12,.06)}
+/* Démo « À vous d'essayer » : étapes capture → revue → claude → fait (data-etape de l'écran). */
+.vs-etapes{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:14px;font-weight:600}
+.vs-etapes li{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;background:#1E1E21;color:#8E8E96}
+.vs-etapes li>span{width:22px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#2E2E33;color:#C7C7CC;font-size:12px}
+.vs-etapes li.vs-passee>span{background:#1F9D55;color:#FFFFFF}
+.vs-etapes li[aria-current="step"]{background:#3A1C12;color:#FFFFFF}
+.vs-etapes li[aria-current="step"]>span{background:#D63A0C;color:#FFFFFF}
+.vs-ecran{--barre:max(4.4cqw, 28px)}
+.vs-bureau,.vs-editeur{transition:opacity .4s ease .15s}
+.vs-ecran[data-etape="capture"] .vs-editeur,.vs-ecran:not([data-etape="capture"]) .vs-bureau{opacity:0;visibility:hidden;transition:none}
+.vs-capture{position:absolute;left:2.5cqw;top:calc(var(--barre) + 2.6cqw);width:64cqw;transition:left .5s cubic-bezier(.2,.7,.2,1),top .5s cubic-bezier(.2,.7,.2,1),width .5s cubic-bezier(.2,.7,.2,1)}
+.vs-ecran[data-etape="capture"] .vs-capture{left:15cqw;top:6cqw;width:70cqw}
+.vs-ecran[data-etape="revue"] .vs-capture{cursor:crosshair}
+@container (max-width: 520px){.vs-si-large{display:none}}
 .vs-exporter{background:#D63A0C;color:#FFFFFF}
 .vs-exporter[aria-disabled="true"]{background:#2E2E33;color:#8E8E96;cursor:default}
+@keyframes vs-appel{0%{box-shadow:0 0 0 0 rgba(255,138,102,.7)}70%,100%{box-shadow:0 0 0 max(.9cqw, 7px) rgba(255,138,102,0)}}
+.vs-appel{box-shadow:0 0 0 2px #FF8A66;animation:vs-appel 1.6s ease-out infinite}
 .vs-derniere{background:#26262A;box-shadow:inset 0 0 0 0.15cqw #D63A0C}
+.vs-pin,.vs-coche{--t:max(4.2cqw, 18px);position:absolute;width:var(--t);height:var(--t);margin-top:calc(var(--t) * -1);box-sizing:border-box;border:max(.35cqw, 2px) solid #FFFFFF;color:#FFFFFF;font-size:calc(var(--t) * .45);font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 .3cqw .8cqw rgba(0,0,0,.3);transform-origin:0 100%;pointer-events:none;animation:vs-pop .35s ease-out both}
+.vs-pin{border-radius:calc(var(--t) / 2) calc(var(--t) / 2) calc(var(--t) / 2) calc(var(--t) / 8);background:#D63A0C}
+.vs-coche{border-radius:999px;background:#1F9D55;transform-origin:50% 50%}
+.vs-coche svg{width:55%;height:55%}
+.vs-repere{--r:max(3cqw, 14px);position:absolute;width:var(--r);height:var(--r);margin:calc(var(--r) / -2) 0 0 calc(var(--r) / -2);box-sizing:border-box;border-radius:999px;border:max(.35cqw, 2px) solid #D63A0C;pointer-events:none;animation:vs-ping 1.6s ease-out infinite}
+.vs-bulle{position:absolute;margin:0;width:min(400px, 94cqw);box-sizing:border-box;padding:10px 12px;border-radius:14px;background:#232327;color:#F2F2F3;box-shadow:0 12px 32px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.35;animation:vs-fadein .25s ease-out both}
+.vs-bulle input{width:100%;box-sizing:border-box;height:38px;padding:0 10px;border:2px solid #D63A0C;border-radius:9px;background:#1A1A1D;color:#F2F2F3;font:inherit;font-size:16px;outline:none}
+.vs-bulle input::placeholder{color:#8E8E96;opacity:1}
+.vs-bulle small{font-size:12px;color:#A1A1A8}
+.vs-tete{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.vs-rec{flex:none;width:8px;height:8px;border-radius:999px;background:#5E5E66}
+.vs-onde{flex:1;height:16px;display:flex;align-items:center;gap:3px}
+.vs-onde span{width:3px;border-radius:2px;background:#4A4A50;transform:scaleY(.35)}
+.vs-micro{flex:none;width:32px;height:32px;border:0;border-radius:999px;background:#2E2E33;color:#F2F2F3;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.vs-micro:hover{background:#3A3A40}
+.vs-bulle.ecoute .vs-rec{background:#FF453A;animation:vs-pulse 1.2s ease-in-out infinite}
+.vs-bulle.ecoute .vs-onde span{background:#F2F2F3;animation:vs-wave .9s ease-in-out infinite}
+.vs-bulle.ecoute .vs-micro{background:#FF453A}
 @keyframes vs-ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}
 @keyframes vs-pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
-@keyframes vs-typein{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @keyframes vs-fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes vs-eclair{from{opacity:.9}to{opacity:0}}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -807,30 +839,65 @@ details[open] .vs-plus{transform:rotate(45deg)}
       <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; max-width: 760px">
         <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66">À vous d'essayer</div>
         <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Cliquez dans l'app, pour voir.</h2>
-        <p style="margin: 0; font-size: 18px; color: #C7C7CC">Cliquez sur ce qui vous gêne dans l'app ci-dessous : la demande s'écrit comme si vous l'aviez dite. Puis exportez, et regardez Claude Code s'y mettre.</p>
+        <p style="margin: 0; font-size: 18px; color: #C7C7CC">Capturez l'écran, cliquez où vous voulez sur la capture, puis tapez ou dictez votre demande. Exportez, et regardez Claude Code modifier l'app.</p>
       </div>
 
-      <div class="vs-reveal" style="width: 100%; max-width: 1100px; container-type: inline-size">
+      <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
+          <ol class="vs-etapes" aria-label="Étapes de la démo">
+            <li data-etape="1" aria-current="step"><span>1</span>Capturez</li>
+            <li data-etape="2"><span>2</span>Commentez</li>
+            <li data-etape="3"><span>3</span>Exportez</li>
+            <li data-etape="4"><span>4</span>Le résultat</li>
+          </ol>
+          <p style="margin: 0; min-height: 26px; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #E5E5EA"><span aria-hidden="true" style="flex: none; width: 9px; height: 9px; border-radius: 999px; background: #FF6A3D; animation: vs-pulse 1.2s ease-in-out infinite"></span><span data-demo="indice" aria-live="polite">Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.</span></p>
+        </div>
+
+        <div class="vs-reveal" style="width: 100%; max-width: 1100px; container-type: inline-size">
         <div style="position: relative; width: 88cqw; margin: 0 auto; box-sizing: border-box; padding: 1.3cqw 1.3cqw 2cqw; border-radius: 2.6cqw 2.6cqw 0.9cqw 0.9cqw; background: #0A0A0B; box-shadow: inset 0 0 0 0.18cqw #3A3A3F, 0 4cqw 8cqw -2cqw rgba(0,0,0,0.6)">
           <span aria-hidden="true" style="position: absolute; left: 50%; top: 1.25cqw; transform: translateX(-50%); width: 9cqw; height: 1.4cqw; border-radius: 0 0 0.8cqw 0.8cqw; background: #0A0A0B; z-index: 3"></span>
-          <div style="position: relative; container-type: inline-size; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 0.5cqw; background: #161618; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif">
+          <div data-demo="ecran" data-etape="capture" class="vs-ecran" style="position: relative; container-type: inline-size; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 0.5cqw; background: #161618; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif">
 
-            <div style="position: absolute; left: 0; top: 0; right: 0; height: 4.4cqw; box-sizing: border-box; display: flex; align-items: center; gap: 1.2cqw; padding: 0 1.2cqw 0 1.6cqw; background: #1C1C1F; border-bottom: 1px solid #2A2A2E; font-size: 1.2cqw">
-              <span aria-hidden="true" style="display: flex; gap: 0.75cqw; margin-right: 0.8cqw"><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FF5F57"></span><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FEBC2E"></span><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #28C840"></span></span>
-              <span style="font-weight: 600">Revue Comptoir · 6 oct.</span>
-              <span data-demo="nombre" style="color: #A1A1A8">0 demande</span>
-              <span style="flex: 1"></span>
-              <button type="button" data-demo="recommencer" hidden style="height: 2.8cqw; padding: 0 1.1cqw; border: 0; border-radius: 0.7cqw; background: #26262A; color: #D1D1D6; font-size: 1.1cqw; cursor: pointer">Recommencer</button>
-              <button type="button" data-demo="exporter" class="vs-exporter" aria-disabled="true" style="height: 2.8cqw; display: flex; align-items: center; gap: 0.7cqw; padding: 0 1.2cqw; border: 0; border-radius: 0.7cqw; font-size: 1.15cqw; font-weight: 600; cursor: pointer">Exporter <span style="font-weight: 500; opacity: 0.85">⌘E</span></button>
+            <div class="vs-bureau" aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(70% 80% at 12% 8%, #5A3428 0%, rgba(90,52,40,0) 70%), radial-gradient(70% 80% at 92% 95%, #26304A 0%, rgba(38,48,74,0) 70%), #18181C">
+              <div style="height: 2.8cqw; display: flex; align-items: center; gap: 2cqw; padding: 0 2cqw; background: rgba(10,10,12,0.5); font-size: 1.15cqw; color: #E5E5EA; white-space: nowrap">
+                <span style="font-weight: 700">Chrome</span><span>Fichier</span><span>Édition</span><span>Affichage</span><span>Fenêtre</span>
+                <span style="flex: 1"></span>
+                <svg viewBox="0 0 28 28" style="width: 1.5cqw; height: 1.5cqw"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#FF6A3D"></path><circle cx="14" cy="14" r="4.2" fill="#18181C"></circle></svg>
+                <span>lun. 6 oct. 10:42</span>
+              </div>
             </div>
 
-            <div style="position: absolute; left: 0; top: 4.4cqw; width: 69cqw; bottom: 0; background: #0E0E10">
-              <div style="position: absolute; left: 2.5cqw; top: 1.6cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0.6cqw 1.2cqw 0.6cqw 0.9cqw; border-radius: 999px; background: #26262A; color: #E5E5EA; font-size: 1.15cqw">
-                <span style="width: 0.9cqw; height: 0.9cqw; border-radius: 999px; background: #FF6A3D; animation: vs-pulse 1.2s ease-in-out infinite"></span>
-                <span data-demo="indice" aria-live="polite">Cliquez sur ce qui vous gêne : le graphique, le tableau, la recherche…</span>
+            <div class="vs-editeur" style="position: absolute; left: 0; top: 0; right: 0; height: var(--barre); box-sizing: border-box; display: flex; align-items: center; gap: 1.2cqw; padding: 0 1.2cqw 0 1.6cqw; background: #1C1C1F; border-bottom: 1px solid #2A2A2E; font-size: max(1.2cqw, 11px)">
+              <span aria-hidden="true" style="display: flex; gap: 0.75cqw; margin-right: 0.8cqw"><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FF5F57"></span><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FEBC2E"></span><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #28C840"></span></span>
+              <span class="vs-si-large" style="font-weight: 600">Revue Comptoir · 6 oct.</span>
+              <span class="vs-si-large" data-demo="nombre" style="color: #A1A1A8">0 demande</span>
+              <span style="flex: 1"></span>
+              <button type="button" data-demo="recommencer" style="height: max(2.8cqw, 22px); padding: 0 max(1.1cqw, 8px); border: 0; border-radius: 0.7cqw; background: #26262A; color: #D1D1D6; font-size: max(1.1cqw, 11px); cursor: pointer">Recommencer</button>
+              <button type="button" data-demo="exporter" class="vs-exporter" aria-disabled="true" style="height: max(2.8cqw, 22px); display: flex; align-items: center; gap: 0.7cqw; padding: 0 max(1.2cqw, 8px); border: 0; border-radius: 0.7cqw; font-size: max(1.15cqw, 11px); font-weight: 600; cursor: pointer">Exporter <span class="vs-si-large" style="font-weight: 500; opacity: 0.85">⌘E</span></button>
+            </div>
+
+            <div class="vs-editeur" style="position: absolute; left: 0; top: var(--barre); width: 69cqw; bottom: 0; background: #0E0E10">
+              <div aria-hidden="true" style="position: absolute; left: 50%; bottom: 1.4cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 1.4cqw; padding: 0.7cqw 1.4cqw; border-radius: 0.9cqw; background: #1C1C1F; border: 1px solid #2E2E33; color: #A1A1A8; font-size: 1.05cqw; white-space: nowrap">
+                <span><span style="color: #F2F2F3">Clic</span> poser un point</span>
+                <span><span style="color: #F2F2F3">Entrée</span> valider</span>
+                <span><span style="color: #F2F2F3">Échap</span> retirer un point vide</span>
               </div>
-              <div data-demo="capture" style="position: absolute; left: 2.5cqw; top: 5.4cqw; width: 64cqw; container-type: inline-size; border-radius: 0.8cqw; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 1.6cqw 4cqw rgba(0,0,0,0.5)">
-                <div style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
+            </div>
+
+            <div class="vs-editeur" style="position: absolute; left: 69cqw; top: var(--barre); right: 0; bottom: 0; box-sizing: border-box; padding: 1.2cqw; background: #1C1C1F; border-left: 1px solid #2A2A2E; display: flex; flex-direction: column; gap: 0.6cqw; font-size: 1.12cqw; line-height: 1.45; overflow: hidden">
+              <div style="padding: 0.4cqw 0.5cqw 1cqw; display: flex; flex-direction: column; gap: 0.2cqw">
+                <span style="font-size: 1.25cqw; font-weight: 600">Ventes · <span data-demo="nombre">0 demande</span></span>
+                <span style="font-size: 1cqw; color: #A1A1A8">Chrome — localhost:5173/ventes</span>
+              </div>
+              <div data-demo="vide" style="margin: 4cqw 1cqw 0; display: flex; flex-direction: column; align-items: center; gap: 1cqw; text-align: center; color: #A1A1A8">
+                <svg viewBox="0 0 24 24" style="width: 3cqw; height: 3cqw" aria-hidden="true"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="none" stroke="#A1A1A8" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+                <span>Aucune demande pour l’instant. Cliquez sur la capture, à gauche.</span>
+              </div>
+              <div data-demo="liste" style="display: flex; flex-direction: column; gap: 0.6cqw"></div>
+            </div>
+
+            <div data-demo="capture" class="vs-capture" style="container-type: inline-size; border-radius: 0.8cqw; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 1.6cqw 4cqw rgba(0,0,0,0.5)">
+                <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
   <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
 
     <div style="position: absolute; left: 0; top: 0; right: 0; height: 6cqw; box-sizing: border-box; background: #EEEEF0; border-bottom: 1px solid #DEDEE3; display: flex; align-items: center; gap: 1cqw; padding: 0 2cqw">
@@ -941,35 +1008,25 @@ details[open] .vs-plus{transform:rotate(45deg)}
     </div>
   </div>
 </div></div>
-              </div>
-              <div aria-hidden="true" style="position: absolute; left: 50%; bottom: 1.4cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 1.4cqw; padding: 0.7cqw 1.4cqw; border-radius: 0.9cqw; background: #1C1C1F; border: 1px solid #2E2E33; color: #A1A1A8; font-size: 1.05cqw; white-space: nowrap">
-                <span><span style="color: #F2F2F3">Clic</span> point</span>
-                <span><span style="color: #F2F2F3">Glisser</span> zone</span>
-                <span><span style="color: #F2F2F3">⇧ Glisser</span> flèche</span>
-              </div>
             </div>
 
-            <div style="position: absolute; left: 69cqw; top: 4.4cqw; right: 0; bottom: 0; box-sizing: border-box; padding: 1.2cqw; background: #1C1C1F; border-left: 1px solid #2A2A2E; display: flex; flex-direction: column; gap: 0.6cqw; font-size: 1.12cqw; line-height: 1.45; overflow: hidden">
-              <div style="padding: 0.4cqw 0.5cqw 1cqw; display: flex; flex-direction: column; gap: 0.2cqw">
-                <span style="font-size: 1.25cqw; font-weight: 600">Ventes · <span data-demo="nombre">0 demande</span></span>
-                <span style="font-size: 1cqw; color: #A1A1A8">Chrome — localhost:5173/ventes</span>
-              </div>
-              <div data-demo="vide" style="margin: 4cqw 1cqw 0; display: flex; flex-direction: column; align-items: center; gap: 1cqw; text-align: center; color: #A1A1A8">
-                <svg viewBox="0 0 24 24" style="width: 3cqw; height: 3cqw" aria-hidden="true"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="none" stroke="#A1A1A8" stroke-width="1.6" stroke-linejoin="round"></path></svg>
-                <span>Aucune demande pour l'instant. Cliquez sur l'app, à gauche.</span>
-              </div>
-              <div data-demo="liste" style="display: flex; flex-direction: column; gap: 0.6cqw"></div>
-            </div>
+            <button type="button" data-demo="capturer" class="vs-bureau vs-appel" aria-label="Capturer l'écran, raccourci Contrôle Option Commande P" style="position: absolute; left: 50%; bottom: 1.6cqw; transform: translateX(-50%); height: max(4.4cqw, 30px); display: flex; align-items: center; gap: max(0.9cqw, 6px); padding: 0 max(1.8cqw, 12px) 0 max(1.4cqw, 10px); border: 0; border-radius: 999px; background: #D63A0C; color: #FFFFFF; font-size: max(1.4cqw, 12px); font-weight: 600; white-space: nowrap; cursor: pointer">
+              <svg viewBox="0 0 28 28" style="width: max(1.8cqw, 14px); height: max(1.8cqw, 14px)" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#FFFFFF"></path><circle cx="14" cy="14" r="4.2" fill="#D63A0C"></circle></svg>
+              Capturer l'écran
+              <span aria-hidden="true" style="padding: 0.2em 0.5em; border-radius: 0.4em; background: rgba(0,0,0,0.22); font-weight: 500">⌃⌥⌘P</span>
+            </button>
+
+            <span data-demo="cadre" hidden aria-hidden="true" style="position: absolute; left: 14.4cqw; top: 5.4cqw; width: 71.2cqw; height: 49.33cqw; box-sizing: border-box; border: 0.35cqw solid #D63A0C; border-radius: 1.2cqw; box-shadow: 0 0 0 100cqw rgba(8,8,10,0.5); pointer-events: none; animation: vs-fadein .2s ease-out both"></span>
 
             <div data-demo="claude" hidden style="position: absolute; inset: 0; background: rgba(8,8,10,0.6); display: flex; align-items: center; justify-content: center; animation: vs-fadein .25s ease-out both">
-              <div role="dialog" aria-label="Claude Code applique la revue" style="width: 62cqw; border-radius: 1.4cqw; overflow: hidden; background: #141416; color: #D1D1D6; box-shadow: 0 3cqw 6cqw rgba(0,0,0,0.5); font-family: 'JetBrains Mono', monospace; font-size: 1.3cqw; line-height: 1.65">
+              <div role="dialog" tabindex="-1" aria-label="Claude Code applique la revue" style="width: 62cqw; border-radius: 1.4cqw; overflow: hidden; background: #141416; color: #D1D1D6; box-shadow: 0 3cqw 6cqw rgba(0,0,0,0.5); font-family: 'JetBrains Mono', monospace; font-size: 1.3cqw; line-height: 1.65; outline: none">
                 <div style="height: 3.4cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; background: #1E1E21; border-bottom: 1px solid #2A2A2E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 1.15cqw; color: #8E8E96">
                   <span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FF5F57"></span>
                   <span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FEBC2E"></span>
                   <span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #28C840"></span>
                   <span style="margin-left: 1cqw; flex: 1">claude — ~/comptoir</span>
                 </div>
-                <div style="padding: 1.8cqw 2cqw; display: flex; flex-direction: column; gap: 0.4cqw">
+                <div style="padding: 1.8cqw 2cqw 2.2cqw; display: flex; flex-direction: column; gap: 0.4cqw">
                   <span style="color: #FFFFFF; animation: vs-fadein .3s .2s ease-out both"><span style="color: #FF6A3D">&gt;</span> Applique la revue VibeScreener</span>
                   <span style="animation: vs-fadein .3s .6s ease-out both"><span style="color: #30D158">⏺</span> lire_revue <span style="color: #8E8E96">⎿ 1 écran · <span data-demo="nombre">0 demande</span></span></span>
                   <span style="animation: vs-fadein .3s .9s ease-out both"><span style="color: #30D158">⏺</span> voir_ecran <span style="color: #8E8E96">⎿ capture annotée et zooms</span></span>
@@ -977,16 +1034,18 @@ details[open] .vs-plus{transform:rotate(45deg)}
                   <span data-demo="appliquees" style="display: flex; flex-direction: column; gap: 0.4cqw"></span>
                   <span data-demo="fin" style="color: #FF8A66; animation: vs-fadein .3s ease-out both"></span>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 1cqw; padding: 0 2cqw 1.8cqw; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">
-                  <button type="button" data-demo="recommencer" style="height: 3.2cqw; padding: 0 1.6cqw; border: 0; border-radius: 0.8cqw; background: #D63A0C; color: #FFFFFF; font-size: 1.2cqw; font-weight: 600; cursor: pointer">Recommencer</button>
-                </div>
               </div>
             </div>
+
+            <span data-demo="eclair" hidden aria-hidden="true" style="position: absolute; inset: 0; background: #FFFFFF; opacity: 0; pointer-events: none; animation: vs-eclair .5s ease-out"></span>
           </div>
         </div>
         <div aria-hidden="true" style="position: relative; width: 100cqw; height: 1.8cqw; margin: 0 auto; border-radius: 0.3cqw 0.3cqw 2.6cqw 2.6cqw; background: #C6C8CD; box-shadow: inset 0 0.3cqw 0 #E6E8EC, inset 0 -0.4cqw 0.6cqw rgba(0,0,0,0.18), 0 2.4cqw 4cqw -1cqw rgba(0,0,0,0.6)">
           <span style="position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 13cqw; height: 0.8cqw; border-radius: 0 0 1cqw 1cqw; background: #A6A9AF"></span>
         </div>
+        </div>
+
+        <p style="margin: 0; max-width: 680px; font-size: 14px; line-height: 1.5; color: #A1A1A8; text-align: center">Dans cette démo, la dictée passe par votre navigateur, qui peut envoyer le son à son éditeur pour le transcrire. Dans l'app, elle se fait sur votre Mac, hors ligne. Rien de ce que vous tapez ici n'est envoyé ni gardé.</p>
       </div>
     </div>
   </section>
@@ -1175,102 +1234,312 @@ for (const carte of cartes) {
   }
 }
 
-// Démo « À vous d'essayer » : chaque clic sur l'app pose une demande, écrite comme si elle était
-// dictée ; Exporter montre Claude Code l'appliquer. Positions en % de la largeur de la capture
-// (zone [gauche, haut, largeur, hauteur], pin et bulle [gauche, haut]).
-const DEMANDES = [
-  { label: 'le graphique', zone: [20, 29.5, 77, 18.5], pin: [37, 32.3], bulle: [30, 36], texte: 'Ajoute un filtre de période : 7 jours, 30 jours, 12 mois.', meta: 'Dicté · 0:04' },
-  { label: 'le tableau des commandes', zone: [20, 49.5, 77, 17.9], pin: [91.5, 55.3], bulle: [32, 36.5], texte: 'Trie par montant et ajoute un export CSV.', meta: 'Dicté · 0:05' },
-  { label: 'la recherche', zone: [58, 9.4, 20, 4.4], pin: [61, 11.6], bulle: [36, 16], texte: 'La recherche doit aussi trouver les clients par e-mail.', meta: 'Dicté · 0:04' },
-  { label: 'les chiffres clés', zone: [20, 17, 77, 10.5], pin: [17.6, 14.6], bulle: [30, 30], texte: 'Sur mobile, ces trois cartes passent en carrousel.', meta: 'Zone · dicté · 0:06', encadre: true },
-  { label: 'le bouton Nouvelle vente', zone: [79.5, 9.4, 17.5, 4.4], pin: [88, 11], bulle: [36, 16], texte: '« Nouvelle vente » ouvre une fenêtre, pas une nouvelle page.', meta: 'Dicté · 0:05' },
-  { label: 'le menu Clients', zone: [1.6, 25.9, 13.8, 3.6], pin: [12, 27.7], bulle: [14, 32], texte: 'Ajoute une page Clients avec l’historique d’achats.', meta: 'Dicté · 0:05' },
-];
-const essai = document.getElementById('essayer');
-const piece = (name) => essai.querySelector(`[data-demo="${name}"]`);
-const capture = piece('capture'), liste = piece('liste'), claude = piece('claude'), exporter = piece('exporter');
-let poses = [];
+// Démo « À vous d'essayer », en quatre étapes : capturer l'écran (⌃⌥⌘P ou le bouton), poser des
+// points où l'on veut avec une demande tapée ou dictée, exporter, puis voir Claude Code modifier
+// l'app. Positions en % de la largeur de la capture (zone [gauche, haut, largeur, hauteur], pin
+// [gauche, haut]). Un point posé sur un élément connu propose sa phrase, et l'app modifiée montre
+// le changement (calques repris du hero).
+{ // bloc : les noms de la démo ne débordent pas sur le reste de la page
+  const MAX_POINTS = 6;
+  const DEMANDES = [
+    { label: 'le graphique', zone: [20, 29.5, 77, 18.5], pin: [37, 32.3], texte: 'Ajoute un filtre : 7 jours, 30 jours, 12 mois.',
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1.1cqw">7 j</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">30 j</span><span style="padding: 0.4cqw 1.1cqw">12 mois</span></span>' },
+    { label: 'le tableau', zone: [20, 49.5, 77, 17.9], pin: [91.5, 55.3], texte: 'Trie par montant et ajoute un export CSV.',
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">↓ Exporter CSV</span></span>'
+        + '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 87.6cqw; top: 54.4cqw; font-size: 1.3cqw; font-weight: 700; color: #0E7C66; animation: vs-fadein .4s ease-out both">↓</span>' },
+    { label: 'la recherche', zone: [58, 9.4, 20, 4.4], pin: [61, 11.6], texte: 'La recherche doit aussi trouver les e-mails.',
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; animation: vs-fadein .4s ease-out both">Commande ou e-mail…</span>' },
+    { label: 'les chiffres clés', zone: [20, 17, 77, 10.5], pin: [33, 21], texte: 'Sur mobile, mets ces cartes en carrousel.',
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 56.4cqw; top: 27.9cqw; display: flex; gap: 0.6cqw; animation: vs-fadein .4s ease-out both"><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #D1D5DB"></span><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #D1D5DB"></span></span>' },
+    { label: 'le bouton Nouvelle vente', zone: [79.5, 9.4, 17.5, 4.4], pin: [88, 11], texte: 'Ouvre la nouvelle vente dans une fenêtre.' },
+    { label: 'le menu Clients', zone: [1.6, 25.9, 13.8, 3.6], pin: [12, 27.7], texte: 'Ajoute une page Clients avec l’historique.' },
+  ];
+  const ERREURS = {
+    'not-allowed': 'Micro refusé. Le clavier marche toujours.',
+    'service-not-allowed': 'Le navigateur refuse la dictée. Tapez votre demande.',
+    'audio-capture': 'Aucun micro trouvé. Tapez votre demande.',
+    'no-speech': 'Je n’ai rien entendu. Réessayez, ou tapez.',
+    network: 'Dictée indisponible pour l’instant. Tapez votre demande.',
+  };
+  const essai = document.getElementById('essayer');
+  const piece = (name) => essai.querySelector(`[data-demo="${name}"]`);
+  const ecran = piece('ecran'), capture = piece('capture'), liste = piece('liste'), claude = piece('claude');
+  const exporter = piece('exporter'), recommencer = piece('recommencer'), capturer = piece('capturer');
+  const Reco = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let poses = [], enCours = null, reco = null, minuteurs = [], visible = false;
 
-const ondes = [1.2, 2.2, 3, 1.6, 2.6, 3, 1.4, 2.4, 1.8, 1.2]
-  .map((h, i) => `<span style="width: 0.5cqw; height: ${h}cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: ${(-(i * 0.11) % 0.9).toFixed(2)}s"></span>`)
-  .join('');
-const ROND = 'box-sizing: border-box; background: #D63A0C; border: 0.35cqw solid #FFFFFF; color: #FFFFFF; font-weight: 700; display: flex; align-items: center; justify-content: center; animation: vs-pop .35s ease-out both';
+  const echappe = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const attendre = (ms, f) => minuteurs.push(setTimeout(f, ms));
+  const minutes = (ms) => { const s = Math.max(1, Math.round(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const meta = (p) => (p.parle ? `Dicté · ${minutes(p.ms)}` : 'Tapé');
+  const aideTexte = (d) => (d ? 'Entrée pour valider. Laissé vide, la suggestion est reprise.' : 'Entrée pour valider, Échap pour retirer le point.');
+  const ONDE = [6, 11, 15, 8, 13, 15, 7, 12, 9, 6].map((h, i) => `<span style="height: ${h}px; animation-delay: -${(i * 0.11).toFixed(2)}s"></span>`).join('');
+  const MICRO = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>';
+  const COCHE = '<svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
-function marque(d, n) {
-  const [x, y, w, h] = d.zone, [px, py] = d.pin;
-  if (d.encadre) {
-    return `<span class="vs-pose" aria-hidden="true" style="position: absolute; left: ${x - 0.7}cqw; top: ${y - 0.7}cqw; width: ${w + 1.4}cqw; height: ${h + 1.4}cqw; box-sizing: border-box; border-radius: 1.6cqw; border: 0.35cqw solid #D63A0C; background: rgba(214,58,12,0.06); pointer-events: none; animation: vs-fadein .3s ease-out both"></span>`
-      + `<span class="vs-pose" aria-hidden="true" style="position: absolute; left: ${px}cqw; top: ${py}cqw; width: 3.8cqw; height: 3.8cqw; border-radius: 999px; font-size: 1.7cqw; pointer-events: none; ${ROND}">${n}</span>`;
+  // Compteurs, indice, bandeau d'étapes et bouton Exporter suivent l'état.
+  function etat() {
+    const etape = ecran.dataset.etape, n = poses.length;
+    for (const e of essai.querySelectorAll('[data-demo="nombre"]')) e.textContent = n + (n > 1 ? ' demandes' : ' demande');
+    piece('vide').hidden = n > 0;
+    const pret = etape === 'revue' && (n > 0 || !!enCours?.input.value.trim());
+    exporter.setAttribute('aria-disabled', !pret);
+    exporter.classList.toggle('vs-appel', pret && n > 0);
+    const numero = { capture: 1, claude: 4, fait: 4 }[etape] || (n ? 3 : 2);
+    for (const li of essai.querySelectorAll('.vs-etapes li')) {
+      const k = Number(li.dataset.etape);
+      if (k === numero) li.setAttribute('aria-current', 'step');
+      else li.removeAttribute('aria-current');
+      li.classList.toggle('vs-passee', k < numero || etape === 'fait');
+    }
+    let indice;
+    if (etape === 'capture') indice = 'Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.';
+    else if (etape === 'claude') indice = 'Claude Code lit votre revue et modifie l’app…';
+    else if (etape === 'fait') indice = 'C’est fait : l’app est modifiée, chaque point est coché. « Recommencer », en haut, pour rejouer.';
+    else if (enCours) indice = Reco ? 'Tapez votre demande ou dictez-la au micro, puis Entrée.' : 'Tapez votre demande, puis Entrée.';
+    else if (!n) indice = 'Cliquez n’importe où sur la capture pour poser un point.';
+    else if (n >= MAX_POINTS) indice = `${MAX_POINTS} points, c’est le maximum ici. Cliquez sur Exporter, en haut à droite.`;
+    else indice = 'Un autre point ? Cliquez ailleurs sur la capture. Sinon, Exporter, en haut à droite.';
+    const zone = piece('indice');
+    if (zone.textContent !== indice) zone.textContent = indice;
   }
-  return `<span class="vs-pose" aria-hidden="true" style="position: absolute; left: ${px}cqw; top: ${py - 4.2}cqw; width: 4.2cqw; height: 4.2cqw; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); font-size: 1.9cqw; transform-origin: 0 100%; pointer-events: none; ${ROND}">${n}</span>`;
-}
-function bulle(d, n) {
-  return `<div class="vs-pose vs-bulle" aria-hidden="true" style="position: absolute; left: ${d.bulle[0]}cqw; top: ${d.bulle[1]}cqw; width: 60cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); pointer-events: none; animation: vs-fadein .3s .15s ease-out both">
-  <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600"><span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#${n}<span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">${ondes}</span><span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">Dictée…</span></div>
-  <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.75cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-typein 1.8s steps(56, end) .6s both">${d.texte}</span></div>
-</div>`;
-}
-function ligne(d, n) {
-  return `<div class="vs-derniere" style="display: flex; gap: 0.9cqw; padding: 0.9cqw; border-radius: 0.9cqw; animation: vs-fadein .3s ease-out both">
-  <span style="width: 2cqw; height: 2cqw; flex: none; border-radius: ${d.encadre ? '999px' : '1cqw 1cqw 1cqw 0.25cqw'}; background: #D63A0C; font-size: 1cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">${n}</span>
-  <div style="display: flex; flex-direction: column; gap: 0.3cqw; min-width: 0"><span style="animation: vs-fadein .4s 1.2s ease-out both">${d.texte}</span><span style="font-size: 0.95cqw; color: #8E8E96">${d.meta}</span></div>
-</div>`;
-}
-
-function etat() {
-  const n = poses.length;
-  for (const e of essai.querySelectorAll('[data-demo="nombre"]')) e.textContent = n + (n > 1 ? ' demandes' : ' demande');
-  piece('vide').hidden = n > 0;
-  piece('recommencer').hidden = n === 0;
-  exporter.setAttribute('aria-disabled', n === 0);
-  piece('indice').textContent = n === 0
-    ? 'Cliquez sur ce qui vous gêne : le graphique, le tableau, la recherche…'
-    : n < 3 ? 'Encore un ? Cliquez ailleurs dans l’app.' : 'Quand c’est bon : Exporter, en haut à droite.';
-}
-function poser(d) {
-  if (!claude.hidden) return;
-  poses.push(d);
-  const n = poses.length;
-  d.ping.hidden = d.bouton.hidden = true;
-  capture.querySelector('.vs-bulle')?.remove();
-  capture.insertAdjacentHTML('beforeend', marque(d, n) + bulle(d, n));
-  liste.querySelector('.vs-derniere')?.classList.remove('vs-derniere');
-  liste.insertAdjacentHTML('beforeend', ligne(d, n));
-  etat();
-}
-for (const d of DEMANDES) {
-  const [x, y, w, h] = d.zone;
-  const [gx, gy] = d.encadre ? [x + 2, y + 2] : [d.pin[0] - 1.5, d.pin[1] - 1.5];
-  capture.insertAdjacentHTML('beforeend', `<span aria-hidden="true" style="position: absolute; left: ${gx}cqw; top: ${gy}cqw; width: 3cqw; height: 3cqw; box-sizing: border-box; border-radius: 999px; border: 0.35cqw solid #D63A0C; animation: vs-ping 1.6s ease-out infinite; pointer-events: none"></span>`
-    + `<button type="button" class="vs-hot" aria-label="Poser un point sur ${d.label}" style="position: absolute; left: ${x}cqw; top: ${y}cqw; width: ${w}cqw; height: ${h}cqw; border: 0; border-radius: 1.2cqw; background: transparent; cursor: crosshair"></button>`);
-  d.bouton = capture.lastElementChild;
-  d.ping = d.bouton.previousElementSibling;
-  d.bouton.addEventListener('click', () => poser(d));
-}
-exporter.addEventListener('click', () => {
-  const n = poses.length;
-  if (!n || !claude.hidden) return;
-  for (const d of DEMANDES) d.ping.hidden = d.bouton.hidden = true;
-  capture.querySelector('.vs-bulle')?.remove();
-  piece('appliquees').innerHTML = poses
-    .map((d, i) => `<span style="padding-left: 2cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: vs-fadein .3s ease-out both; animation-delay: ${(1.5 + i * 0.35).toFixed(2)}s"><span style="color: #30D158">✓</span> #${i + 1} ${d.texte}</span>`)
-    .join('');
-  const fin = piece('fin');
-  fin.textContent = '✻ ' + (n > 1 ? `Les ${n} demandes sont appliquées.` : 'La demande est appliquée.');
-  fin.style.animationDelay = `${(1.6 + n * 0.35).toFixed(2)}s`;
-  claude.hidden = false;
-  claude.querySelector('button').focus({ preventScroll: true });
-});
-for (const button of essai.querySelectorAll('[data-demo="recommencer"]')) {
-  button.addEventListener('click', () => {
-    poses = [];
-    claude.hidden = true;
-    for (const e of capture.querySelectorAll('.vs-pose')) e.remove();
-    liste.replaceChildren();
-    for (const d of DEMANDES) d.ping.hidden = d.bouton.hidden = false;
+  function allerA(etape) {
+    ecran.dataset.etape = etape;
+    const revue = etape === 'revue';
+    capture.tabIndex = revue ? 0 : -1;
+    if (revue) {
+      capture.setAttribute('role', 'button');
+      capture.setAttribute('aria-label', 'Capture de l’app : cliquez où vous voulez pour poser un point, ou Entrée pour en poser un sur l’élément suivant');
+    } else {
+      capture.removeAttribute('role');
+      capture.removeAttribute('aria-label');
+    }
     etat();
-    DEMANDES[0].bouton.focus({ preventScroll: true });
+  }
+
+  // Étape 1 : cadre orange autour de la fenêtre, flash, puis l'éditeur s'ouvre sur la capture.
+  function capturerEcran() {
+    const cadre = piece('cadre');
+    if (ecran.dataset.etape !== 'capture' || !cadre.hidden) return;
+    cadre.hidden = false;
+    attendre(600, () => {
+      cadre.hidden = true;
+      piece('eclair').hidden = false;
+      allerA('revue');
+      for (const d of DEMANDES.slice(0, 3)) capture.insertAdjacentHTML('beforeend', `<span class="vs-pose vs-repere" aria-hidden="true" style="left: ${d.pin[0]}cqw; top: ${d.pin[1]}cqw"></span>`);
+      capture.focus({ preventScroll: true });
+      attendre(500, () => (piece('eclair').hidden = true));
+    });
+  }
+
+  // Étape 2 : un point à l'endroit du clic, avec sa bulle (champ et micro).
+  function poser(x, y) {
+    fermer();
+    if (poses.length >= MAX_POINTS) return etat();
+    for (const e of capture.querySelectorAll('.vs-repere')) e.remove();
+    const n = poses.length + 1;
+    const d = DEMANDES.find(({ zone: [zx, zy, w, h] }) => x >= zx && x <= zx + w && y >= zy && y <= zy + h);
+    capture.insertAdjacentHTML('beforeend', `<span class="vs-pose vs-pin" aria-hidden="true" style="left: ${x.toFixed(2)}cqw; top: ${y.toFixed(2)}cqw">${n}</span>`);
+    claude.insertAdjacentHTML('beforebegin', `<form class="vs-pose vs-bulle" aria-label="Point ${n}${d ? ', sur ' + d.label : ''}">
+    <div class="vs-tete"><span class="vs-rec"></span>#${n}<span class="vs-onde" aria-hidden="true">${ONDE}</span>${Reco ? `<button type="button" class="vs-micro" aria-pressed="false" aria-label="Dicter au micro">${MICRO}</button>` : ''}</div>
+    <input type="text" maxlength="140" autocomplete="off" enterkeyhint="done" aria-label="Demande du point ${n}" placeholder="${echappe(d ? d.texte : 'Votre demande…')}">
+    <small aria-live="polite">${aideTexte(d)}</small>
+  </form>`);
+    const bulle = claude.previousElementSibling;
+    const p = { x, y, d, n, pin: capture.lastElementChild, bulle, input: bulle.querySelector('input'), aide: bulle.querySelector('small'), parle: false, ms: 0, debut: 0, erreur: '' };
+    enCours = p;
+    placer(p);
+    bulle.addEventListener('submit', (e) => {
+      e.preventDefault();
+      arreter();
+      const tape = p.input.value.trim();
+      if (!tape && !d) return (p.aide.textContent = 'Écrivez ou dictez d’abord votre demande.');
+      garder(p, tape || d.texte, tape ? meta(p) : 'Suggestion');
+      capture.focus({ preventScroll: true });
+    });
+    p.input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      // Comme dans l'app : Échap retire un point vide et ferme la bulle d'un point rempli.
+      e.preventDefault();
+      arreter();
+      const tape = p.input.value.trim();
+      if (tape) garder(p, tape, meta(p));
+      else retirer(p);
+      capture.focus({ preventScroll: true });
+    });
+    p.input.addEventListener('input', () => {
+      if (reco) arreter(); // taper pendant la dictée l'arrête, comme dans l'app
+      etat();
+    });
+    bulle.querySelector('.vs-micro')?.addEventListener('click', () => dicter(p));
+    p.input.focus({ preventScroll: true });
+    etat();
+  }
+  // Bulle sous le point (au-dessus s'il n'y a pas la place), sans sortir de l'écran.
+  function placer(p) {
+    const e = ecran.getBoundingClientRect(), c = capture.getBoundingClientRect(), b = p.bulle.getBoundingClientRect();
+    const px = c.left - e.left + (p.x / 100) * c.width, py = c.top - e.top + (p.y / 100) * c.width;
+    const left = Math.min(Math.max(px - 24, 8), e.width - b.width - 8);
+    let top = py + 10;
+    if (top + b.height > e.height - 8) top = Math.max(8, py - p.pin.offsetHeight - 10 - b.height);
+    p.bulle.style.left = `${((left / e.width) * 100).toFixed(2)}cqw`;
+    p.bulle.style.top = `${((top / e.width) * 100).toFixed(2)}cqw`;
+  }
+  function garder(p, texte, quoi) {
+    enCours = null;
+    p.bulle.remove();
+    p.texte = texte;
+    liste.querySelector('.vs-derniere')?.classList.remove('vs-derniere');
+    liste.insertAdjacentHTML('beforeend', `<div class="vs-derniere" style="display: flex; gap: 0.9cqw; padding: 0.9cqw; border-radius: 0.9cqw; animation: vs-fadein .3s ease-out both">
+    <span class="vs-num" style="width: 2cqw; height: 2cqw; flex: none; border-radius: 1cqw 1cqw 1cqw 0.25cqw; background: #D63A0C; font-size: 1cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">${p.n}</span>
+    <div style="display: flex; flex-direction: column; gap: 0.3cqw; min-width: 0"><span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere">${echappe(texte)}</span><span class="vs-meta" style="font-size: 0.95cqw; color: #8E8E96">${quoi}</span></div>
+  </div>`);
+    p.ligne = liste.lastElementChild;
+    poses.push(p);
+    etat();
+  }
+  function retirer(p) {
+    enCours = null;
+    p.pin.remove();
+    p.bulle.remove();
+    etat();
+  }
+  // Clic ailleurs ou export : le point en cours est gardé s'il a du texte, sinon retiré.
+  function fermer() {
+    const p = enCours;
+    if (!p) return;
+    arreter();
+    const tape = p.input.value.trim();
+    if (tape) garder(p, tape, meta(p));
+    else retirer(p);
+  }
+
+  // Dictée par le navigateur (Chrome, Edge, Safari) ; sans elle, pas de bouton micro.
+  function ecoute(p, on) {
+    p.bulle.classList.toggle('ecoute', on);
+    const micro = p.bulle.querySelector('.vs-micro');
+    micro.setAttribute('aria-pressed', on);
+    micro.setAttribute('aria-label', on ? 'Arrêter la dictée' : 'Dicter au micro');
+    if (on) p.debut = Date.now();
+    else if (p.debut) {
+      p.ms += Date.now() - p.debut;
+      p.debut = 0;
+    }
+    p.aide.textContent = on ? 'J’écoute… Entrée ou le micro pour finir.' : p.erreur || aideTexte(p.d);
+  }
+  function arreter() { // coupe la dictée sans attendre son dernier résultat
+    if (!reco) return;
+    const r = reco;
+    reco = null;
+    r.abort();
+    if (enCours) ecoute(enCours, false);
+  }
+  function dicter(p) {
+    if (reco) return reco.stop(); // second clic : la dictée finit, son dernier résultat arrive encore
+    const r = new Reco();
+    r.lang = 'fr-FR';
+    r.interimResults = true;
+    const avant = p.input.value.trim();
+    r.onresult = (e) => {
+      if (reco !== r) return;
+      const dit = Array.from(e.results, (res) => res[0].transcript).join('').trim();
+      if (!dit) return;
+      p.parle = true;
+      p.input.value = avant ? `${avant} ${dit}` : dit;
+      etat();
+    };
+    r.onerror = (e) => {
+      if (reco === r && e.error !== 'aborted') p.erreur = ERREURS[e.error] || 'La dictée ne marche pas ici. Tapez votre demande.';
+    };
+    r.onend = () => {
+      if (reco !== r) return;
+      reco = null;
+      ecoute(p, false);
+    };
+    p.erreur = '';
+    reco = r;
+    ecoute(p, true);
+    try {
+      r.start();
+    } catch {
+      reco = null;
+      p.erreur = 'La dictée ne marche pas ici. Tapez votre demande.';
+      ecoute(p, false);
+    }
+    if (matchMedia('(pointer: fine)').matches) p.input.focus({ preventScroll: true });
+  }
+
+  capturer.addEventListener('click', capturerEcran);
+  capture.addEventListener('click', (e) => {
+    if (ecran.dataset.etape !== 'revue') return;
+    const r = capture.getBoundingClientRect();
+    poser(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.width) * 100);
   });
+  capture.addEventListener('keydown', (e) => {
+    if (e.target !== capture || (e.key !== 'Enter' && e.key !== ' ') || ecran.dataset.etape !== 'revue') return;
+    e.preventDefault();
+    const pris = new Set(poses.map((p) => p.d));
+    const d = DEMANDES.find((d) => !pris.has(d));
+    poser(...(d ? d.pin : [58, 40]));
+  });
+
+  // Étapes 3 et 4 : Claude Code déroule la revue, puis la fenêtre se ferme sur l'app modifiée.
+  exporter.addEventListener('click', () => {
+    if (ecran.dataset.etape !== 'revue' || exporter.getAttribute('aria-disabled') === 'true') return;
+    fermer();
+    const n = poses.length;
+    if (!n) return etat();
+    piece('appliquees').innerHTML = poses
+      .map((p, i) => `<span style="padding-left: 2cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: vs-fadein .3s ease-out both; animation-delay: ${(1.5 + i * 0.35).toFixed(2)}s"><span style="color: #30D158">✓</span> #${p.n} ${echappe(p.texte)}</span>`)
+      .join('');
+    const fin = piece('fin'), derniere = 1.6 + n * 0.35;
+    fin.textContent = '✻ ' + (n > 1 ? `Les ${n} demandes sont appliquées.` : 'La demande est appliquée.');
+    fin.style.animationDelay = `${derniere.toFixed(2)}s`;
+    claude.hidden = false;
+    allerA('claude');
+    claude.querySelector('[role="dialog"]').focus({ preventScroll: true });
+    attendre((derniere + 0.3) * 1000 + 1500, appliquer);
+  });
+  function appliquer() {
+    claude.hidden = true;
+    allerA('fait');
+    for (const d of new Set(poses.map((p) => p.d))) if (d?.apres) capture.insertAdjacentHTML('beforeend', d.apres);
+    poses.forEach((p, i) => {
+      p.pin.remove();
+      capture.insertAdjacentHTML('beforeend', `<span class="vs-pose vs-coche" aria-hidden="true" style="left: ${p.x.toFixed(2)}cqw; top: ${p.y.toFixed(2)}cqw; animation-delay: ${(0.2 + i * 0.2).toFixed(2)}s">${COCHE}</span>`);
+      p.ligne.querySelector('.vs-num').style.background = '#1F9D55';
+      p.ligne.querySelector('.vs-meta').insertAdjacentHTML('beforeend', ' · <span style="color: #30D158; font-weight: 600">✓ Fait</span>');
+    });
+    liste.querySelector('.vs-derniere')?.classList.remove('vs-derniere');
+    recommencer.focus({ preventScroll: true });
+  }
+  recommencer.addEventListener('click', () => {
+    for (const t of minuteurs) clearTimeout(t);
+    minuteurs = [];
+    arreter();
+    enCours = null;
+    poses = [];
+    for (const e of ecran.querySelectorAll('.vs-pose')) e.remove();
+    liste.replaceChildren();
+    claude.hidden = piece('cadre').hidden = piece('eclair').hidden = true;
+    allerA('capture');
+    capturer.focus({ preventScroll: true });
+  });
+
+  // Raccourcis, seulement quand la démo est à l'écran : ⌃⌥⌘P capture, ⌘E (ou Ctrl+E) exporte.
+  document.addEventListener('keydown', (e) => {
+    if (!visible || e.repeat) return;
+    if (e.code === 'KeyP' && e.ctrlKey && e.altKey && e.metaKey && ecran.dataset.etape === 'capture') {
+      e.preventDefault();
+      capturerEcran();
+    } else if (e.code === 'KeyE' && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && exporter.getAttribute('aria-disabled') === 'false') {
+      e.preventDefault();
+      exporter.click();
+    }
+  });
+  if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.4 }).observe(ecran);
+  else visible = true;
+  allerA('capture');
 }
 </script>
 </body>
