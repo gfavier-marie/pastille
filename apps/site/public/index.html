@@ -95,6 +95,14 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-carte{position:relative;display:grid;min-height:400px;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
 .vs-carte.ouverte{transform:rotateY(180deg)}
 .vs-face{position:relative;grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+/* Les dessins animés du recto ont leur propre calque, que backface-visibility ne cache pas (Safari) :
+   ils disparaissent dès que la carte s'ouvre et ne reviennent qu'une fois la tranche repassée
+   à la fermeture (90° vers 0,09 s avec cet amorti). Seul le décor est masqué : les boutons gardent le focus. */
+.vs-face:first-child>[aria-hidden="true"]>*{transition:visibility 0s .1s}
+.vs-carte.ouverte>.vs-face:first-child>[aria-hidden="true"]>*{visibility:hidden;transition-delay:0s}
+.vs-etapes{margin:0;padding:0;list-style:none;display:grid;gap:20px;grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1040px){.vs-etapes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.vs-etapes{grid-template-columns:minmax(0,1fr)}}
 .vs-round{transition:transform .2s ease, background .2s ease}
 .vs-round:hover{transform:scale(1.08)}
 .vs-hot{transition:box-shadow .15s ease, background .15s ease}
@@ -489,6 +497,22 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 13px; line-height: 1.5; color: #A1A1A8">Hypothèses&nbsp;: à la main, 30 s par retour (capture, recadrage, collage dans un document, commentaire tapé) et 2 min pour assembler la revue. Avec VibeScreener, 5 s par retour (un clic, une phrase dite) et 5 s pour l'export.</p>
         </div>
       </div>
+      <div class="vs-reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px 40px; padding: 28px; border-radius: 20px; background: #FFFFFF">
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.02em">Et des retours plus complets</h3>
+          <p style="margin: 0; color: #3A3A40">Taper chaque retour est pénible, alors on écrit le minimum et l'IA devine le reste. À l'oral, on dit sans effort ce qui cloche, pourquoi, et ce qu'on attend. L'IA a plus de contexte et vise juste plus souvent.</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 15px">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #8E8E96">Tapé</span>
+            <span style="color: #5E5E66">«&nbsp;bouton trop petit&nbsp;»</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #D63A0C">Dicté</span>
+            <span style="color: #17171A">«&nbsp;Ce bouton est trop petit sur mobile, on le rate avec le pouce. Mets-le en pleine largeur, comme celui du panier.&nbsp;»</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -496,21 +520,27 @@ details[open] .vs-plus{transform:rotate(45deg)}
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 10px">
         <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Comment ça marche</div>
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Trois gestes. Zéro rédaction.</h2>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Trois gestes de votre côté, l'IA s'occupe du code.</h2>
+        <p style="margin: 6px 0 0; max-width: 720px; font-size: 18px; color: #3A3A40">Vous relisez votre app comme avec quelqu'un assis à côté de vous&nbsp;: vous montrez ce qui ne va pas et vous le dites. L'IA reçoit chaque demande avec la capture et l'endroit exact.</p>
       </div>
-      <ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">
+      <ol class="vs-etapes">
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
-          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 10px">
-            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 12px; background: #FFFFFF; font-size: 24px">⇧</span>
-            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 12px; background: #FFFFFF; font-size: 24px">⌘</span>
-            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 12px; background: #FFFFFF; font-size: 24px; font-weight: 600">2</span>
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 8px">
+            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌃</span>
+            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌥</span>
+            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌘</span>
+            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px; font-weight: 600">P</span>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">1.</span> Figez l'écran</h3>
-          <p style="margin: 0; color: #5E5E66">Sur votre app, d'un raccourci.</p>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">1.</span> Capture d'écran</h3>
+          <p style="margin: 0; color: #5E5E66">Sur votre app, le raccourci fige l'écran. Un clic sur la fenêtre et elle est capturée.</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
-          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 14px">
-            <span style="width: 40px; height: 40px; box-sizing: border-box; border-radius: 20px 20px 20px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+            <span style="display: flex; gap: 10px">
+              <span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px 18px 18px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+              <span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px 18px 18px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+              <span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px 18px 18px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
+            </span>
             <span style="height: 44px; display: flex; align-items: center; gap: 4px">
                               <span style="width: 4px; height: 14px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.00s"></span>
               
@@ -538,18 +568,26 @@ details[open] .vs-plus{transform:rotate(45deg)}
               
             </span>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">2.</span> Pointez et parlez</h3>
-          <p style="margin: 0; color: #5E5E66">Un clic par demande : le micro s'ouvre tout seul.</p>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">2.</span> Effectuez vos commentaires</h3>
+          <p style="margin: 0; color: #5E5E66">Un clic par demande, puis vous parlez&nbsp;: le micro s'ouvre tout seul.</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
-          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #17171A; display: flex; align-items: center; justify-content: center; gap: 12px">
-            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3A40; border-bottom-width: 4px; border-radius: 12px; background: #2A2A2E; color: #FFFFFF; font-size: 24px">⌘</span>
-            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3A40; border-bottom-width: 4px; border-radius: 12px; background: #2A2A2E; color: #FFFFFF; font-size: 24px; font-weight: 600">E</span>
-            <svg width="28" height="16" viewBox="0 0 28 16" fill="none" stroke="#FF6A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h22M18 2l6 6-6 6"></path></svg>
-            <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF">IA</span>
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #17171A; display: flex; align-items: center; justify-content: center; gap: 14px">
+            <span style="padding: 9px 14px; border: 1px solid #3A3A40; border-radius: 10px; background: #2A2A2E; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; letter-spacing: 0.04em; color: #FFFFFF">MCP</span>
+            <svg width="28" height="16" viewBox="0 0 28 16" fill="none" stroke="#FF6A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h22M18 2l6 6-6 6"></path></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24"><use href="#logo-claude"></use></svg>
           </div>
           <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">3.</span> Passez la main</h3>
-          <p style="margin: 0; color: #5E5E66">En PDF, en Markdown, ou Claude Code lit la revue.</p>
+          <p style="margin: 0; color: #5E5E66">Claude Code lit la revue par le serveur MCP de VibeScreener. Pour une autre IA, exportez en PDF ou en Markdown.</p>
+        </li>
+        <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px">
+            <span style="display: flex; align-items: center; gap: 10px"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="width: 120px; height: 10px; border-radius: 999px; background: #D9D9DE"></span></span>
+            <span style="display: flex; align-items: center; gap: 10px"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="width: 92px; height: 10px; border-radius: 999px; background: #D9D9DE"></span></span>
+            <span style="display: flex; align-items: center; gap: 10px"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="width: 106px; height: 10px; border-radius: 999px; background: #D9D9DE"></span></span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">4.</span> Modifs effectuées automatiquement</h3>
+          <p style="margin: 0; color: #5E5E66">L'IA reprend les points un par un et modifie le code. Vous vérifiez le résultat.</p>
         </li>
       </ol>
     </div>
@@ -699,7 +737,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
               <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Une inspiration en exemple</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>Dans la bulle d'un point, touchez Inspiration, ouvrez le site modèle, puis ⇧⌘2 et un clic.</li>
+                <li>Dans la bulle d'un point, touchez Inspiration, ouvrez le site modèle, puis ⌃⌥⌘P et un clic.</li>
                 <li>La capture rejoint le point, sans créer de nouvel écran.</li>
                 <li>L'IA la reçoit comme le modèle à suivre, pas comme l'écran à modifier.</li>
                 <li>Une image se colle aussi avec ⌘V.</li>

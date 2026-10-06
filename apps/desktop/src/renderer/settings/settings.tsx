@@ -11,7 +11,7 @@ const api = window.pastille;
 const isMac = navigator.userAgent.includes('Mac');
 const S = T.settings;
 
-/** Touche pressée → accélérateur Electron (« CommandOrControl+Shift+2 »). Electron vise la position
+/** Touche pressée → accélérateur Electron (« CommandOrControl+Alt+P »). Electron vise la position
  *  physique de la touche sur Mac (e.code), mais la lettre du clavier sous Windows (code virtuel) :
  *  en AZERTY, la touche A doit donner « A », pas « Q ». */
 function accelerator(e: React.KeyboardEvent): string | null {

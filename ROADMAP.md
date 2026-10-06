@@ -78,7 +78,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Toutes les sessions (hors cahier des charges, demandé) : liste dans l'éditeur (« Sessions » dans l'en-tête, « Toutes les sessions… » dans le menu de l'icône) pour ouvrir, réexporter le PDF ou mettre à la corbeille
 - [x] Suppression d'un écran (hors cahier des charges, demandé) : croix sur la vignette, avec ses points, annulable (⌘Z)
 - [x] Relancer la dictée d'un point (demandé) : bouton micro dans la bulle et dans la liste des points, le texte s'ajoute à la fin ; « ⌘M dicte la suite » affiché dans la bulle
-- [x] Inspiration d'un point (hors cahier des charges, demandé) : bouton dans la bulle, l'éditeur s'efface, la capture suivante (⇧⌘2) est jointe au point au lieu de créer un écran ; aussi par ⌘V ou glisser-déposer d'une image ; reprise dans les trois exports et le MCP comme « modèle du résultat souhaité »
+- [x] Inspiration d'un point (hors cahier des charges, demandé) : bouton dans la bulle, l'éditeur s'efface, la capture suivante (⌃⌥⌘P) est jointe au point au lieu de créer un écran ; aussi par ⌘V ou glisser-déposer d'une image ; reprise dans les trois exports et le MCP comme « modèle du résultat souhaité »
 - [ ] Inspiration : essai réel de la capture (l'autotest n'a pas l'autorisation d'enregistrement d'écran ; chaîne vérifiée avec une image factice)
 - [x] Assistant de premier lancement rouvert au démarrage tant qu'une autorisation manque (après une mise à jour, macOS les oublie) ; le micro n'est plus demandé avant l'assistant ; non bloquant, chaque fonction signale ce qui manque
 - [x] Remarques générales (hors cahier des charges, demandé) : liste de commentaires non rattachés à un point, tapés ou dictés, annulables (⌘Z), repris dans les trois exports et le MCP
@@ -86,7 +86,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Nom de l’app : VibeScreener (identifiants internes inchangés : `@pastille/*`, `PASTILLE_*`, `pastille://`, appId) ; PDF avec logo
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
 - [x] Windows publié (demandé) : `VibeScreener-Setup.exe` dans la Release, installation en une commande PowerShell (`install.ps1`, sans SmartScreen ni droits administrateur), runtime Visual C++ embarqué pour whisper-server, mise à jour depuis le menu de l'icône ; la CI installe l'app sur un Windows et la teste (e2e + 5 captures réelles)
-- [ ] Essai sur un vrai PC (ou une VM Windows 11 sur le Mac) : installation, raccourci Ctrl+Shift+2, overlay, dictée au micro, menu de la zone de notification, mise à jour
+- [ ] Essai sur un vrai PC (ou une VM Windows 11 sur le Mac) : installation, raccourci Ctrl+Alt+P (vérifier qu'AltGr+P ne le déclenche pas en AZERTY), overlay, dictée au micro, menu de la zone de notification, mise à jour
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
 - [x] Dépôt public : installation en une commande (`install.sh`, branche aussi Claude Code), installeur signé ad hoc, relais partagé visé par l'app installée, Release publiée par tag, licence MIT
 
@@ -103,7 +103,7 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 - [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant, l'appairage et la liste des sessions
 - [x] Overlay en panneau macOS : Échap et premier clic marchent sans que l'app soit au premier plan (macOS 14+)
 - [ ] Validation réelle sur Mac : popover sous l'icône, barre flottante au survol, ouverture au démarrage
-- [ ] Raccourci par défaut : sur le Mac de test, ⇧⌘2 (et ⇧⌘0) n'arrivent jamais à Pastille, interceptés par une autre app ; ⌃⌥⌘P marche. L'enregistrement « réussit » quand même, donc rien n'est signalé. Choisir un défaut plus sûr
+- [x] Raccourci par défaut : sur le Mac de test, ⇧⌘2 (et ⇧⌘0) n'arrivent jamais à Pastille, interceptés par une autre app ; ⌃⌥⌘P marche. L'enregistrement « réussit » quand même, donc rien n'est signalé. Nouveau défaut ⌃⌥⌘P (Windows : Ctrl+Alt+P), l'ancien défaut enregistré est remplacé, un raccourci choisi est gardé
 
 ## Hors lot — Serveur MCP pour Claude Code [C], demandé
 
@@ -198,7 +198,7 @@ Sur main, cette branche. Les remarques vont de la plus gênante à la plus lourd
   - Nouveau réglage « Contexte du projet » dans l'onglet Export, à côté des instructions pour l'IA.
   - Il s'applique à la session ouverte et aux suivantes, et remplace l'héritage caché `lastContext` (repris comme valeur de départ).
   - Les exports et le MCP ne changent pas : ils lisent toujours `session.context`.
-- [x] **B3 « Nouvelle capture » visible** : la vignette ressemble à une capture. Elle devient un vrai bouton orange « ＋ Nouvelle capture ⇧⌘2 » au bout de la bande. Le même bouton s'affiche dans l'éditeur vide.
+- [x] **B3 « Nouvelle capture » visible** : la vignette ressemble à une capture. Elle devient un vrai bouton orange « ＋ Nouvelle capture ⌃⌥⌘P » au bout de la bande. Le même bouton s'affiche dans l'éditeur vide.
   - À vérifier au passage : le micro préparé au clic est refermé quand l'éditeur se masque (`visibilitychange` → `recorder.close()`), ce qui fait perdre l'avance de la dictée.
 - [x] **B4 Onglets Points / Remarques générales** : deux onglets en haut du panneau de droite, chacun sur toute la hauteur, avec le compte de remarques sur l'onglet.
   - La navigation d'écran n'apparaît que sur l'onglet Points.

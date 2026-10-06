@@ -84,7 +84,7 @@ export type MenuState = {
   tablet: boolean; // tablette connectée
   pending: number; // transcriptions en cours
   errors: number; // transcriptions en erreur
-  shortcut: string; // raccourci de capture, affiché (« ⇧⌘2 »)
+  shortcut: string; // raccourci de capture, affiché (« ⌃⌥⌘P »)
   recents: SessionSummary[];
   update?: string; // version plus récente publiée
   license: LicenseView;
