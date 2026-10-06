@@ -170,6 +170,11 @@ export const Folder = (p: Props) => (
     <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3H6l1.5 1.5h5A1.5 1.5 0 0 1 14 6v5.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5z" />
   </Stroke>
 );
+export const Trash = (p: Props) => (
+  <Stroke {...p} width={1.4}>
+    <path d="M2.5 4.5h11M6.5 4.5V3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1.5M4 4.5l.7 8.6a1 1 0 0 0 1 .9h4.6a1 1 0 0 0 1-.9l.7-8.6M6.8 7v4.5M9.2 7v4.5" />
+  </Stroke>
+);
 export const Doc = (p: Props) => (
   <Stroke {...p} width={1.3}>
     <path d="M4 1.5h5.5L12.5 4.5v10h-8.5z" />

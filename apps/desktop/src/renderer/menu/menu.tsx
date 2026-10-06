@@ -117,6 +117,10 @@ function App() {
               </button>
             </div>
           ))}
+          <button type="button" className="item" onClick={() => act({ type: 'sessions' })}>
+            <I.Folder />
+            <span>{T.menu.allSessions}</span>
+          </button>
         </>
       )}
 

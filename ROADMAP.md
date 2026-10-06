@@ -74,6 +74,9 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Réglages complets : raccourci (vérifié), mode de commentaire (auto, ⌥ maintenu, clavier seul), silence, langue, dossier d'export, instructions du PDF, glossaire, moteur API compatible OpenAI (clé chiffrée), révocation de la tablette
 - [x] Découpage du PDF (> 100 pages ou 30 Mo), **export PowerPoint**, copie du PDF dans le presse-papiers [S] (à vérifier en vrai)
 - [x] Sessions récentes [S], icône d'état [S] (nombre de points, transcriptions en cours)
+- [x] Toutes les sessions (hors cahier des charges, demandé) : liste dans l'éditeur (« Sessions » dans l'en-tête, « Toutes les sessions… » dans le menu de l'icône) pour ouvrir, réexporter le PDF ou mettre à la corbeille
+- [x] Suppression d'un écran (hors cahier des charges, demandé) : croix sur la vignette, avec ses points, annulable (⌘Z)
+- [x] Assistant de premier lancement rouvert au démarrage tant qu'une autorisation manque (après une mise à jour, macOS les oublie) ; le micro n'est plus demandé avant l'assistant ; non bloquant, chaque fonction signale ce qui manque
 - [x] Remarques générales (hors cahier des charges, demandé) : liste de commentaires non rattachés à un point, tapés ou dictés, annulables (⌘Z), repris dans les trois exports et le MCP
 - [x] Mise à jour depuis le menu de l'icône (demandé) : la dernière Release GitHub est proposée, install.sh la pose et relance l'app ; macOS redemande les autorisations (app non signée)
 - [x] Nom de l’app : VibeScreener (identifiants internes inchangés : `@pastille/*`, `PASTILLE_*`, `pastille://`, appId) ; PDF avec logo
@@ -92,7 +95,7 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 - [x] Overlay (assombrissement, étiquette app + taille, pastille fantôme), éditeur sombre (bulle avec onde, panneau, vignettes, zoom)
 - [x] Menu en popover sous l'icône ; réglages en onglets ; assistant de premier lancement en 3 étapes ; fenêtre d'appairage ; PWA restylée
 - [x] Hors cahier des charges, validés le 6 oct. 2026 : **barre flottante** (option), **ouverture au démarrage**, **icône d'état dynamique** (dictée, transcriptions, erreur)
-- [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant et l'appairage
+- [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant, l'appairage et la liste des sessions
 - [x] Overlay en panneau macOS : Échap et premier clic marchent sans que l'app soit au premier plan (macOS 14+)
 - [ ] Validation réelle sur Mac : popover sous l'icône, barre flottante au survol, ouverture au démarrage
 - [ ] Raccourci par défaut : sur le Mac de test, ⇧⌘2 (et ⇧⌘0) n'arrivent jamais à Pastille, interceptés par une autre app ; ⌃⌥⌘P marche. L'enregistrement « réussit » quand même, donc rien n'est signalé. Choisir un défaut plus sûr

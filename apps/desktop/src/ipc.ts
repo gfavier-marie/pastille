@@ -71,6 +71,9 @@ export type PairingState = { qr: string; connected: boolean };
 export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
+/** Une session enregistrée, telle que listée (menu de l'icône, liste de toutes les sessions). */
+export type SessionSummary = { id: string; name: string; points: number; screens: number; updatedAt: string };
+
 /** Ce qu'affichent le menu de l'icône et la barre flottante. */
 export type MenuState = {
   platform: 'mac' | 'win' | 'other';
@@ -79,12 +82,12 @@ export type MenuState = {
   pending: number; // transcriptions en cours
   errors: number; // transcriptions en erreur
   shortcut: string; // raccourci de capture, affiché (« ⇧⌘2 »)
-  recents: { id: string; name: string; points: number; screens: number; updatedAt: string }[];
+  recents: SessionSummary[];
   update?: string; // version plus récente publiée sur GitHub
 };
 
 export type MenuAction =
-  | { type: 'capture' | 'editor' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' }
+  | { type: 'capture' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' }
   | { type: 'open-recent' | 'export-recent'; id: string };
 
 /** Message de la barre flottante après un export. */
@@ -102,6 +105,11 @@ export type PastilleApi = {
   updateAnnotation(id: string, patch: { text?: string; geometry?: Geometry }): void;
   deleteAnnotation(id: string): void;
   updateSession(patch: { name?: string; context?: string }): void;
+  deleteCapture(id: string): void; // annulable par ⌘Z
+  listSessions(): Promise<SessionSummary[]>;
+  openSession(id: string): Promise<void>;
+  trashSession(id: string): Promise<boolean>; // après confirmation ; faux si annulé
+  onShowSessions(cb: () => void): () => void; // « Toutes les sessions… » du menu de l'icône
   addNote(): Promise<string>;
   updateNote(id: string, text: string): void;
   deleteNote(id: string): void;

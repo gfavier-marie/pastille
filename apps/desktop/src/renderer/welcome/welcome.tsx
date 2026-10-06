@@ -48,6 +48,13 @@ function App() {
     if (!r.ok) setError(r.error);
   }
 
+  // L'essai du raccourci est facultatif : arrivé là, fermer l'assistant ne le fait plus revenir
+  // (sauf autorisation retirée ; un modèle manquant ouvre les réglages).
+  async function toShortcut() {
+    await update({ firstRunDone: true });
+    setStep(3);
+  }
+
   async function finish() {
     await update({ firstRunDone: true });
     window.close();
@@ -185,7 +192,7 @@ function App() {
         <button type="button" className="btn tall" onClick={() => setStep(1)}>
           {W.back}
         </button>
-        <button type="button" className="btn primary tall" onClick={() => setStep(3)}>
+        <button type="button" className="btn primary tall" onClick={() => void toShortcut()}>
           {W.continue}
         </button>
       </>

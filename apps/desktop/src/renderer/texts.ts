@@ -41,6 +41,7 @@ export const T = {
     exportPdf: 'Exporter le PDF',
     newSession: 'Nouvelle session',
     recents: 'Sessions récentes',
+    allSessions: 'Toutes les sessions…',
     reexport: (name: string) => `Réexporter le PDF de ${name}`,
     pair: 'Appairer une tablette…',
     settings: 'Réglages…',
@@ -207,6 +208,14 @@ export const T = {
 
   editor: {
     rename: 'Renommer la session',
+    sessions: 'Sessions',
+    allSessions: 'Toutes les sessions',
+    noSessions: 'Aucune session enregistrée.',
+    sessionOpen: 'ouverte',
+    openSession: (name: string) => `Ouvrir ${name}`,
+    exportSession: (name: string) => `Exporter le PDF de ${name}`,
+    trashSession: (name: string) => `Mettre ${name} à la corbeille`,
+    close: 'Fermer',
     context: 'Contexte',
     contextEmpty: 'projet, stack, page testée',
     tablet: 'Tablette connectée',
@@ -261,6 +270,8 @@ export const T = {
     thumbLabel: (index: number, points: number, current: boolean) =>
       `Écran ${index}, ${plural(points, 'point')}${current ? ', affiché' : ''}`,
     captures: 'Captures de la session',
+    deleteScreen: (index: number) => `Supprimer l'écran ${index} et ses points`,
+    screenDeleted: (index: number, mod: string) => `Écran ${index} supprimé · ${mod}Z pour annuler`,
     newCapture: 'Nouvelle capture',
     emptyTitle: "Aucune capture pour l'instant",
     emptyBefore: "Sur l'écran à relire, appuyez sur",

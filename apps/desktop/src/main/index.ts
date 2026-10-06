@@ -3,7 +3,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, mkdirSync, mkdtempSync, renameSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, join, normalize, sep } from 'node:path';
+import { basename, dirname, join, normalize, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   app,
@@ -349,6 +349,9 @@ function onMenuAction(a: MenuAction) {
       return startCapture();
     case 'editor':
       return showEditor();
+    case 'sessions':
+      showEditor();
+      return editor?.webContents.send('editor:sessions');
     case 'export':
       return void exportFromMenu('pdf');
     case 'new-session':
@@ -467,15 +470,28 @@ function showWelcome() {
   if (isMac) app.focus({ steal: true });
 }
 
-function settingsState(): SettingsState {
-  const permission = (kind: 'screen' | 'microphone') =>
+/** Autorisations système : enregistrement de l'écran (macOS seulement) et micro. */
+function permissions() {
+  const status = (kind: 'screen' | 'microphone') =>
     isMac || process.platform === 'win32' ? systemPreferences.getMediaAccessStatus(kind) : 'granted';
+  return { screen: isMac ? status('screen') : 'granted', microphone: status('microphone') };
+}
+
+/** L'assistant s'ouvre au premier lancement, puis tant qu'une autorisation nécessaire manque
+ *  (après une mise à jour, macOS oublie celles de l'app non signée). */
+function setupNeeded() {
+  const p = permissions();
+  const { firstRunDone, commentMode } = settings.get();
+  return !firstRunDone || p.screen !== 'granted' || (commentMode !== 'keyboard' && p.microphone !== 'granted');
+}
+
+function settingsState(): SettingsState {
   return {
     ...settings.view(),
     platform: isMac ? 'mac' : process.platform === 'win32' ? 'win' : 'other',
     shortcutLabel: shortcutLabel(settings.get().shortcut),
     shortcutOk: shortcutRegistered,
-    permissions: { screen: isMac ? permission('screen') : 'granted', microphone: permission('microphone') },
+    permissions: permissions(),
     modelPresent: transcriber.status().state !== 'missing' || settings.get().engine === 'api',
     whisper: transcriber.status(),
     tabletPaired: tablet?.isPaired() ?? false,
@@ -589,6 +605,31 @@ ipcMain.on('annotation:delete', (_e, id: string) =>
 ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
   store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
 );
+// Écran supprimé avec ses points ; son image reste sur le disque pour que ⌘Z le fasse revenir.
+ipcMain.on('capture:delete', (_e, id: string) =>
+  store.update((s) => (s.captures = s.captures.filter((c) => c.id !== id)), { undoable: true }),
+);
+// Toutes les sessions (éditeur) : ouvrir, ou mettre à la corbeille après confirmation.
+ipcMain.handle('sessions:list', () => store.recent(Infinity));
+ipcMain.handle('session:open', (_e, id: string) => store.open(id));
+ipcMain.handle('session:trash', async (_e, id: string) => {
+  const target = (await store.recent(Infinity)).find((r) => r.id === id);
+  const dir = join(store.sessionsDir, id);
+  if (!target || dirname(dir) !== store.sessionsDir) return false;
+  const { response } = await dialog.showMessageBox({
+    type: 'warning',
+    message: `Mettre la session « ${target.name} » à la corbeille ?`,
+    detail: 'Ses captures et ses commentaires partent avec elle. Elle reste récupérable depuis la corbeille.',
+    buttons: ['Mettre à la corbeille', 'Annuler'],
+    defaultId: 1,
+    cancelId: 1,
+  });
+  if (response !== 0) return false;
+  if (store.get()?.id === id) await store.close();
+  await shell.trashItem(dir).catch((err) => dialog.showMessageBox({ type: 'warning', message: `Mise à la corbeille impossible : ${err}` }));
+  updateTrayMenu();
+  return true;
+});
 // Remarques générales : une liste, chaque remarque tapée ou dictée comme un commentaire de point.
 ipcMain.handle('note:add', () => {
   const note = newNote();
@@ -673,6 +714,12 @@ async function runEditorAutotest() {
   const mcpImages = reply.result?.content.filter((c) => c.type === 'image').length ?? 0;
 
   const results = { whisper: transcriber.status().state, dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx'), mcpImages };
+
+  // Liste de toutes les sessions, par-dessus l'éditeur, puis refermée (Échap).
+  editor.webContents.send('editor:sessions');
+  await wait(600);
+  await writeFile(join(out, 'sessions.png'), (await editor.webContents.capturePage()).toPNG());
+  editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
 
   showSettings();
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
@@ -846,11 +893,10 @@ void app.whenReady().then(async () => {
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
   void transcriber.restart().then(() => {
-    // Premier lancement (§4.9) : l'assistant s'ouvre. Plus tard, un modèle manquant ouvre les réglages.
-    if (!settings.get().firstRunDone) showWelcome();
+    // Assistant de premier lancement (§4.9), rouvert si une autorisation manque. Sinon, un modèle manquant ouvre les réglages.
+    if (setupNeeded()) showWelcome();
     else if (settings.get().engine === 'local' && transcriber.status().state === 'missing') showSettings('transcription');
   });
   dictation.resume();
   void tablet?.start();
-  if (isMac) void systemPreferences.askForMediaAccess('microphone');
 });

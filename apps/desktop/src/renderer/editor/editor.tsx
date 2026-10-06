@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { allAnnotations, type Annotation, type Note, type Session } from '@pastille/shared';
-import { imageUrl, type ExportFormat, type SettingsState } from '../../ipc.ts';
+import { imageUrl, type ExportFormat, type SessionSummary, type SettingsState } from '../../ipc.ts';
 import * as I from '../icons.tsx';
 import { T } from '../texts.ts';
 import { createRecorder, type RecorderState } from './recorder.ts';
@@ -86,6 +86,58 @@ function EditableText(props: {
   );
 }
 
+/** Toutes les sessions, la plus récente d'abord : ouvrir, réexporter le PDF, mettre à la corbeille. */
+function SessionsPanel(props: { currentId?: string; onOpen: (id: string) => void; onExport: (id: string) => void; onClose: () => void }) {
+  const [list, setList] = useState<SessionSummary[] | null>(null);
+  const load = () => void api.listSessions().then(setList);
+  useEffect(load, []);
+  return (
+    <div className="sessions-backdrop" onMouseDown={(e) => e.target === e.currentTarget && props.onClose()}>
+      <section className="sessions" role="dialog" aria-label={T.editor.allSessions}>
+        <div className="sessions-head">
+          <h2>{T.editor.allSessions}</h2>
+          <button type="button" className="nav-btn" aria-label={T.editor.close} onClick={props.onClose}>
+            <I.Close size={11} />
+          </button>
+        </div>
+        {list?.length === 0 && <p className="none">{T.editor.noSessions}</p>}
+        <ul>
+          {list?.map((r) => (
+            <li key={r.id} className={r.id === props.currentId ? 'current' : ''}>
+              <button type="button" className="open" aria-label={T.editor.openSession(r.name)} onClick={() => props.onOpen(r.id)}>
+                <span className="title">{r.name}</span>
+                <span className="meta">
+                  {T.points(r.points)} · {T.screens(r.screens)} · {T.day(r.updatedAt)}
+                </span>
+              </button>
+              {r.id === props.currentId && <span className="tag">{T.editor.sessionOpen}</span>}
+              <button
+                type="button"
+                className="tool"
+                aria-label={T.editor.exportSession(r.name)}
+                title={T.editor.exportSession(r.name)}
+                disabled={r.screens === 0}
+                onClick={() => props.onExport(r.id)}
+              >
+                <I.Export size={14} />
+              </button>
+              <button
+                type="button"
+                className="tool"
+                aria-label={T.editor.trashSession(r.name)}
+                title={T.editor.trashSession(r.name)}
+                onClick={() => void api.trashSession(r.id).then((done) => done && load())}
+              >
+                <I.Trash size={14} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [captureId, setCaptureId] = useState<string | null>(null);
@@ -93,6 +145,7 @@ function App() {
   const [bubbleOpen, setBubbleOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [exportMenu, setExportMenu] = useState(false);
+  const [sessionsOpen, setSessionsOpen] = useState(false); // liste de toutes les sessions
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [rec, setRec] = useState<RecorderState>(null);
   const levels = useRef<number[]>([]);
@@ -148,6 +201,7 @@ function App() {
     void api.getSettings().then(applyPrefs);
     const offSettings = api.onSettingsChanged(applyPrefs);
     const offTablet = api.onTabletStatus(setTablet);
+    const offSessions = api.onShowSessions(() => setSessionsOpen(true));
     const offMic = api.onPrepareMic(() => void canDictate.then((ok) => (ok ? recorder.open() : undefined)).catch(() => {}));
     // Fenêtre cachée : la dictée en cours part en transcription et le micro est libéré.
     const onVisibility = () => document.hidden && recorder.close();
@@ -158,6 +212,7 @@ function App() {
       offMic();
       offTablet();
       offSettings();
+      offSessions();
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
@@ -198,6 +253,28 @@ function App() {
     setTimeout(() => setToast(null), 5000);
   }
 
+  /** Une session de la liste s'ouvre dans l'éditeur ; « Exporter » l'ouvre puis exporte son PDF. */
+  async function openSession(id: string, exportPdf = false) {
+    recorder.stop(true);
+    setSessionsOpen(false);
+    if (id !== session?.id) {
+      await api.openSession(id);
+      setCaptureId(null);
+      setSelectedId(null);
+      setBubbleOpen(false);
+    }
+    if (exportPdf) void runExport('pdf');
+  }
+
+  const sessionsPanel = sessionsOpen && (
+    <SessionsPanel
+      currentId={session?.id}
+      onOpen={(id) => void openSession(id)}
+      onExport={(id) => void openSession(id, true)}
+      onClose={() => setSessionsOpen(false)}
+    />
+  );
+
   // Mode « appuyer pour parler » : ⌥ (Alt) maintenu enregistre pour le point sélectionné.
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -221,6 +298,11 @@ function App() {
   // Raccourcis (§4.6).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (sessionsOpen) {
+        // Liste des sessions ouverte : seul Échap agit (la fermer).
+        if (e.key === 'Escape') setSessionsOpen(false);
+        return;
+      }
       const mod = isMac ? e.metaKey : e.ctrlKey;
       if (mod && e.key.toLowerCase() === 'e') {
         e.preventDefault();
@@ -283,6 +365,11 @@ function App() {
         <p>
           {T.editor.emptyBefore} <kbd>{shortcut}</kbd> {T.editor.emptyAfter}
         </p>
+        <button type="button" className="btn" onClick={() => setSessionsOpen(true)}>
+          <I.Folder size={14} />
+          {T.editor.allSessions}
+        </button>
+        {sessionsPanel}
       </div>
     );
   }
@@ -363,9 +450,29 @@ function App() {
     setBubbleOpen(false);
   };
 
+  /** Supprime un écran et ses points (⌘Z le fait revenir) ; l'écran voisin prend sa place. */
+  function deleteCapture(i: number) {
+    const c = captures[i]!;
+    if (c.annotations.some((a) => a.id === recorder.current())) recorder.stop(false);
+    if (c.id === capture!.id) {
+      setCaptureId((captures[i + 1] ?? captures[i - 1])?.id ?? null);
+      setSelectedId(null);
+      setBubbleOpen(false);
+    }
+    api.deleteCapture(c.id);
+    setToast({ text: T.editor.screenDeleted(i + 1, MOD) });
+    setTimeout(() => setToast(null), 4000);
+  }
+
   return (
     <div className={`editor ${isMac ? 'mac' : ''}`}>
       <header>
+        <button type="button" className="crumb" onClick={() => setSessionsOpen(true)}>
+          {T.editor.sessions}
+        </button>
+        <span className="crumb-sep" aria-hidden="true">
+          /
+        </span>
         {renaming ? (
           <input
             className="name-input"
@@ -661,19 +768,23 @@ function App() {
 
       <nav aria-label={T.editor.captures}>
         {captures.map((c, i) => (
-          <button
-            type="button"
-            key={c.id}
-            className="thumb"
-            aria-label={T.editor.thumbLabel(i + 1, c.annotations.length, c.id === capture.id)}
-            aria-current={c.id === capture.id || undefined}
-            onClick={() => goTo(i)}
-          >
-            <span className="img">
-              <img src={imageUrl(session, c.image)} alt="" />
-            </span>
-            <span className="cap">{T.editor.thumb(i + 1, c.annotations[0]?.number, c.annotations.at(-1)?.number)}</span>
-          </button>
+          <div className="shot" key={c.id}>
+            <button
+              type="button"
+              className="thumb"
+              aria-label={T.editor.thumbLabel(i + 1, c.annotations.length, c.id === capture.id)}
+              aria-current={c.id === capture.id || undefined}
+              onClick={() => goTo(i)}
+            >
+              <span className="img">
+                <img src={imageUrl(session, c.image)} alt="" />
+              </span>
+              <span className="cap">{T.editor.thumb(i + 1, c.annotations[0]?.number, c.annotations.at(-1)?.number)}</span>
+            </button>
+            <button type="button" className="remove" aria-label={T.editor.deleteScreen(i + 1)} title={T.editor.deleteScreen(i + 1)} onClick={() => deleteCapture(i)}>
+              <I.Close size={9} />
+            </button>
+          </div>
         ))}
         <button type="button" className="thumb new" onClick={() => api.startCapture()}>
           <span className="img">
@@ -691,6 +802,7 @@ function App() {
           <img src={zoomed} alt={T.editor.sketchZoomed} />
         </div>
       )}
+      {sessionsPanel}
     </div>
   );
 }
