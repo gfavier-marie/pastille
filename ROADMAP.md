@@ -28,9 +28,9 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
     - [ ] PC (quand un PC sera disponible)
 - [ ] **Dictée** : micro → PCM 16 kHz (AudioWorklet) → whisper-server, modèle large-v3-turbo q5_0.
   *Critère : 5 s de français en < 2 s (Mac) et < 5 s (PC), « border-radius », « padding », « header » corrects.*
-    - [x] Mac, échantillon de 5,3 s : **1,1 s**, vocabulaire 3/3 (M1 Pro, 6 oct. 2026)
+    - [x] Mac, échantillon de 5,3 s : **0,6 s** avec contexte audio réduit (1,1 s sans), vocabulaire 3/3 (M1 Pro, 6 oct. 2026)
     - [ ] Mac, au micro
-    - [ ] Windows : indicatif via la CI (`bench` manuel), vrai PC plus tard
+    - [ ] Windows : runner GitHub (2 vCPU partagés, 8 Go, sans GPU) **38 s** (71 s sans contexte réduit), vocabulaire 3/3. Bien plus faible qu'un vrai PC, mais **risque réel** : à mesurer sur un PC récent ; sinon moteur API en secours (prévu au lot 4) ou modèle plus léger.
 - [ ] **Synchro** : Worker Cloudflare + Durable Object, PWA minimale, AES-GCM.
   *Critère : aller-retour chiffré desktop → iPad → desktop < 300 ms, en Wi-Fi et en 4G.*
     - [x] En local (wrangler dev + navigateur) : **3 ms**, reconnexion après rechargement OK
