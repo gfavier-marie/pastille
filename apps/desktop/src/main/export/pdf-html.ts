@@ -1,7 +1,10 @@
 // Page HTML imprimée en PDF : texte réel (jamais rasterisé), A4 paysage,
 // récapitulatif complet avant les images, un point jamais coupé entre deux pages.
 
-import type { ExportDoc } from './build.ts';
+import type { ExportDoc, ExportScreen } from './build.ts';
+
+/** Partie d'un PDF découpé : le récapitulatif reste complet, seuls les écrans changent. */
+export type PdfPart = { index: number; total: number; screens: ExportScreen[] };
 
 const esc = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -30,7 +33,7 @@ tr { break-inside: avoid; }
 .point .images img { display: inline-block; vertical-align: top; max-width: 75mm; max-height: 50mm; margin-left: 3mm; border: 0.3mm solid #ccc; }
 `;
 
-export function toPdfHtml(doc: ExportDoc): string {
+export function toPdfHtml(doc: ExportDoc, part?: PdfPart): string {
   const summary = doc.points
     .map(
       (p) =>
@@ -38,7 +41,7 @@ export function toPdfHtml(doc: ExportDoc): string {
     )
     .join('');
 
-  const screens = doc.screens
+  const screens = (part?.screens ?? doc.screens)
     .map(
       (s) => `
 <section class="screen">
@@ -67,8 +70,10 @@ export function toPdfHtml(doc: ExportDoc): string {
   return `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><title>${esc(doc.name)}</title><style>${CSS}</style></head>
 <body>
-<h1>${esc(doc.name)}</h1>
-<p class="meta">${esc(doc.date)} · ${doc.screens.length} écran(s) · ${doc.points.length} point(s)</p>
+<h1>${esc(doc.name)}${part ? ` — partie ${part.index}/${part.total}` : ''}</h1>
+<p class="meta">${esc(doc.date)} · ${doc.screens.length} écran(s) · ${doc.points.length} point(s)${
+    part ? ` · cette partie : écrans ${part.screens[0]!.index} à ${part.screens.at(-1)!.index}` : ''
+  }</p>
 ${doc.context ? `<p><b>Contexte :</b> ${multiline(doc.context)}</p>` : ''}
 <h2>Instructions</h2>
 <div class="instructions">${esc(doc.instructions)}</div>

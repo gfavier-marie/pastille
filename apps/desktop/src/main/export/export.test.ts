@@ -40,4 +40,33 @@ describe('export', () => {
     expect(html.indexOf('Récapitulatif')).toBeLessThan(html.indexOf('class="screen"'));
     expect(html.match(/class="point"/g)).toHaveLength(10);
   });
+
+  it('produit un PowerPoint : titre, récapitulatif, 5 écrans, 20 points', async () => {
+    const { session, dir: sessionDir } = await createFakeSession(await mkdtemp(join(tmpdir(), 'pastille-sessions-')));
+    const outDir = await mkdtemp(join(tmpdir(), 'pastille-out-'));
+    const file = await exportSession({ session, sessionDir, outDir, format: 'pptx', printHtml: async () => new Uint8Array() });
+    expect(file).toMatch(/\.pptx$/);
+    const zip = await readFile(file);
+    const slides = new Set(zip.toString('latin1').match(/ppt\/slides\/slide\d+\.xml/g));
+    expect(slides.size).toBeGreaterThanOrEqual(1 + 1 + 5 + 20);
+  });
+
+  it('découpe le PDF au-delà de 100 pages, récapitulatif complet dans chaque partie', async () => {
+    const { session, dir: sessionDir } = await createFakeSession(await mkdtemp(join(tmpdir(), 'pastille-sessions-')));
+    const outDir = await mkdtemp(join(tmpdir(), 'pastille-out-'));
+    const htmls: string[] = [];
+    // Faux PDF : 50 pages par écran (5 écrans → 250 pages → 3 parties).
+    const printHtml = async (file: string) => {
+      const html = await readFile(file, 'utf8');
+      htmls.push(html);
+      return new TextEncoder().encode('/Type /Page\n'.repeat(50 * (html.match(/class="screen"/g)?.length ?? 0)));
+    };
+    const first = await exportSession({ session, sessionDir, outDir, format: 'pdf', printHtml });
+    expect(first).toMatch(/-partie-1-sur-3\.pdf$/);
+    const parts = htmls.slice(1);
+    expect(parts).toHaveLength(3);
+    expect(parts.map((h) => h.match(/class="screen"/g)?.length)).toEqual([2, 2, 1]);
+    for (const h of parts) expect(h.match(/<tr><td>#/g)).toHaveLength(20);
+    expect(parts[2]).toContain('partie 3/3');
+  });
 });

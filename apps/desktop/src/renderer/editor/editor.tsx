@@ -122,7 +122,7 @@ function App() {
 
   async function runExport(format: ExportFormat) {
     setExportMenu(false);
-    setToast({ text: format === 'pdf' ? 'Export du PDF…' : 'Export Markdown…' });
+    setToast({ text: { pdf: 'Export du PDF…', markdown: 'Export Markdown…', pptx: 'Export PowerPoint…' }[format] });
     const r = await api.exportSession(format);
     setToast(r.ok ? { text: `Exporté : ${r.path}` } : { text: r.error, error: true });
     setTimeout(() => setToast(null), 5000);
@@ -280,6 +280,7 @@ function App() {
             <div className="menu">
               <button onClick={() => void runExport('pdf')}>PDF pour l'IA ({isMac ? '⌘E' : 'Ctrl+E'})</button>
               <button onClick={() => void runExport('markdown')}>Dossier Markdown + images</button>
+              <button onClick={() => void runExport('pptx')}>PowerPoint (présentation)</button>
             </div>
           )}
         </div>

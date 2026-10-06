@@ -37,7 +37,7 @@ export type WhisperStatus =
 
 export type TranscribeResult = { text: string; whisperMs: number; audioMs: number };
 
-export type ExportFormat = 'pdf' | 'markdown';
+export type ExportFormat = 'pdf' | 'markdown' | 'pptx';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
 /** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */

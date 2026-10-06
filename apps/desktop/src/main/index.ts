@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   globalShortcut,
   ipcMain,
@@ -215,10 +216,17 @@ async function runExport(format: ExportFormat): Promise<ExportResult> {
     await store.flush();
     const path = await exportSession({ session, sessionDir: store.dir(session), outDir: exportDir, format, printHtml });
     if (!autotest) shell.showItemInFolder(path);
+    if (!autotest && format === 'pdf') copyFileToClipboard(path);
     return { ok: true, path };
   } catch (err) {
     return { ok: false, error: String(err) };
   }
+}
+
+/** Le PDF est aussi mis dans le presse-papiers, pour le coller directement dans le chat de l'IA (§6.1). */
+function copyFileToClipboard(path: string) {
+  if (isMac) clipboard.writeBuffer('public.file-url', Buffer.from(pathToFileURL(path).href));
+  else if (process.platform === 'win32') clipboard.writeBuffer('FileNameW', Buffer.from(`${path}\0`, 'ucs2'));
 }
 
 async function exportFromMenu(format: ExportFormat) {
@@ -242,6 +250,7 @@ function updateTrayMenu() {
       { label: "Ouvrir l'éditeur", click: () => showEditor() },
       { label: 'Exporter le PDF', enabled: !!session, click: () => void exportFromMenu('pdf') },
       { label: 'Exporter en Markdown', enabled: !!session, click: () => void exportFromMenu('markdown') },
+      { label: 'Exporter en PowerPoint', enabled: !!session, click: () => void exportFromMenu('pptx') },
       { label: tablet?.isConnected() ? 'Tablette connectée' : 'Appairer une tablette (QR)', click: () => void showPairing() },
       { label: 'Réglages — lot 4', enabled: false },
       { type: 'separator' },
@@ -395,7 +404,7 @@ async function runEditorAutotest() {
     if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
   }
 
-  const results = { dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown') };
+  const results = { dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx') };
   console.log('AUTOTEST', JSON.stringify({ out, ...results }));
 }
 
