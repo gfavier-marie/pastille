@@ -1,5 +1,6 @@
 // Test de bout en bout : session factice (5 captures, 20 points), dictée sur le point #1
-// par un faux micro qui joue l'échantillon, photo de l'éditeur, export PDF et Markdown. Résultats dans e2e-output/ (editor.png, chemins des exports).
+// par un faux micro qui joue l'échantillon, photo de l'éditeur, export PDF et Markdown. Résultats dans e2e-output/
+// (editor.png, settings.png, menu, barre, overlay, assistant, appairage ; chemins des exports).
 // Usage : pnpm e2e
 
 import { execFileSync } from 'node:child_process';

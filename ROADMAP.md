@@ -77,3 +77,14 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [ ] Installeurs .dmg et .exe (electron-builder, whisper-server embarqué)
 
 *Critère : installation sur une machine vierge, Mac et PC, en < 5 min modèle compris.*
+
+## Design
+
+Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfFPfoVjpYJ1PQbEDk) (13 écrans).
+
+- [x] Pastilles en goutte, couleur #D63A0C (éditeur, exports, PWA) ; thème et icônes communs, textes regroupés (`renderer/texts.ts`)
+- [x] Overlay (assombrissement, étiquette app + taille, pastille fantôme), éditeur sombre (bulle avec onde, panneau, vignettes, zoom)
+- [x] Menu en popover sous l'icône ; réglages en onglets ; assistant de premier lancement en 3 étapes ; fenêtre d'appairage ; PWA restylée
+- [x] Hors cahier des charges, validés le 6 oct. 2026 : **barre flottante** (option), **ouverture au démarrage**, **icône d'état dynamique** (dictée, transcriptions, erreur)
+- [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant et l'appairage
+- [ ] Validation réelle sur Mac : popover sous l'icône, barre flottante au survol, ouverture au démarrage
