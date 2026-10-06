@@ -28,6 +28,7 @@ pnpm bench:synchro   # affiche un QR d'appairage puis mesure l'aller-retour chif
 Pour l'iPad, déployer le relais sur Cloudflare (compte gratuit) :
 
 ```bash
-cd apps/relay && npx wrangler login && pnpm deploy
+pnpm --filter @pastille/relay exec wrangler login
+pnpm relay:deploy
 pnpm bench:synchro https://pastille.<ton-sous-domaine>.workers.dev
 ```

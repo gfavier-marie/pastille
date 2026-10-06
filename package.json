@@ -13,7 +13,8 @@
     "setup:whisper": "node scripts/setup-whisper.ts",
     "bench:dictee": "node apps/desktop/scripts/bench-dictee.ts",
     "bench:synchro": "node apps/desktop/scripts/bench-synchro.ts",
-    "relay": "pnpm --filter @pastille/relay dev"
+    "relay": "pnpm --filter @pastille/relay dev",
+    "relay:deploy": "pnpm --filter @pastille/relay run deploy"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",
