@@ -78,10 +78,10 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-s2{0%,16.67%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}17.67%,61.33%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}62.33%,100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
 @keyframes vs-s3{0%,61.33%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}62.33%,84.67%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}85.67%,100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
 @keyframes vs-s4{0%,84.67%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}85.67%,99%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
-.vs-etapes{margin:16px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.vs-etapes li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent;font-size:14px;font-weight:600;line-height:1.25}
-.vs-etapes span{flex:none;width:22px;height:22px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px}
-@media (max-width:600px){.vs-etapes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.vs-bandeau{margin:16px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.vs-bandeau li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent;font-size:14px;font-weight:600;line-height:1.25}
+.vs-bandeau span{flex:none;width:22px;height:22px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px}
+@media (max-width:600px){.vs-bandeau{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @keyframes vs-draw{0%{stroke-dashoffset:1;opacity:1}40%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw2{0%,30%{stroke-dashoffset:1;opacity:1}58%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw3{0%,52%{stroke-dashoffset:1;opacity:1}72%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
@@ -427,7 +427,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
 
           <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 30s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
         </div>
-        <ol class="vs-etapes" aria-label="Les quatre étapes de la démonstration">
+        <ol class="vs-bandeau" aria-label="Les quatre étapes de la démonstration">
           <li style="animation: vs-s1 30s linear infinite"><span>1</span>Capture d'écran</li>
           <li style="animation: vs-s2 30s linear infinite"><span>2</span>Commentez</li>
           <li style="animation: vs-s3 30s linear infinite"><span>3</span>Claude Code lit la revue (MCP)</li>
