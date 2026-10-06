@@ -12,6 +12,7 @@ export type OverlayShow = {
   screen: number;
   nextNumber: number;
   cursor?: { x: number; y: number }; // position du curseur sur cet écran, au moment du raccourci
+  inspiration?: number; // capture d'une inspiration pour ce point : rien n'est posé
 };
 
 /** Fenêtre visable sur l'écran de l'overlay (DIP), de l'avant vers l'arrière. */
@@ -93,8 +94,8 @@ export type MenuAction =
 /** Message de la barre flottante après un export. */
 export type ExportNotice = { format: ExportFormat; file: string; copied: boolean };
 
-/** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte. */
-export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean };
+/** Ce que l'éditeur doit montrer : une capture, et éventuellement un point avec sa bulle ouverte (dictée lancée ou non). */
+export type EditorFocus = { captureId: string; annotationId?: string; openBubble?: boolean; dictate?: boolean };
 
 export type PastilleApi = {
   // Éditeur
@@ -123,6 +124,9 @@ export type PastilleApi = {
   onPrepareMic(cb: () => void): () => void;
   setSelection(annotationId: string | null): void;
   deleteSketch(annotationId: string, sketchId: string): void;
+  captureInspiration(annotationId: string): void; // éditeur masqué, la prochaine capture devient l'inspiration du point
+  importInspiration(annotationId: string, png: Uint8Array): void; // image collée ou déposée
+  deleteInspiration(annotationId: string, inspirationId: string): void;
   tabletStatus(): Promise<boolean>;
   onTabletStatus(cb: (connected: boolean) => void): () => void;
   // Réglages

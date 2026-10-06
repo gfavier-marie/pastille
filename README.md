@@ -28,6 +28,10 @@ VibeScreener vit dans la barre de menus. Un assistant en trois étapes :
 2. **Modèle de dictée** : téléchargé tout seul (547 Mo, une seule fois). La dictée se fait ensuite sur le Mac, hors ligne.
 3. **Raccourci** : **⇧⌘2** fige l'écran ; clic sur l'élément, on parle, c'est noté. **⌘E** exporte.
 
+## Inspiration
+
+Pour montrer à quoi un point doit ressembler : dans la bulle du point, **Inspiration**. L'éditeur s'efface ; ouvrir la page modèle (un autre site, une autre app), puis **⇧⌘2** et cliquer la fenêtre ou glisser une zone. L'image rejoint le point, l'éditeur revient dessus (Échap : retour sans rien joindre). Une image peut aussi être collée (**⌘V**) ou déposée sur le point sélectionné. Les exports et Claude Code la présentent comme un modèle, pas comme l'écran à modifier.
+
 ## Tablette (iPad + Apple Pencil)
 
 Menu de l'icône > « Appairer une tablette », scanner le QR code avec l'appareil photo de l'iPad, puis Partager > « Sur l'écran d'accueil ». Le croquis dessiné sur l'iPad rejoint le point en cours. Rien à installer d'autre, en Wi-Fi comme en 4G.
@@ -46,7 +50,7 @@ VibeScreener doit être lancée. Il suffit ensuite de demander à Claude Code, d
 | --- | --- |
 | `lister_sessions` | Les 20 sessions récentes, avec leur id ; la session ouverte est signalée |
 | `lire_revue` | Tous les retours d'une session en texte (la session ouverte par défaut) |
-| `voir_ecran` | Un écran : capture annotée, zoom autour de chaque point, croquis |
+| `voir_ecran` | Un écran : capture annotée, zoom autour de chaque point, croquis, inspirations |
 
 Port pris : les réglages le signalent ; `PASTILLE_MCP_PORT` en choisit un autre (à reporter dans la commande ci-dessus).
 

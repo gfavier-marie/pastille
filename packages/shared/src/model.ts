@@ -36,11 +36,15 @@ export type Annotation = {
   audio?: string;
   transcription: 'none' | 'recording' | 'pending' | 'done' | 'error';
   sketches: Sketch[];
+  inspirations?: Inspiration[]; // captures d'autres sites : le résultat souhaité pour ce point
   createdAt: string;
   updatedAt: string;
 };
 
 export type Sketch = { id: string; png: string; strokes: string; createdAt: string };
+
+/** Image modèle d'un point (autre site, autre app) : capturée au raccourci, collée ou déposée. */
+export type Inspiration = { id: string; image: string; createdAt: string; source?: { app?: string; windowTitle?: string } };
 
 /** Remarque générale : un commentaire sans point, tapé ou dicté comme celui d'un point. */
 export type Note = Pick<Annotation, 'id' | 'text' | 'input' | 'audio' | 'transcription' | 'createdAt' | 'updatedAt'>;

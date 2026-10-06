@@ -38,6 +38,18 @@ const Badge = ({ a }: { a: Annotation }) => (
 );
 const isTyping = (t: EventTarget | null) => t instanceof HTMLTextAreaElement || t instanceof HTMLInputElement;
 
+/** Image collée ou déposée (PNG, JPEG, WebP…) convertie en PNG ; null si illisible. */
+async function toPng(file: File): Promise<Uint8Array | null> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+    return new Uint8Array(await (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
 /** Texte modifiable : état local pendant la saisie, envoyé au processus principal à chaque frappe. */
 function EditableText(props: {
   value: string;
@@ -152,7 +164,7 @@ function App() {
   const [editingContext, setEditingContext] = useState(false);
   const [shortcut, setShortcut] = useState(isMac ? '⇧⌘2' : 'Ctrl+Shift+2');
   const [tablet, setTablet] = useState(false);
-  const [zoomed, setZoomed] = useState<string | null>(null); // croquis agrandi
+  const [zoomed, setZoomed] = useState<string | null>(null); // croquis ou inspiration agrandi
   const [newNoteId, setNewNoteId] = useState<string | null>(null); // remarque juste ajoutée, à mettre au focus
   const activeNote = useRef<string | null>(null); // remarque en cours de saisie
   const [commentMode, setCommentMode] = useState<SettingsState['commentMode']>('auto');
@@ -190,7 +202,7 @@ function App() {
       setCaptureId(f.captureId);
       setSelectedId(f.annotationId ?? null);
       setBubbleOpen(!!f.openBubble);
-      if (f.annotationId && f.openBubble) autoDictation(f.annotationId);
+      if (f.annotationId && f.openBubble && f.dictate) autoDictation(f.annotationId);
     });
     void api.tabletStatus().then(setTablet);
     const applyPrefs = (s: SettingsState) => {
@@ -357,6 +369,43 @@ function App() {
     return () => window.removeEventListener('keydown', onKey);
   });
 
+  // Image collée (⌘V) ou déposée : elle devient une inspiration du point sélectionné.
+  useEffect(() => {
+    const flash = (text: string) => {
+      setToast({ text, error: true });
+      setTimeout(() => setToast(null), 4000);
+    };
+    const attach = (files: FileList | undefined) => {
+      const file = [...(files ?? [])].find((f) => f.type.startsWith('image/'));
+      if (!file) return false;
+      if (!selectedId) flash(T.editor.imageNeedsPoint);
+      else {
+        const id = selectedId;
+        void toPng(file).then((png) => (png ? api.importInspiration(id, png) : flash(T.editor.unreadableImage)));
+      }
+      return true;
+    };
+    const onPaste = (e: ClipboardEvent) => {
+      // Du texte collé dans un commentaire reste du texte.
+      if (isTyping(e.target) && e.clipboardData?.types.includes('text/plain')) return;
+      if (attach(e.clipboardData?.files)) e.preventDefault();
+    };
+    // Sans ceci, un fichier déposé remplace l'éditeur dans la fenêtre.
+    const onDragOver = (e: DragEvent) => e.preventDefault();
+    const onDrop = (e: DragEvent) => {
+      e.preventDefault();
+      attach(e.dataTransfer?.files);
+    };
+    window.addEventListener('paste', onPaste);
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('paste', onPaste);
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('drop', onDrop);
+    };
+  });
+
   if (!session || !capture) {
     return (
       <div className={`empty ${isMac ? 'mac' : ''}`}>
@@ -441,22 +490,35 @@ function App() {
       </div>
     ) : null;
 
-  const sketches = (a: Annotation) =>
-    a.sketches.length > 0 && (
-      <div className="sketches">
-        {a.sketches.map((k) => (
-          <span key={k.id} className="sketch">
-            <button type="button" aria-label={T.editor.zoomSketch} onClick={() => setZoomed(imageUrl(session, k.png))}>
-              <img src={imageUrl(session, k.png)} alt="" />
-            </button>
-            <button type="button" className="remove" aria-label={T.editor.deleteSketch} onClick={() => api.deleteSketch(a.id, k.id)}>
-              <I.Close size={9} />
-            </button>
-          </span>
-        ))}
-        <span className="count">{T.editor.sketches(a.sketches.length)}</span>
-      </div>
+  /** Vignettes d'un point, croquis ou inspirations : clic = agrandir, croix = supprimer. */
+  const gallery = (a: Annotation, kind: 'sketch' | 'inspiration') => {
+    const sketch = kind === 'sketch';
+    const items = sketch
+      ? a.sketches.map((k) => ({ id: k.id, image: k.png, source: '' }))
+      : (a.inspirations ?? []).map((k) => ({ id: k.id, image: k.image, source: [k.source?.app, k.source?.windowTitle].filter(Boolean).join(' — ') }));
+    return (
+      items.length > 0 && (
+        <div className="sketches">
+          {items.map((k) => (
+            <span key={k.id} className="sketch" title={k.source || undefined}>
+              <button type="button" aria-label={sketch ? T.editor.zoomSketch : T.editor.zoomInspiration} onClick={() => setZoomed(imageUrl(session, k.image))}>
+                <img src={imageUrl(session, k.image)} alt="" />
+              </button>
+              <button
+                type="button"
+                className="remove"
+                aria-label={sketch ? T.editor.deleteSketch : T.editor.deleteInspiration}
+                onClick={() => (sketch ? api.deleteSketch(a.id, k.id) : api.deleteInspiration(a.id, k.id))}
+              >
+                <I.Close size={9} />
+              </button>
+            </span>
+          ))}
+          <span className="count">{sketch ? T.editor.sketches(items.length) : T.editor.inspirations(items.length)}</span>
+        </div>
+      )
     );
+  };
 
   const notes = session.notes ?? [];
   const index = captures.indexOf(capture);
@@ -589,7 +651,7 @@ function App() {
             // À droite de la pastille, ou à gauche si la place manque ; toujours dans la scène.
             let left = pin.x + pin.r + 12;
             if (left + BUBBLE_WIDTH > stage.w - 12) left = Math.max(12, pin.x - pin.r - 12 - BUBBLE_WIDTH);
-            const top = Math.max(12, Math.min(pin.y - pin.r + 4, stage.h - 240));
+            const top = Math.max(12, Math.min(pin.y - pin.r + 4, stage.h - 300)); // place pour une bulle avec croquis et inspiration
             const r = recording(selected);
             return (
               <section className="bubble" aria-label={T.editor.bubbleLabel(selected.number)} style={{ left, top }} key={selected.id}>
@@ -610,13 +672,30 @@ function App() {
                   onKeyDown={bubbleKeys}
                 />
                 {status(selected, kind(selected))}
-                {sketches(selected)}
+                {gallery(selected, 'sketch')}
                 {tablet && selected.sketches.length === 0 && (
                   <div className="meta">
                     <I.Tablet size={13} />
                     {T.editor.sketchHint}
                   </div>
                 )}
+                <div className="meta">
+                  <button
+                    type="button"
+                    className="inspire"
+                    title={T.editor.inspirationTitle(shortcut, MOD)}
+                    onMouseDown={(e) => e.preventDefault()} // la saisie en cours garde le focus
+                    onClick={() => {
+                      recorder.stop(true); // la dictée en cours part en transcription
+                      api.captureInspiration(selected.id);
+                    }}
+                  >
+                    <I.Picture size={13} />
+                    {T.editor.inspiration}
+                  </button>
+                  {T.editor.inspirationHint(shortcut, MOD)}
+                </div>
+                {gallery(selected, 'inspiration')}
                 <div className="keys">
                   {[...T.editor.keys, ...(r ? [T.editor.keyToType] : commentMode !== 'keyboard' ? [T.editor.keyDictate(MOD)] : [])].map(([key, text]) => (
                     <span key={key}>
@@ -695,7 +774,8 @@ function App() {
                         {meta.join(' · ')}
                       </div>
                     )}
-                    {sketches(a)}
+                    {gallery(a, 'sketch')}
+                    {gallery(a, 'inspiration')}
                   </div>
                   {micButton(a.id, r !== null)}
                   <button type="button" className="delete" aria-label={T.editor.deletePoint} onClick={() => api.deleteAnnotation(a.id)}>
@@ -820,7 +900,7 @@ function App() {
       {toast && <div className={`toast ${toast.error ? 'error' : ''}`} role="status">{toast.text}</div>}
       {zoomed && (
         <div className="zoomed" onClick={() => setZoomed(null)}>
-          <img src={zoomed} alt={T.editor.sketchZoomed} />
+          <img src={zoomed} alt={T.editor.zoomedImage} />
         </div>
       )}
       {sessionsPanel}

@@ -71,9 +71,16 @@ export const T = {
       ['⇧ Clic', 'dernière zone'],
       ['Échap', 'annuler'],
     ] as [string, string][],
+    inspirationHints: [
+      ['Clic', 'capture la fenêtre'],
+      ['Glisser', 'zone'],
+      ['⇧ Clic', 'dernière zone'],
+      ['Échap', 'retour au point'],
+    ] as [string, string][],
     wholeScreen: 'Écran entier',
     zone: 'Zone',
     screen: (session: string, index: number) => `${session} · écran ${index}`,
+    inspiration: (n: number) => `Inspiration du point #${n}`,
   },
 
   settings: {
@@ -263,6 +270,15 @@ export const T = {
     sketches: (n: number) => `${plural(n, 'croquis', 'croquis')} · tablette`,
     zoomSketch: 'Agrandir le croquis',
     deleteSketch: 'Supprimer le croquis',
+    inspiration: 'Inspiration',
+    inspirationTitle: (shortcut: string, mod: string) =>
+      `Joindre l'exemple d'un autre site : l'éditeur s'efface, ouvrez la page modèle et appuyez sur ${shortcut}. Ou collez une image (${mod}V).`,
+    inspirationHint: (shortcut: string, mod: string) => `puis ${shortcut} sur la page modèle, ou ${mod}V`,
+    inspirations: (n: number) => plural(n, 'inspiration'),
+    zoomInspiration: "Agrandir l'inspiration",
+    deleteInspiration: "Supprimer l'inspiration",
+    imageNeedsPoint: "Sélectionnez d'abord un point : l'image deviendra son inspiration.",
+    unreadableImage: 'Image illisible.',
     deletePoint: 'Supprimer le point',
     noComment: 'Sans commentaire',
     bubbleLabel: (n: number) => `Commentaire du point ${n}`,
@@ -286,6 +302,6 @@ export const T = {
     emptyBefore: "Sur l'écran à relire, appuyez sur",
     emptyAfter: "puis cliquez sur l'élément à corriger.",
     micError: (err: unknown) => `Micro indisponible : ${err}`,
-    sketchZoomed: 'Croquis agrandi',
+    zoomedImage: 'Image agrandie',
   },
 };

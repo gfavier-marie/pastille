@@ -1,11 +1,12 @@
 // Rendu PowerPoint, pour présenter la revue à des humains : titre, remarques générales, récapitulatif,
-// une diapo par écran (capture annotée), puis une diapo par point (commentaire, zoom, croquis).
+// une diapo par écran (capture annotée), puis une diapo par point (commentaire, zoom, croquis),
+// suivie d'une diapo pour ses inspirations s'il en a.
 
 import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
 import PptxGenJS from 'pptxgenjs';
 import { PIN_COLOR } from '@pastille/shared';
-import type { ExportDoc } from './build.ts';
+import { INSPIRATION_NOTE, type ExportDoc } from './build.ts';
 
 const W = 13.333; // 16:9, en pouces
 const H = 7.5;
@@ -48,11 +49,12 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
 
   const summary = pptx.addSlide();
   summary.addText('Récapitulatif', { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
-  const header = ['#', 'Écran', 'Commentaire', 'Croquis'].map((text) => ({ text, options: { bold: true, fill: { color: 'F4F4F5' } } }));
+  const header = ['#', 'Écran', 'Commentaire', 'Croquis', 'Inspiration'].map((text) => ({ text, options: { bold: true, fill: { color: 'F4F4F5' } } }));
+  const yesNo = (list: unknown[]) => (list.length ? 'oui' : 'non');
   summary.addTable(
-    [header, ...doc.points.map((p) => [`#${p.number}`, String(p.screen), p.text || '—', p.sketches.length ? 'oui' : 'non'].map((text) => ({ text })))],
+    [header, ...doc.points.map((p) => [`#${p.number}`, String(p.screen), p.text || '—', yesNo(p.sketches), yesNo(p.inspirations)].map((text) => ({ text })))],
     {
-      x: 0.5, y: 1.1, w: W - 1, colW: [0.8, 0.9, W - 1 - 0.8 - 0.9 - 1.1, 1.1],
+      x: 0.5, y: 1.1, w: W - 1, colW: [0.8, 0.9, W - 1 - 0.8 - 0.9 - 1.1 - 1.3, 1.1, 1.3],
       fontFace: FONT, fontSize: 12, border: { type: 'solid', pt: 0.5, color: 'E4E4E7' },
       autoPage: true, autoPageRepeatHeader: true, autoPageSlideStartY: 0.5,
     },
@@ -75,6 +77,16 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
       const boxH = (H - 2) / images.length - 0.15;
       for (const [i, img] of images.entries()) {
         slide.addImage(await fitted(join(dir, img), { x: 6.5, y: 1.4 + i * (boxH + 0.15), w: W - 7, h: boxH }));
+      }
+
+      if (!p.inspirations.length) continue;
+      const inspiration = pptx.addSlide();
+      inspiration.addText(`#${p.number}`, { x: 0.5, y: 0.4, w: 2, h: 0.8, fontFace: FONT, fontSize: 40, bold: true, color: PIN });
+      inspiration.addText(`Inspiration : ${INSPIRATION_NOTE}`, { x: 2.3, y: 0.5, w: W - 2.8, h: 0.6, fontFace: FONT, fontSize: 14, color: MUTED });
+      const boxW = (W - 1) / p.inspirations.length;
+      for (const [i, k] of p.inspirations.entries()) {
+        inspiration.addImage(await fitted(join(dir, k.image), { x: 0.5 + i * boxW, y: 1.4, w: boxW - 0.2, h: H - 2.1 }));
+        if (k.source) inspiration.addText(k.source, { x: 0.5 + i * boxW, y: H - 0.65, w: boxW - 0.2, h: 0.4, fontFace: FONT, fontSize: 11, color: MUTED, align: 'center' });
       }
     }
   }

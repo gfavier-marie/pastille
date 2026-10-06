@@ -1,4 +1,5 @@
-// Session factice pour les tests : 5 captures d'interfaces dessinées, 20 points.
+// Session factice pour les tests : 5 captures d'interfaces dessinées, 20 points ;
+// le point #1 a un croquis et une inspiration.
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -83,6 +84,23 @@ export async function createFakeSession(sessionsDir: string, pointsPerScreen = 4
     strokes: 'sketches/croquis-1.json',
     createdAt: session.createdAt,
   });
+  // Une inspiration sur le point #1 : le bouton d'un autre site, à prendre pour modèle.
+  await mkdir(join(dir, 'inspirations'), { recursive: true });
+  const example = createCanvas(1200, 700);
+  const ectx = example.getContext('2d');
+  ectx.fillStyle = '#ffffff';
+  ectx.fillRect(0, 0, 1200, 700);
+  ectx.fillStyle = '#635bff';
+  ectx.beginPath();
+  ectx.roundRect(420, 300, 360, 90, 45);
+  ectx.fill();
+  ectx.fillStyle = '#ffffff';
+  ectx.font = 'bold 34px sans-serif';
+  ectx.fillText('Commencer', 510, 357);
+  await writeFile(join(dir, 'inspirations/inspiration-1.png'), await example.encode('png'));
+  session.captures[0]!.annotations[0]!.inspirations = [
+    { id: 'inspiration-1', image: 'inspirations/inspiration-1.png', createdAt: session.createdAt, source: { app: 'Google Chrome', windowTitle: 'Exemple — Tarifs' } },
+  ];
   renumber(session);
   await writeFile(join(dir, 'session.json'), JSON.stringify(session, null, 2));
   return { session, dir };
