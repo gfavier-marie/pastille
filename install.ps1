@@ -23,8 +23,17 @@
   }
 
   # Installation silencieuse, sans droits administrateur ; sessions et réglages restent.
-  Start-Process $setup -ArgumentList '/S' -Wait
-  Remove-Item $setup
+  # Un antivirus qui analyse encore le fichier peut refuser le lancement un instant (« Accès refusé ») :
+  # on réessaie. Sans -Wait, que certains antivirus empêchent aussi : on attend la fin par le nom du processus.
+  for ($i = 1; ; $i++) {
+    try { Start-Process $setup -ArgumentList '/S'; break }
+    catch {
+      if ($i -ge 5) { throw "Windows ou l'antivirus empêche de lancer l'installeur. Ouvre-le à la main : $setup" }
+      Start-Sleep 3
+    }
+  }
+  while (Get-Process VibeScreener-Setup -ErrorAction SilentlyContinue) { Start-Sleep 1 }
+  Remove-Item $setup -ErrorAction SilentlyContinue
   if (-not (Test-Path $app)) { throw "Installation échouée : $app introuvable" }
   Write-Host "VibeScreener installée : $app"
 
