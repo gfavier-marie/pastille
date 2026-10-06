@@ -155,7 +155,7 @@ export const T = {
     back: 'Retour',
     finish: 'Terminer',
     permissions: {
-      title: 'Deux autorisations pour commencer',
+      title: isMac ? 'Deux autorisations pour commencer' : 'Une autorisation pour commencer', // Windows : micro seulement
       intro: "VibeScreener capture la fenêtre que vous relisez et écoute vos commentaires. Les images et l'audio restent sur cet ordinateur.",
       screen: "Enregistrement de l'écran",
       screenWhy: 'Pour capturer la fenêtre à relire en pleine résolution.',
