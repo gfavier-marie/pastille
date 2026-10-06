@@ -653,12 +653,13 @@ async function runTabletAutotest() {
   await tablet!.start();
   console.log('PAIR', await tablet!.pairUrl());
   const target = session.captures[0]!.annotations[0]!;
+  const before = target.sketches.length; // la session factice a déjà un croquis sur ce point
   tablet!.setFocus(target.id);
   for (let i = 0; i < 1800; i++) {
     await new Promise((r) => setTimeout(r, 100));
     const a = findAnnotation(store.get()!, target.id)?.annotation;
-    if (a?.sketches.length) {
-      console.log('AUTOTEST', JSON.stringify({ sketch: join(store.dir(store.get()!), a.sketches[0]!.png), connected: tablet!.isConnected() }));
+    if (a && a.sketches.length > before) {
+      console.log('AUTOTEST', JSON.stringify({ sketch: join(store.dir(store.get()!), a.sketches.at(-1)!.png), connected: tablet!.isConnected() }));
       await new Promise((r) => setTimeout(r, 500));
       return;
     }

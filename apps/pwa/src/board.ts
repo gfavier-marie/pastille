@@ -14,7 +14,7 @@ export function createBoard(bgCanvas: HTMLCanvasElement, inkCanvas: HTMLCanvasEl
   let penSeen = false;
   let background: Background = 'blanc';
   let crop: HTMLImageElement | null = null;
-  const tool = { tool: 'pen' as Stroke['tool'], color: '#18181b', size: 4 };
+  const tool = { tool: 'pen' as Stroke['tool'], color: '#1D1D1F', size: 4 };
   const touches = new Map<number, number>(); // pointerId → début
   let tapCandidate = false;
 
