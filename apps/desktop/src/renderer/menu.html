@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+    <title>Pastille</title>
+    <link rel="stylesheet" href="./theme.css" />
+    <style>
+      /* Menu de l'icône : un panneau qui remplit la fenêtre transparente. */
+      html, body { background: transparent; overflow: hidden; }
+      .panel {
+        display: flex; flex-direction: column; gap: 2px; padding: 6px; background: #f6f6f8;
+        border: 1px solid rgba(0, 0, 0, 0.14); border-radius: 12px; user-select: none;
+      }
+      .head { display: flex; align-items: flex-start; gap: 10px; padding: 10px 10px 8px; }
+      .head .titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+      .head .name { font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .head .meta { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 10px 10px; }
+      .chips .chip svg { color: var(--muted); }
+      .capture { padding: 0 4px 6px; }
+      .capture button {
+        width: 100%; height: 38px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 0; border-radius: 8px;
+        background: var(--accent); color: #fff; font-weight: 600; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+      }
+      .capture button:hover { background: #c4340a; }
+      .capture kbd { font-size: 12px; opacity: 0.85; }
+      .item {
+        height: 30px; display: flex; align-items: center; gap: 10px; padding: 0 10px; margin: 0 4px; border: 0; border-radius: 6px;
+        background: transparent; text-align: left;
+      }
+      .item:hover:not(:disabled) { background: rgba(0, 0, 0, 0.06); }
+      .item:disabled { color: var(--faint); }
+      .item svg { color: var(--text-2); }
+      .item:disabled svg { color: var(--faint); }
+      .item span { flex: 1; }
+      .item kbd, .recent .meta { font-size: 12px; color: var(--muted); }
+      hr { height: 1px; border: 0; margin: 5px 10px; background: rgba(0, 0, 0, 0.09); }
+      .section { font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 14px 4px; }
+      .recent { display: flex; align-items: center; gap: 8px; margin: 0 4px; border-radius: 6px; }
+      .recent:hover { background: rgba(0, 0, 0, 0.06); }
+      .recent .open { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 5px 0 5px 14px; border: 0; background: transparent; text-align: left; }
+      .recent .title { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .recent .meta { font-size: 11px; font-variant-numeric: tabular-nums; }
+      .recent .again { width: 28px; height: 28px; margin-right: 6px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+      .recent .again:hover { background: rgba(0, 0, 0, 0.08); color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./menu/menu.tsx"></script>
+  </body>
+</html>

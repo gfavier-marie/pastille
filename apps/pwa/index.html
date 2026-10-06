@@ -10,49 +10,134 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Pastille</title>
     <style>
-      :root { font: 17px/1.3 -apple-system, system-ui, sans-serif; color: #18181b; --pin: #e5484d; }
+      :root {
+        --accent: #d63a0c; --text: #1d1d1f; --text-2: #3a3a3c; --muted: #6e6e73; --border: #e3e3e8; --pressed: #efeff2; --success: #1f9d47;
+        font: 17px/1.3 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased;
+      }
       * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #f4f4f5; overscroll-behavior: none; }
-      body { display: grid; grid-template-rows: auto 1fr auto; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-      header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #e4e4e7; min-height: 52px; }
-      #focus { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      #focus b { color: var(--pin); }
-      #dot { width: 12px; height: 12px; border-radius: 6px; background: #a1a1aa; flex: none; }
-      #dot.on { background: #1a7f37; }
-      #board { position: relative; touch-action: none; overflow: hidden; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #fff; overscroll-behavior: none; }
+      body { position: relative; display: flex; flex-direction: column; height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+      button { font: inherit; color: inherit; }
+
+      /* En-tête : le point qui recevra le croquis, et la liaison avec l'ordinateur. */
+      header { flex: none; min-height: 68px; display: flex; align-items: center; gap: 14px; padding: 8px 24px; background: #fafafb; border-bottom: 1px solid #ececef; }
+      #pin {
+        width: 32px; height: 32px; flex: none; border-radius: 16px 16px 16px 4px; background: var(--accent); border: 2px solid #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      }
+      #pin.empty { background: transparent; border: 2px dashed #aeaeb2; box-shadow: none; }
+      #pin.wide { font-size: 10.5px; }
+      .titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      #title { font-size: 16px; font-weight: 600; }
+      #sub { font-size: 13.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #link { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; flex: none; border-radius: 999px; background: #fff; border: 1px solid var(--border); font-size: 13.5px; color: var(--text-2); }
+      #link[hidden] { display: none; }
+      .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--success); }
+      .dot.off { background: transparent; border: 1.5px solid #8e8e93; }
+      #offline { display: none; align-items: center; gap: 8px; padding: 8px 24px; background: #fff3e0; color: #7a3e00; font-size: 14px; }
+      #offline.on { display: flex; }
+
+      #board { position: relative; flex: 1; min-height: 0; touch-action: none; overflow: hidden; }
       #board canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
-      nav { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #fff; border-top: 1px solid #e4e4e7; overflow-x: auto; }
-      nav button { min-width: 48px; min-height: 48px; padding: 0 12px; font: inherit; border: 1px solid #d4d4d8; border-radius: 12px; background: #fff; color: inherit; flex: none; }
-      nav button[aria-pressed="true"] { border-color: #18181b; box-shadow: inset 0 0 0 2px #18181b; }
-      nav button.color { padding: 0; }
-      nav button.color i { display: inline-block; width: 24px; height: 24px; border-radius: 12px; vertical-align: middle; }
+
+      /* Outils : une carte flottante en bas, cibles de 52 px. */
+      nav {
+        position: absolute; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom)); transform: translateX(-50%); max-width: calc(100% - 24px);
+        display: flex; align-items: center; gap: 6px; padding: 10px; border-radius: 22px; background: #fff; border: 1px solid var(--border);
+        box-shadow: 0 12px 34px rgba(20, 22, 30, 0.14); overflow-x: auto;
+      }
+      nav button { width: 52px; height: 52px; flex: none; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 14px; background: transparent; color: var(--text-2); }
+      nav button[aria-pressed='true'] { background: var(--pressed); color: var(--text); }
       nav button:disabled { opacity: 0.4; }
-      nav .sep { width: 1px; align-self: stretch; background: #e4e4e7; flex: none; }
-      #send { margin-left: auto; min-width: 140px; background: var(--pin); color: #fff; border: 0; font-weight: 600; }
-      #toast { position: fixed; left: 50%; top: 70px; transform: translateX(-50%); background: #18181b; color: #fff; padding: 10px 16px; border-radius: 10px; display: none; }
+      nav .sep { width: 1px; height: 32px; flex: none; margin: 0 4px; background: var(--border); }
+      nav .swatch { width: 28px; height: 28px; border-radius: 999px; }
+      nav [data-color][aria-pressed='true'] { background: transparent; }
+      nav [data-color][aria-pressed='true'] .swatch { box-shadow: 0 0 0 3px #fff, 0 0 0 5px currentColor; }
+      nav .stroke { width: 22px; border-radius: 6px; background: currentColor; }
+      #background { width: auto; padding: 0 14px; gap: 8px; font-size: 15px; white-space: nowrap; }
+      #send {
+        width: auto; height: 56px; padding: 0 26px; margin-left: 6px; gap: 10px; border-radius: 16px; background: var(--accent); color: #fff;
+        font-size: 17px; font-weight: 600; white-space: nowrap; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+      }
+      #send:disabled { opacity: 1; background: #f0f0f3; color: #8e8e93; box-shadow: none; }
+
+      #toast {
+        position: absolute; left: 50%; bottom: calc(118px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: none; align-items: center; gap: 10px;
+        height: 40px; padding: 0 18px 0 12px; border-radius: 999px; background: #1c1c1e; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+      }
+      #toast.on { display: flex; }
+      #toast.plain svg { display: none; }
+      #toast.plain { padding-left: 18px; }
+
+      /* Première ouverture après le scan du QR. */
+      #welcome { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.92); }
+      #welcome.on { display: flex; }
+      #welcome div { max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 32px; text-align: center; }
+      #welcome h1 { margin: 0; font-size: 22px; }
+      #welcome p { margin: 0; color: var(--muted); line-height: 1.45; }
+      #welcome button { margin-top: 8px; height: 52px; padding: 0 24px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font-weight: 600; }
     </style>
   </head>
   <body>
     <header>
-      <span id="dot"></span>
-      <span id="focus">Connexion…</span>
+      <span id="pin" class="empty"></span>
+      <div class="titles">
+        <div id="title"></div>
+        <div id="sub"></div>
+      </div>
+      <span id="link"><span class="dot off"></span><span></span></span>
     </header>
+    <div id="offline" role="status">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 1.8 12.6 11.6H1.4z"></path><path d="M7 5.6v2.6M7 10h0"></path></svg>
+      <span></span>
+    </div>
     <div id="board"><canvas id="bg"></canvas><canvas id="ink"></canvas></div>
-    <nav>
-      <button data-tool="pen" aria-pressed="true">Stylo</button>
-      <button class="color" data-color="#18181b" aria-label="Noir" aria-pressed="true"><i style="background:#18181b"></i></button>
-      <button class="color" data-color="#e5484d" aria-label="Rouge"><i style="background:#e5484d"></i></button>
-      <button class="color" data-color="#0a84ff" aria-label="Bleu"><i style="background:#0a84ff"></i></button>
-      <button data-size="4" aria-pressed="true">Fin</button>
-      <button data-size="10">Épais</button>
-      <button data-tool="eraser">Gomme</button>
+
+    <nav role="toolbar">
+      <button data-tool="pen" aria-pressed="true">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2.5l2.5 2.5L6 12.5H3.5V10z"></path><path d="M9.5 4l2.5 2.5"></path></svg>
+      </button>
+      <button data-tool="eraser" aria-pressed="false">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5l4 4-6.5 6.5H4L2.5 11.5z"></path><path d="M6 6l4 4M7 13h7"></path></svg>
+      </button>
       <span class="sep"></span>
-      <button id="undo">Annuler</button>
-      <button id="clear">Effacer</button>
-      <button id="background">Fond : blanc</button>
-      <button id="send" disabled>Envoyer</button>
+      <button data-color="#1D1D1F" aria-pressed="true" style="color:#1D1D1F"><span class="swatch" style="background:#1D1D1F"></span></button>
+      <button data-color="#E5341F" aria-pressed="false" style="color:#E5341F"><span class="swatch" style="background:#E5341F"></span></button>
+      <button data-color="#2563EB" aria-pressed="false" style="color:#2563EB"><span class="swatch" style="background:#2563EB"></span></button>
+      <span class="sep"></span>
+      <button data-size="4" aria-pressed="true"><span class="stroke" style="height:3px"></span></button>
+      <button data-size="10" aria-pressed="false"><span class="stroke" style="height:8px"></span></button>
+      <span class="sep"></span>
+      <button id="undo">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 4 2.5 7l3 3"></path><path d="M2.5 7H10a3.5 3.5 0 0 1 0 7H8"></path></svg>
+      </button>
+      <button id="clear">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5a1 1 0 0 0 1 .9h3.8a1 1 0 0 0 1-.9l.6-8.5"></path></svg>
+      </button>
+      <button id="background">
+        <svg width="22" height="22" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1.5"></rect><path d="M6 2v12M10 2v12M2 6h12M2 10h12" opacity="0.6"></path></svg>
+        <span></span>
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#6E6E73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"></path></svg>
+      </button>
+      <button id="send" disabled>
+        <span></span>
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2 7 9M14 2l-4.5 12-2.5-5-5-2.5z"></path></svg>
+      </button>
     </nav>
-    <div id="toast"></div>
+
+    <div id="toast" role="status">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#30D158"></circle><path d="M4.8 8.2 7 10.4l4.2-4.6" stroke="#0B2E16" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span></span>
+    </div>
+
+    <div id="welcome" role="dialog" aria-labelledby="welcome-title">
+      <div>
+        <svg width="44" height="44" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#1F9D47"></circle><path d="M4.8 8.2 7 10.4l4.2-4.6" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <h1 id="welcome-title"></h1>
+        <p></p>
+        <button></button>
+      </div>
+    </div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
