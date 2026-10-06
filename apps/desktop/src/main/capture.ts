@@ -42,6 +42,7 @@ export type CaptureOptions = {
   preload: string;
   loadPage: (win: BrowserWindow, page: 'overlay') => void;
   onCapture: (c: CapturedImage) => Promise<void>;
+  onCancel: () => void; // Échap dans l'overlay
   onError: (message: string) => void;
   /** Ce que l'overlay annonce : session en cours, numéro de l'écran et du prochain point. */
   info: () => Omit<OverlayShow, 'jpeg'>;
@@ -183,7 +184,7 @@ export function createCapture(opts: CaptureOptions) {
     const tPick = performance.now();
     for (const ov of overlays) ov.win.hide();
     for (const w of p.hidden) if (!w.isDestroyed()) w.showInactive();
-    if (pick.kind === 'cancel') return;
+    if (pick.kind === 'cancel') return opts.onCancel();
 
     const d = o.display;
     const image = p.frozen.get(d.id)!;

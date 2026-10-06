@@ -94,6 +94,24 @@ describe('annuler / rétablir', () => {
   });
 });
 
+describe('inspirations', () => {
+  it('joint une image à un point, annulable, et ignore un point disparu', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'pastille-'));
+    const store = createSessionStore(root);
+    await store.addCapture(new Uint8Array([0]), meta);
+    const a = point(0.1);
+    store.update((s) => s.captures[0]!.annotations.push(a));
+    await store.addInspiration(a.id, new Uint8Array([1, 2]), { app: 'Google Chrome', windowTitle: 'Tarifs' });
+    const [inspiration] = store.get()!.captures[0]!.annotations[0]!.inspirations!;
+    expect(inspiration).toMatchObject({ image: `inspirations/${inspiration!.id}.png`, source: { app: 'Google Chrome' } });
+    expect(existsSync(join(store.dir(store.get()!), inspiration!.image))).toBe(true);
+    store.undo();
+    expect(store.get()!.captures[0]!.annotations[0]!.inspirations).toBeUndefined();
+    await store.addInspiration('inconnu', new Uint8Array([1]));
+    expect(store.get()!.captures[0]!.annotations[0]!.inspirations).toBeUndefined();
+  });
+});
+
 describe('sessions récentes', () => {
   it('liste les sessions et en rouvre une', async () => {
     const root = await mkdtemp(join(tmpdir(), 'pastille-'));

@@ -78,6 +78,8 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Toutes les sessions (hors cahier des charges, demandé) : liste dans l'éditeur (« Sessions » dans l'en-tête, « Toutes les sessions… » dans le menu de l'icône) pour ouvrir, réexporter le PDF ou mettre à la corbeille
 - [x] Suppression d'un écran (hors cahier des charges, demandé) : croix sur la vignette, avec ses points, annulable (⌘Z)
 - [x] Relancer la dictée d'un point (demandé) : bouton micro dans la bulle et dans la liste des points, le texte s'ajoute à la fin ; « ⌘M dicte la suite » affiché dans la bulle
+- [x] Inspiration d'un point (hors cahier des charges, demandé) : bouton dans la bulle, l'éditeur s'efface, la capture suivante (⇧⌘2) est jointe au point au lieu de créer un écran ; aussi par ⌘V ou glisser-déposer d'une image ; reprise dans les trois exports et le MCP comme « modèle du résultat souhaité »
+- [ ] Inspiration : essai réel de la capture (l'autotest n'a pas l'autorisation d'enregistrement d'écran ; chaîne vérifiée avec une image factice)
 - [x] Assistant de premier lancement rouvert au démarrage tant qu'une autorisation manque (après une mise à jour, macOS les oublie) ; le micro n'est plus demandé avant l'assistant ; non bloquant, chaque fonction signale ce qui manque
 - [x] Remarques générales (hors cahier des charges, demandé) : liste de commentaires non rattachés à un point, tapés ou dictés, annulables (⌘Z), repris dans les trois exports et le MCP
 - [x] Mise à jour depuis le menu de l'icône (demandé) : la dernière Release GitHub est proposée, install.sh la pose et relance l'app ; macOS redemande les autorisations (app non signée)

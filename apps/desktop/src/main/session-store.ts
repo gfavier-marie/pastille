@@ -4,7 +4,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { newSession, renumber, upgradeSession, type Capture, type Session } from '@pastille/shared';
+import { findAnnotation, newSession, renumber, upgradeSession, type Capture, type Inspiration, type Session } from '@pastille/shared';
 import { renameRetry } from './rename.ts';
 
 const SAVE_DELAY_MS = 300;
@@ -140,6 +140,23 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     return capture;
   }
 
+  /** Inspiration jointe à un point (annulable) ; l'image reste sur le disque pour que ⌘Z puisse la rétablir. */
+  async function addInspiration(annotationId: string, png: Uint8Array, source?: Inspiration['source']) {
+    const s = session;
+    if (!s || !findAnnotation(s, annotationId)) return;
+    const id = crypto.randomUUID();
+    const inspiration: Inspiration = { id, image: `inspirations/${id}.png`, createdAt: new Date().toISOString(), source };
+    await mkdir(join(dirOf(s.id), 'inspirations'), { recursive: true });
+    await writeFile(join(dirOf(s.id), inspiration.image), png);
+    update(
+      (x) => {
+        const a = findAnnotation(x, annotationId)?.annotation;
+        if (a) a.inspirations = [...(a.inspirations ?? []), { ...inspiration }];
+      },
+      { undoable: true },
+    );
+  }
+
   /** Annuler (⌘Z) / rétablir (⌘⇧Z) : la session revient à l'état précédent. */
   function undo() {
     const previous = undoStack.pop();
@@ -213,6 +230,7 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     recent,
     open,
     addCapture,
+    addInspiration,
     flush,
     close,
   };

@@ -1,11 +1,11 @@
 // Moteur d'export commun : prépare une fois le contenu et les images (captures
-// annotées, zooms autour de chaque point, croquis), que les rendus PDF, Markdown
-// et PowerPoint se contentent de mettre en forme.
+// annotées, zooms autour de chaque point, croquis, inspirations), que les rendus PDF,
+// Markdown et PowerPoint se contentent de mettre en forme.
 
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
-import { allAnnotations, bounds, drawAnnotations, type Annotation, type Capture, type Ctx2D, type Session } from '@pastille/shared';
+import { allAnnotations, bounds, drawAnnotations, type Annotation, type Capture, type Ctx2D, type Inspiration, type Session } from '@pastille/shared';
 
 const MAX_SCREEN_WIDTH = 2000;
 const CROP_W = 600;
@@ -19,6 +19,9 @@ recadrage montrent l'élément visé, un rectangle désigne une zone, une flèch
 Applique chaque retour dans le code. Si un retour est ambigu, pose une question plutôt
 que de deviner. À la fin, liste les numéros traités et ceux qui ne l'ont pas été.`;
 
+/** Écrit à côté de chaque inspiration, pour que l'IA ne la prenne pas pour l'écran à corriger. */
+export const INSPIRATION_NOTE = "capture d'un autre site, modèle du résultat souhaité (ce n'est pas l'écran à modifier)";
+
 export type ExportPoint = {
   number: number;
   text: string;
@@ -26,6 +29,7 @@ export type ExportPoint = {
   screen: number;
   crop: string; // chemin relatif au dossier d'export
   sketches: string[];
+  inspirations: { image: string; source?: string }[];
   position: string;
 };
 
@@ -43,6 +47,11 @@ export type ExportDoc = {
 
 export function screenTitle(index: number, capture: Capture): string {
   return [`Écran ${index}`, capture.source?.app, capture.source?.windowTitle].filter(Boolean).join(' — ');
+}
+
+/** « Google Chrome — Tarifs » : d'où vient une inspiration capturée sur une fenêtre. */
+export function sourceLabel(source: Inspiration['source']): string | undefined {
+  return [source?.app, source?.windowTitle].filter(Boolean).join(' — ') || undefined;
 }
 
 /** Position lisible en pixels de la capture (« x 120, y 340 sur 1600 × 1000 »). */
@@ -106,6 +115,13 @@ export function screenJpeg(img: Image, capture: Capture): Promise<Buffer> {
   });
 }
 
+/** Inspiration entière, limitée à 2000 px de large comme les captures (exports et MCP). */
+export function inspirationJpeg(img: Image): Promise<Buffer> {
+  const scale = Math.min(1, MAX_SCREEN_WIDTH / img.width);
+  const W = img.width * scale, H = img.height * scale;
+  return renderJpeg(W, H, (ctx) => ctx.drawImage(img, 0, 0, W, H));
+}
+
 // Le contexte de @napi-rs/canvas suit l'API Canvas 2D du navigateur.
 const asCtx = (ctx: SKRSContext2D) => ctx as unknown as Ctx2D;
 
@@ -139,6 +155,12 @@ export async function buildExport(
         await copyFile(join(sessionDir, sketch.png), join(outDir, file));
         sketches.push(file);
       }
+      const inspirations: ExportPoint['inspirations'] = [];
+      for (const [k, inspiration] of (a.inspirations ?? []).entries()) {
+        const file = `images/inspiration-${a.number}${a.inspirations!.length > 1 ? `-${k + 1}` : ''}.jpg`;
+        await writeFile(join(outDir, file), await inspirationJpeg(await loadImage(join(sessionDir, inspiration.image))));
+        inspirations.push({ image: file, source: sourceLabel(inspiration.source) });
+      }
       points.push({
         number: a.number,
         text: a.text.trim(),
@@ -146,6 +168,7 @@ export async function buildExport(
         screen: index,
         crop,
         sketches,
+        inspirations,
         position: position(a, capture),
       });
     }

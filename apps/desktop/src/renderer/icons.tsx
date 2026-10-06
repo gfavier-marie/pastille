@@ -181,6 +181,13 @@ export const Trash = (p: Props) => (
     <path d="M2.5 4.5h11M6.5 4.5V3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1.5M4 4.5l.7 8.6a1 1 0 0 0 1 .9h4.6a1 1 0 0 0 1-.9l.7-8.6M6.8 7v4.5M9.2 7v4.5" />
   </Stroke>
 );
+export const Picture = (p: Props) => (
+  <Stroke {...p} width={1.4}>
+    <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+    <circle cx="5.8" cy="6.2" r="1.2" />
+    <path d="M2.5 12.5 6.2 8.8l2.4 2.4 1.9-1.9 3 3" />
+  </Stroke>
+);
 export const Doc = (p: Props) => (
   <Stroke {...p} width={1.3}>
     <path d="M4 1.5h5.5L12.5 4.5v10h-8.5z" />

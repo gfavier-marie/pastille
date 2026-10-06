@@ -172,6 +172,7 @@ function createEditor() {
 }
 
 function showEditor(focus?: EditorFocus) {
+  inspirationFor = null; // revenir à l'éditeur annule l'inspiration en attente
   editor ??= createEditor();
   if (focus) editor.webContents.send('editor:focus', focus);
   editor.show();
@@ -181,14 +182,30 @@ function showEditor(focus?: EditorFocus) {
 
 // ——— Captures ———
 
+// Inspiration d'un point : l'éditeur s'efface pour laisser chercher une page modèle, et la prochaine
+// capture (raccourci, menu, barre) est jointe au point au lieu de devenir un écran.
+let inspirationFor: string | null = null;
+
+/** Point qui attend son inspiration, s'il existe toujours dans la session ouverte. */
+function inspirationTarget() {
+  const s = store.get();
+  return inspirationFor && s ? findAnnotation(s, inspirationFor) : undefined;
+}
+
 function startCapture() {
   welcomeWindow?.webContents.send('welcome:shortcut');
   // Le micro chauffe pendant que l'utilisateur vise : la dictée démarre sans délai au clic.
-  editor?.webContents.send('editor:prepare-mic');
+  if (!inspirationTarget()) editor?.webContents.send('editor:prepare-mic');
   void capture.start();
 }
 
 async function onCapture(c: CapturedImage) {
+  const target = inspirationTarget();
+  if (target) {
+    // L'éditeur revient sur le point, bulle ouverte, sans relancer la dictée.
+    await store.addInspiration(target.annotation.id, c.png, c.target === 'window' ? { app: c.app, windowTitle: c.title } : undefined);
+    return showEditor({ captureId: target.capture.id, annotationId: target.annotation.id, openBubble: true });
+  }
   const capture = await store.addCapture(c.png, {
     width: c.width,
     height: c.height,
@@ -197,7 +214,7 @@ async function onCapture(c: CapturedImage) {
   });
   let annotationId: string | undefined;
   if (c.point) annotationId = addAnnotation(capture.id, { kind: 'point', ...c.point });
-  showEditor({ captureId: capture.id, annotationId, openBubble: !!annotationId });
+  showEditor({ captureId: capture.id, annotationId, openBubble: !!annotationId, dictate: !!annotationId });
   reportCapture({
     ok: true,
     width: c.width,
@@ -666,6 +683,20 @@ ipcMain.on('sketch:delete', (_e, annotationId: string, sketchId: string) =>
     { undoable: true },
   ),
 );
+ipcMain.on('inspiration:capture', (_e, id: string) => {
+  editor?.hide();
+  inspirationFor = id;
+});
+ipcMain.on('inspiration:import', (_e, id: string, png: Uint8Array) => void store.addInspiration(id, png));
+ipcMain.on('inspiration:delete', (_e, annotationId: string, inspirationId: string) =>
+  store.update(
+    (s) => {
+      const a = findAnnotation(s, annotationId)?.annotation;
+      if (a) a.inspirations = a.inspirations?.filter((k) => k.id !== inspirationId);
+    },
+    { undoable: true },
+  ),
+);
 ipcMain.on('editor:selection', (_e, annotationId: string | null) => tablet?.setFocus(annotationId));
 ipcMain.handle('tablet:status', () => tablet?.isConnected() ?? false);
 ipcMain.on('session:undo', () => store.undo());
@@ -704,7 +735,7 @@ async function runEditorAutotest() {
 
   // Ouvre le point #1 : la dictée démarre seule, le faux micro « parle » pendant ~6 s, puis Entrée.
   // Le micro met un temps variable à s'ouvrir : les 6 s comptent à partir du premier son reçu.
-  showEditor({ captureId: first.id, annotationId: target.id, openBubble: true });
+  showEditor({ captureId: first.id, annotationId: target.id, openBubble: true, dictate: true });
   for (let i = 0; i < 100 && !recording; i++) await wait(100);
   await wait(2500);
   await writeFile(join(out, 'editor.png'), (await editor.webContents.capturePage()).toPNG());
@@ -718,7 +749,7 @@ async function runEditorAutotest() {
     if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
   }
 
-  // Claude Code par le serveur MCP : l'écran 1 doit arriver avec sa capture, ses zooms et le croquis.
+  // Claude Code par le serveur MCP : l'écran 1 doit arriver avec sa capture, ses zooms, le croquis et l'inspiration.
   const mcpUrl = await mcp.listen(0);
   mcpStatus = { url: mcpUrl };
   const post = async (body: unknown) =>
@@ -780,6 +811,15 @@ async function photographScreens(out: string) {
     win.webContents.send('overlay:show', { jpeg: img.toJPEG(80), session: session.name, screen: 6, nextNumber: 21 });
     await wait(300);
     win.webContents.send('overlay:windows', [{ x: 300, y: 96, width: 900, height: 620, app: 'Google Chrome', title: 'Tableau de bord' }]);
+    move(win, 760, 300);
+    await wait(300);
+  });
+  // Capture de l'inspiration du point #3 : pas de pastille fantôme, rappel du point visé.
+  await photo('overlay-inspiration', 'overlay', 1280, 800, async (win) => {
+    const img = (await editor!.webContents.capturePage()).resize({ width: 1280, height: 800 });
+    win.webContents.send('overlay:show', { jpeg: img.toJPEG(80), session: store.get()!.name, screen: 6, nextNumber: 21, inspiration: 3 });
+    await wait(300);
+    win.webContents.send('overlay:windows', [{ x: 300, y: 96, width: 900, height: 620, app: 'Google Chrome', title: 'Exemple — Tarifs' }]);
     move(win, 760, 300);
     await wait(300);
   });
@@ -853,12 +893,18 @@ void app.whenReady().then(async () => {
     preload,
     loadPage,
     onCapture,
+    onCancel: () => {
+      // Échap pendant une inspiration : retour au point, rien n'est joint.
+      const target = inspirationTarget();
+      if (target) showEditor({ captureId: target.capture.id, annotationId: target.annotation.id, openBubble: true });
+    },
     info: () => {
       const session = store.get();
       return {
         session: session?.name ?? 'Nouvelle revue',
         screen: (session?.captures.length ?? 0) + 1,
         nextNumber: (session ? allAnnotations(session).length : 0) + 1,
+        inspiration: inspirationTarget()?.annotation.number,
       };
     },
     onError: (message) => {

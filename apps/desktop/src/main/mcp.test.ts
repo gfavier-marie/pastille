@@ -48,7 +48,7 @@ describe('serveur MCP', async () => {
     expect(text).toContain('Contexte : Back-office React');
     expect(text).toContain('## Écran 3 — Google Chrome — Paramètres');
     expect(text).toMatch(/- #9 · Paramètres : le bouton 1 .* · x \d+, y \d+ sur 1600 × 1000/);
-    expect(text).toMatch(/- #1 · .* · 1 croquis/);
+    expect(text).toMatch(/- #1 · .* · 1 croquis · 1 inspiration/);
     expect(text).toContain('voir_ecran avec ecran de 1 à 5');
   });
 
@@ -59,18 +59,20 @@ describe('serveur MCP', async () => {
     expect((await call('lire_revue', { session: 'inconnue' })).isError).toBe(true);
   });
 
-  it("montre un écran : capture, zooms et croquis", async () => {
+  it("montre un écran : capture, zooms, croquis et inspiration", async () => {
     const r = await call('voir_ecran', { ecran: 1 });
     expect(r.isError).toBeUndefined();
     expect(r.content.filter((c) => c.type === 'image').map((c) => c.mimeType)).toEqual([
       'image/jpeg', // capture annotée
       'image/jpeg', // zoom #1
       'image/png', // croquis de #1
+      'image/jpeg', // inspiration de #1
       'image/jpeg',
       'image/jpeg',
       'image/jpeg',
     ]);
     expect(textOf(r)).toContain('### #1\nTableau de bord : le bouton 1');
+    expect(textOf(r)).toContain("Inspiration 1 de #1 (Google Chrome — Exemple — Tarifs) : capture d'un autre site");
     const missing = await call('voir_ecran', { ecran: 9 });
     expect(missing.isError).toBe(true);
     expect(textOf(missing)).toContain('a 5 écrans');
