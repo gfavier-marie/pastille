@@ -93,6 +93,9 @@ export const T = {
       ? 'Évite ⇧⌘3, ⇧⌘4 et ⇧⌘5, réservés par macOS. Cliquez puis tapez la nouvelle combinaison.'
       : 'Cliquez puis tapez la nouvelle combinaison.',
     shortcutTaken: 'Ce raccourci est indisponible : choisissez-en un autre.',
+    shortcutUnsupported: isMac
+      ? 'Combinaison non prise en charge : ⌘, ⌥, ⇧ ou ⌃ avec une lettre, un chiffre ou F1 à F12.'
+      : 'Combinaison non prise en charge : Ctrl, Alt ou Shift avec une lettre, un chiffre du haut du clavier (pas du pavé numérique) ou F1 à F12.',
     comment: 'Commentaire',
     mode: 'Mode',
     modes: { auto: 'Dictée auto', push: 'Appuyer pour parler', keyboard: 'Clavier seul' },
