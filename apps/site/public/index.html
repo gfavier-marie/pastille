@@ -106,12 +106,12 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-round{transition:transform .2s ease, background .2s ease}
 .vs-round:hover{transform:scale(1.08)}
 /* Démo « À vous d'essayer » : étapes capture → revue → claude → fait (data-etape de l'écran). */
-.vs-etapes{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:14px;font-weight:600}
-.vs-etapes li{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;background:#1E1E21;color:#8E8E96}
-.vs-etapes li>span{width:22px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#2E2E33;color:#C7C7CC;font-size:12px}
-.vs-etapes li.vs-passee>span{background:#1F9D55;color:#FFFFFF}
-.vs-etapes li[aria-current="step"]{background:#3A1C12;color:#FFFFFF}
-.vs-etapes li[aria-current="step"]>span{background:#D63A0C;color:#FFFFFF}
+.vs-parcours{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:14px;font-weight:600}
+.vs-parcours li{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;background:#1E1E21;color:#8E8E96}
+.vs-parcours li>span{width:22px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#2E2E33;color:#C7C7CC;font-size:12px}
+.vs-parcours li.vs-passee>span{background:#1F9D55;color:#FFFFFF}
+.vs-parcours li[aria-current="step"]{background:#3A1C12;color:#FFFFFF}
+.vs-parcours li[aria-current="step"]>span{background:#D63A0C;color:#FFFFFF}
 .vs-ecran{--barre:max(4.4cqw, 28px)}
 .vs-bureau,.vs-editeur{transition:opacity .4s ease .15s}
 .vs-ecran[data-etape="capture"] .vs-editeur,.vs-ecran:not([data-etape="capture"]) .vs-bureau{opacity:0;visibility:hidden;transition:none}
@@ -890,7 +890,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
 
       <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
-          <ol class="vs-etapes" aria-label="Étapes de la démo">
+          <ol class="vs-parcours" aria-label="Étapes de la démo">
             <li data-etape="1" aria-current="step"><span>1</span>Capturez</li>
             <li data-etape="2"><span>2</span>Commentez</li>
             <li data-etape="3"><span>3</span>Exportez</li>
@@ -1332,7 +1332,7 @@ for (const carte of cartes) {
     exporter.setAttribute('aria-disabled', !pret);
     exporter.classList.toggle('vs-appel', pret && n > 0);
     const numero = { capture: 1, claude: 4, fait: 4 }[etape] || (n ? 3 : 2);
-    for (const li of essai.querySelectorAll('.vs-etapes li')) {
+    for (const li of essai.querySelectorAll('.vs-parcours li')) {
       const k = Number(li.dataset.etape);
       if (k === numero) li.setAttribute('aria-current', 'step');
       else li.removeAttribute('aria-current');
