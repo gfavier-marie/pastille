@@ -55,7 +55,10 @@ export type SettingsState = SettingsView & {
   modelPresent: boolean;
   whisper: WhisperStatus;
   tabletPaired: boolean;
+  tabletConnected: boolean;
 };
+
+export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
 /** Ce qu'affichent le menu de l'icône et la barre flottante. */
@@ -111,6 +114,7 @@ export type PastilleApi = {
   revokeTablet(): Promise<void>;
   pairTablet(): void;
   onSettingsChanged(cb: (s: SettingsState) => void): () => void;
+  onSettingsTab(cb: (tab: SettingsTab) => void): () => void;
   // Menu de l'icône et barre flottante
   getMenuState(): Promise<MenuState>;
   onMenuState(cb: (s: MenuState) => void): () => void;

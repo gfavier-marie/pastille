@@ -21,7 +21,7 @@ import {
   systemPreferences,
 } from 'electron';
 import { allAnnotations, findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
-import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, SettingsState } from '../ipc.ts';
+import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, SettingsState, SettingsTab } from '../ipc.ts';
 import { createCapture, type CapturedImage } from './capture.ts';
 import { createDictation } from './dictation.ts';
 import { createMenubar } from './menubar.ts';
@@ -77,7 +77,7 @@ const tablet = autotest && autotest !== 'tablet'
       store,
       onStatus: (connected) => {
         editor?.webContents.send('tablet:status', connected);
-        updateTrayMenu();
+        broadcastSettings();
       },
     });
 const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
@@ -356,13 +356,24 @@ async function showPairing() {
 // ——— Réglages et premier lancement (§4.8, §4.9) ———
 
 let settingsWindow: BrowserWindow | null = null;
-function showSettings() {
+function showSettings(tab?: SettingsTab) {
   if (!settingsWindow) {
-    settingsWindow = new BrowserWindow({ width: 640, height: 780, title: 'Réglages de Pastille', webPreferences: { preload } });
+    settingsWindow = new BrowserWindow({
+      width: 760,
+      height: 640,
+      minWidth: 640,
+      minHeight: 480,
+      title: 'Réglages de Pastille',
+      backgroundColor: '#F5F5F7',
+      // macOS : titre et onglets dans une même barre d'outils.
+      ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 14 } } : {}),
+      webPreferences: { preload },
+    });
     settingsWindow.setContentProtection(true);
     settingsWindow.on('closed', () => (settingsWindow = null));
     loadPage(settingsWindow, 'settings');
-  }
+    if (tab) settingsWindow.webContents.once('did-finish-load', () => settingsWindow?.webContents.send('settings:tab', tab));
+  } else if (tab) settingsWindow.webContents.send('settings:tab', tab);
   settingsWindow.show();
   if (isMac) app.focus({ steal: true });
 }
@@ -379,6 +390,7 @@ function settingsState(): SettingsState {
     modelPresent: transcriber.status().state !== 'missing' || settings.get().engine === 'api',
     whisper: transcriber.status(),
     tabletPaired: tablet?.isPaired() ?? false,
+    tabletConnected: tablet?.isConnected() ?? false,
   };
 }
 
@@ -397,6 +409,7 @@ ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
     return { ok: false, error: `${shortcutLabel(patch.shortcut)} est déjà pris par une autre application.` };
   }
   const after = settings.update(patch);
+  if (patch.openAtLogin !== undefined && !autotest) app.setLoginItemSettings({ openAtLogin: patch.openAtLogin });
   if (after.language !== before.language || after.glossary !== before.glossary) void transcriber.restart().then(broadcastSettings);
   broadcastSettings();
   return { ok: true };
