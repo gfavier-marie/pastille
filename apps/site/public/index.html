@@ -3,239 +3,1111 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VibeScreener : la revue d'interface dictée, pour l'IA (Mac)</title>
-<meta name="description" content="Un raccourci fige l'écran, un clic pose un point numéroté, vous parlez : la revue part chez Claude, ChatGPT, Cursor ou Claude Code. Dictée transcrite sur le Mac. 14 jours d'essai gratuit, sans carte bancaire.">
+<title>VibeScreener : montrez à votre IA ce qu'il faut changer</title>
+<meta name="description" content="Une fonction à ajouter, un parcours à revoir, un détail qui cloche : pointez-le sur votre app et dites-le. Votre IA reçoit chaque demande avec sa capture. Mac Apple Silicon, 14 jours d'essai gratuit, sans carte bancaire.">
 <link rel="canonical" href="https://vibescreener.dev/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://vibescreener.dev/">
 <meta property="og:site_name" content="VibeScreener">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="VibeScreener : montrez à l'IA ce qui cloche">
-<meta property="og:description" content="Capture, points numérotés, dictée sur le Mac, croquis à l'iPad. Export PDF, Markdown ou PowerPoint, ou lecture directe par Claude Code.">
+<meta property="og:title" content="VibeScreener : montrez à votre IA ce qu'il faut changer">
+<meta property="og:description" content="Pointez, dites-le : chaque demande part avec sa capture vers Claude Code, Cursor, ChatGPT ou Claude. Dictée sur le Mac, croquis à l'iPad.">
 <meta property="og:image" content="https://vibescreener.dev/editeur.png">
 <meta property="og:image:width" content="1600">
 <meta property="og:image:height" content="1025">
 <meta property="og:image:alt" content="L'éditeur de VibeScreener : capture annotée de points numérotés, commentaires dictés et croquis">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#161618" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css">
+<link rel="preload" href="/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts.css">
+<!-- Landing reprise de la maquette « VibeScreener — landing » (canevas Claude Design). -->
+<style>
+body{margin:0;background:#FFFFFF}
+button{font:inherit;color:inherit}
+a{color:#B8300A}a:hover{color:#8F2507}
+summary{list-style:none}summary::-webkit-details-marker{display:none}
+details[open] .vs-plus{transform:rotate(45deg)}
+:focus-visible{outline:2px solid #D63A0C;outline-offset:3px}
+.vs-btn{transition:transform .15s ease, box-shadow .15s ease}
+.vs-btn:hover{transform:translateY(-2px)}
+@keyframes vs-rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@supports (animation-timeline: view()){.vs-reveal{animation:vs-rise linear both;animation-timeline:view();animation-range:entry 5% entry 45%}}
+@keyframes vs-wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+@keyframes vs-keys{0%{opacity:0;transform:translate(-50%,-50%) scale(.92)}1.2%,4.5%{opacity:1;transform:translate(-50%,-50%) scale(1)}6%,100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+@keyframes vs-frame{0%,5%{opacity:0}6.5%,96%{opacity:1}99%,100%{opacity:0}}
+@keyframes vs-cursor{0%,6%{left:90cqw;top:62cqw}11%,35%{left:37cqw;top:32.3cqw}41%,64%{left:91.5cqw;top:55.3cqw}70%,88%{left:61cqw;top:11.6cqw}93%,100%{left:90cqw;top:62cqw}}
+@keyframes vs-r1{0%,11%{transform:scale(0);opacity:0}11.5%{transform:scale(.2);opacity:.7}15%,100%{transform:scale(1);opacity:0}}
+@keyframes vs-r2{0%,41%{transform:scale(0);opacity:0}41.5%{transform:scale(.2);opacity:.7}45%,100%{transform:scale(1);opacity:0}}
+@keyframes vs-r3{0%,70%{transform:scale(0);opacity:0}70.5%{transform:scale(.2);opacity:.7}74%,100%{transform:scale(1);opacity:0}}
+@keyframes vs-p1{0%,11.5%{transform:scale(0);opacity:0}12.6%{transform:scale(1.2);opacity:1}13.6%,96%{transform:scale(1);opacity:1}99%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-p2{0%,41.5%{transform:scale(0);opacity:0}42.6%{transform:scale(1.2);opacity:1}43.6%,96%{transform:scale(1);opacity:1}99%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-p3{0%,70.5%{transform:scale(0);opacity:0}71.6%{transform:scale(1.2);opacity:1}72.6%,96%{transform:scale(1);opacity:1}99%,100%{transform:scale(.6);opacity:0}}
+@keyframes vs-b1{0%,13%{opacity:0;transform:translateY(1.5cqw)}15.5%,35%{opacity:1;transform:translateY(0)}38%,100%{opacity:0;transform:translateY(0)}}
+@keyframes vs-b2{0%,43%{opacity:0;transform:translateY(1.5cqw)}45.5%,64%{opacity:1;transform:translateY(0)}67%,100%{opacity:0;transform:translateY(0)}}
+@keyframes vs-b3{0%,72%{opacity:0;transform:translateY(1.5cqw)}74.5%,87%{opacity:1;transform:translateY(0)}90%,100%{opacity:0;transform:translateY(0)}}
+@keyframes vs-t1{0%,16%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(46,end)}27%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t2{0%,46%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}57%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t3{0%,75%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}85%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-pill{0%,89%{opacity:0;transform:translate(-50%,2cqw)}92%,96%{opacity:1;transform:translate(-50%,0)}99%,100%{opacity:0;transform:translate(-50%,0)}}
+@keyframes vs-draw{0%{stroke-dashoffset:1;opacity:1}40%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes vs-draw2{0%,30%{stroke-dashoffset:1;opacity:1}58%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes vs-draw3{0%,52%{stroke-dashoffset:1;opacity:1}72%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes vs-march{to{stroke-dashoffset:-16}}
+@keyframes vs-float{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+@keyframes vs-l1{0%,6%{opacity:0;transform:translateY(6px)}12%,88%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes vs-l2{0%,28%{opacity:0;transform:translateY(6px)}34%,88%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes vs-l3{0%,48%{opacity:0;transform:translateY(6px)}54%,88%{opacity:1;transform:none}96%,100%{opacity:0}}
+@keyframes vs-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
+<div style="font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #17171A; background: #FFFFFF; font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden">
 
-<header class="wrap top">
-  <a class="brand" href="/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
-  <nav class="nav" aria-label="Sections">
-    <a class="wide" href="#fonctionnement">Fonctionnement</a>
-    <a href="#tarifs">Tarifs</a>
-    <a href="#faq">FAQ</a>
-  </nav>
-</header>
+  <header style="border-bottom: 1px solid #ECECEF; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px">
+      <a href="#haut" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #17171A">
+        <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#D63A0C"></path><circle cx="14" cy="14" r="4.2" fill="#FFFFFF"></circle></svg>
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em">VibeScreener</span>
+      </a>
+      <nav aria-label="Sections" style="flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 15px">
+        <a href="#comment" style="color: #3A3A40; text-decoration: none">Comment ça marche</a>
+        <a href="#fonctions" style="color: #3A3A40; text-decoration: none">Fonctionnalités</a>
+        <a href="#tarifs" style="color: #3A3A40; text-decoration: none">Tarifs</a>
+        <a href="#faq" style="color: #3A3A40; text-decoration: none">FAQ</a>
+      </nav>
+      <a href="#installer" class="vs-btn" style="height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 10px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px">Essai gratuit</a>
+    </div>
+  </header>
 
-<main>
-  <section class="wrap hero">
-    <div class="hero-head">
-      <h1>Montrez à l'IA<br>ce qui <span class="target">cloche<span class="pin" aria-hidden="true"><span>1</span></span></span>.</h1>
-      <div class="bubble" aria-hidden="true">
-        <div class="bubble-top">
-          <i class="rec"></i><span>#1</span>
-          <span class="wave"><i style="--h:.25"></i><i style="--h:.3"></i><i style="--h:.25"></i><i style="--h:.5"></i><i style="--h:.7"></i><i style="--h:.45"></i><i style="--h:.9"></i><i style="--h:.6"></i><i style="--h:1"></i><i style="--h:.75"></i><i style="--h:.4"></i><i style="--h:.85"></i><i style="--h:.55"></i><i style="--h:.3"></i></span>
-          <span class="time">0:04</span>
+  <section id="haut" style="padding: 80px 0 80px">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 56px 56px">
+
+      <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+        <div style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px; border-radius: 999px; background: #FBEBE5; color: #B8300A; font-size: 14px; font-weight: 600; animation: vs-rise .7s .05s cubic-bezier(.2,.7,.2,1) both">
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a7 7 0 1 1 0 14H1V8a7 7 0 0 1 7-7z" fill="#D63A0C"></path></svg>
+          Pour celles et ceux qui codent avec l'IA
         </div>
-        <p>Le bouton Payer doit passer en pleine largeur sur mobile.</p>
+        <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(44px, 5.4vw, 76px); line-height: 0.98; letter-spacing: -0.045em; animation: vs-rise .7s .12s cubic-bezier(.2,.7,.2,1) both">Montrez à votre IA <span style="color: #D63A0C">ce qu'il faut changer.</span></h1>
+        <p style="margin: 0; max-width: 500px; font-size: 20px; line-height: 1.45; color: #3A3A40; animation: vs-rise .7s .2s cubic-bezier(.2,.7,.2,1) both">Une fonction à ajouter, un parcours à revoir, un détail qui cloche : pointez-le sur votre app et dites-le. Votre IA reçoit chaque demande avec sa capture.</p>
+        <div id="installer" style="display: flex; flex-direction: column; gap: 12px; animation: vs-rise .7s .28s cubic-bezier(.2,.7,.2,1) both">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 16px; border-radius: 12px; background: #17171A; max-width: 520px">
+            <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
+            <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="Copier la commande d'installation" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 9px; background: #D63A0C; color: #FFFFFF; font-weight: 600; font-size: 14px; cursor: pointer">Copier</button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 14px; color: #5E5E66">
+            <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1F7A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>14 jours gratuits, sans carte</span>
+            <span>Mac Apple Silicon</span>
+            <a href="https://dl.vibescreener.dev/VibeScreener-arm64.dmg" style="font-weight: 600">ou le .dmg</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex: 1.35 1 560px; min-width: 0; animation: vs-rise .9s .3s cubic-bezier(.2,.7,.2,1) both">
+        <div role="img" aria-label="Démonstration sur une app de ventes : ⇧⌘2 fige l'écran, puis trois clics posent trois points avec une demande dictée chacun (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail), et la revue est prête pour l'IA" style="position: relative; container-type: inline-size; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px rgba(23,23,26,0.08), 0 40px 80px -28px rgba(23,23,26,0.45)">
+          <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
+  <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
+
+    <div style="position: absolute; left: 0; top: 0; right: 0; height: 6cqw; box-sizing: border-box; background: #EEEEF0; border-bottom: 1px solid #DEDEE3; display: flex; align-items: center; gap: 1cqw; padding: 0 2cqw">
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #FF5F57"></span>
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #FEBC2E"></span>
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #28C840"></span>
+      <span style="margin-left: 2cqw; flex: 0 1 44cqw; height: 3.5cqw; box-sizing: border-box; border-radius: 0.9cqw; background: #FFFFFF; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; font-size: 1.6cqw; color: #6B7280; white-space: nowrap; overflow: hidden">
+        <svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>
+        localhost:5173/ventes
+      </span>
+    </div>
+
+    <div style="position: absolute; left: 0; top: 6cqw; bottom: 0; width: 17cqw; box-sizing: border-box; padding: 2.4cqw 1.6cqw 2cqw; background: #F7F8F7; border-right: 1px solid #E7E9E7; display: flex; flex-direction: column; gap: 0.5cqw">
+      <div style="display: flex; align-items: center; gap: 1cqw; margin: 0 0 2cqw 0.6cqw">
+        <span style="width: 3.2cqw; height: 3.2cqw; border-radius: 0.9cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.8cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">C</span>
+        <span style="font-size: 2cqw; font-weight: 700; letter-spacing: -0.02em">Comptoir</span>
+      </div>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>Accueil
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; background: #E2F1EC; color: #0B5E4E; font-weight: 600">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>Ventes
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>Produits
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>Clients
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>Réglages
+      </span>
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 1cqw; padding: 0 0.6cqw">
+        <span style="width: 2.8cqw; height: 2.8cqw; border-radius: 999px; background: #FCD9BD; color: #7C2D12; font-size: 1.15cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>
+        <span style="font-size: 1.45cqw; font-weight: 500; color: #374151">Maëlle L.</span>
       </div>
     </div>
-    <p class="lead">Un raccourci fige l'écran. Un clic sur l'élément pose un point numéroté&#8239;; vous dites ce qui ne va pas, c'est transcrit sur votre Mac. La revue part ensuite chez Claude, ChatGPT, Cursor ou Claude Code.</p>
 
-    <div class="install" id="installer">
-      <p class="label">Installer depuis le Terminal</p>
-      <div class="cmd">
-        <code id="commande">curl -fsSL https://vibescreener.dev/install.sh <span class="nowrap">| sh</span></code>
-        <button class="btn primary copy" type="button" data-copy="commande">Copier</button>
-      </div>
-      <div class="actions">
-        <a class="btn" href="https://dl.vibescreener.dev/VibeScreener-arm64.dmg">Télécharger le .dmg</a>
-        <span>pour installer sans Terminal</span>
-      </div>
-      <p class="meta"><strong>14 jours d'essai gratuit, sans carte bancaire.</strong> Mac Apple Silicon (M1 ou plus récent), macOS 13 ou plus.</p>
+    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">Ventes</div>
+    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">Octobre 2026 · 1 284 commandes</div>
+
+    <div style="position: absolute; left: 58cqw; top: 9.4cqw; width: 20cqw; height: 4.4cqw; box-sizing: border-box; border: 1px solid #E5E7EB; border-radius: 1cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.2cqw; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap">
+      <svg viewBox="0 0 16 16" style="width: 1.7cqw; height: 1.7cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
+      Rechercher une commande
+    </div>
+    <div style="position: absolute; left: 79.5cqw; top: 9.4cqw; width: 17.5cqw; height: 4.4cqw; border-radius: 1cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.5cqw; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.6cqw; white-space: nowrap">
+      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>Nouvelle vente
     </div>
 
-    <figure class="shot">
-      <img src="/editeur.png" width="1600" height="1025" alt="L'éditeur de VibeScreener : capture annotée de points numérotés, commentaires dictés et croquis">
-      <figcaption>L'éditeur&#8239;: chaque point garde sa capture, son commentaire dicté et son croquis.</figcaption>
-    </figure>
+    <div style="position: absolute; left: 20cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Chiffre d'affaires</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">48 320 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+12 %</span></span>
+    </div>
+    <div style="position: absolute; left: 46.2cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Commandes</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">1 284</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+8 %</span></span>
+    </div>
+    <div style="position: absolute; left: 72.4cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Panier moyen</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">37,60 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">−2 %</span></span>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 29.5cqw; width: 77cqw; height: 18.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw 1.2cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; gap: 0.8cqw">
+      <div style="height: 2.4cqw; display: flex; align-items: center; gap: 1cqw">
+        <span style="font-size: 1.7cqw; font-weight: 600">Ventes par jour</span>
+        <span style="flex: 1"></span>
+        <span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span>
+        <span style="font-size: 1.3cqw; color: #6B7280">Chiffre d'affaires</span>
+      </div>
+      <div style="position: relative; flex: 1">
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
+          <path d="M0 20H400M0 40H400M0 60H400" stroke="#F0F1F3" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+          <path d="M0 58 L30.8 52 L61.5 55 L92.3 44 L123 47 L153.8 38 L184.6 42 L215.4 33 L246 36 L277 26 L307.7 30 L338.5 20 L369 24 L400 12 L400 80 L0 80 Z" fill="rgba(14,124,102,0.1)"></path>
+          <path d="M0 58 L30.8 52 L61.5 55 L92.3 44 L123 47 L153.8 38 L184.6 42 L215.4 33 L246 36 L277 26 L307.7 30 L338.5 20 L369 24 L400 12" fill="none" stroke="#0E7C66" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+        </svg>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 1.2cqw; color: #9CA3AF">
+        <span>23 sept.</span><span>27 sept.</span><span>1 oct.</span><span>6 oct.</span>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 49.5cqw; width: 77cqw; height: 17.9cqw; box-sizing: border-box; padding: 1.4cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column">
+      <div style="height: 3cqw; display: flex; align-items: center">
+        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">Dernières commandes</span>
+        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">Tout voir</span>
+      </div>
+      <div style="height: 2.8cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F0F1F3; font-size: 1.2cqw; font-weight: 600; color: #6B7280">
+        <span>Client</span><span>Date</span><span>Statut</span><span style="text-align: right">Montant</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #E0E7FF; color: #3730A3; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">AN</span>Atelier Nord</span>
+        <span style="color: #6B7280">6 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
+        <span style="text-align: right; font-weight: 600">1 240,00 €</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">BC</span>Brindille &amp; Co</span>
+        <span style="color: #6B7280">6 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">En attente</span></span>
+        <span style="text-align: right; font-weight: 600">389,90 €</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FCE7F3; color: #9D174D; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>Maison Lumen</span>
+        <span style="color: #6B7280">5 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
+        <span style="text-align: right; font-weight: 600">2 105,50 €</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+          <span aria-hidden="true" style="position: absolute; inset: 0; box-shadow: inset 0 0 0 0.5cqw #D63A0C; pointer-events: none; animation: vs-frame 15s linear infinite"></span>
+
+          <span aria-hidden="true" style="position: absolute; left: 34cqw; top: 29.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r1 15s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; left: 88.5cqw; top: 52.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r2 15s ease-out infinite"></span>
+          <span aria-hidden="true" style="position: absolute; left: 58cqw; top: 8.6cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r3 15s ease-out infinite"></span>
+
+          <span aria-hidden="true" style="position: absolute; left: 37cqw; top: 28.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p1 15s ease-out infinite">1</span>
+          <span aria-hidden="true" style="position: absolute; left: 91.5cqw; top: 51.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p2 15s ease-out infinite">2</span>
+          <span aria-hidden="true" style="position: absolute; left: 61cqw; top: 7.4cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center; transform-origin: 0 100%; animation: vs-p3 15s ease-out infinite">3</span>
+
+          <div aria-hidden="true" style="position: absolute; left: 34cqw; top: 36cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); animation: vs-b1 15s ease-out infinite">
+            <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600">
+              <span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#1
+              <span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">
+                                  <span style="width: 0.5cqw; height: 1.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.00s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.11s"></span>
+                
+                  <span style="width: 0.5cqw; height: 3cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.22s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.6cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.33s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.6cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.44s"></span>
+                
+                  <span style="width: 0.5cqw; height: 3cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.55s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.4cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.66s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.4cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.77s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.8cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.88s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.09s"></span>
+                
+              </span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:04</span>
+            </div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t1 15s linear infinite">Ajoute un filtre : 7 jours, 30 jours, 12 mois.</span></div>
+          </div>
+
+          <div aria-hidden="true" style="position: absolute; left: 38cqw; top: 36.5cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b2 15s ease-out infinite">
+            <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600">
+              <span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#2
+              <span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">
+                                  <span style="width: 0.5cqw; height: 1.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.00s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.11s"></span>
+                
+                  <span style="width: 0.5cqw; height: 3cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.22s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.6cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.33s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.6cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.44s"></span>
+                
+                  <span style="width: 0.5cqw; height: 3cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.55s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.4cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.66s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.4cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.77s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.8cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.88s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.09s"></span>
+                
+              </span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:05</span>
+            </div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t2 15s linear infinite">Trie par montant, et ajoute un export CSV.</span></div>
+          </div>
+
+          <div aria-hidden="true" style="position: absolute; left: 40cqw; top: 16cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b3 15s ease-out infinite">
+            <div style="display: flex; align-items: center; gap: 1.2cqw; font-size: 1.8cqw; font-weight: 600">
+              <span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #FF453A; animation: vs-pulse 1.2s ease-in-out infinite"></span>#3
+              <span style="flex: 1; height: 3cqw; display: flex; align-items: center; gap: 0.5cqw">
+                                  <span style="width: 0.5cqw; height: 1.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.00s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.11s"></span>
+                
+                  <span style="width: 0.5cqw; height: 3cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.22s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.6cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.33s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.6cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.44s"></span>
+                
+                  <span style="width: 0.5cqw; height: 3cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.55s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.4cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.66s"></span>
+                
+                  <span style="width: 0.5cqw; height: 2.4cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.77s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.8cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.88s"></span>
+                
+                  <span style="width: 0.5cqw; height: 1.2cqw; border-radius: 0.3cqw; background: #F2F2F3; animation: vs-wave 0.9s ease-in-out infinite; animation-delay: -0.09s"></span>
+                
+              </span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:04</span>
+            </div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t3 15s linear infinite">La recherche doit aussi trouver les e-mails.</span></div>
+          </div>
+
+          <span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 1.4cqw; opacity: 0; animation: vs-keys 15s ease-out infinite">
+            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">⇧</span>
+            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">⌘</span>
+            <span style="width: 9cqw; height: 8.5cqw; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 0.7cqw; border-radius: 1.6cqw; background: #FFFFFF; font-size: 4cqw; font-weight: 600; box-shadow: 0 2cqw 4cqw rgba(23,23,26,0.25)">2</span>
+          </span>
+
+          <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.6cqw 1.2cqw 1.2cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-pill 15s ease-out infinite">
+            <span style="padding: 0.3cqw 0.9cqw; border-radius: 0.7cqw; background: #2E2E33; font-weight: 500">⌘E</span>
+            <svg viewBox="0 0 16 16" style="width: 2.4cqw; height: 2.4cqw" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#30D158"></circle><path d="M4.8 8.2 7 10.4l4.2-4.6" fill="none" stroke="#0B2E16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            3 demandes prêtes pour l'IA
+          </span>
+
+          <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 15s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="block" id="fonctionnement">
-    <div class="wrap">
-      <h2>Une revue en trois gestes</h2>
-      <p class="intro">VibeScreener vit dans la barre de menus. Rien à ouvrir avant de commencer&#8239;: le raccourci suffit.</p>
-      <ol class="steps">
-        <li>
-          <p class="keys"><span class="pin" aria-hidden="true">1</span><kbd>⇧</kbd><kbd>⌘</kbd><kbd>2</kbd></p>
-          <h3>Figez l'écran</h3>
-          <p>Le raccourci fige l'écran, quelle que soit l'app ouverte. Il se change dans les réglages.</p>
+  <div style="border-top: 1px solid #ECECEF; border-bottom: 1px solid #ECECEF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 22px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 28px; font-size: 15px; color: #5E5E66">
+      <span>Pour</span>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em">Claude Code</span>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em">Cursor</span>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em">ChatGPT</span>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em">Claude</span>
+      <span>et toute IA qui lit un PDF</span>
+    </div>
+  </div>
+
+  <section id="pourquoi" style="padding: 104px 0; background: #F5F5F7">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
+      <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Arrêtez de décrire. Montrez.</h2>
+        <p style="margin: 0; font-size: 18px; color: #3A3A40">Une demande, c'est un clic et une phrase. La capture et le zoom suivent tout seuls.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start">
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: 20px; background: #E9E9EC">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #5E5E66">
+            <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#8E8E96"></circle><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"></path></svg>
+            Sans VibeScreener
+          </div>
+          <div style="padding: 18px 20px; border-radius: 16px; background: #FFFFFF; font-size: 15.5px; line-height: 1.6; color: #3A3A40; max-height: 230px; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent); mask-image: linear-gradient(to bottom, #000 60%, transparent)">Sur la page Ventes, le graphique, il faudrait pouvoir choisir la période, genre 7 jours, 30 jours ou 12 mois. Et le tableau des commandes en dessous, ce serait bien de pouvoir le trier par montant, avec un bouton pour exporter en CSV. Ah, et la recherche en haut à droite, elle devrait aussi trouver les clients par e-mail, parce que là elle ne cherche que dans les numéros de commande, et du coup quand je tape…</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #5E5E66">
+            <span style="padding: 6px 10px; border-radius: 8px; background: #FFFFFF; border: 1px dashed #B8B8C0">capture-1.png</span>
+            <span style="padding: 6px 10px; border-radius: 8px; background: #FFFFFF; border: 1px dashed #B8B8C0">capture-2.png</span>
+            <span style="padding: 6px 0; font-family: 'Instrument Sans', sans-serif; font-size: 14px">à recadrer, à légender…</span>
+          </div>
+        </div>
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: 20px; background: #FFFFFF; box-shadow: 0 0 0 2px #D63A0C, 0 24px 48px -24px rgba(214,58,12,0.45)">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #B8300A">
+            <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#D63A0C"></circle><path d="M4.8 8.2 7 10.4l4.2-4.6" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Avec VibeScreener
+          </div>
+          <div aria-hidden="true" style="position: relative; container-type: inline-size; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px #E6E7EB">
+            <div style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
+  <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
+
+    <div style="position: absolute; left: 0; top: 0; right: 0; height: 6cqw; box-sizing: border-box; background: #EEEEF0; border-bottom: 1px solid #DEDEE3; display: flex; align-items: center; gap: 1cqw; padding: 0 2cqw">
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #FF5F57"></span>
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #FEBC2E"></span>
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #28C840"></span>
+      <span style="margin-left: 2cqw; flex: 0 1 44cqw; height: 3.5cqw; box-sizing: border-box; border-radius: 0.9cqw; background: #FFFFFF; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; font-size: 1.6cqw; color: #6B7280; white-space: nowrap; overflow: hidden">
+        <svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>
+        localhost:5173/ventes
+      </span>
+    </div>
+
+    <div style="position: absolute; left: 0; top: 6cqw; bottom: 0; width: 17cqw; box-sizing: border-box; padding: 2.4cqw 1.6cqw 2cqw; background: #F7F8F7; border-right: 1px solid #E7E9E7; display: flex; flex-direction: column; gap: 0.5cqw">
+      <div style="display: flex; align-items: center; gap: 1cqw; margin: 0 0 2cqw 0.6cqw">
+        <span style="width: 3.2cqw; height: 3.2cqw; border-radius: 0.9cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.8cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">C</span>
+        <span style="font-size: 2cqw; font-weight: 700; letter-spacing: -0.02em">Comptoir</span>
+      </div>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>Accueil
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; background: #E2F1EC; color: #0B5E4E; font-weight: 600">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>Ventes
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>Produits
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>Clients
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>Réglages
+      </span>
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 1cqw; padding: 0 0.6cqw">
+        <span style="width: 2.8cqw; height: 2.8cqw; border-radius: 999px; background: #FCD9BD; color: #7C2D12; font-size: 1.15cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>
+        <span style="font-size: 1.45cqw; font-weight: 500; color: #374151">Maëlle L.</span>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">Ventes</div>
+    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">Octobre 2026 · 1 284 commandes</div>
+
+    <div style="position: absolute; left: 58cqw; top: 9.4cqw; width: 20cqw; height: 4.4cqw; box-sizing: border-box; border: 1px solid #E5E7EB; border-radius: 1cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.2cqw; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap">
+      <svg viewBox="0 0 16 16" style="width: 1.7cqw; height: 1.7cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
+      Rechercher une commande
+    </div>
+    <div style="position: absolute; left: 79.5cqw; top: 9.4cqw; width: 17.5cqw; height: 4.4cqw; border-radius: 1cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.5cqw; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.6cqw; white-space: nowrap">
+      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>Nouvelle vente
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Chiffre d'affaires</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">48 320 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+12 %</span></span>
+    </div>
+    <div style="position: absolute; left: 46.2cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Commandes</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">1 284</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+8 %</span></span>
+    </div>
+    <div style="position: absolute; left: 72.4cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Panier moyen</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">37,60 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">−2 %</span></span>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 29.5cqw; width: 77cqw; height: 18.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw 1.2cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; gap: 0.8cqw">
+      <div style="height: 2.4cqw; display: flex; align-items: center; gap: 1cqw">
+        <span style="font-size: 1.7cqw; font-weight: 600">Ventes par jour</span>
+        <span style="flex: 1"></span>
+        <span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span>
+        <span style="font-size: 1.3cqw; color: #6B7280">Chiffre d'affaires</span>
+      </div>
+      <div style="position: relative; flex: 1">
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
+          <path d="M0 20H400M0 40H400M0 60H400" stroke="#F0F1F3" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+          <path d="M0 58 L30.8 52 L61.5 55 L92.3 44 L123 47 L153.8 38 L184.6 42 L215.4 33 L246 36 L277 26 L307.7 30 L338.5 20 L369 24 L400 12 L400 80 L0 80 Z" fill="rgba(14,124,102,0.1)"></path>
+          <path d="M0 58 L30.8 52 L61.5 55 L92.3 44 L123 47 L153.8 38 L184.6 42 L215.4 33 L246 36 L277 26 L307.7 30 L338.5 20 L369 24 L400 12" fill="none" stroke="#0E7C66" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+        </svg>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 1.2cqw; color: #9CA3AF">
+        <span>23 sept.</span><span>27 sept.</span><span>1 oct.</span><span>6 oct.</span>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 49.5cqw; width: 77cqw; height: 17.9cqw; box-sizing: border-box; padding: 1.4cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column">
+      <div style="height: 3cqw; display: flex; align-items: center">
+        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">Dernières commandes</span>
+        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">Tout voir</span>
+      </div>
+      <div style="height: 2.8cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F0F1F3; font-size: 1.2cqw; font-weight: 600; color: #6B7280">
+        <span>Client</span><span>Date</span><span>Statut</span><span style="text-align: right">Montant</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #E0E7FF; color: #3730A3; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">AN</span>Atelier Nord</span>
+        <span style="color: #6B7280">6 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
+        <span style="text-align: right; font-weight: 600">1 240,00 €</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">BC</span>Brindille &amp; Co</span>
+        <span style="color: #6B7280">6 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">En attente</span></span>
+        <span style="text-align: right; font-weight: 600">389,90 €</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FCE7F3; color: #9D174D; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>Maison Lumen</span>
+        <span style="color: #6B7280">5 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
+        <span style="text-align: right; font-weight: 600">2 105,50 €</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+            <span style="position: absolute; left: 37cqw; top: 27.4cqw; width: 4.9cqw; height: 4.9cqw; box-sizing: border-box; border-radius: 2.45cqw 2.45cqw 2.45cqw 0.6cqw; background: #D63A0C; border: 0.4cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 2.3cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+            <span style="position: absolute; left: 91cqw; top: 50.4cqw; width: 4.9cqw; height: 4.9cqw; box-sizing: border-box; border-radius: 2.45cqw 2.45cqw 2.45cqw 0.6cqw; background: #D63A0C; border: 0.4cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 2.3cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+            <span style="position: absolute; left: 61cqw; top: 6.7cqw; width: 4.9cqw; height: 4.9cqw; box-sizing: border-box; border-radius: 2.45cqw 2.45cqw 2.45cqw 0.6cqw; background: #D63A0C; border: 0.4cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 2.3cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 16px">
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; flex: none; border-radius: 11px 11px 11px 3px; background: #D63A0C; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>Filtre de période : 7 j, 30 j, 12 mois.</div>
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; flex: none; border-radius: 11px 11px 11px 3px; background: #D63A0C; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>Tri par montant et export CSV.</div>
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; flex: none; border-radius: 11px 11px 11px 3px; background: #D63A0C; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>Recherche aussi par e-mail.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="comment" style="padding: 104px 0; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
+      <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 10px">
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Comment ça marche</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Trois gestes. Zéro rédaction.</h2>
+      </div>
+      <ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">
+        <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 10px">
+            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 12px; background: #FFFFFF; font-size: 24px">⇧</span>
+            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 12px; background: #FFFFFF; font-size: 24px">⌘</span>
+            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 12px; background: #FFFFFF; font-size: 24px; font-weight: 600">2</span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">1.</span> Figez l'écran</h3>
+          <p style="margin: 0; color: #5E5E66">Sur votre app, d'un raccourci.</p>
         </li>
-        <li>
-          <p class="keys"><span class="pin" aria-hidden="true">2</span><kbd>Clic</kbd></p>
-          <h3>Pointez et parlez</h3>
-          <p>Un clic sur l'élément pose le point et ouvre le micro. Vous parlez, c'est transcrit. Glissez pour entourer une zone, ou tapez votre commentaire si vous préférez.</p>
+        <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 14px">
+            <span style="width: 40px; height: 40px; box-sizing: border-box; border-radius: 20px 20px 20px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+            <span style="height: 44px; display: flex; align-items: center; gap: 4px">
+                              <span style="width: 4px; height: 14px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.00s"></span>
+              
+                <span style="width: 4px; height: 26px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.09s"></span>
+              
+                <span style="width: 4px; height: 40px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.18s"></span>
+              
+                <span style="width: 4px; height: 22px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.27s"></span>
+              
+                <span style="width: 4px; height: 34px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.36s"></span>
+              
+                <span style="width: 4px; height: 46px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.45s"></span>
+              
+                <span style="width: 4px; height: 18px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.54s"></span>
+              
+                <span style="width: 4px; height: 30px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.63s"></span>
+              
+                <span style="width: 4px; height: 42px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.72s"></span>
+              
+                <span style="width: 4px; height: 24px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.81s"></span>
+              
+                <span style="width: 4px; height: 12px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.90s"></span>
+              
+                <span style="width: 4px; height: 28px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.99s"></span>
+              
+            </span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">2.</span> Pointez et parlez</h3>
+          <p style="margin: 0; color: #5E5E66">Un clic par demande : le micro s'ouvre tout seul.</p>
         </li>
-        <li>
-          <p class="keys"><span class="pin" aria-hidden="true">3</span><kbd>⌘</kbd><kbd>E</kbd></p>
-          <h3>Exportez pour l'IA</h3>
-          <ul class="formats">
-            <li><b>PDF</b>, à coller dans le chat de Claude ou de ChatGPT</li>
-            <li><b>Markdown et images</b>, pour Claude Code ou Cursor</li>
-            <li><b>PowerPoint</b></li>
-          </ul>
+        <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #17171A; display: flex; align-items: center; justify-content: center; gap: 12px">
+            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3A40; border-bottom-width: 4px; border-radius: 12px; background: #2A2A2E; color: #FFFFFF; font-size: 24px">⌘</span>
+            <span style="width: 60px; height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3A40; border-bottom-width: 4px; border-radius: 12px; background: #2A2A2E; color: #FFFFFF; font-size: 24px; font-weight: 600">E</span>
+            <svg width="28" height="16" viewBox="0 0 28 16" fill="none" stroke="#FF6A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h22M18 2l6 6-6 6"></path></svg>
+            <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF">IA</span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">3.</span> Passez la main</h3>
+          <p style="margin: 0; color: #5E5E66">En PDF, en Markdown, ou Claude Code lit la revue.</p>
         </li>
       </ol>
-      <p class="after">Les captures suivantes s'ajoutent à la même session et les points continuent leur numérotation&#8239;: toute une revue d'écrans part en un seul export.</p>
     </div>
   </section>
 
-  <section class="block">
-    <div class="wrap duo">
-      <div>
-        <h2>Un croquis à l'iPad</h2>
-        <p class="intro">Ce qui se dessine mieux qu'il ne se dit&#8239;: tracé à l'Apple Pencil, le croquis rejoint le point en cours.</p>
-        <ul class="facts">
-          <li>Menu de l'icône &gt; «&#8239;Appairer une tablette&#8239;», puis le QR code scanné avec l'appareil photo de l'iPad.</li>
-          <li>Rien à installer&#8239;: Partager &gt; «&#8239;Sur l'écran d'accueil&#8239;».</li>
-          <li>En Wi-Fi comme en 4G, chiffré de bout en bout.</li>
-        </ul>
+  <section id="fonctions" style="padding: 104px 0; background: #F5F5F7">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
+      <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 10px">
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Fonctionnalités</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Tout ce qu'une revue demande.</h2>
       </div>
-      <div>
-        <h2>Claude Code lit la revue</h2>
-        <p class="intro">Sans export&#8239;: dans votre projet, demandez-lui simplement</p>
-        <p class="term">applique la revue VibeScreener</p>
-        <dl class="tools" aria-label="Outils lus par Claude Code, en lecture seule">
-          <div><dt>lister_sessions</dt><dd>les 20 sessions récentes</dd></div>
-          <div><dt>lire_revue</dt><dd>tous les retours d'une session, en texte</dd></div>
-          <div><dt>voir_ecran</dt><dd>la capture annotée, un zoom sur chaque point, les croquis</dd></div>
-        </dl>
-        <p class="note">L'installation branche VibeScreener à Claude Code s'il est présent&#8239;; sinon, la commande est dans les réglages, onglet «&#8239;Claude Code&#8239;». VibeScreener doit être lancée.</p>
-      </div>
-    </div>
-  </section>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
 
-  <section class="block" id="confidentialite">
-    <div class="wrap">
-      <h2>Vos captures restent sur votre Mac</h2>
-      <p class="intro">Captures, sessions et dictée ne quittent pas votre Mac. Pas de compte à créer.</p>
-      <div class="trio">
-        <div>
-          <h3>Dictée hors ligne</h3>
-          <p>La transcription tourne sur le Mac (whisper.cpp). Le moteur par API, facultatif, envoie l'audio au service que vous choisissez.</p>
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
+          <div aria-hidden="true" style="height: 170px; border-radius: 14px; background: #F5F5F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px">
+            <span style="height: 52px; display: flex; align-items: center; gap: 4px">
+                              <span style="width: 5px; height: 14px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.00s"></span>
+              
+                <span style="width: 5px; height: 26px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.09s"></span>
+              
+                <span style="width: 5px; height: 40px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.18s"></span>
+              
+                <span style="width: 5px; height: 22px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.27s"></span>
+              
+                <span style="width: 5px; height: 34px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.36s"></span>
+              
+                <span style="width: 5px; height: 46px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.45s"></span>
+              
+                <span style="width: 5px; height: 18px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.54s"></span>
+              
+                <span style="width: 5px; height: 30px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.63s"></span>
+              
+                <span style="width: 5px; height: 42px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.72s"></span>
+              
+                <span style="width: 5px; height: 24px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.81s"></span>
+              
+                <span style="width: 5px; height: 12px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.90s"></span>
+              
+                <span style="width: 5px; height: 28px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.99s"></span>
+              
+                              <span style="width: 5px; height: 14px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.00s"></span>
+              
+                <span style="width: 5px; height: 26px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.09s"></span>
+              
+                <span style="width: 5px; height: 40px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.18s"></span>
+              
+                <span style="width: 5px; height: 22px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.27s"></span>
+              
+                <span style="width: 5px; height: 34px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.36s"></span>
+              
+                <span style="width: 5px; height: 46px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.45s"></span>
+              
+                <span style="width: 5px; height: 18px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.54s"></span>
+              
+                <span style="width: 5px; height: 30px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.63s"></span>
+              
+                <span style="width: 5px; height: 42px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.72s"></span>
+              
+                <span style="width: 5px; height: 24px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.81s"></span>
+              
+                <span style="width: 5px; height: 12px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.90s"></span>
+              
+                <span style="width: 5px; height: 28px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.99s"></span>
+              
+            </span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #5E5E66">5 s de parole · transcrites en 0,6 s</span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Dictée sur votre Mac</h3>
+          <p style="margin: 0; color: #5E5E66">Hors ligne. Vous enchaînez sans rien valider.</p>
         </div>
-        <div>
-          <h3>Tablette chiffrée</h3>
-          <p>Le relais ne voit que des messages chiffrés (AES-GCM). La clé est dans le QR code et ne passe jamais par le serveur.</p>
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
+          <div aria-hidden="true" style="height: 170px; border-radius: 14px; background: #F5F5F7; display: flex; align-items: center; justify-content: center">
+            <div style="width: 200px; height: 140px; box-sizing: border-box; padding: 8px; border-radius: 16px; background: #1D1D1F">
+              <svg width="184" height="124" viewBox="0 0 184 124" style="display: block; border-radius: 9px; background: #FFFFFF" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M28 22c38-1 80-1 112 1 3 0 4 2 4 4l-1 12c0 3-2 4-4 4-38 1-74 0-110-1-3 0-4-2-4-4l1-12c0-2 1-4 2-4z" pathLength="1" stroke="#17171A" stroke-width="2.2" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw 5s ease-in-out infinite"></path>
+                <path d="M124 30l6 6 6-6" pathLength="1" stroke="#17171A" stroke-width="2.2" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw 5s ease-in-out infinite"></path>
+                <path d="M36 60c20-1 40 1 56-1" pathLength="1" stroke="#17171A" stroke-width="2" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw2 5s ease-in-out infinite"></path>
+                <path d="M36 78c22 1 38-1 62 0" pathLength="1" stroke="#17171A" stroke-width="2" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw2 5s ease-in-out infinite"></path>
+                <path d="M36 96c16-1 30 1 44 0" pathLength="1" stroke="#17171A" stroke-width="2" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw2 5s ease-in-out infinite"></path>
+                <path d="M158 100c-6-18-14-30-30-38" pathLength="1" stroke="#E5341F" stroke-width="2.6" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw3 5s ease-in-out infinite"></path>
+                <path d="M134 56l-7 6 9 3" pathLength="1" stroke="#E5341F" stroke-width="2.6" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw3 5s ease-in-out infinite"></path>
+              </svg>
+            </div>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Un croquis à l'iPad</h3>
+          <p style="margin: 0; color: #5E5E66">Dessinez la fonction voulue : elle rejoint le point.</p>
         </div>
-        <div>
-          <h3>Claude Code en local</h3>
-          <p>Le serveur lu par Claude Code n'écoute que sur votre Mac (127.0.0.1) et refuse les requêtes venant d'un navigateur.</p>
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
+          <div aria-hidden="true" style="height: 170px; border-radius: 14px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 4px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+              <div style="position: relative; width: 100px; height: 76px; box-sizing: border-box; padding: 12px 10px; border-radius: 10px; background: #FFFFFF; border: 1px solid #DCDEE4; display: flex; flex-direction: column; gap: 8px">
+                <span style="height: 14px; box-sizing: border-box; border-radius: 4px; border: 1px solid #D1D5DB"></span>
+                <span style="width: 70%; height: 6px; border-radius: 3px; background: #E5E7EB"></span>
+                <span style="width: 50%; height: 6px; border-radius: 3px; background: #E5E7EB"></span>
+                <span style="position: absolute; left: 62px; top: -8px; width: 20px; height: 20px; box-sizing: border-box; border-radius: 10px 10px 10px 3px; background: #D63A0C; border: 2px solid #FFFFFF; color: #FFFFFF; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
+              </div>
+              <span style="font-size: 12px; color: #5E5E66">votre app</span>
+            </div>
+            <svg width="44" height="20" viewBox="0 0 44 20" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" style="margin-bottom: 20px" aria-hidden="true"><path d="M40 10H4" stroke-dasharray="4 4" style="animation: vs-march 0.8s linear infinite"></path><path d="M10 4 4 10l6 6" stroke-linejoin="round"></path></svg>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+              <div style="width: 100px; height: 76px; box-sizing: border-box; padding: 12px 10px; border-radius: 10px; background: #17171A; display: flex; flex-direction: column; gap: 8px">
+                <span style="height: 14px; border-radius: 7px; background: #2E2E33"></span>
+                <span style="display: flex; gap: 4px"><span style="width: 24px; height: 12px; border-radius: 6px; background: #FF6A3D"></span><span style="width: 20px; height: 12px; border-radius: 6px; background: #3A3A40"></span><span style="width: 28px; height: 12px; border-radius: 6px; background: #3A3A40"></span></span>
+                <span style="width: 60%; height: 6px; border-radius: 3px; background: #3A3A40"></span>
+              </div>
+              <span style="font-size: 12px; color: #5E5E66">un site modèle</span>
+            </div>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Une inspiration en exemple</h3>
+          <p style="margin: 0; color: #5E5E66">Capturez un autre site : l'IA s'en inspire.</p>
+        </div>
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
+          <div aria-hidden="true" style="height: 170px; border-radius: 14px; background: #F5F5F7; display: flex; align-items: center; justify-content: center">
+            <svg width="236" height="134" viewBox="0 0 236 134" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="1" width="234" height="132" rx="10" fill="#FFFFFF" stroke="#DCDEE4"></rect>
+              <rect x="18" y="18" width="62" height="9" rx="3" fill="#111827"></rect>
+              <rect x="176" y="15" width="44" height="15" rx="4" fill="#0E7C66"></rect>
+              <rect x="20" y="48" width="58" height="40" rx="6" fill="#FFFFFF" stroke="#E5E7EB"></rect>
+              <rect x="88" y="48" width="58" height="40" rx="6" fill="#FFFFFF" stroke="#E5E7EB"></rect>
+              <rect x="156" y="48" width="58" height="40" rx="6" fill="#FFFFFF" stroke="#E5E7EB"></rect>
+              <rect x="28" y="58" width="24" height="5" rx="2" fill="#D1D5DB"></rect>
+              <rect x="28" y="70" width="34" height="8" rx="2" fill="#111827"></rect>
+              <rect x="96" y="58" width="24" height="5" rx="2" fill="#D1D5DB"></rect>
+              <rect x="96" y="70" width="30" height="8" rx="2" fill="#111827"></rect>
+              <rect x="164" y="58" width="24" height="5" rx="2" fill="#D1D5DB"></rect>
+              <rect x="164" y="70" width="36" height="8" rx="2" fill="#111827"></rect>
+              <rect x="20" y="104" width="64" height="16" rx="4" fill="#E2F1EC"></rect>
+              <rect x="13" y="41" width="208" height="54" rx="8" pathLength="1" stroke="#D63A0C" stroke-width="2.4" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw 5s ease-in-out infinite"></rect>
+              <path d="M88 112c40 6 80 2 112-4" pathLength="1" stroke="#D63A0C" stroke-width="2.6" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw2 5s ease-in-out infinite"></path>
+              <path d="M190 100l11 8-10 8" pathLength="1" stroke="#D63A0C" stroke-width="2.6" style="stroke-dasharray: 1; stroke-dashoffset: 0; animation: vs-draw3 5s ease-in-out infinite"></path>
+              <circle cx="13" cy="41" r="10" fill="#D63A0C" stroke="#FFFFFF" stroke-width="2"></circle>
+              <text x="13" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" font-family="Instrument Sans, sans-serif">4</text>
+            </svg>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Points, zones, flèches</h3>
+          <p style="margin: 0; color: #5E5E66">« Mets ce bloc ici » se dessine d'un glisser.</p>
+        </div>
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
+          <div aria-hidden="true" style="height: 170px; border-radius: 14px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 14px">
+            <span style="--r: -6deg; width: 66px; height: 86px; box-sizing: border-box; padding: 10px 8px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 8px 18px rgba(23,23,26,0.14); display: flex; flex-direction: column; justify-content: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #B8300A; animation: vs-float 3.2s ease-in-out infinite">PDF</span>
+            <span style="--r: 0deg; width: 66px; height: 86px; box-sizing: border-box; padding: 10px 8px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 8px 18px rgba(23,23,26,0.14); display: flex; flex-direction: column; justify-content: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #17171A; animation: vs-float 3.2s ease-in-out infinite; animation-delay: -1.1s">.md</span>
+            <span style="--r: 6deg; width: 66px; height: 86px; box-sizing: border-box; padding: 10px 8px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 8px 18px rgba(23,23,26,0.14); display: flex; flex-direction: column; justify-content: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #17171A; animation: vs-float 3.2s ease-in-out infinite; animation-delay: -2.2s">.pptx</span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">PDF, Markdown, PowerPoint</h3>
+          <p style="margin: 0; color: #5E5E66">Un zoom par demande : l'IA vise le bon endroit.</p>
+        </div>
+
+        <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
+          <div aria-hidden="true" style="height: 170px; box-sizing: border-box; padding: 20px; border-radius: 14px; background: #17171A; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #D1D1D6; white-space: nowrap; overflow: hidden">
+            <span style="color: #FFFFFF; animation: vs-l1 6s ease-out infinite"><span style="color: #FF6A3D">&gt;</span> applique la revue VibeScreener</span>
+            <span style="animation: vs-l2 6s ease-out infinite"><span style="color: #FF6A3D">●</span> lire_revue <span style="color: #8E8E96">· 12 demandes</span></span>
+            <span style="animation: vs-l3 6s ease-out infinite"><span style="color: #FF6A3D">●</span> voir_ecran <span style="color: #8E8E96">· Ventes, 4 zooms</span></span>
+          </div>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Claude Code lit la revue</h3>
+          <p style="margin: 0; color: #5E5E66">Branché à l'installation. Il suffit de demander.</p>
         </div>
       </div>
-      <p class="more"><a href="/confidentialite">Politique de confidentialité</a></p>
-    </div>
-  </section>
 
-  <section class="block" id="tarifs">
-    <div class="wrap">
-      <h2>Tarifs</h2>
-      <p class="intro">Essayez VibeScreener 14 jours, gratuitement et sans carte bancaire. Ensuite, une licence.</p>
-      <div class="plans">
-        <!-- Offre « Licence à vie » : supprimer ce bloc <article> pour la retirer. -->
-        <article class="plan">
-          <h3>Licence à vie</h3>
-          <p class="price"><strong>19,99 €</strong><span>une fois</span></p>
-          <p>Un seul paiement, sans date de fin.</p>
-          <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
-          <a class="btn primary" href="#">Acheter la licence</a>
-        </article>
-        <!-- Offre « Abonnement mensuel » : supprimer ce bloc <article> pour la retirer. -->
-        <article class="plan">
-          <h3>Abonnement mensuel</h3>
-          <p class="price"><strong>1,99 €</strong><span>par mois</span></p>
-          <p>Renouvelé chaque mois, résiliable à tout moment.</p>
-          <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
-          <a class="btn primary" href="#">S'abonner</a>
-        </article>
-      </div>
-      <ul class="terms">
-        <li>Une licence s'active sur 3 Mac.</li>
-        <li>Prix TTC. Paiement par Polar, vendeur officiel&#8239;: TVA gérée, facture fournie.</li>
-        <li>Remboursement dans les 14 jours, sans justification.</li>
-        <li>Sans licence après l'essai, les nouvelles captures s'arrêtent&#8239;; vos sessions, exports et Claude Code restent accessibles.</li>
-      </ul>
-      <p class="note">Déjà abonné&#8239;? <a href="https://polar.sh/vibescreener/portal">Gérer mon abonnement</a>. Conditions&#8239;: <a href="/licence">licence d'utilisation</a>.</p>
-    </div>
-  </section>
-
-  <section class="block" id="faq">
-    <div class="wrap">
-      <h2>Questions fréquentes</h2>
-      <div class="faq">
-        <details>
-          <summary>Que se passe-t-il à la fin de l'essai&#8239;?</summary>
-          <p>Sans licence, VibeScreener ne fait plus de nouvelles captures. Vous ne perdez rien&#8239;: vos sessions, vos exports et la lecture par Claude Code restent accessibles.</p>
-        </details>
-        <details>
-          <summary>Sur quels ordinateurs&#8239;?</summary>
-          <p>Un Mac Apple Silicon (M1 ou plus récent) sous macOS 13 ou plus. Une licence s'active sur 3 Mac. Windows est prévu, mais pas encore disponible.</p>
-        </details>
-        <details>
-          <summary>Faut-il une connexion Internet&#8239;?</summary>
-          <p>Pas pour capturer ni dicter&#8239;: la transcription se fait sur le Mac, une fois le modèle de dictée téléchargé au premier lancement (547&nbsp;Mo). Internet sert à la tablette, aux mises à jour et à la vérification de la licence.</p>
-        </details>
-        <details>
-          <summary>Pourquoi macOS bloque-t-il la première ouverture&#8239;?</summary>
-          <p>VibeScreener n'est pas signée par Apple. La commande d'installation évite ce blocage&#8239;; avec le .dmg, glissez l'app dans Applications, puis Réglages Système &gt; Confidentialité et sécurité &gt; «&#8239;Ouvrir quand même&#8239;». Pour la même raison, macOS redemande les autorisations écran et micro après chaque mise à jour.</p>
-        </details>
-        <details>
-          <summary>Comment me faire rembourser&#8239;?</summary>
-          <p>Dans les 14 jours suivant l'achat, écrivez à [À COMPLÉTER : e-mail]&#8239;: vous êtes remboursé, sans justification.</p>
-        </details>
-        <details>
-          <summary>Comment résilier l'abonnement&#8239;?</summary>
-          <p>À tout moment, depuis <a href="https://polar.sh/vibescreener/portal">votre espace client Polar</a>. Vos revues restent accessibles après la fin de l'abonnement.</p>
-        </details>
+      <div class="vs-reveal" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; font-size: 15px; font-weight: 600; color: #3A3A40">
+        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>Vos captures restent sur votre Mac</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"></rect><path d="M3.5 7.5a4.5 4.5 0 0 0 9 0M8 12v2.5"></path></svg>Dictée hors ligne</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 14c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path><path d="M2 2l12 12"></path></svg>Pas de compte à créer</span>
       </div>
     </div>
   </section>
-</main>
 
-<footer class="foot">
-  <div class="wrap">
-    <a class="brand" href="/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
-    <nav aria-label="Informations">
+  <section aria-label="L'éditeur" style="padding: 104px 0; background: #141416; color: #FFFFFF; overflow: hidden">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 48px">
+      <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Toute la revue au même endroit.</h2>
+        <p style="margin: 0; font-size: 18px; color: #C7C7CC">Demandes dictées, croquis et inspirations, prêts à partir.</p>
+      </div>
+
+      <div class="vs-reveal" role="img" aria-label="L'éditeur de VibeScreener : la capture de l'app de ventes avec quatre demandes numérotées, la liste des demandes à droite avec un croquis et une inspiration, et les écrans de la session en bas" style="width: 100%; border-radius: 16px; overflow: hidden; background: #161618; box-shadow: 0 0 0 1px #2E2E33, 0 40px 100px -30px rgba(214,58,12,0.35)">
+        <div style="min-height: 50px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 8px 12px 8px 16px; background: #1C1C1F; border-bottom: 1px solid #2A2A2E; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif; font-size: 13px">
+          <span style="display: flex; gap: 8px; margin-right: 8px"><span style="width: 12px; height: 12px; border-radius: 999px; background: #FF5F57"></span><span style="width: 12px; height: 12px; border-radius: 999px; background: #FEBC2E"></span><span style="width: 12px; height: 12px; border-radius: 999px; background: #28C840"></span></span>
+          <span style="font-weight: 600">Revue Comptoir · 6 oct.</span>
+          <span style="color: #A1A1A8">12 demandes · 4 écrans</span>
+          <span style="flex: 1"></span>
+          <span style="display: flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border-radius: 999px; background: #26262A; color: #D1D1D6; font-size: 12px"><span style="width: 7px; height: 7px; border-radius: 999px; background: #30D158"></span>iPad connectée</span>
+          <span style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 8px; background: #D63A0C; font-weight: 600">Exporter <span style="font-weight: 500; opacity: 0.85">⌘E</span></span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap">
+          <div style="flex: 999 1 540px; min-width: 0; box-sizing: border-box; padding: 28px; background: #0E0E10">
+            <div style="position: relative; container-type: inline-size; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 20px 50px rgba(0,0,0,0.5)">
+              <div style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
+  <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
+
+    <div style="position: absolute; left: 0; top: 0; right: 0; height: 6cqw; box-sizing: border-box; background: #EEEEF0; border-bottom: 1px solid #DEDEE3; display: flex; align-items: center; gap: 1cqw; padding: 0 2cqw">
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #FF5F57"></span>
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #FEBC2E"></span>
+      <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #28C840"></span>
+      <span style="margin-left: 2cqw; flex: 0 1 44cqw; height: 3.5cqw; box-sizing: border-box; border-radius: 0.9cqw; background: #FFFFFF; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; font-size: 1.6cqw; color: #6B7280; white-space: nowrap; overflow: hidden">
+        <svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>
+        localhost:5173/ventes
+      </span>
+    </div>
+
+    <div style="position: absolute; left: 0; top: 6cqw; bottom: 0; width: 17cqw; box-sizing: border-box; padding: 2.4cqw 1.6cqw 2cqw; background: #F7F8F7; border-right: 1px solid #E7E9E7; display: flex; flex-direction: column; gap: 0.5cqw">
+      <div style="display: flex; align-items: center; gap: 1cqw; margin: 0 0 2cqw 0.6cqw">
+        <span style="width: 3.2cqw; height: 3.2cqw; border-radius: 0.9cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.8cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">C</span>
+        <span style="font-size: 2cqw; font-weight: 700; letter-spacing: -0.02em">Comptoir</span>
+      </div>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>Accueil
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; background: #E2F1EC; color: #0B5E4E; font-weight: 600">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>Ventes
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>Produits
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>Clients
+      </span>
+      <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>Réglages
+      </span>
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 1cqw; padding: 0 0.6cqw">
+        <span style="width: 2.8cqw; height: 2.8cqw; border-radius: 999px; background: #FCD9BD; color: #7C2D12; font-size: 1.15cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>
+        <span style="font-size: 1.45cqw; font-weight: 500; color: #374151">Maëlle L.</span>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">Ventes</div>
+    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">Octobre 2026 · 1 284 commandes</div>
+
+    <div style="position: absolute; left: 58cqw; top: 9.4cqw; width: 20cqw; height: 4.4cqw; box-sizing: border-box; border: 1px solid #E5E7EB; border-radius: 1cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.2cqw; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap">
+      <svg viewBox="0 0 16 16" style="width: 1.7cqw; height: 1.7cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
+      Rechercher une commande
+    </div>
+    <div style="position: absolute; left: 79.5cqw; top: 9.4cqw; width: 17.5cqw; height: 4.4cqw; border-radius: 1cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.5cqw; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.6cqw; white-space: nowrap">
+      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>Nouvelle vente
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Chiffre d'affaires</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">48 320 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+12 %</span></span>
+    </div>
+    <div style="position: absolute; left: 46.2cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Commandes</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">1 284</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+8 %</span></span>
+    </div>
+    <div style="position: absolute; left: 72.4cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
+      <span style="font-size: 1.4cqw; color: #6B7280">Panier moyen</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">37,60 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">−2 %</span></span>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 29.5cqw; width: 77cqw; height: 18.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw 1.2cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; gap: 0.8cqw">
+      <div style="height: 2.4cqw; display: flex; align-items: center; gap: 1cqw">
+        <span style="font-size: 1.7cqw; font-weight: 600">Ventes par jour</span>
+        <span style="flex: 1"></span>
+        <span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span>
+        <span style="font-size: 1.3cqw; color: #6B7280">Chiffre d'affaires</span>
+      </div>
+      <div style="position: relative; flex: 1">
+        <svg viewBox="0 0 400 80" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
+          <path d="M0 20H400M0 40H400M0 60H400" stroke="#F0F1F3" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+          <path d="M0 58 L30.8 52 L61.5 55 L92.3 44 L123 47 L153.8 38 L184.6 42 L215.4 33 L246 36 L277 26 L307.7 30 L338.5 20 L369 24 L400 12 L400 80 L0 80 Z" fill="rgba(14,124,102,0.1)"></path>
+          <path d="M0 58 L30.8 52 L61.5 55 L92.3 44 L123 47 L153.8 38 L184.6 42 L215.4 33 L246 36 L277 26 L307.7 30 L338.5 20 L369 24 L400 12" fill="none" stroke="#0E7C66" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+        </svg>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 1.2cqw; color: #9CA3AF">
+        <span>23 sept.</span><span>27 sept.</span><span>1 oct.</span><span>6 oct.</span>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 20cqw; top: 49.5cqw; width: 77cqw; height: 17.9cqw; box-sizing: border-box; padding: 1.4cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column">
+      <div style="height: 3cqw; display: flex; align-items: center">
+        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">Dernières commandes</span>
+        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">Tout voir</span>
+      </div>
+      <div style="height: 2.8cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F0F1F3; font-size: 1.2cqw; font-weight: 600; color: #6B7280">
+        <span>Client</span><span>Date</span><span>Statut</span><span style="text-align: right">Montant</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #E0E7FF; color: #3730A3; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">AN</span>Atelier Nord</span>
+        <span style="color: #6B7280">6 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
+        <span style="text-align: right; font-weight: 600">1 240,00 €</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">BC</span>Brindille &amp; Co</span>
+        <span style="color: #6B7280">6 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">En attente</span></span>
+        <span style="text-align: right; font-weight: 600">389,90 €</span>
+      </div>
+      <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; font-size: 1.45cqw">
+        <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FCE7F3; color: #9D174D; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>Maison Lumen</span>
+        <span style="color: #6B7280">5 oct.</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
+        <span style="text-align: right; font-weight: 600">2 105,50 €</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+              <span style="position: absolute; left: 19.3cqw; top: 16.3cqw; width: 78.4cqw; height: 12cqw; box-sizing: border-box; border-radius: 1.6cqw; border: 0.35cqw solid #D63A0C; background: rgba(214,58,12,0.06)"></span>
+              <span style="position: absolute; left: 17.6cqw; top: 14.6cqw; width: 3.6cqw; height: 3.6cqw; box-sizing: border-box; border-radius: 999px; background: #D63A0C; border: 0.3cqw solid #FFFFFF; color: #FFFFFF; font-size: 1.6cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">4</span>
+              <span style="position: absolute; left: 37cqw; top: 28.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+              <span style="position: absolute; left: 90.6cqw; top: 50.2cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 3cqw 3cqw 3cqw 0.7cqw; border: 0.35cqw solid #D63A0C; opacity: 0.55"></span>
+              <span style="position: absolute; left: 91.5cqw; top: 51.1cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+              <span style="position: absolute; left: 61cqw; top: 7.4cqw; width: 4.2cqw; height: 4.2cqw; box-sizing: border-box; border-radius: 2.1cqw 2.1cqw 2.1cqw 0.5cqw; background: #D63A0C; border: 0.35cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.3); color: #FFFFFF; font-size: 1.9cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
+            </div>
+          </div>
+          <div style="flex: 1 1 300px; min-width: 0; box-sizing: border-box; padding: 12px; background: #1C1C1F; border-left: 1px solid #2A2A2E; display: flex; flex-direction: column; gap: 6px; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif; font-size: 13px; line-height: 1.45">
+            <div style="padding: 6px 6px 10px; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 600">Ventes · 4 demandes</span>
+              <span style="font-size: 12px; color: #A1A1A8">Chrome — localhost:5173/ventes</span>
+            </div>
+            <div style="display: flex; gap: 10px; padding: 10px; border-radius: 10px">
+              <span style="width: 22px; height: 22px; flex: none; border-radius: 11px 11px 11px 3px; background: #D63A0C; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
+              <div style="display: flex; flex-direction: column; gap: 4px"><span>Ajoute un filtre de période : 7 jours, 30 jours, 12 mois.</span><span style="font-size: 11.5px; color: #8E8E96">Dicté · 0:04</span></div>
+            </div>
+            <div style="display: flex; gap: 10px; padding: 10px; border-radius: 10px; background: #26262A; box-shadow: inset 0 0 0 1.5px #D63A0C">
+              <span style="width: 22px; height: 22px; flex: none; border-radius: 11px 11px 11px 3px; background: #D63A0C; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
+              <div style="display: flex; flex-direction: column; gap: 8px"><span>Trie le tableau par montant et ajoute un export CSV.</span>
+                <span style="display: flex; align-items: center; gap: 10px">
+                  <svg width="76" height="50" viewBox="0 0 76 50" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex: none; border-radius: 6px; background: #FFFFFF" aria-hidden="true"><path d="M8 12h44M8 22h40M8 32h44M8 42h36" stroke="#C9CDD6" stroke-width="2"></path><path d="M62 10v20M58 14l4-4 4 4M58 26l4 4 4-4" stroke="#E5341F" stroke-width="2"></path><rect x="54" y="35" width="16" height="10" rx="2" stroke="#E5341F" stroke-width="1.8"></rect></svg>
+                  <span style="font-size: 11.5px; color: #8E8E96">1 croquis · iPad</span>
+                </span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; padding: 10px; border-radius: 10px">
+              <span style="width: 22px; height: 22px; flex: none; border-radius: 11px 11px 11px 3px; background: #D63A0C; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
+              <div style="display: flex; flex-direction: column; gap: 8px"><span>La recherche doit aussi trouver les clients par e-mail.</span>
+                <span style="display: flex; align-items: center; gap: 10px">
+                  <svg width="76" height="50" viewBox="0 0 76 50" style="flex: none; border-radius: 6px; background: #26262A" aria-hidden="true"><rect x="8" y="9" width="60" height="11" rx="5.5" fill="#3A3A40"></rect><rect x="8" y="27" width="18" height="8" rx="4" fill="#FF6A3D"></rect><rect x="29" y="27" width="16" height="8" rx="4" fill="#4A4A50"></rect><rect x="48" y="27" width="20" height="8" rx="4" fill="#4A4A50"></rect><rect x="8" y="40" width="34" height="4" rx="2" fill="#3A3A40"></rect></svg>
+                  <span style="font-size: 11.5px; color: #8E8E96">1 inspiration</span>
+                </span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; padding: 10px; border-radius: 10px">
+              <span style="width: 22px; height: 22px; flex: none; border-radius: 999px; background: #D63A0C; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">4</span>
+              <div style="display: flex; flex-direction: column; gap: 4px"><span><span style="color: #A1A1A8">Zone ·</span> Sur mobile, ces trois cartes passent en carrousel.</span><span style="font-size: 11.5px; color: #8E8E96">Dicté · 0:06</span></div>
+            </div>
+            <div style="margin-top: auto; padding: 12px 6px 4px; border-top: 1px solid #2A2A2E; display: flex; flex-direction: column; gap: 6px">
+              <span style="font-weight: 600">Remarques générales</span>
+              <span style="padding: 8px 10px; border-radius: 8px; background: #26262A; color: #D1D1D6">Garder le vert de la marque partout.</span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: #161618; border-top: 1px solid #2A2A2E; overflow-x: auto; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif; font-size: 11.5px; color: #A1A1A8">
+                      <span style="flex: none; display: flex; flex-direction: column; gap: 6px">
+              <span style="position: relative; width: 120px; height: 82px; box-sizing: border-box; border-radius: 6px; background: #FFFFFF; overflow: hidden; display: block; box-shadow: 0 0 0 2px #161618, 0 0 0 4px #D63A0C">
+                <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: #F7F8F7; border-right: 1px solid #E7E9E7"></span>
+                <span style="position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 8px; width: 34px; height: 5px; border-radius: 2px; background: #111827"></span>
+                <span style="position: absolute; right: 8px; top: 7px; width: 18px; height: 7px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 22px; width: 84px; height: 14px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 28px; top: 42px; width: 84px; height: 18px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 58px; top: 18px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+                <span style="position: absolute; left: 100px; top: 58px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+              </span>
+              <span style="color: #F2F2F3; font-weight: 600">Ventes · #1–4</span>
+            </span>
+          
+            <span style="flex: none; display: flex; flex-direction: column; gap: 6px">
+              <span style="position: relative; width: 120px; height: 82px; box-sizing: border-box; border-radius: 6px; background: #FFFFFF; overflow: hidden; display: block; box-shadow: 0 0 0 1px #2E2E33">
+                <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: #F7F8F7; border-right: 1px solid #E7E9E7"></span>
+                <span style="position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 8px; width: 34px; height: 5px; border-radius: 2px; background: #111827"></span>
+                <span style="position: absolute; right: 8px; top: 7px; width: 18px; height: 7px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 22px; width: 84px; height: 30px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 28px; top: 58px; width: 84px; height: 18px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 40px; top: 30px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+                <span style="position: absolute; left: 86px; top: 62px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+              </span>
+              <span style="color: #A1A1A8; font-weight: 400">Produits · #5–7</span>
+            </span>
+          
+            <span style="flex: none; display: flex; flex-direction: column; gap: 6px">
+              <span style="position: relative; width: 120px; height: 82px; box-sizing: border-box; border-radius: 6px; background: #FFFFFF; overflow: hidden; display: block; box-shadow: 0 0 0 1px #2E2E33">
+                <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: #F7F8F7; border-right: 1px solid #E7E9E7"></span>
+                <span style="position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 8px; width: 34px; height: 5px; border-radius: 2px; background: #111827"></span>
+                <span style="position: absolute; right: 8px; top: 7px; width: 18px; height: 7px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 22px; width: 84px; height: 22px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 28px; top: 50px; width: 84px; height: 18px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 70px; top: 24px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+                <span style="position: absolute; left: 50px; top: 54px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+              </span>
+              <span style="color: #A1A1A8; font-weight: 400">Clients · #8–9</span>
+            </span>
+          
+            <span style="flex: none; display: flex; flex-direction: column; gap: 6px">
+              <span style="position: relative; width: 120px; height: 82px; box-sizing: border-box; border-radius: 6px; background: #FFFFFF; overflow: hidden; display: block; box-shadow: 0 0 0 1px #2E2E33">
+                <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: #F7F8F7; border-right: 1px solid #E7E9E7"></span>
+                <span style="position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 8px; width: 34px; height: 5px; border-radius: 2px; background: #111827"></span>
+                <span style="position: absolute; right: 8px; top: 7px; width: 18px; height: 7px; border-radius: 2px; background: #0E7C66"></span>
+                <span style="position: absolute; left: 28px; top: 22px; width: 84px; height: 36px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 28px; top: 62px; width: 84px; height: 18px; border-radius: 3px; background: #F1F3F2"></span>
+                <span style="position: absolute; left: 36px; top: 36px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+                <span style="position: absolute; left: 96px; top: 20px; width: 8px; height: 8px; border-radius: 999px; background: #D63A0C"></span>
+              </span>
+              <span style="color: #A1A1A8; font-weight: 400">Paiement · #10–12</span>
+            </span>
+          
+          <span style="flex: none; display: flex; flex-direction: column; gap: 6px">
+            <span style="width: 120px; height: 82px; box-sizing: border-box; border-radius: 6px; border: 1.5px dashed #3A3A40; display: flex; align-items: center; justify-content: center; color: #A1A1A8; letter-spacing: 0.04em">⇧⌘2</span>
+            <span>Nouvelle capture</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tarifs" style="padding: 104px 0; background: #FFFFFF">
+    <div style="max-width: 1000px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 40px">
+      <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Tarifs</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">14 jours gratuits.<br>Sans carte bancaire.</h2>
+        <p style="margin: 0; font-size: 18px; color: #3A3A40">Toutes les fonctions pendant l'essai. Ensuite, au choix :</p>
+      </div>
+
+      <div style="width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px">
+        <!-- Offre « Licence à vie » : supprimer ce bloc pour la retirer. -->
+          <div class="vs-reveal" style="flex: 1 1 320px; max-width: 420px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; padding: 32px; border-radius: 24px; background: #17171A; color: #FFFFFF">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+              <span style="font-size: 17px; font-weight: 600">Licence à vie</span>
+              <span style="padding: 4px 10px; border-radius: 999px; background: #D63A0C; font-size: 12.5px; font-weight: 700">Une fois pour toutes</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 10px">
+              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.04em">19,99 €</span>
+              <span style="color: #C7C7CC">une fois</span>
+            </div>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: #E5E5EA">
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Toutes les fonctions</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Jusqu'à 3 Mac</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Aucun abonnement</li>
+            </ul>
+            <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
+            <a href="#tarifs" class="vs-btn" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 16px">Acheter la licence</a>
+          </div>
+        <!-- Offre « Abonnement » : supprimer ce bloc pour la retirer. -->
+          <div class="vs-reveal" style="flex: 1 1 320px; max-width: 420px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; padding: 32px; border-radius: 24px; background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #DCDCE1">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+              <span style="font-size: 17px; font-weight: 600">Abonnement</span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 10px">
+              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.04em">1,99 €</span>
+              <span style="color: #5E5E66">par mois</span>
+            </div>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: #3A3A40">
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Toutes les fonctions</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Jusqu'à 3 Mac</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Résiliable à tout moment</li>
+            </ul>
+            <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
+            <a href="#tarifs" class="vs-btn" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #FFFFFF; color: #17171A; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: inset 0 0 0 1.5px #17171A">S'abonner</a>
+          </div>
+      </div>
+
+      <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 14px; color: #5E5E66">
+        <span>Prix TTC · paiement par Polar, facture fournie · remboursé sous 14 jours, sans justification</span>
+        <span>Après l'essai sans licence, seules les nouvelles captures s'arrêtent : vos revues restent accessibles.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" style="padding: 104px 0; background: #F5F5F7">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 32px 64px; align-items: flex-start">
+      <h2 class="vs-reveal" style="flex: 1 1 280px; margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Questions</h2>
+      <div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; border-top: 1px solid #DCDCE1">
+        <details open="" style="border-bottom: 1px solid #DCDCE1">
+          <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
+            <span style="flex: 1">Et à la fin de l'essai ?</span>
+            <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
+          </summary>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Sans licence, les nouvelles captures s'arrêtent. Vos sessions, vos exports et Claude Code restent accessibles.</p>
+        </details>
+        <details style="border-bottom: 1px solid #DCDCE1">
+          <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
+            <span style="flex: 1">Quel Mac faut-il ?</span>
+            <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
+          </summary>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Un Mac Apple Silicon (M1 ou plus récent) sous macOS 13 ou plus. Windows est prévu.</p>
+        </details>
+        <details style="border-bottom: 1px solid #DCDCE1">
+          <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
+            <span style="flex: 1">Faut-il une connexion Internet ?</span>
+            <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
+          </summary>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Pas pour capturer ni dicter. Internet sert à la tablette, aux mises à jour et à vérifier la licence.</p>
+        </details>
+        <details style="border-bottom: 1px solid #DCDCE1">
+          <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
+            <span style="flex: 1">Puis-je être remboursé ou résilier ?</span>
+            <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
+          </summary>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Oui : remboursé dans les 14 jours suivant l'achat, sans justification. L'abonnement se résilie à tout moment depuis votre espace Polar.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Installer VibeScreener" style="padding: 104px 0; background: #D63A0C; color: #FFFFFF">
+    <div class="vs-reveal" style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center">
+      <h2 style="margin: 0; max-width: 860px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 80px); line-height: 0.98; letter-spacing: -0.045em">Votre prochaine version commence par un clic.</h2>
+      <div style="width: 100%; max-width: 560px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 16px; border-radius: 12px; background: #17171A; text-align: left">
+        <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
+        <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="Copier la commande d'installation" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 9px; background: #FFFFFF; color: #17171A; font-weight: 700; font-size: 14px; cursor: pointer">Copier</button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; font-size: 15px">
+        <span>14 jours gratuits, sans carte</span>
+        <a href="https://dl.vibescreener.dev/VibeScreener-arm64.dmg" style="color: #FFFFFF; font-weight: 700">Télécharger le .dmg</a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding: 28px 0; background: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; font-size: 14px; color: #5E5E66">
+      <span style="display: flex; align-items: center; gap: 8px; color: #17171A; font-weight: 600">
+        <svg width="18" height="18" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#D63A0C"></path><circle cx="14" cy="14" r="4.2" fill="#FFFFFF"></circle></svg>
+        VibeScreener
+      </span>
+      <span style="flex: 1"></span>
       <a href="/mentions-legales">Mentions légales</a>
       <a href="/licence">Licence d'utilisation</a>
       <a href="/confidentialite">Confidentialité</a>
       <a href="/licences-tierces">Licences tierces</a>
-    </nav>
-    <p>Contact : [À COMPLÉTER : e-mail]</p>
-  </div>
-</footer>
+      <span>Contact : [À COMPLÉTER : e-mail]</span>
+    </div>
+  </footer>
+</div>
 
 <script>
-  // Seul script du site : copier la commande d'installation (sinon, elle est sélectionnée pour ⌘C).
-  for (const button of document.querySelectorAll('[data-copy]')) {
-    const text = document.getElementById(button.dataset.copy);
-    button.addEventListener('click', () => {
-      navigator.clipboard.writeText(text.textContent).then(
-        () => {
-          button.textContent = 'Copié';
-          setTimeout(() => (button.textContent = 'Copier'), 1500);
-        },
-        () => getSelection().selectAllChildren(text),
-      );
-    });
-  }
+// Copie de la commande d'installation ; sans accès au presse-papiers, elle est sélectionnée
+// pour ⌘C (sans le « $ » qui la précède).
+for (const button of document.querySelectorAll('[data-copy]')) {
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy);
+    } catch {
+      const command = button.previousElementSibling.lastChild;
+      const range = document.createRange();
+      range.selectNodeContents(command);
+      getSelection().removeAllRanges();
+      getSelection().addRange(range);
+      return;
+    }
+    button.textContent = 'Copié';
+    setTimeout(() => (button.textContent = 'Copier'), 2000);
+  });
+}
 </script>
 </body>
 </html>

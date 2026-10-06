@@ -1,0 +1,5 @@
+/* Polices du site, hébergées ici (pas d'appel à Google Fonts) : sous-ensemble latin, licence SIL OFL 1.1. */
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 600 800; font-display: swap; src: url(/fonts/bricolage-grotesque.woff2) format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-weight: 400 700; font-display: swap; src: url(/fonts/instrument-sans.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400 500; font-display: swap; src: url(/fonts/jetbrains-mono.woff2) format('woff2'); }
+@font-face { font-family: 'DM Sans'; font-weight: 400 700; font-display: swap; src: url(/fonts/dm-sans.woff2) format('woff2'); }

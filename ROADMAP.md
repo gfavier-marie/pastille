@@ -138,7 +138,7 @@ Adresses (domaine **vibescreener.dev**, acheté sur Cloudflare le 6 oct.) : `<do
 - [x] `pnpm e2e` photographie l'onglet Licence
 
 **M3 — Site** (`apps/site`, HTML/CSS statique)
-- [x] Landing : accroche, installation en une commande, démo, 3 étapes, tablette, Claude Code, confidentialité, **tarifs** (deux cartes, chacune retirable), FAQ ; vérifiée en local, de 375 px au bureau, clair et sombre
+- [x] Landing reprise de la maquette « VibeScreener — landing » (canevas Claude Design, 6 oct.) : démo animée sur une app d'exemple, avant/après, 3 gestes, fonctionnalités, éditeur, **tarifs** (deux cartes, chacune retirable), FAQ, appel final ; polices hébergées sur le site (pas de Google Fonts) ; vérifiée en local à 375 px et au bureau
 - [x] Mentions légales, licence d'utilisation et remboursement, confidentialité, licences tierces (whisper.cpp, modèle Whisper, Electron : MIT) ; `/install.sh` redirigé vers `dl.<domaine>`
 - [x] Prix sur la page (19,99 € et 1,99 €/mois), pas encore republiée
 - [ ] Compléter les « À COMPLÉTER » : liens de paiement de production, e-mail de contact, identité, statut, SIRET et adresse (mentions légales)
