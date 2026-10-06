@@ -48,7 +48,7 @@ export function findWhisperBin(dirs: string[]): string | undefined {
   for (const c of candidates) if (c && existsSync(c)) return c;
   try {
     const cmd = process.platform === 'win32' ? 'where' : 'which';
-    return execFileSync(cmd, [exe], { encoding: 'utf8' }).split(/\r?\n/)[0]?.trim() || undefined;
+    return execFileSync(cmd, [exe], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split(/\r?\n/)[0]?.trim() || undefined;
   } catch {
     return undefined;
   }

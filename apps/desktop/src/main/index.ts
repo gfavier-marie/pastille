@@ -851,7 +851,10 @@ async function runTabletAutotest() {
 let capture: ReturnType<typeof createCapture>;
 let quitting = false;
 
-if (!autotest && !app.requestSingleInstanceLock()) app.quit();
+// Seconde copie (Windows : double-clic sur l'app ouverte, « --quit » d'install.ps1) : elle passe la main
+// à la première et quitte sans rien démarrer (icône, raccourci, Whisper…).
+const firstInstance = !!autotest || app.requestSingleInstanceLock();
+if (!firstInstance) app.quit();
 // « VibeScreener.exe --quit » : install.ps1 ferme proprement l'app avant de la remplacer.
 app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : showEditor()));
 app.on('window-all-closed', () => {
@@ -871,6 +874,7 @@ app.on('will-quit', () => {
 });
 
 void app.whenReady().then(async () => {
+  if (!firstInstance) return;
   if (isMac) app.dock?.hide();
   // Windows : sans cela, chaque fenêtre porte le menu anglais par défaut d'Electron (File, Edit…).
   // Sur Mac, ce menu garde copier/coller (⌘C, ⌘V) dans les champs.
