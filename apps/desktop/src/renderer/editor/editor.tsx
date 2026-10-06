@@ -403,6 +403,25 @@ function App() {
   };
 
   const recording = (a: Note) => (rec?.annotationId === a.id ? rec : null);
+
+  /** Micro d'un point (bulle et liste) : relance la dictée, le texte s'ajoute à la fin ; pendant la dictée, l'arrête. */
+  const micButton = (id: string, on: boolean) =>
+    commentMode !== 'keyboard' && (
+      <button
+        type="button"
+        className={`mic ${on ? 'on' : ''}`}
+        aria-label={on ? T.editor.stopDictation : T.editor.dictateMore(MOD)}
+        title={on ? T.editor.stopDictation : T.editor.dictateMore(MOD)}
+        onMouseDown={(e) => e.preventDefault()} // la saisie en cours garde le focus
+        onClick={() => {
+          if (on) return recorder.stop(true);
+          setBubbleOpen(true);
+          startDictation(id);
+        }}
+      >
+        <I.Mic size={12} />
+      </button>
+    );
   const kind = (a: Annotation) => T.editor.kinds[a.geometry.kind];
 
   /** Ligne d'état d'un point ou d'une remarque : transcription en cours ou en erreur. */
@@ -580,6 +599,7 @@ function App() {
                   </span>
                   {r ? <Wave levels={levels.current} /> : <span className="spacer" />}
                   {r && <span className="time">{clock(r.elapsedMs)}</span>}
+                  {micButton(selected.id, r !== null)}
                 </div>
                 <EditableText
                   className="field"
@@ -598,7 +618,7 @@ function App() {
                   </div>
                 )}
                 <div className="keys">
-                  {[...T.editor.keys, ...(r ? [T.editor.keyToType] : [])].map(([key, text]) => (
+                  {[...T.editor.keys, ...(r ? [T.editor.keyToType] : commentMode !== 'keyboard' ? [T.editor.keyDictate(MOD)] : [])].map(([key, text]) => (
                     <span key={key}>
                       <b>{key}</b> {text}
                     </span>
@@ -677,6 +697,7 @@ function App() {
                     )}
                     {sketches(a)}
                   </div>
+                  {micButton(a.id, r !== null)}
                   <button type="button" className="delete" aria-label={T.editor.deletePoint} onClick={() => api.deleteAnnotation(a.id)}>
                     <I.Close size={10} />
                   </button>

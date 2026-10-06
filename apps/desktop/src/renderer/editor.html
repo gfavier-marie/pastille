@@ -115,6 +115,15 @@
         border: 0; border-radius: 6px; background: var(--card); color: var(--muted);
       }
       .item:hover .delete { display: flex; }
+      .item .mic { position: absolute; top: 6px; right: 32px; display: none; }
+      .item:hover .mic, .item .mic.on { display: flex; }
+      .mic {
+        width: 22px; height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; flex: none;
+        border: 0; border-radius: 6px; background: var(--card); color: var(--muted);
+      }
+      .mic:hover { color: var(--text); }
+      .mic.on { color: #ff453a; }
+      .bubble-head .mic { background: var(--chip); }
       .skeleton { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
       .skeleton i { height: 8px; border-radius: 4px; background: var(--border-2); }
       .badge {

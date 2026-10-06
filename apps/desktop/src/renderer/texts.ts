@@ -248,6 +248,8 @@ export const T = {
     notesHint: 'sans point précis',
     notePlaceholder: 'Votre remarque…',
     dictateNote: 'Dicter la suite',
+    dictateMore: (mod: string) => `Dicter la suite (${mod}M)`,
+    keyDictate: (mod: string) => [`${mod}M`, 'dicte la suite'] as [string, string],
     stopDictation: 'Arrêter la dictée',
     deleteNote: 'Supprimer la remarque',
     kinds: { point: 'Point', zone: 'Zone', arrow: 'Flèche' },
