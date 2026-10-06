@@ -2,10 +2,10 @@
 // Usage : pnpm setup:whisper
 //  - modèle : models/ggml-large-v3-turbo-q5_0.bin (547 Mo, Hugging Face)
 //  - macOS  : whisper-server via Homebrew (brew install whisper-cpp)
-//  - Windows: binaire officiel whisper.cpp (CPU x64) dans vendor/whisper/
+//  - Windows: binaire officiel whisper.cpp (CPU x64) et runtime Visual C++ dans vendor/whisper/
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { downloadFile, findWhisperBin, MODEL_FILE, MODEL_URL } from '../apps/desktop/src/main/whisper.ts';
 
@@ -59,6 +59,13 @@ if (bin) {
   rmSync(vendor, { recursive: true, force: true });
   renameSync(join(server, '..'), vendor); // le dossier contient aussi les DLL nécessaires
   rmSync(tmp, { recursive: true, force: true });
+  // whisper-server a besoin du runtime Visual C++, absent d'un Windows neuf : ses DLL (redistribuables)
+  // sont copiées depuis cette machine à côté de l'exécutable, et partent dans l'installeur.
+  for (const dll of ['msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll', 'vcomp140.dll']) {
+    const from = join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', dll);
+    if (existsSync(from)) copyFileSync(from, join(vendor, dll));
+    else console.log(`${dll} absent de cette machine : l'installeur ne marchera que sur un PC qui a le runtime Visual C++.`);
+  }
   console.log(`whisper-server installé : ${join(vendor, 'whisper-server.exe')}`);
 } else if (process.platform === 'darwin') {
   console.log('whisper-server introuvable. Installe-le avec : brew install whisper-cpp');

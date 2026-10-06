@@ -1,5 +1,6 @@
-# Pas de PC Windows sous la main : la CI vérifie que tout compile et tourne sur Windows et macOS.
-# Un tag v* (git tag v0.1.0 && git push --tags) publie le .dmg dans une Release GitHub.
+# La CI vérifie que tout compile et tourne sur Windows et macOS ; « Construire les installeurs »
+# installe aussi l'app sur le runner Windows et la teste. Un tag v* (git tag v0.1.0 && git push --tags)
+# publie le .dmg et le .exe dans une Release GitHub.
 name: CI
 
 on:
@@ -52,8 +53,6 @@ jobs:
 
   dist:
     if: ${{ inputs.dist || startsWith(github.ref, 'refs/tags/v') }}
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -66,19 +65,73 @@ jobs:
           node-version: 22
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      # Windows : le modèle sert au test de l'app installée (il n'est pas dans l'installeur).
       - if: runner.os == 'Windows'
-        run: pnpm setup:whisper --bin-only
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: whisper-large-v3-turbo-q5_0
+      - if: runner.os == 'Windows'
+        run: pnpm setup:whisper
       - if: runner.os == 'macOS'
         run: pnpm build:whisper-mac
       - run: pnpm dist
+      # Windows : installé par install.ps1 comme chez un utilisateur (depuis le fichier construit),
+      # puis l'app installée doit démarrer, passer le test de bout en bout et faire une vraie capture.
+      - if: runner.os == 'Windows'
+        name: install.ps1
+        shell: powershell
+        run: |
+          $env:PASTILLE_EXE_URL = ([uri](Resolve-Path apps\desktop\dist\VibeScreener-Setup.exe).Path).AbsoluteUri
+          Get-Content install.ps1 -Raw -Encoding UTF8 | Invoke-Expression
+          Start-Sleep 15
+          Get-Process VibeScreener | Format-Table Id, StartTime # échoue si l'app s'est arrêtée au démarrage
+          Get-ChildItem "$env:LOCALAPPDATA\Programs\VibeScreener\resources\whisper" -Filter *.dll | Format-Wide Name -Column 4
+          & "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe" --quit
+          Wait-Process VibeScreener -Timeout 15
+      - if: runner.os == 'Windows'
+        name: e2e (app installée)
+        run: |
+          $env:PASTILLE_E2E_APP = "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe"
+          $env:PASTILLE_FAKE_AUDIO = "$PWD\apps\desktop\fixtures\dictee-fr.wav"
+          $env:PASTILLE_WHISPER_MODEL = "$PWD\models\ggml-large-v3-turbo-q5_0.bin"
+          $env:TEMP = (New-Item -ItemType Directory -Force e2e-output\tmp).FullName # sessions et exports gardés avec les photos
+          node scripts/e2e.ts
+      - if: runner.os == 'Windows'
+        name: Capture (app installée)
+        timeout-minutes: 3
+        run: |
+          Start-Process notepad
+          Start-Sleep 3
+          $env:PASTILLE_AUTOTEST = 'capture'
+          $env:TEMP = (New-Item -ItemType Directory -Force e2e-output\capture).FullName
+          $log = & "$env:LOCALAPPDATA\Programs\VibeScreener\VibeScreener.exe" | Out-String
+          $log
+          if (([regex]::Matches($log, 'CAPTURE \{"ok":true')).Count -ne 5) { throw '5 captures attendues' }
+      - if: runner.os == 'Windows' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-Windows
+          path: e2e-output
       - uses: actions/upload-artifact@v4
         with:
           name: vibescreener-${{ runner.os }}
           path: |
             apps/desktop/dist/*.dmg
             apps/desktop/dist/*.exe
-      # Mac seulement : l'installeur Windows n'est pas encore testé sur un vrai PC.
-      - if: runner.os == 'macOS' && startsWith(github.ref, 'refs/tags/v')
-        run: gh release create "$GITHUB_REF_NAME" apps/desktop/dist/VibeScreener-arm64.dmg --generate-notes
+
+  # Release publiée quand les deux installeurs sont construits (et l'app Windows testée).
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: dist
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vibescreener-*
+          merge-multiple: true
+      - run: gh release create "$GITHUB_REF_NAME" VibeScreener-arm64.dmg VibeScreener-Setup.exe --generate-notes --repo "$GITHUB_REPOSITORY"
         env:
           GH_TOKEN: ${{ github.token }}

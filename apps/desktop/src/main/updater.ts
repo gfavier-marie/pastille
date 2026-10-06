@@ -1,7 +1,8 @@
-// Mises à jour (Mac, app installée) : la dernière Release GitHub est comparée à la version de
-// l'app. « Mettre à jour » lance l'install.sh de cette Release, détaché : il télécharge le .dmg,
-// quitte l'app, la remplace et la rouvre. Sans signature Apple, macOS redemande ensuite
-// l'enregistrement de l'écran et le micro (limite de plateforme, voir install.sh).
+// Mises à jour (app installée) : la dernière Release GitHub est comparée à la version de l'app.
+// « Mettre à jour » lance le script d'installation de cette Release, détaché (install.sh sur Mac,
+// install.ps1 sur Windows) : il télécharge l'installeur, quitte l'app, la remplace et la rouvre.
+// Sans signature Apple, macOS redemande ensuite l'enregistrement de l'écran et le micro
+// (limite de plateforme, voir install.sh).
 
 import { spawn } from 'node:child_process';
 import { openSync } from 'node:fs';
@@ -33,11 +34,12 @@ export async function checkForUpdate(current: string): Promise<Update | null> {
 
 /** Lance l'installation, qui survit à la fermeture de l'app ; sa sortie va dans `logFile`. */
 export function installUpdate(update: Update, logFile: string) {
-  const script = `https://raw.githubusercontent.com/${REPO}/${update.tag}/install.sh`;
-  const dmg = `https://github.com/${REPO}/releases/download/${update.tag}/VibeScreener-arm64.dmg`;
+  const scripts = `https://raw.githubusercontent.com/${REPO}/${update.tag}`;
+  const assets = `https://github.com/${REPO}/releases/download/${update.tag}`;
   const log = openSync(logFile, 'w');
-  spawn('/bin/sh', ['-c', `curl -fsSL "${script}" | PASTILLE_DMG_URL="${dmg}" sh`], {
-    detached: true,
-    stdio: ['ignore', log, log],
-  }).unref();
+  const [cmd, args]: [string, string[]] =
+    process.platform === 'win32'
+      ? ['powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', `$env:PASTILLE_EXE_URL='${assets}/VibeScreener-Setup.exe'; irm ${scripts}/install.ps1 | iex`]]
+      : ['/bin/sh', ['-c', `curl -fsSL "${scripts}/install.sh" | PASTILLE_DMG_URL="${assets}/VibeScreener-arm64.dmg" sh`]];
+  spawn(cmd, args, { detached: true, stdio: ['ignore', log, log], windowsHide: true }).unref();
 }

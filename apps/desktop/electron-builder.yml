@@ -32,5 +32,8 @@ mac:
     NSMicrophoneUsageDescription: VibeScreener utilise le micro pour dicter les commentaires.
 win:
   target: nsis
+  # Pas de certificat de signature : un .exe téléchargé par le navigateur déclenche SmartScreen
+  # (« Informations complémentaires » > « Exécuter quand même ») ; install.ps1 l'évite.
+  artifactName: ${productName}-Setup.${ext} # lien stable : releases/latest/download/VibeScreener-Setup.exe
 nsis:
-  oneClick: true
+  oneClick: true # installation pour l'utilisateur, sans droits administrateur, dans %LOCALAPPDATA%\Programs\VibeScreener

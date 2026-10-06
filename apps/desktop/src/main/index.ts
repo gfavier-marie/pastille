@@ -14,6 +14,7 @@ import {
   dialog,
   globalShortcut,
   ipcMain,
+  Menu,
   net,
   protocol,
   session as electronSession,
@@ -322,12 +323,12 @@ async function menuState(): Promise<MenuState> {
   };
 }
 
-// ——— Mises à jour (app installée sur Mac) ———
+// ——— Mises à jour (app installée sur Mac ou Windows) ———
 
 let update: Update | null = null;
 
 async function lookForUpdate() {
-  if (!app.isPackaged || !isMac || autotest) return;
+  if (!app.isPackaged || !(isMac || process.platform === 'win32') || autotest) return;
   update = await checkForUpdate(app.getVersion());
   updateTrayMenu();
 }
@@ -337,8 +338,8 @@ async function confirmUpdate() {
   const { response } = await dialog.showMessageBox({
     message: `Mettre à jour VibeScreener vers la version ${update.version} ?`,
     detail:
-      "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés.\n" +
-      "L'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro.",
+      "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés." +
+      (isMac ? "\nL'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro." : ''),
     buttons: ['Mettre à jour', 'Plus tard'],
     defaultId: 0,
     cancelId: 1,
@@ -708,7 +709,8 @@ async function runEditorAutotest() {
   await wait(3500);
   editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Enter' });
   let dictated = '';
-  for (let i = 0; i < 300 && !dictated; i++) {
+  // Jusqu'à 2 min : le runner Windows de la CI met ~40 s à transcrire (moins d'1 s sur M1 Pro).
+  for (let i = 0; i < 1200 && !dictated; i++) {
     await wait(100);
     const a = store.get() && findAnnotation(store.get()!, target.id)?.annotation;
     if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
@@ -808,7 +810,8 @@ let capture: ReturnType<typeof createCapture>;
 let quitting = false;
 
 if (!autotest && !app.requestSingleInstanceLock()) app.quit();
-app.on('second-instance', () => showEditor());
+// « VibeScreener.exe --quit » : install.ps1 ferme proprement l'app avant de la remplacer.
+app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : showEditor()));
 app.on('window-all-closed', () => {
   // Application de barre de menus : elle reste active sans fenêtre.
 });
@@ -827,6 +830,9 @@ app.on('will-quit', () => {
 
 void app.whenReady().then(async () => {
   if (isMac) app.dock?.hide();
+  // Windows : sans cela, chaque fenêtre porte le menu anglais par défaut d'Electron (File, Edit…).
+  // Sur Mac, ce menu garde copier/coller (⌘C, ⌘V) dans les champs.
+  else Menu.setApplicationMenu(null);
 
   // Images de session servies par pastille://session/<id>/<chemin>, sans sortir du dossier des sessions.
   protocol.handle('pastille', (request) => {

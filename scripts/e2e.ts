@@ -3,6 +3,8 @@
 // serveur MCP. Résultats dans e2e-output/ (editor.png, sessions.png, settings.png, settings-claude.png, menu,
 // barre, overlay, assistant, appairage ; chemins des exports).
 // Usage : pnpm e2e
+// App installée (CI Windows) : PASTILLE_E2E_APP=…\VibeScreener.exe, avec PASTILLE_FAKE_AUDIO et
+// PASTILLE_WHISPER_MODEL (l'échantillon et le modèle ne sont pas dans l'app).
 
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
@@ -11,10 +13,11 @@ import { join } from 'node:path';
 const root = join(import.meta.dirname, '..');
 const out = join(root, 'e2e-output');
 const electron = createRequire(join(root, 'apps/desktop/package.json'))('electron') as unknown as string;
-const log = execFileSync(electron, [join(root, 'apps/desktop')], {
+const [bin, args] = process.env.PASTILLE_E2E_APP ? [process.env.PASTILLE_E2E_APP, []] : [electron, [join(root, 'apps/desktop')]];
+const log = execFileSync(bin, args, {
   env: { ...process.env, PASTILLE_AUTOTEST: 'editor', PASTILLE_AUTOTEST_OUT: out },
   encoding: 'utf8',
-  timeout: 120_000,
+  timeout: 300_000,
 });
 const line = log.split('\n').find((l) => l.startsWith('AUTOTEST '));
 if (!line) throw new Error(`Pas de résultat :\n${log}`);
