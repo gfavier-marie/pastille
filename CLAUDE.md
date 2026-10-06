@@ -17,7 +17,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm install` puis `pnpm setup:whisper` : modèle + binaire whisper (Windows : téléchargé dans `vendor/`, macOS : `brew install whisper-cpp`).
 - `pnpm dev` : lance l'app desktop.
 - `pnpm bench:dictee` : mesure de transcription sur `apps/desktop/fixtures/dictee-fr.wav`.
-- `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour).
+- `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour). L'app desktop vise `PASTILLE_RELAY` (défaut `http://localhost:8787`).
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 

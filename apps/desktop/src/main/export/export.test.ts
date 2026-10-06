@@ -19,6 +19,9 @@ describe('export', () => {
     expect(md).toContain('Ce document liste 20 retours');
     expect(md).toContain('**Contexte** : Back-office React');
     expect(md).toContain('## Écran 3 — Google Chrome — Paramètres');
+    expect(md).toMatch(/\| #1 \| 1 \| .* \| oui \|/);
+    expect(md).toContain('![Croquis 1 de #1](images/croquis-1.png)');
+    expect(existsSync(join(dir, 'images/croquis-1.png'))).toBe(true);
     for (let n = 1; n <= 20; n++) {
       expect(md).toContain(`### #${n}\n`);
       expect(existsSync(join(dir, `images/point-${n}.jpg`))).toBe(true);

@@ -60,9 +60,11 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 
 ## Lot 3 — Tablette (iPad + Apple Pencil)
 
-- [ ] Relais, appairage QR mémorisé, reconnexion avec renvoi du point actif
-- [ ] PWA installable : bandeau « Point #N », toile, gros boutons, Envoyer
-- [ ] Pression du Pencil, rejet de la paume, tap à deux doigts [S], fonds quadrillé et recadrage [S], plusieurs croquis par point [S]
+- [x] Relais, appairage QR mémorisé (menu de l'icône), reconnexion avec renvoi du point actif, présence (voyant dans l'éditeur)
+- [x] PWA installable (manifeste + petit service worker, sans Workbox) : bandeau « Point #N », toile, gros boutons, Envoyer, « Joint au point #N »
+- [x] Pression du stylet, rejet de la paume, tap à deux doigts [S], fonds quadrillé et recadrage [S], plusieurs croquis par point [S] ; croquis agrandissables et supprimables dans l'éditeur, repris dans les exports
+- [x] Testé en local : `PASTILLE_AUTOTEST=tablet` + relais local + navigateur en guise de tablette → croquis reçu sur le point #1
+- [ ] Déploiement Cloudflare (`wrangler login` par toi), puis test sur iPad + Pencil en Wi-Fi et 4G
 
 *Critère : croquis visible sur le desktop < 500 ms après « Envoyer » ; reconnexion après mise en veille.*
 

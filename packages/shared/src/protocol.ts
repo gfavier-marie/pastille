@@ -9,10 +9,13 @@ export type Message =
   | { type: 'ping'; id: number; t: number }
   | { type: 'pong'; id: number; t: number }
   // desktop → tablette
-  | { type: 'focus'; annotationId: string; number: number; text: string; background?: string /* JPEG base64 */ }
-  | { type: 'focus_none' }
+  // background : recadrage JPEG (base64) autour du point, envoyé seulement quand le point change
+  | { type: 'focus'; annotationId: string; number: number; text: string; background?: string }
+  // lastNumber : dernier point créé, qui recevra le croquis ; absent s'il n'y a aucun point
+  | { type: 'focus_none'; lastNumber?: number }
   | { type: 'sketch_ack'; sketchId: string; number: number }
   // tablette → desktop
+  // annotationId vide : joindre au dernier point créé
   | { type: 'sketch'; annotationId: string; sketchId: string; png: string /* base64 */; strokes: string };
 
 const encoder = new TextEncoder();

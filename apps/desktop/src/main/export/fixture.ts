@@ -62,6 +62,23 @@ export async function createFakeSession(sessionsDir: string, pointsPerScreen = 4
       annotations,
     });
   }
+  // Un croquis de tablette sur le point #1.
+  await mkdir(join(dir, 'sketches'), { recursive: true });
+  const sketch = createCanvas(800, 600);
+  const sctx = sketch.getContext('2d');
+  sctx.fillStyle = '#ffffff';
+  sctx.fillRect(0, 0, 800, 600);
+  sctx.strokeStyle = '#e5484d';
+  sctx.lineWidth = 8;
+  sctx.strokeRect(200, 200, 400, 160);
+  await writeFile(join(dir, 'sketches/croquis-1.png'), await sketch.encode('png'));
+  await writeFile(join(dir, 'sketches/croquis-1.json'), '{"strokes":[]}');
+  session.captures[0]!.annotations[0]!.sketches.push({
+    id: 'croquis-1',
+    png: 'sketches/croquis-1.png',
+    strokes: 'sketches/croquis-1.json',
+    createdAt: session.createdAt,
+  });
   renumber(session);
   await writeFile(join(dir, 'session.json'), JSON.stringify(session, null, 2));
   return { session, dir };

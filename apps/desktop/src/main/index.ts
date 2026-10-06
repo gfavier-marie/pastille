@@ -27,6 +27,8 @@ import { createDictation } from './dictation.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
 import { createSessionStore } from './session-store.ts';
+import { createTablet } from './tablet.ts';
+import QRCode from 'qrcode';
 import { encodeWav, wavDurationMs } from './wav.ts';
 import { findModel, findWhisperBin, startWhisperServer, UI_PROMPT, type WhisperServer } from './whisper.ts';
 
@@ -34,9 +36,12 @@ const isMac = process.platform === 'darwin';
 const repoRoot = join(app.getAppPath(), '..', '..');
 const preload = join(import.meta.dirname, '../preload/index.cjs');
 const SHORTCUT = 'CommandOrControl+Shift+2';
-// Tests sans interaction : « capture » (mesure de 5 captures) ou « editor » (session factice,
-// photo de l'éditeur, exports PDF et Markdown). Données dans un dossier temporaire.
-const autotest = process.env.PASTILLE_AUTOTEST as 'capture' | 'editor' | undefined;
+// Relais de la tablette : local en développement, l'URL du Worker déployé sinon (PASTILLE_RELAY).
+const RELAY_URL = process.env.PASTILLE_RELAY ?? 'http://localhost:8787';
+// Tests sans interaction : « capture » (mesure de 5 captures), « editor » (session factice,
+// dictée, photo de l'éditeur, exports) ou « tablet » (attend un croquis sur le point #1).
+// Données dans un dossier temporaire.
+const autotest = process.env.PASTILLE_AUTOTEST as 'capture' | 'editor' | 'tablet' | undefined;
 if (autotest) app.setPath('userData', mkdtempSync(join(tmpdir(), 'pastille-autotest-')));
 if (autotest === 'editor') {
   // Faux micro qui joue l'échantillon de dictée : la chaîne micro → Whisper → commentaire est testée sans personne.
@@ -60,7 +65,19 @@ function loadPage(win: BrowserWindow, page: Page) {
 const store = createSessionStore(app.getPath('userData'), (s) => {
   editor?.webContents.send('session:changed', s);
   updateTrayMenu();
+  tablet?.refresh();
 });
+const tablet = autotest && autotest !== 'tablet'
+  ? null
+  : createTablet({
+      dataDir: app.getPath('userData'),
+      relayUrl: RELAY_URL,
+      store,
+      onStatus: (connected) => {
+        editor?.webContents.send('tablet:status', connected);
+        updateTrayMenu();
+      },
+    });
 const exportDir = autotest ? join(app.getPath('userData'), 'exports') : join(app.getPath('documents'), 'Pastille');
 
 let editor: BrowserWindow | null = null;
@@ -225,7 +242,7 @@ function updateTrayMenu() {
       { label: "Ouvrir l'éditeur", click: () => showEditor() },
       { label: 'Exporter le PDF', enabled: !!session, click: () => void exportFromMenu('pdf') },
       { label: 'Exporter en Markdown', enabled: !!session, click: () => void exportFromMenu('markdown') },
-      { label: 'Appairer une tablette (QR) — lot 3', enabled: false },
+      { label: tablet?.isConnected() ? 'Tablette connectée' : 'Appairer une tablette (QR)', click: () => void showPairing() },
       { label: 'Réglages — lot 4', enabled: false },
       { type: 'separator' },
       { label: 'Mesures (POC)', click: () => showPoc() },
@@ -239,6 +256,25 @@ function createTray() {
   if (isMac) icon.setTemplateImage(true);
   tray = new Tray(icon);
   updateTrayMenu();
+}
+
+// ——— Appairage de la tablette (§5.1) ———
+
+let pairingWindow: BrowserWindow | null = null;
+async function showPairing() {
+  const url = await tablet!.pairUrl();
+  const qr = await QRCode.toDataURL(url, { width: 360, margin: 1 });
+  const html = `<!doctype html><meta charset="utf-8"><title>Appairer une tablette</title>
+<body style="font:14px -apple-system,'Segoe UI',sans-serif;text-align:center;padding:20px;margin:0">
+<h2 style="margin:0 0 12px">Appairer une tablette</h2>
+<img src="${qr}" width="300" height="300" alt="QR code d'appairage">
+<p>Scanne ce code avec l'appareil photo de la tablette.<br>La PWA s'ouvre déjà liée à cet ordinateur ;<br>ajoute-la à l'écran d'accueil.</p>
+<p style="color:#888;font-size:11px;word-break:break-all">${url.replace(/&k=.*/, '&k=…')}</p></body>`;
+  pairingWindow?.destroy();
+  pairingWindow = new BrowserWindow({ width: 420, height: 560, title: 'Appairer une tablette', resizable: false });
+  pairingWindow.setContentProtection(true);
+  pairingWindow.on('closed', () => (pairingWindow = null));
+  void pairingWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
 // ——— Fenêtre de mesures du lot 0 ———
@@ -304,6 +340,17 @@ ipcMain.on('annotation:delete', (_e, id: string) =>
 ipcMain.on('session:update', (_e, patch: Pick<Session, 'name' | 'context'>) =>
   store.update((s) => Object.assign(s, patch), { undoable: true, coalesceKey: `session:${Object.keys(patch).join()}` }),
 );
+ipcMain.on('sketch:delete', (_e, annotationId: string, sketchId: string) =>
+  store.update(
+    (s) => {
+      const a = findAnnotation(s, annotationId)?.annotation;
+      if (a) a.sketches = a.sketches.filter((k) => k.id !== sketchId);
+    },
+    { undoable: true },
+  ),
+);
+ipcMain.on('editor:selection', (_e, annotationId: string | null) => tablet?.setFocus(annotationId));
+ipcMain.handle('tablet:status', () => tablet?.isConnected() ?? false);
 ipcMain.on('session:undo', () => store.undo());
 ipcMain.on('session:redo', () => store.redo());
 ipcMain.handle('dictation:available', () => whisperStatus.state === 'loading' || whisperStatus.state === 'ready');
@@ -352,6 +399,26 @@ async function runEditorAutotest() {
   console.log('AUTOTEST', JSON.stringify({ out, ...results }));
 }
 
+async function runTabletAutotest() {
+  const { session } = await createFakeSession(store.sessionsDir);
+  await writeFile(join(app.getPath('userData'), 'state.json'), JSON.stringify({ currentSessionId: session.id }));
+  await store.restore();
+  await tablet!.start();
+  console.log('PAIR', await tablet!.pairUrl());
+  const target = session.captures[0]!.annotations[0]!;
+  tablet!.setFocus(target.id);
+  for (let i = 0; i < 1800; i++) {
+    await new Promise((r) => setTimeout(r, 100));
+    const a = findAnnotation(store.get()!, target.id)?.annotation;
+    if (a?.sketches.length) {
+      console.log('AUTOTEST', JSON.stringify({ sketch: join(store.dir(store.get()!), a.sketches[0]!.png), connected: tablet!.isConnected() }));
+      await new Promise((r) => setTimeout(r, 500));
+      return;
+    }
+  }
+  console.log('AUTOTEST', JSON.stringify({ sketch: null }));
+}
+
 // ——— Démarrage ———
 
 let capture: ReturnType<typeof createCapture>;
@@ -370,6 +437,7 @@ app.on('before-quit', (e) => {
 });
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  tablet?.stop();
   whisper?.stop();
 });
 
@@ -398,6 +466,12 @@ void app.whenReady().then(async () => {
       if (!autotest) void dialog.showMessageBox({ type: 'warning', message });
     },
   });
+
+  if (autotest === 'tablet') {
+    await runTabletAutotest();
+    app.quit();
+    return;
+  }
 
   if (autotest === 'editor') {
     await runEditorAutotest();
@@ -432,5 +506,6 @@ void app.whenReady().then(async () => {
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
   startWhisper();
   dictation.resume();
+  void tablet?.start();
   if (isMac) void systemPreferences.askForMediaAccess('microphone');
 });

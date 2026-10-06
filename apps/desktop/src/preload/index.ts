@@ -23,6 +23,10 @@ const api: PastilleApi = {
   submitDictation: (id, samples) => ipcRenderer.send('dictation:submit', id, samples),
   retryDictation: (id) => ipcRenderer.send('dictation:retry', id),
   onPrepareMic: (cb) => on('editor:prepare-mic', cb),
+  setSelection: (id) => ipcRenderer.send('editor:selection', id),
+  deleteSketch: (annotationId, sketchId) => ipcRenderer.send('sketch:delete', annotationId, sketchId),
+  tabletStatus: () => ipcRenderer.invoke('tablet:status'),
+  onTabletStatus: (cb) => on('tablet:status', cb),
 
   onCaptureResult: (cb) => on('capture:result', cb),
   startCapture: () => ipcRenderer.send('capture:start'),

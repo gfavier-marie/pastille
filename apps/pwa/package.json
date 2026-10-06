@@ -8,7 +8,8 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@pastille/shared": "workspace:*"
+    "@pastille/shared": "workspace:*",
+    "perfect-freehand": "^1.2.3"
   },
   "devDependencies": {
     "vite": "^7.3.7"

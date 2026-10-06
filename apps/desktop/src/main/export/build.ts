@@ -4,7 +4,7 @@
 
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createCanvas, loadImage, type SKRSContext2D } from '@napi-rs/canvas';
+import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import { allAnnotations, bounds, drawAnnotations, type Annotation, type Capture, type Ctx2D, type Session } from '@pastille/shared';
 
 const MAX_SCREEN_WIDTH = 2000;
@@ -69,13 +69,29 @@ export function cropRegion(a: Annotation, c: Capture) {
   return { x, y, w, h };
 }
 
-async function renderJpeg(width: number, height: number, draw: (ctx: SKRSContext2D) => void, file: string) {
+function renderJpeg(width: number, height: number, draw: (ctx: SKRSContext2D) => void, quality = JPEG_QUALITY) {
   const canvas = createCanvas(Math.round(width), Math.round(height));
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   draw(ctx);
-  await writeFile(file, await canvas.encode('jpeg', JPEG_QUALITY));
+  return canvas.encode('jpeg', quality);
+}
+
+/** Zoom d'environ 600 × 400 autour d'une annotation, pastille dessinée (exports et fond de la tablette). */
+export function cropJpeg(img: Image, capture: Capture, a: Annotation, quality = JPEG_QUALITY): Promise<Buffer> {
+  const r = cropRegion(a, capture);
+  const s = Math.min(1, CROP_W / r.w);
+  return renderJpeg(
+    r.w * s,
+    r.h * s,
+    (ctx) => {
+      ctx.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, r.w * s, r.h * s);
+      const view = { x: -r.x * s, y: -r.y * s, width: capture.width * s, height: capture.height * s };
+      drawAnnotations(asCtx(ctx), [a], view, { radius: 16 });
+    },
+    quality,
+  );
 }
 
 // Le contexte de @napi-rs/canvas suit l'API Canvas 2D du navigateur.
@@ -98,31 +114,16 @@ export async function buildExport(
     const scale = Math.min(1, MAX_SCREEN_WIDTH / capture.width);
     const W = capture.width * scale, H = capture.height * scale;
     const image = `images/ecran-${index}.jpg`;
-    await renderJpeg(
-      W,
-      H,
-      (ctx) => {
-        ctx.drawImage(img, 0, 0, W, H);
-        drawAnnotations(asCtx(ctx), capture.annotations, { x: 0, y: 0, width: W, height: H }, { radius: Math.max(12, W / 90) });
-      },
-      join(outDir, image),
-    );
+    const full = await renderJpeg(W, H, (ctx) => {
+      ctx.drawImage(img, 0, 0, W, H);
+      drawAnnotations(asCtx(ctx), capture.annotations, { x: 0, y: 0, width: W, height: H }, { radius: Math.max(12, W / 90) });
+    });
+    await writeFile(join(outDir, image), full);
 
     const points: ExportPoint[] = [];
     for (const a of capture.annotations) {
-      const r = cropRegion(a, capture);
-      const s = Math.min(1, CROP_W / r.w);
       const crop = `images/point-${a.number}.jpg`;
-      await renderJpeg(
-        r.w * s,
-        r.h * s,
-        (ctx) => {
-          ctx.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, r.w * s, r.h * s);
-          const view = { x: -r.x * s, y: -r.y * s, width: capture.width * s, height: capture.height * s };
-          drawAnnotations(asCtx(ctx), [a], view, { radius: 16 });
-        },
-        join(outDir, crop),
-      );
+      await writeFile(join(outDir, crop), await cropJpeg(img, capture, a));
 
       const sketches: string[] = [];
       for (const [k, sketch] of a.sketches.entries()) {

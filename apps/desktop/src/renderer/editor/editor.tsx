@@ -64,6 +64,8 @@ function App() {
   const [exportMenu, setExportMenu] = useState(false);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [rec, setRec] = useState<RecorderState>(null);
+  const [tablet, setTablet] = useState(false);
+  const [zoomed, setZoomed] = useState<string | null>(null); // croquis agrandi
   // Whisper présent (ou en cours de chargement) : sinon, saisie au clavier seulement.
   const [canDictate] = useState(() => api.dictationAvailable());
   const [recorder] = useState(() =>
@@ -86,6 +88,8 @@ function App() {
       setBubbleOpen(!!f.openBubble);
       if (f.annotationId && f.openBubble) startDictation(f.annotationId);
     });
+    void api.tabletStatus().then(setTablet);
+    const offTablet = api.onTabletStatus(setTablet);
     const offMic = api.onPrepareMic(() => void canDictate.then((ok) => (ok ? recorder.open() : undefined)).catch(() => {}));
     // Fenêtre cachée : la dictée en cours part en transcription et le micro est libéré.
     const onVisibility = () => document.hidden && recorder.close();
@@ -94,9 +98,13 @@ function App() {
       offSession();
       offFocus();
       offMic();
+      offTablet();
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
+
+  // La tablette dessine toujours pour le point sélectionné (§2).
+  useEffect(() => api.setSelection(selectedId), [selectedId]);
 
   const captures = session?.captures ?? [];
   const capture = captures.find((c) => c.id === captureId) ?? captures.at(-1);
@@ -215,6 +223,20 @@ function App() {
       </span>
     ) : null;
 
+  const sketches = (a: Annotation) =>
+    a.sketches.length > 0 && (
+      <div className="sketches">
+        {a.sketches.map((k) => (
+          <span key={k.id} className="sketch">
+            <img src={imageUrl(session, k.png)} alt="Croquis" onClick={() => setZoomed(imageUrl(session, k.png))} />
+            <button title="Supprimer le croquis" onClick={() => api.deleteSketch(a.id, k.id)}>
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+    );
+
   return (
     <div className="editor">
       <header>
@@ -244,6 +266,9 @@ function App() {
           key={session.id}
           onChange={(e) => api.updateSession({ context: e.target.value })}
         />
+        <span className={`tablet ${tablet ? 'on' : ''}`} title={tablet ? 'Tablette connectée' : 'Tablette non connectée'}>
+          ● Tablette
+        </span>
         <span className="count">
           {ordered.length} point{ordered.length > 1 ? 's' : ''}
         </span>
@@ -291,6 +316,7 @@ function App() {
                     onKeyDown={bubbleKeys}
                   />
                   {status(selected)}
+                  {sketches(selected)}
                 </div>
               </div>
             ) : null
@@ -318,6 +344,7 @@ function App() {
                   onChange={(text) => api.updateAnnotation(a.id, { text })}
                 />
                 {status(a)}
+                {sketches(a)}
               </div>
               <button className="delete" title="Supprimer le point" onClick={() => api.deleteAnnotation(a.id)}>
                 ×
@@ -346,6 +373,11 @@ function App() {
       </footer>
 
       {toast && <div className={`toast ${toast.error ? 'error' : ''}`}>{toast.text}</div>}
+      {zoomed && (
+        <div className="zoomed" onClick={() => setZoomed(null)}>
+          <img src={zoomed} alt="Croquis agrandi" />
+        </div>
+      )}
     </div>
   );
 }

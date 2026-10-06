@@ -59,6 +59,10 @@ export type PastilleApi = {
   submitDictation(annotationId: string, samples: Float32Array): void;
   retryDictation(annotationId: string): void;
   onPrepareMic(cb: () => void): () => void;
+  setSelection(annotationId: string | null): void;
+  deleteSketch(annotationId: string, sketchId: string): void;
+  tabletStatus(): Promise<boolean>;
+  onTabletStatus(cb: (connected: boolean) => void): () => void;
   // Fenêtre POC
   onCaptureResult(cb: (r: CaptureResult) => void): () => void;
   startCapture(): void;
