@@ -1,0 +1,18 @@
+{
+  "name": "@pastille/relay",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @pastille/pwa build && wrangler dev",
+    "deploy": "pnpm --filter @pastille/pwa build && wrangler deploy",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@pastille/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
+    "wrangler": "^4.147.0"
+  }
+}

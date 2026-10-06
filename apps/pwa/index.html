@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pastille</title>
+    <style>
+      :root { color-scheme: light dark; font: 17px/1.45 system-ui, sans-serif; }
+      body { margin: 0; padding: 24px; }
+      #status::before { content: '●'; margin-right: 8px; color: #999; }
+      #status.open::before { color: #1a7f37; }
+      #status.peer::before { color: #1a7f37; }
+      button { font: inherit; min-height: 48px; padding: 0 20px; margin-top: 16px; }
+      #result { margin-top: 12px; }
+    </style>
+  </head>
+  <body>
+    <div id="status">Connexion…</div>
+    <button id="measure" disabled>Mesurer l'aller-retour</button>
+    <div id="result"></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+# Pas de PC Windows sous la main : la CI vérifie que tout compile et tourne sur Windows et macOS.
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      bench:
+        description: 'Mesurer aussi la transcription (télécharge le modèle, 547 Mo)'
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm --filter @pastille/desktop build
+
+  bench-windows:
+    if: ${{ inputs.bench }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: models
+          key: whisper-large-v3-turbo-q5_0
+      - run: pnpm setup:whisper
+      - run: pnpm bench:dictee

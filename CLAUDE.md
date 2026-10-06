@@ -7,6 +7,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 ## Stack
 
 - Monorepo pnpm (`nodeLinker: hoisted`), TypeScript strict, Node ≥ 22.18 (exécute le TS directement).
+- `apps/relay` : Worker Cloudflare + Durable Object (une room par appairage), sert aussi la PWA (`apps/pwa/dist`).
 - `apps/desktop` : Electron + electron-vite + React. Toute la logique dans le processus principal (`src/main`), les fenêtres affichent et parlent par IPC typé (`src/ipc.ts`, exposé par `src/preload`).
 - `packages/shared` : types, protocole, chiffrement, rendu des annotations (`drawAnnotations`, Canvas 2D, seule fonction de rendu).
 - Transcription : `whisper-server` (whisper.cpp) en processus enfant, modèle `models/ggml-large-v3-turbo-q5_0.bin`.
@@ -16,6 +17,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm install` puis `pnpm setup:whisper` : modèle + binaire whisper (Windows : téléchargé dans `vendor/`, macOS : `brew install whisper-cpp`).
 - `pnpm dev` : lance l'app desktop.
 - `pnpm bench:dictee` : mesure de transcription sur `apps/desktop/fixtures/dictee-fr.wav`.
+- `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour).
 - `pnpm test`, `pnpm typecheck`.
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 

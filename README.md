@@ -17,3 +17,17 @@ pnpm dev             # fenêtre « Pastille — POC » : capture et dictée au m
 - **Windows** : `pnpm setup:whisper` télécharge aussi whisper.cpp (CPU x64) dans `vendor/whisper/`. Raccourci : Ctrl+Shift+2.
 
 Dans la fenêtre POC, « Copier les mesures » met un tableau dans le presse-papiers.
+
+### Synchro tablette
+
+```bash
+pnpm relay           # relais + PWA en local sur http://localhost:8787
+pnpm bench:synchro   # affiche un QR d'appairage puis mesure l'aller-retour chiffré
+```
+
+Pour l'iPad, déployer le relais sur Cloudflare (compte gratuit) :
+
+```bash
+cd apps/relay && npx wrangler login && pnpm deploy
+pnpm bench:synchro https://pastille.<ton-sous-domaine>.workers.dev
+```

@@ -1,0 +1,16 @@
+{
+  "name": "@pastille/pwa",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@pastille/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^7.3.7"
+  }
+}

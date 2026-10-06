@@ -1,6 +1,6 @@
 # Pastille — roadmap
 
-Six étapes, chacune utilisable en vrai dès sa livraison. On ne passe à la suivante qu'après validation de son critère, mesuré sur Mac **et** sur PC Windows. Cahier des charges : [docs/SPEC.md](docs/SPEC.md).
+Six étapes, chacune utilisable en vrai dès sa livraison. On ne passe à la suivante qu'après validation de son critère, mesuré sur Mac. **Pas de PC Windows pour l'instant** : le code reste multiplateforme, la CI GitHub le compile et le teste sous Windows, et la validation sur un vrai PC attendra. Cahier des charges : [docs/SPEC.md](docs/SPEC.md).
 
 **Simplicité d'abord** : on fait les [M], les [S] placés ci-dessous, aucun [C], rien hors cahier des charges sauf l'export PowerPoint demandé.
 
@@ -16,22 +16,26 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 
 ## Étape 0 — Mise en place ✅
 
-- [x] Monorepo pnpm : `apps/desktop`, `packages/shared` (`apps/pwa` et `apps/relay` arrivent avec le POC synchro)
+- [x] Monorepo pnpm : `apps/desktop`, `apps/pwa`, `apps/relay`, `packages/shared`
+- [x] Dépôt privé GitHub + CI Windows et macOS
 - [x] `docs/SPEC.md`, `CLAUDE.md`, `ROADMAP.md`
 
 ## Lot 0 — Trois POC
 
 - [ ] **Capture** : raccourci global, overlay figé par écran, fenêtre sous le curseur (get-windows), recadrage en résolution physique.
   *Critère : fenêtre Chrome capturée en 1 raccourci + 1 clic, pleine résolution, sans fenêtre de Pastille. Overlay < 200 ms.*
-    - [ ] Mac
-    - [ ] PC
+    - [ ] Mac (code prêt, en attente de l'autorisation d'enregistrement d'écran)
+    - [ ] PC (quand un PC sera disponible)
 - [ ] **Dictée** : micro → PCM 16 kHz (AudioWorklet) → whisper-server, modèle large-v3-turbo q5_0.
   *Critère : 5 s de français en < 2 s (Mac) et < 5 s (PC), « border-radius », « padding », « header » corrects.*
     - [x] Mac, échantillon de 5,3 s : **1,1 s**, vocabulaire 3/3 (M1 Pro, 6 oct. 2026)
     - [ ] Mac, au micro
-    - [ ] PC
+    - [ ] Windows : indicatif via la CI (`bench` manuel), vrai PC plus tard
 - [ ] **Synchro** : Worker Cloudflare + Durable Object, PWA minimale, AES-GCM.
   *Critère : aller-retour chiffré desktop → iPad → desktop < 300 ms, en Wi-Fi et en 4G.*
+    - [x] En local (wrangler dev + navigateur) : **3 ms**, reconnexion après rechargement OK
+    - [ ] Relais déployé + iPad, Wi-Fi et 4G
+    - Simplification : le même Worker sert la PWA et le WebSocket (un seul déploiement au lieu de Worker + Pages).
 
 ## Lot 1 — Boucle de base au clavier + exports PDF et Markdown
 
