@@ -29,6 +29,7 @@ import { createCapture, type CapturedImage } from './capture.ts';
 import { createDictation } from './dictation.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
+import { createMcp, MCP_PORT } from './mcp.ts';
 import { createSessionStore } from './session-store.ts';
 import { createTablet } from './tablet.ts';
 import QRCode from 'qrcode';
@@ -87,6 +88,9 @@ const tablet = autotest && autotest !== 'tablet'
 const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
 const exportDir = () => (autotest ? join(app.getPath('userData'), 'exports') : settings.get().exportDir);
 const modelDir = join(app.getPath('userData'), 'models');
+// Serveur MCP pour Claude Code : son adresse, ou l'erreur affichée dans les réglages.
+const mcp = createMcp({ store, instructions: () => settings.get().instructions });
+let mcpStatus: SettingsState['mcp'] = {};
 const transcriber = createTranscriber({
   binDirs: app.isPackaged ? [join(process.resourcesPath, 'whisper')] : [join(repoRoot, 'vendor', 'whisper')],
   modelDirs: app.isPackaged ? [modelDir] : [modelDir, join(repoRoot, 'models')],
@@ -382,6 +386,7 @@ function settingsState(): SettingsState {
     modelPresent: transcriber.status().state !== 'missing' || settings.get().engine === 'api',
     whisper: transcriber.status(),
     tabletPaired: tablet?.isPaired() ?? false,
+    mcp: mcpStatus,
   };
 }
 
@@ -541,7 +546,16 @@ async function runEditorAutotest() {
     if (a?.transcription === 'done' || a?.transcription === 'error') dictated = `${a.transcription} : ${a.text}`;
   }
 
-  const results = { whisper: transcriber.status().state, dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx') };
+  // Claude Code par le serveur MCP : l'écran 1 doit arriver avec sa capture, ses zooms et le croquis.
+  const mcpUrl = await mcp.listen(0);
+  mcpStatus = { url: mcpUrl };
+  const call = { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'voir_ecran', arguments: { ecran: 1 } } };
+  const reply = (await (await fetch(mcpUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(call) })).json()) as {
+    result?: { content: { type: string }[] };
+  };
+  const mcpImages = reply.result?.content.filter((c) => c.type === 'image').length ?? 0;
+
+  const results = { whisper: transcriber.status().state, dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx'), mcpImages };
 
   showSettings();
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
@@ -590,6 +604,7 @@ app.on('will-quit', () => {
   globalShortcut.unregisterAll();
   tablet?.stop();
   transcriber.stop();
+  mcp.close();
 });
 
 void app.whenReady().then(async () => {
@@ -645,6 +660,15 @@ void app.whenReady().then(async () => {
     return;
   }
 
+  mcpStatus = await mcp.listen(MCP_PORT).then(
+    (url) => ({ url }),
+    (err: NodeJS.ErrnoException) => ({
+      error:
+        err.code === 'EADDRINUSE'
+          ? `Le port ${MCP_PORT} est déjà pris (une autre copie de Pastille ?) : Claude Code ne peut pas se connecter.`
+          : `Serveur pour Claude Code indisponible : ${err.message}`,
+    }),
+  );
   if (!registerShortcut(settings.get().shortcut)) {
     void dialog.showMessageBox({
       type: 'warning',

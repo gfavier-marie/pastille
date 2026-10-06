@@ -13,6 +13,24 @@ Revue d'interface par captures annotées, dictée et croquis, exportée pour l'I
 
 Pastille vit dans la barre de menus (Mac) ou la zone de notification (Windows). Son menu donne accès aux exports, aux sessions récentes, à l'appairage de la tablette et aux réglages.
 
+## Connecter Claude Code
+
+Pastille embarque un serveur MCP local : Claude Code lit directement les revues, sans passer par un export. À faire une fois (la commande est aussi dans les réglages, section « Claude Code ») :
+
+```bash
+claude mcp add --transport http --scope user pastille http://127.0.0.1:3917/mcp
+```
+
+Pastille doit être lancée. Il suffit ensuite de demander à Claude Code, dans le projet concerné, « applique la revue Pastille ». Trois outils, en lecture seule :
+
+| Outil | Rôle |
+| --- | --- |
+| `lister_sessions` | Les 20 sessions récentes, avec leur id ; la session ouverte est signalée |
+| `lire_revue` | Tous les retours d'une session en texte (la session ouverte par défaut) |
+| `voir_ecran` | Un écran : capture annotée, zoom autour de chaque point, croquis |
+
+Le serveur n'écoute que sur `127.0.0.1` et refuse les requêtes venant d'un navigateur. Port pris : les réglages le signalent ; `PASTILLE_MCP_PORT` en choisit un autre (à reporter dans la commande ci-dessus).
+
 ## Développer
 
 Prérequis : Node 22.18 ou plus récent, pnpm (`corepack enable`), git.
@@ -26,7 +44,7 @@ pnpm dev             # lance l'app (depuis ton propre Terminal sur Mac, pour l'a
 | Commande | Rôle |
 | --- | --- |
 | `pnpm test`, `pnpm typecheck` | Tests unitaires et vérification des types |
-| `pnpm e2e` | Session factice, dictée par un faux micro, photo de l'éditeur et des réglages, exports PDF, Markdown et PowerPoint (`e2e-output/`) |
+| `pnpm e2e` | Session factice, dictée par un faux micro, photo de l'éditeur et des réglages, exports PDF, Markdown et PowerPoint, lecture d'un écran par le serveur MCP (`e2e-output/`) |
 | `pnpm bench:dictee` | Temps de transcription de 5 s de français |
 | `pnpm relay` | Relais + PWA de la tablette en local (http://localhost:8787) |
 | `pnpm bench:synchro [url]` | QR d'appairage et aller-retour chiffré desktop ↔ tablette |

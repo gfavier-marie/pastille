@@ -79,3 +79,8 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
 
 *Critère : installation sur une machine vierge, Mac et PC, en < 5 min modèle compris.*
+
+## Hors lot — Serveur MCP pour Claude Code [C], demandé
+
+- [x] Serveur MCP local dans l'app (HTTP sur 127.0.0.1:3917, lecture seule) : `lister_sessions`, `lire_revue`, `voir_ecran` ; commande `claude mcp add` dans les réglages ; testé par `pnpm e2e`
+- [ ] Essai réel : une revue appliquée par Claude Code sur un projet

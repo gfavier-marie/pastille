@@ -19,6 +19,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm bench:dictee` : mesure de transcription sur `apps/desktop/fixtures/dictee-fr.wav`.
 - `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour). L'app desktop vise `PASTILLE_RELAY` (défaut `http://localhost:8787`).
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
+- Claude Code : `claude mcp add --transport http --scope user pastille http://127.0.0.1:3917/mcp` (serveur MCP de l'app, `src/main/mcp.ts`, Pastille lancée).
 - Mesure de capture sans interaction : `pnpm --filter @pastille/desktop build && PASTILLE_AUTOTEST=capture npx electron apps/desktop` (5 captures, clic simulé au centre).
 
 ## Conventions

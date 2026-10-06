@@ -51,6 +51,7 @@ export type SettingsState = SettingsView & {
   modelPresent: boolean;
   whisper: WhisperStatus;
   tabletPaired: boolean;
+  mcp: { url?: string; error?: string }; // serveur MCP pour Claude Code
 };
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 

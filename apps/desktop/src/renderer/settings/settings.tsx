@@ -221,6 +221,22 @@ function App() {
           </span>
         </div>
       </section>
+
+      <section>
+        <h2>Claude Code</h2>
+        {s.mcp.url ? (
+          <label>
+            À lancer une fois dans un terminal ; Claude Code lira ensuite tes revues tant que Pastille tourne
+            <input
+              readOnly
+              value={`claude mcp add --transport http --scope user pastille ${s.mcp.url}`}
+              onFocus={(e) => e.currentTarget.select()}
+            />
+          </label>
+        ) : (
+          <p className="error">{s.mcp.error ?? 'Serveur pour Claude Code non démarré.'}</p>
+        )}
+      </section>
     </main>
   );
 }
