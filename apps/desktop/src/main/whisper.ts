@@ -15,6 +15,16 @@ export const UI_PROMPT =
   "Retour d'interface : bouton, border-radius de 8 px, padding, margin, header, footer, " +
   'sidebar, navbar, modale, dropdown, hover, focus, flexbox, grid, z-index, opacité.';
 
+/**
+ * Contexte audio réduit pour les dictées courtes : l'encodeur traite sinon toujours 30 s,
+ * même pour 5 s de parole (≈ 2 à 3 fois plus rapide). Mesuré sur M1 Pro : seuls les
+ * multiples de 256 donnent un texte stable ; on garde une marge de 50 % et au moins 768.
+ */
+export function audioContextFor(durationMs: number): number {
+  const frames = (durationMs / 1000) * 50 * 1.5; // 50 trames par seconde
+  return Math.min(1500, Math.max(768, Math.ceil(frames / 256) * 256));
+}
+
 export type WhisperServer = {
   url: string;
   loadMs: number;
@@ -99,6 +109,7 @@ export async function startWhisperServer(opts: {
       form.append('file', new Blob([wav.slice()], { type: 'audio/wav' }), 'audio.wav');
       form.append('response_format', 'json');
       form.append('temperature', '0.0');
+      form.append('audio_ctx', String(audioContextFor(((wav.byteLength - 44) / 32000) * 1000)));
       const t = performance.now();
       const res = await fetch(url + '/inference', { method: 'POST', body: form });
       if (!res.ok) throw new Error(`whisper-server : HTTP ${res.status} ${await res.text()}`);
