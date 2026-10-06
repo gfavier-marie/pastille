@@ -58,6 +58,9 @@ export type SettingsState = SettingsView & {
   tabletConnected: boolean;
 };
 
+/** Fenêtre d'appairage : le code QR (image) et l'état de la tablette. */
+export type PairingState = { qr: string; connected: boolean };
+
 export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
@@ -113,6 +116,7 @@ export type PastilleApi = {
   askPermission(kind: 'screen' | 'microphone'): Promise<void>;
   revokeTablet(): Promise<void>;
   pairTablet(): void;
+  getPairing(): Promise<PairingState>;
   onSettingsChanged(cb: (s: SettingsState) => void): () => void;
   onSettingsTab(cb: (tab: SettingsTab) => void): () => void;
   openSettings(tab?: SettingsTab): void;

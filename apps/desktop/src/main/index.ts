@@ -21,7 +21,7 @@ import {
   systemPreferences,
 } from 'electron';
 import { allAnnotations, findAnnotation, type Annotation, type Geometry, type Session } from '@pastille/shared';
-import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, SettingsState, SettingsTab } from '../ipc.ts';
+import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab } from '../ipc.ts';
 import { createCapture, type CapturedImage } from './capture.ts';
 import { createDictation } from './dictation.ts';
 import { createMenubar } from './menubar.ts';
@@ -77,6 +77,8 @@ const tablet = autotest && autotest !== 'tablet'
       store,
       onStatus: (connected) => {
         editor?.webContents.send('tablet:status', connected);
+        pairingWindow?.webContents.send('tablet:status', connected);
+        pairingWindow?.setContentSize(720, pairingHeight(connected));
         broadcastSettings();
       },
     });
@@ -307,7 +309,7 @@ function onMenuAction(a: MenuAction) {
     case 'new-session':
       return void store.close();
     case 'pair':
-      return void showPairing();
+      return showPairing();
     case 'settings':
       return showSettings();
     case 'quit':
@@ -338,21 +340,37 @@ const updateTrayMenu = () => menubar.refresh();
 // ——— Appairage de la tablette (§5.1) ———
 
 let pairingWindow: BrowserWindow | null = null;
-async function showPairing() {
-  const url = await tablet!.pairUrl();
-  const qr = await QRCode.toDataURL(url, { width: 360, margin: 1 });
-  const html = `<!doctype html><meta charset="utf-8"><title>Appairer une tablette</title>
-<body style="font:14px -apple-system,'Segoe UI',sans-serif;text-align:center;padding:20px;margin:0">
-<h2 style="margin:0 0 12px">Appairer une tablette</h2>
-<img src="${qr}" width="300" height="300" alt="QR code d'appairage">
-<p>Scanne ce code avec l'appareil photo de la tablette.<br>La PWA s'ouvre déjà liée à cet ordinateur ;<br>ajoute-la à l'écran d'accueil.</p>
-<p style="color:#888;font-size:11px;word-break:break-all">${url.replace(/&k=.*/, '&k=…')}</p></body>`;
-  pairingWindow?.destroy();
-  pairingWindow = new BrowserWindow({ width: 420, height: 560, title: 'Appairer une tablette', resizable: false });
-  pairingWindow.setContentProtection(true);
-  pairingWindow.on('closed', () => (pairingWindow = null));
-  void pairingWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+// La fenêtre s'agrandit pour montrer la tablette connectée et le bouton « Révoquer ».
+const pairingHeight = (connected: boolean) => (connected ? 510 : 410);
+function showPairing() {
+  if (!pairingWindow) {
+    pairingWindow = new BrowserWindow({
+      width: 720,
+      height: pairingHeight(tablet?.isConnected() ?? false),
+      useContentSize: true,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      title: 'Appairer une tablette',
+      webPreferences: { preload },
+    });
+    pairingWindow.setContentProtection(true);
+    pairingWindow.on('closed', () => (pairingWindow = null));
+    loadPage(pairingWindow, 'pairing');
+  }
+  pairingWindow.show();
+  if (isMac) app.focus({ steal: true });
 }
+
+// Correction d'erreur maximale : le logo posé au centre du code ne gêne pas la lecture.
+ipcMain.handle('tablet:pairing', async (): Promise<PairingState> => {
+  const url = tablet ? await tablet.pairUrl() : `${RELAY_URL}/#r=autotest`; // pas de tablette dans les autotests
+  return {
+    qr: await QRCode.toDataURL(url, { width: 416, margin: 0, errorCorrectionLevel: 'H' }),
+    connected: tablet?.isConnected() ?? false,
+  };
+});
 
 // ——— Réglages et premier lancement (§4.8, §4.9) ———
 
@@ -476,7 +494,7 @@ ipcMain.handle('tablet:revoke', async () => {
   await tablet?.revoke();
   broadcastSettings();
 });
-ipcMain.on('tablet:pair', () => void showPairing());
+ipcMain.on('tablet:pair', () => showPairing());
 
 // ——— Fenêtre de mesures du lot 0 ———
 
@@ -606,6 +624,7 @@ async function photographScreens(out: string) {
   const move = (win: BrowserWindow, x: number, y: number) => win.webContents.sendInputEvent({ type: 'mouseMove', x, y });
 
   for (const step of [1, 2, 3]) await photo(`welcome-${step}`, 'welcome', 720, 520, undefined, String(step));
+  await photo('pairing', 'pairing', 720, pairingHeight(false));
   await photo('menu', 'menu', 330, 560);
   await photo('bar', 'bar', 640, 64);
   await photo('bar-open', 'bar', 640, 64, async (win) => {

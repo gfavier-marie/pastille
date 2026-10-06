@@ -25,6 +25,7 @@ export default defineConfig({
           menu: resolve(import.meta.dirname, 'src/renderer/menu.html'),
           bar: resolve(import.meta.dirname, 'src/renderer/bar.html'),
           welcome: resolve(import.meta.dirname, 'src/renderer/welcome.html'),
+          pairing: resolve(import.meta.dirname, 'src/renderer/pairing.html'),
         },
       },
     },

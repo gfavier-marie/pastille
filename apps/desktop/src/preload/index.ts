@@ -38,6 +38,7 @@ const api: PastilleApi = {
   askPermission: (kind) => ipcRenderer.invoke('settings:permission', kind),
   revokeTablet: () => ipcRenderer.invoke('tablet:revoke'),
   pairTablet: () => ipcRenderer.send('tablet:pair'),
+  getPairing: () => ipcRenderer.invoke('tablet:pairing'),
   onSettingsChanged: (cb) => on('settings:changed', cb),
   onSettingsTab: (cb) => on('settings:tab', cb),
   openSettings: (tab) => ipcRenderer.send('settings:open', tab),

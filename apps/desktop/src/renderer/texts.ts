@@ -182,6 +182,24 @@ export const T = {
     },
   },
 
+  pairing: {
+    title: 'Scannez ce code avec la tablette',
+    qr: "Code QR d'appairage",
+    waiting: 'En attente de la tablette…',
+    connected: 'Tablette connectée',
+    steps: [
+      "Ouvrez l'appareil photo de la tablette et visez le code.",
+      "Touchez le lien, puis Partager › Sur l'écran d'accueil pour l'installer.",
+      "C'est fait : la tablette se reconnectera seule à chaque ouverture.",
+    ],
+    secure: "Chiffré de bout en bout. La clé est dans le code et ne passe jamais par le serveur : ne le montrez qu'à votre tablette.",
+    devices: 'Appareils appairés',
+    tablet: 'Tablette',
+    online: 'Connectée',
+    revoke: 'Révoquer',
+    revokeHint: 'Un nouveau code est créé : la tablette devra le scanner à nouveau.',
+  },
+
   editor: {
     rename: 'Renommer la session',
     context: 'Contexte',
