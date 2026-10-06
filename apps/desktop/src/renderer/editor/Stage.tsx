@@ -143,7 +143,7 @@ export function Stage(props: {
 
   function hitTest(x: number, y: number): Annotation | undefined {
     return [...annotations].reverse().find((a) => {
-      const [px, py] = pinPosition(a.geometry, imageView);
+      const [px, py] = pinPosition(a.geometry, imageView, PIN_RADIUS);
       return Math.hypot(px - x, py - y) <= PIN_RADIUS + 3;
     });
   }
@@ -205,7 +205,7 @@ export function Stage(props: {
   }
 
   const selected = annotations.find((a) => a.id === props.selectedId);
-  const pin = selected && pinPosition(selected.geometry, imageView);
+  const pin = selected && pinPosition(selected.geometry, imageView, PIN_RADIUS);
 
   return (
     <div className="stage" ref={wrapRef}>

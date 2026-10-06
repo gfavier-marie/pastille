@@ -68,7 +68,7 @@ export async function createFakeSession(sessionsDir: string, pointsPerScreen = 4
   const sctx = sketch.getContext('2d');
   sctx.fillStyle = '#ffffff';
   sctx.fillRect(0, 0, 800, 600);
-  sctx.strokeStyle = '#e5484d';
+  sctx.strokeStyle = '#E5341F';
   sctx.lineWidth = 8;
   sctx.strokeRect(200, 200, 400, 160);
   await writeFile(join(dir, 'sketches/croquis-1.png'), await sketch.encode('png'));

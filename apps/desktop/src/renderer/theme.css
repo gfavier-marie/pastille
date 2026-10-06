@@ -1,0 +1,100 @@
+/* Thème commun des fenêtres de Pastille : couleurs, police système, contrôles de base.
+   L'éditeur redéfinit les couleurs pour son thème sombre. */
+
+:root {
+  color-scheme: light;
+  --accent: #d63a0c; /* pastilles, actions principales */
+  --accent-text: #b8300a; /* liens et texte accent sur fond clair (contraste AA) */
+  --accent-hover: #8f2507;
+  --text: #1d1d1f;
+  --text-2: #3a3a3c;
+  --muted: #6e6e73;
+  --faint: #8e8e93;
+  --bg: #ffffff;
+  --bg-soft: #f6f6f8;
+  --panel: #f5f5f7;
+  --fill: #f2f2f5;
+  --border: #e3e3e8;
+  --border-2: #d9d9de;
+  --divider: #eeeef1;
+  --success: #1f9d47;
+  --success-text: #1f7a3a;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  font: 13px/1.4 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; color: var(--text); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: default; }
+a { color: var(--accent-text); }
+a:hover { color: var(--accent-hover); }
+h1, h2, p { margin: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Boutons */
+.btn {
+  height: 28px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1px solid var(--border-2); border-radius: 7px; background: var(--bg); white-space: nowrap;
+}
+.btn:disabled { color: var(--faint); }
+.btn.primary { border: 0; background: var(--accent); color: #fff; font-weight: 600; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15); }
+.btn.primary:disabled, .btn.primary[aria-disabled='true'] { background: #f0f0f3; color: var(--faint); box-shadow: none; }
+.btn.tall { height: 32px; padding: 0 16px; border-radius: 8px; }
+.btn.danger { color: var(--accent-text); }
+.link { height: 32px; padding: 0; border: 0; background: transparent; color: var(--accent-text); font-weight: 500; }
+.link:hover { color: var(--accent-hover); }
+
+/* Interrupteur (role="switch") */
+.switch {
+  width: 38px; height: 22px; padding: 2px; flex: none; border: 0; border-radius: 999px;
+  background: #d1d1d6; display: flex; justify-content: flex-start; transition: background 0.15s;
+}
+.switch[aria-checked='true'] { background: var(--accent); justify-content: flex-end; }
+.switch::after { content: ''; width: 18px; height: 18px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
+
+/* Contrôle segmenté */
+.segmented { display: flex; padding: 2px; border-radius: 8px; background: #ebebef; }
+.segmented button { height: 26px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--text-2); }
+.segmented button[aria-pressed='true'] { background: #fff; color: var(--text); font-weight: 500; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+
+/* Puces d'état */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px;
+  background: #fff; border: 1px solid var(--border); font-size: 11.5px; color: var(--text-2); white-space: nowrap;
+}
+.dot { width: 7px; height: 7px; flex: none; border-radius: 999px; background: var(--success); }
+.dot.off { background: transparent; border: 1.5px solid var(--faint); }
+
+/* Touches */
+kbd { font: inherit; font-weight: 500; letter-spacing: 0.04em; }
+
+/* Étapes numérotées */
+.step-num {
+  width: 22px; height: 22px; flex: none; border-radius: 999px; background: var(--fill);
+  font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+
+/* Encadré d'information */
+.note {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px;
+  background: var(--bg-soft); font-size: 12.5px; line-height: 1.45; color: var(--text-2);
+}
+.note svg { flex: none; margin-top: 1px; }
+
+/* Barre de progression */
+.progress { height: 8px; border-radius: 999px; background: var(--divider); overflow: hidden; }
+.progress > i { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width 0.2s; }
+
+/* Animations */
+@keyframes pt-spin { to { transform: rotate(360deg); } }
+@keyframes pt-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes pt-wave { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+.spin { animation: pt-spin 1.1s linear infinite; }
+.blink { animation: pt-blink 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+/* Texte réservé aux lecteurs d'écran */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
