@@ -39,8 +39,9 @@ import { downloadFile, MODEL_FILE, MODEL_URL } from './whisper.ts';
 const isMac = process.platform === 'darwin';
 const repoRoot = join(app.getAppPath(), '..', '..');
 const preload = join(import.meta.dirname, '../preload/index.cjs');
-// Relais de la tablette : local en développement, l'URL du Worker déployé sinon (PASTILLE_RELAY).
-const RELAY_URL = process.env.PASTILLE_RELAY ?? 'http://localhost:8787';
+// Relais de la tablette : le relais partagé pour l'app installée, local en développement ;
+// PASTILLE_RELAY vise un autre relais (auto-hébergé).
+const RELAY_URL = process.env.PASTILLE_RELAY ?? (app.isPackaged ? 'https://pastille.vibescreener.workers.dev' : 'http://localhost:8787');
 // Tests sans interaction : « capture » (mesure de 5 captures), « editor » (session factice,
 // dictée, photo de l'éditeur, exports) ou « tablet » (attend un croquis sur le point #1).
 // Données dans un dossier temporaire.

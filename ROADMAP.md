@@ -78,6 +78,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
 - [ ] Installeur .exe : construit par la CI (option « Construire les installeurs »), à essayer sur un vrai PC
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
+- [x] Dépôt public : installation en une commande (`install.sh`, branche aussi Claude Code), installeur signé ad hoc, relais partagé visé par l'app installée, Release publiée par tag, licence MIT
 
 *Critère : installation sur une machine vierge, Mac et PC, en < 5 min modèle compris.*
 
