@@ -101,7 +101,14 @@ const settings = createSettings(app.getPath('userData'), app.getPath('documents'
 const exportDir = () => (autotest ? join(app.getPath('userData'), 'exports') : settings.get().exportDir);
 const modelDir = join(app.getPath('userData'), 'models');
 // Serveur MCP pour Claude Code : son adresse, ou l'erreur affichée dans les réglages.
-const mcp = createMcp({ store, instructions: () => settings.get().instructions });
+const mcp = createMcp({
+  store,
+  instructions: () => settings.get().instructions,
+  onClient: () => {
+    settings.update({ mcpSeenAt: new Date().toISOString() });
+    broadcastSettings();
+  },
+});
 let mcpStatus: SettingsState['mcp'] = {};
 const transcriber = createTranscriber({
   binDirs: app.isPackaged ? [join(process.resourcesPath, 'whisper')] : [join(repoRoot, 'vendor', 'whisper')],
@@ -358,6 +365,8 @@ function onMenuAction(a: MenuAction) {
       return void store.close();
     case 'pair':
       return showPairing();
+    case 'claude-code':
+      return showSettings('claude');
     case 'settings':
       return showSettings();
     case 'quit':
@@ -510,6 +519,7 @@ function broadcastSettings() {
 
 ipcMain.handle('settings:get', () => settingsState());
 ipcMain.on('settings:open', (_e, tab?: SettingsTab) => showSettings(tab));
+ipcMain.on('clipboard:write', (_e, text: string) => clipboard.writeText(text));
 ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
   const before = settings.get();
   if (patch.shortcut && patch.shortcut !== before.shortcut && !registerShortcut(patch.shortcut)) {
@@ -707,10 +717,12 @@ async function runEditorAutotest() {
   // Claude Code par le serveur MCP : l'écran 1 doit arriver avec sa capture, ses zooms et le croquis.
   const mcpUrl = await mcp.listen(0);
   mcpStatus = { url: mcpUrl };
-  const call = { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'voir_ecran', arguments: { ecran: 1 } } };
-  const reply = (await (await fetch(mcpUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(call) })).json()) as {
-    result?: { content: { type: string }[] };
-  };
+  const post = async (body: unknown) =>
+    (await (await fetch(mcpUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json()) as {
+      result?: { content: { type: string }[] };
+    };
+  await post({ jsonrpc: '2.0', id: 0, method: 'initialize', params: { protocolVersion: '2025-06-18', clientInfo: { name: 'autotest' } } });
+  const reply = await post({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'voir_ecran', arguments: { ecran: 1 } } });
   const mcpImages = reply.result?.content.filter((c) => c.type === 'image').length ?? 0;
 
   const results = { whisper: transcriber.status().state, dictated, pdf: await runExport('pdf'), markdown: await runExport('markdown'), pptx: await runExport('pptx'), mcpImages };
@@ -725,6 +737,9 @@ async function runEditorAutotest() {
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
   await wait(1000);
   await writeFile(join(out, 'settings.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
+  settingsWindow!.webContents.send('settings:tab', 'claude');
+  await wait(400);
+  await writeFile(join(out, 'settings-claude.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
   await photographScreens(out);
   console.log('AUTOTEST', JSON.stringify({ out, ...results }));
 }

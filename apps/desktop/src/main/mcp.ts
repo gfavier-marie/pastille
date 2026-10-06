@@ -66,7 +66,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
 const dateFr = (iso: string) => new Date(iso).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
 const comment = (t: string) => t.trim().replace(/\s*\n\s*/g, ' ') || '(sans commentaire)';
 
-export function createMcp(deps: { store: SessionStore; instructions?: () => string }) {
+export function createMcp(deps: { store: SessionStore; instructions?: () => string; onClient?: () => void }) {
   const { store } = deps;
   let server: Server | null = null;
   let hosts: string[] = [];
@@ -161,6 +161,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     const fail = (code: number, message: string) => ({ jsonrpc: '2.0', id: msg.id, error: { code, message } });
     switch (msg.method) {
       case 'initialize': {
+        deps.onClient?.(); // un client (Claude Code) vient de se brancher
         const asked = String(msg.params?.protocolVersion);
         return reply({
           protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],

@@ -68,7 +68,7 @@ export type SettingsState = SettingsView & {
 /** Fenêtre d'appairage : le code QR (image) et l'état de la tablette. */
 export type PairingState = { qr: string; connected: boolean };
 
-export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices';
+export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices' | 'claude';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
 /** Une session enregistrée, telle que listée (menu de l'icône, liste de toutes les sessions). */
@@ -87,7 +87,7 @@ export type MenuState = {
 };
 
 export type MenuAction =
-  | { type: 'capture' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' }
+  | { type: 'capture' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'claude-code' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' }
   | { type: 'open-recent' | 'export-recent'; id: string };
 
 /** Message de la barre flottante après un export. */
@@ -139,6 +139,7 @@ export type PastilleApi = {
   onSettingsChanged(cb: (s: SettingsState) => void): () => void;
   onSettingsTab(cb: (tab: SettingsTab) => void): () => void;
   openSettings(tab?: SettingsTab): void;
+  copyText(text: string): void;
   onShortcutPressed(cb: () => void): () => void; // assistant de premier lancement
   // Menu de l'icône et barre flottante
   getMenuState(): Promise<MenuState>;

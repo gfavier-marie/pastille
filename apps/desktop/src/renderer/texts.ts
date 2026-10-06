@@ -44,6 +44,7 @@ export const T = {
     allSessions: 'Toutes les sessions…',
     reexport: (name: string) => `Réexporter le PDF de ${name}`,
     pair: 'Appairer une tablette…',
+    claudeCode: 'Brancher Claude Code…',
     settings: 'Réglages…',
     quit: 'Quitter VibeScreener',
     update: (version: string) => `Mettre à jour (version ${version})`,
@@ -76,7 +77,7 @@ export const T = {
   },
 
   settings: {
-    tabs: { general: 'Général', transcription: 'Transcription', export: 'Export PDF', devices: 'Appareils' },
+    tabs: { general: 'Général', transcription: 'Transcription', export: 'Export PDF', devices: 'Appareils', claude: 'Claude Code' },
     capture: 'Capture',
     shortcut: 'Raccourci de capture',
     shortcutAria: (label: string) => `Modifier le raccourci, actuellement ${label}`,
@@ -128,9 +129,15 @@ export const T = {
     instructions: "Instructions à l'IA",
     instructionsHint: 'En tête du PDF, du Markdown et de la revue lue par Claude Code. {N} est remplacé par le nombre de retours.',
     claudeCode: 'Claude Code',
-    claudeCodeCommand: 'À lancer une fois dans un terminal :',
-    claudeCodeHint: 'Claude Code lit alors vos revues (sessions, retours, captures annotées) tant que VibeScreener est lancée.',
+    claudeCodeCommand: 'Pour le brancher, lancez une fois cette commande dans un terminal :',
+    claudeCodeHint:
+      'Claude Code lit alors vos revues (sessions, retours, captures annotées) tant que VibeScreener est lancée. Demandez-lui par exemple « applique la revue VibeScreener ».',
     claudeCodeOff: 'Serveur pour Claude Code non démarré.',
+    claudeCodeSeen: (iso: string) =>
+      `Connecté ${day(iso)} à ${new Intl.DateTimeFormat('fr', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso))}`,
+    claudeCodeNever: 'Pas encore connecté',
+    copy: 'Copier',
+    copied: 'Copié',
     tablet: 'Tablette',
     tabletPaired: 'Tablette appairée',
     tabletNone: 'Aucune tablette appairée',

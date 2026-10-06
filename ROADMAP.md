@@ -103,4 +103,5 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 ## Hors lot — Serveur MCP pour Claude Code [C], demandé
 
 - [x] Serveur MCP local dans l'app (HTTP sur 127.0.0.1:3917, lecture seule) : `lister_sessions`, `lire_revue`, `voir_ecran` ; commande `claude mcp add` dans les réglages ; testé par `pnpm e2e`
+- [x] Branchement facile à trouver : onglet « Claude Code » dans les réglages (commande à copier, dernière connexion), « Brancher Claude Code… » dans le menu de l'icône
 - [ ] Essai réel : une revue appliquée par Claude Code sur un projet

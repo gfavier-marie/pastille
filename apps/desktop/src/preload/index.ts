@@ -50,6 +50,7 @@ const api: PastilleApi = {
   onSettingsChanged: (cb) => on('settings:changed', cb),
   onSettingsTab: (cb) => on('settings:tab', cb),
   openSettings: (tab) => ipcRenderer.send('settings:open', tab),
+  copyText: (text) => ipcRenderer.send('clipboard:write', text),
   onShortcutPressed: (cb) => on('welcome:shortcut', cb),
 
   getMenuState: () => ipcRenderer.invoke('menu:state'),

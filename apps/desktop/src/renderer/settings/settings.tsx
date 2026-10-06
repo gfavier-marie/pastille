@@ -41,6 +41,7 @@ const TABS: { id: SettingsTab; icon: ReactNode }[] = [
   { id: 'transcription', icon: <I.Mic size={20} /> },
   { id: 'export', icon: <I.Doc size={20} /> },
   { id: 'devices', icon: <I.Tablet size={20} /> },
+  { id: 'claude', icon: <I.Terminal size={20} /> },
 ];
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
   const [download, setDownload] = useState<number | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [listening, setListening] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     void api.getSettings().then(setS);
@@ -273,18 +275,47 @@ function App() {
           <textarea id="instructions" rows={14} key={s.instructions} defaultValue={s.instructions} onBlur={(e) => void update({ instructions: e.target.value })} />
         </div>
       </Section>
-
-      <Section title={S.claudeCode} hint={s.mcp.url ? <p className="hint">{S.claudeCodeHint}</p> : <p className="error">{s.mcp.error ?? S.claudeCodeOff}</p>}>
-        {s.mcp.url && (
-          <div className="row stack">
-            <label className="hint" htmlFor="mcp" style={{ margin: 0 }}>
-              {S.claudeCodeCommand}
-            </label>
-            <input id="mcp" readOnly value={`claude mcp add --transport http --scope user vibescreener ${s.mcp.url}`} onFocus={(e) => e.currentTarget.select()} />
-          </div>
-        )}
-      </Section>
     </>
+  );
+
+  // Claude Code : la commande à copier, et la dernière connexion du serveur MCP.
+  const command = `claude mcp add --transport http --scope user vibescreener ${s.mcp.url}`;
+  const claude = (
+    <Section title={S.claudeCode} hint={s.mcp.url ? <p className="hint">{S.claudeCodeHint}</p> : <p className="error">{s.mcp.error ?? S.claudeCodeOff}</p>}>
+      <div className="row">
+        <span className="device-icon">
+          <I.Terminal size={20} />
+        </span>
+        <span className="label">
+          {S.claudeCode}
+          <small className="state">
+            <span className={`dot ${s.mcpSeenAt ? '' : 'off'}`} />
+            {s.mcpSeenAt ? S.claudeCodeSeen(s.mcpSeenAt) : S.claudeCodeNever}
+          </small>
+        </span>
+      </div>
+      {s.mcp.url && (
+        <div className="row stack">
+          <label className="hint" htmlFor="mcp" style={{ margin: 0 }}>
+            {S.claudeCodeCommand}
+          </label>
+          <span className="field">
+            <input id="mcp" readOnly value={command} onFocus={(e) => e.currentTarget.select()} />
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                api.copyText(command);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+            >
+              {copied ? S.copied : S.copy}
+            </button>
+          </span>
+        </div>
+      )}
+    </Section>
   );
 
   const devices = (
@@ -328,7 +359,7 @@ function App() {
         </div>
       </div>
       <div className="content" role="tabpanel">
-        {tab === 'general' ? general : tab === 'transcription' ? transcription : tab === 'export' ? exportPdf : devices}
+        {tab === 'general' ? general : tab === 'transcription' ? transcription : tab === 'export' ? exportPdf : tab === 'devices' ? devices : claude}
       </div>
     </div>
   );

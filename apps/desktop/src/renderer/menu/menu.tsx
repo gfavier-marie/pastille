@@ -135,6 +135,10 @@ function App() {
         <I.Qr />
         <span>{T.menu.pair}</span>
       </button>
+      <button type="button" className="item" onClick={() => act({ type: 'claude-code' })}>
+        <I.Terminal />
+        <span>{T.menu.claudeCode}</span>
+      </button>
       <button type="button" className="item" onClick={() => act({ type: 'settings' })}>
         <I.Sliders />
         <span>{T.menu.settings}</span>

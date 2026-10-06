@@ -21,6 +21,7 @@ export type Settings = {
   copyPdf: boolean; // PDF mis dans le presse-papiers après l'export
   openAtLogin: boolean;
   floatingBar: boolean; // barre flottante pendant une session
+  mcpSeenAt: string; // dernière connexion de Claude Code au serveur MCP (ISO), vide si jamais
 };
 
 /** Ce que voit la fenêtre de réglages : jamais la clé elle-même. */
@@ -43,6 +44,7 @@ export function createSettings(dataDir: string, documentsDir: string) {
     copyPdf: true,
     openAtLogin: false,
     floatingBar: false,
+    mcpSeenAt: '',
   };
   const stored = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
   if (stored.exportDir === join(documentsDir, 'Pastille')) delete stored.exportDir; // ancien nom de l'app
