@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VibeScreener : montrez à votre IA ce qu'il faut changer</title>
-<meta name="description" content="Cliquez sur ce qui cloche dans votre app et dites ce que vous voulez : la capture, l'endroit exact et votre phrase partent ensemble à votre IA. Quelques secondes par retour au lieu d'une demi-minute. Mac Apple Silicon, 14 jours d'essai gratuit, sans carte bancaire.">
+<meta name="description" content="Cliquez sur n'importe quel élément de votre app et dites ce que vous voulez : la capture, l'endroit exact et votre phrase partent ensemble à votre IA. Quelques secondes par retour au lieu d'une demi-minute. Mac Apple Silicon, 14 jours d'essai gratuit, sans carte bancaire.">
 <link rel="canonical" href="https://vibescreener.dev/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://vibescreener.dev/">
 <meta property="og:site_name" content="VibeScreener">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="VibeScreener : montrez à votre IA ce qu'il faut changer">
-<meta property="og:description" content="Pointez, dites-le : chaque demande part avec sa capture vers Claude Code, Cursor, ChatGPT ou Claude. Dictée sur le Mac, croquis à l'iPad.">
+<meta property="og:description" content="Pointez, dites-le : chaque demande part avec sa capture vers Claude Code, Cursor, ChatGPT, Gemini ou toute autre IA. Dictée sur le Mac, croquis à l'iPad.">
 <meta property="og:image" content="https://vibescreener.dev/editeur.png">
 <meta property="og:image:width" content="1600">
 <meta property="og:image:height" content="1025">
 <meta property="og:image:alt" content="L'éditeur de VibeScreener : capture annotée de points numérotés, commentaires dictés et croquis">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#0a0a0b">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link rel="preload" href="/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
@@ -73,15 +73,57 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-done{0%,88.66%{opacity:0;transform:translate(-50%,2cqw)}90%,97.33%{opacity:1;transform:translate(-50%,0)}99%,100%{opacity:0;transform:translate(-50%,0)}}
 @keyframes vs-frame{0%,10%{opacity:0}11%,15.83%{opacity:1}16.67%,100%{opacity:0}}
 @keyframes vs-rc{0%,15.33%{transform:scale(0);opacity:0}15.58%{transform:scale(.2);opacity:.7}17.33%,100%{transform:scale(1);opacity:0}}
-/* Bandeau des 4 étapes, surligné en synchro : capture 0-5 s, commentaires 5-18,4 s, Claude Code 18,4-25,4 s, résultat 25,4-29,7 s. */
-@keyframes vs-s1{0%,16.67%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}17.67%,99%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}100%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}}
-@keyframes vs-s2{0%,16.67%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}17.67%,61.33%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}62.33%,100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
-@keyframes vs-s3{0%,61.33%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}62.33%,84.67%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}85.67%,100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
-@keyframes vs-s4{0%,84.67%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}85.67%,99%{background-color:#FBEBE5;color:#B8300A;box-shadow:inset 0 0 0 1.5px #D63A0C}100%{background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent}}
-.vs-bandeau{margin:16px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.vs-bandeau li{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background-color:#F5F5F7;color:#5E5E66;box-shadow:inset 0 0 0 1.5px transparent;font-size:14px;font-weight:600;line-height:1.25}
-.vs-bandeau span{flex:none;width:22px;height:22px;box-sizing:border-box;border:1.5px solid currentColor;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px}
-@media (max-width:600px){.vs-bandeau{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Frise sous la démo du hero, en synchro : capture 0-5 s, commentaires 5-18,4 s, l'IA lit la revue 18,4-25,4 s, résultat 25,4-30 s. */
+@keyframes vs-s1{0%{transform:scaleX(0)}16.67%,99%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes vs-s2{0%,16.67%{transform:scaleX(0)}61.33%,99%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes vs-s3{0%,61.33%{transform:scaleX(0)}84.67%,99%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes vs-s4{0%,84.67%{transform:scaleX(0)}99%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes vs-n1{0%,16.27%{color:#FFFFFF}17.07%,99.6%{color:#8A8A93}100%{color:#FFFFFF}}
+@keyframes vs-n2{0%,16.27%{color:#8A8A93}17.07%,60.93%{color:#FFFFFF}61.73%,100%{color:#8A8A93}}
+@keyframes vs-n3{0%,60.93%{color:#8A8A93}61.73%,84.27%{color:#FFFFFF}85.07%,100%{color:#8A8A93}}
+@keyframes vs-n4{0%,84.27%{color:#8A8A93}85.07%,99.6%{color:#FFFFFF}100%{color:#8A8A93}}
+.vs-prog{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.vs-trk{display:block;height:3px;border-radius:999px;background:#2A2A2F;overflow:hidden}
+.vs-fill{display:block;height:100%;background:#FF6A3D;transform-origin:0 50%;transform:scaleX(0)}
+.vs-lab{display:flex;align-items:baseline;gap:8px;margin-top:12px;font-size:14px;font-weight:600;line-height:1.3;color:#8A8A93}
+.vs-lab b{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:12px}
+@media (max-width:640px){.vs-prog{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@keyframes vs-zoom{from{transform:scale(.86);opacity:.5}to{transform:none;opacity:1}}
+@supports (animation-timeline: view()){.vs-zoom{animation:vs-zoom linear both;animation-timeline:view();animation-range:entry 0% cover 40%}}
+/* Intro plein écran : le viseur se referme (0,25 s), l'éclair, le titre sort du flou, le point #1 se pose (2,95 s),
+   sa demande s'écrit, puis elle est appliquée (4,35 s) : la ligne passe en orange et le point en coche verte. */
+@keyframes vs-i-vf{0%{opacity:0;transform:scale(1.16)}35%{opacity:1;transform:scale(1)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.97)}}
+@keyframes vs-i-flash{0%{opacity:0}12%{opacity:.85}100%{opacity:0}}
+@keyframes vs-i-rise{from{opacity:0;transform:translateY(56px) scale(1.04);filter:blur(16px)}to{opacity:1;transform:none;filter:none}}
+@keyframes vs-i-orange{from{color:#FFFFFF}to{color:#FF6A3D}}
+@keyframes vs-i-pop{0%{transform:scale(0)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes vs-i-ping{0%{opacity:0;transform:scale(.4)}2%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(2.4)}}
+@keyframes vs-i-bulle{0%{opacity:0;transform:translateY(10px)}14%{opacity:1;transform:none}86%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-6px)}}
+@keyframes vs-i-type{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes vs-i-green{from{background-color:#D63A0C}to{background-color:#1F9D55}}
+@keyframes vs-i-out{from{opacity:1}to{opacity:0}}
+@keyframes vs-i-in{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@keyframes vs-i-fade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes vs-i-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.vs-nav{color:#C7C7CC;text-decoration:none}.vs-nav:hover{color:#FFFFFF}
+.vs-i-head{animation:vs-i-fade .8s .2s ease both}
+.vs-i-vf{opacity:0;animation:vs-i-vf 1.5s .25s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-flash{opacity:0;animation:vs-i-flash .55s 1.15s ease-out both}
+.vs-i-l1{animation:vs-i-rise 1.1s 1.4s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-l2{animation:vs-i-rise 1.1s 1.7s cubic-bezier(.2,.7,.2,1) both,vs-i-orange .7s 4.35s ease both}
+.vs-i-ping{position:absolute;left:100%;top:.24em;width:.48em;height:.48em;margin:-.24em 0 0 -.24em;box-sizing:border-box;border-radius:999px;border:4px solid #FF6A3D;opacity:0;animation:vs-i-ping 1.2s 2.95s ease-out both}
+.vs-i-pin{position:absolute;left:100%;top:-1em;width:2.33em;height:2.33em;box-sizing:border-box;border:max(2px,.16em) solid #FFFFFF;border-radius:1.17em 1.17em 1.17em .33em;background:#1F9D55;box-shadow:0 10px 24px rgba(0,0,0,.45);transform-origin:0 100%;font-family:'Instrument Sans',sans-serif;font-size:.194em;font-weight:700;letter-spacing:0;color:#FFFFFF;animation:vs-i-pop .45s 2.95s cubic-bezier(.2,.7,.2,1) both,vs-i-green .5s 4.35s ease both}
+.vs-i-num,.vs-i-ok{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.vs-i-num{opacity:0;animation:vs-i-out .25s 4.3s ease both}
+.vs-i-ok{animation:vs-i-in .35s 4.45s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-ok svg{width:1.08em;height:1.08em}
+.vs-i-bulle{position:absolute;right:-40px;top:calc(100% + 6px);width:360px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:18px;background:#1E1E22;border:1px solid #2E2E33;box-shadow:0 24px 48px rgba(0,0,0,.5);font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:500;letter-spacing:0;line-height:1.35;color:#F2F2F3;text-align:left;opacity:0;animation:vs-i-bulle 1.5s 3.05s ease both}
+.vs-i-type{display:inline-block;white-space:nowrap;animation:vs-i-type .95s 3.3s steps(24,end) both}
+.vs-i-sub{animation:vs-i-fade .8s 4.7s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-cta{animation:vs-i-fade .8s 4.85s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-cue{animation:vs-i-fade .8s 5.3s ease both}
+.vs-i-bob{animation:vs-i-bob 1.6s 6s ease-in-out infinite}
+@media (max-width:640px){.vs-i-bulle{right:-8px;width:260px;font-size:15px}}
 @keyframes vs-draw{0%{stroke-dashoffset:1;opacity:1}40%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw2{0%,30%{stroke-dashoffset:1;opacity:1}58%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw3{0%,52%{stroke-dashoffset:1;opacity:1}72%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
@@ -105,13 +147,16 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @media (max-width:560px){.vs-etapes{grid-template-columns:minmax(0,1fr)}}
 .vs-round{transition:transform .2s ease, background .2s ease}
 .vs-round:hover{transform:scale(1.08)}
-/* Démo « À vous d'essayer » : étapes capture → revue → claude → fait (data-etape de l'écran). */
-.vs-parcours{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:14px;font-weight:600}
-.vs-parcours li{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;background:#1E1E21;color:#8E8E96}
-.vs-parcours li>span{width:22px;height:22px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#2E2E33;color:#C7C7CC;font-size:12px}
-.vs-parcours li.vs-passee>span{background:#1F9D55;color:#FFFFFF}
-.vs-parcours li[aria-current="step"]{background:#3A1C12;color:#FFFFFF}
-.vs-parcours li[aria-current="step"]>span{background:#D63A0C;color:#FFFFFF}
+/* Démo « À vous d'essayer » : étapes capture → revue → claude → fait (data-etape de l'écran), en frise. */
+.vs-dp{list-style:none;margin:0;padding:0;width:100%;max-width:760px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.vs-dp-trk{display:block;height:3px;border-radius:999px;background:#2E2E33;overflow:hidden}
+.vs-dp-fill{display:block;width:0;height:100%;background:#FF6A3D;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.vs-dp-lab{display:flex;align-items:baseline;gap:8px;margin-top:10px;font-size:14px;font-weight:600;color:#8A8A93}
+.vs-dp-lab b{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:12px}
+.vs-dp li.vs-passee .vs-dp-lab{color:#C7C7CC}
+.vs-dp li[aria-current="step"] .vs-dp-lab{color:#FFFFFF}
+.vs-dp li.vs-passee .vs-dp-fill,.vs-dp li[aria-current="step"] .vs-dp-fill{width:100%}
+@media (max-width:640px){.vs-dp{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .vs-ecran{--barre:max(4.4cqw, 28px)}
 .vs-bureau,.vs-editeur{transition:opacity .4s ease .15s}
 .vs-ecran[data-etape="capture"] .vs-editeur,.vs-ecran:not([data-etape="capture"]) .vs-bureau{opacity:0;visibility:hidden;transition:none}
@@ -129,19 +174,14 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-coche{border-radius:999px;background:#1F9D55;transform-origin:50% 50%}
 .vs-coche svg{width:55%;height:55%}
 .vs-repere{--r:max(3cqw, 14px);position:absolute;width:var(--r);height:var(--r);margin:calc(var(--r) / -2) 0 0 calc(var(--r) / -2);box-sizing:border-box;border-radius:999px;border:max(.35cqw, 2px) solid #D63A0C;pointer-events:none;animation:vs-ping 1.6s ease-out infinite}
-.vs-bulle{position:absolute;margin:0;width:min(400px, 94cqw);box-sizing:border-box;padding:10px 12px;border-radius:14px;background:#232327;color:#F2F2F3;box-shadow:0 12px 32px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.35;animation:vs-fadein .25s ease-out both}
-.vs-bulle input{width:100%;box-sizing:border-box;height:38px;padding:0 10px;border:2px solid #D63A0C;border-radius:9px;background:#1A1A1D;color:#F2F2F3;font:inherit;font-size:16px;outline:none}
-.vs-bulle input::placeholder{color:#8E8E96;opacity:1}
-.vs-bulle small{font-size:12px;color:#A1A1A8}
+.vs-bulle{position:absolute;margin:0;width:min(400px, 94cqw);box-sizing:border-box;padding:10px 12px;border-radius:14px;background:#232327;color:#F2F2F3;box-shadow:0 12px 32px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.35;pointer-events:none;animation:vs-fadein .25s ease-out both}
+.vs-champ{display:block;padding:8px 10px;border:2px solid #D63A0C;border-radius:9px;background:#1A1A1D;font-size:15px;overflow-wrap:anywhere}
+.vs-caret{display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-.2em;background:#FF8A66;animation:vs-caret 1s steps(1) infinite}
+@keyframes vs-caret{0%,49%{opacity:1}50%,100%{opacity:0}}
 .vs-tete{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
-.vs-rec{flex:none;width:8px;height:8px;border-radius:999px;background:#5E5E66}
+.vs-rec{flex:none;width:9px;height:9px;border-radius:999px;background:#FF453A;animation:vs-pulse 1.2s ease-in-out infinite}
 .vs-onde{flex:1;height:16px;display:flex;align-items:center;gap:3px}
-.vs-onde span{width:3px;border-radius:2px;background:#4A4A50;transform:scaleY(.35)}
-.vs-micro{flex:none;width:32px;height:32px;border:0;border-radius:999px;background:#2E2E33;color:#F2F2F3;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.vs-micro:hover{background:#3A3A40}
-.vs-bulle.ecoute .vs-rec{background:#FF453A;animation:vs-pulse 1.2s ease-in-out infinite}
-.vs-bulle.ecoute .vs-onde span{background:#F2F2F3;animation:vs-wave .9s ease-in-out infinite}
-.vs-bulle.ecoute .vs-micro{background:#FF453A}
+.vs-onde span{width:3px;height:100%;border-radius:2px;background:#F2F2F3;animation:vs-wave .9s ease-in-out infinite}
 @keyframes vs-ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}
 @keyframes vs-pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
 @keyframes vs-fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -152,47 +192,60 @@ details[open] .vs-plus{transform:rotate(45deg)}
 <body>
 <div style="font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #17171A; background: #FFFFFF; font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden">
 
-  <header style="border-bottom: 1px solid #ECECEF; background: #FFFFFF">
-    <div style="max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px">
-      <a href="#haut" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #17171A">
-        <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#D63A0C"></path><circle cx="14" cy="14" r="4.2" fill="#FFFFFF"></circle></svg>
+  <section id="haut" style="position: relative; min-height: 100svh; display: flex; flex-direction: column; background: #0A0A0B; color: #FFFFFF; overflow: hidden">
+    <header class="vs-i-head" style="position: relative; z-index: 3; width: 100%; max-width: 1240px; box-sizing: border-box; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px">
+      <a href="#haut" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF">
+        <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#D63A0C"></path><circle cx="14" cy="14" r="4.2" fill="#0A0A0B"></circle></svg>
         <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em">VibeScreener</span>
       </a>
       <nav aria-label="Sections" style="flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 15px">
-        <a href="#comment" style="color: #3A3A40; text-decoration: none">Comment ça marche</a>
-        <a href="#fonctions" style="color: #3A3A40; text-decoration: none">Fonctionnalités</a>
-        <a href="#tarifs" style="color: #3A3A40; text-decoration: none">Tarifs</a>
-        <a href="#faq" style="color: #3A3A40; text-decoration: none">FAQ</a>
+        <a href="#comment" class="vs-nav">Comment ça marche</a>
+        <a href="#fonctions" class="vs-nav">Fonctionnalités</a>
+        <a href="#tarifs" class="vs-nav">Tarifs</a>
+        <a href="#faq" class="vs-nav">FAQ</a>
       </nav>
       <a href="#installer" class="vs-btn" style="height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 10px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px">Essai gratuit</a>
+    </header>
+
+    <!-- Arrivée : le viseur de capture se referme, l'éclair, le titre sort du flou, un point #1 se pose et sa demande s'écrit, puis elle est appliquée. -->
+    <div aria-hidden="true" class="vs-i-vf" style="position: absolute; left: 6%; right: 6%; top: 92px; bottom: 76px; pointer-events: none">
+      <span style="position: absolute; width: 64px; height: 64px; border-color: #FFFFFF; border-style: solid; border-width: 0; left: 0; top: 0; border-left-width: 3px; border-top-width: 3px; border-radius: 10px 0 0 0"></span>
+      <span style="position: absolute; width: 64px; height: 64px; border-color: #FFFFFF; border-style: solid; border-width: 0; right: 0; top: 0; border-right-width: 3px; border-top-width: 3px; border-radius: 0 10px 0 0"></span>
+      <span style="position: absolute; width: 64px; height: 64px; border-color: #FFFFFF; border-style: solid; border-width: 0; left: 0; bottom: 0; border-left-width: 3px; border-bottom-width: 3px; border-radius: 0 0 0 10px"></span>
+      <span style="position: absolute; width: 64px; height: 64px; border-color: #FFFFFF; border-style: solid; border-width: 0; right: 0; bottom: 0; border-right-width: 3px; border-bottom-width: 3px; border-radius: 0 0 10px 0"></span>
+      <span style="position: absolute; left: 50%; top: 50%; width: 28px; height: 2px; margin: -1px 0 0 -14px; background: #FFFFFF"></span>
+      <span style="position: absolute; left: 50%; top: 50%; width: 2px; height: 28px; margin: -14px 0 0 -1px; background: #FFFFFF"></span>
     </div>
-  </header>
+    <div aria-hidden="true" class="vs-i-flash" style="position: absolute; inset: 0; z-index: 5; background: #FFFFFF; pointer-events: none"></div>
 
-  <section id="haut" style="padding: 80px 0 80px">
-    <div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 56px 56px">
-
-      <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
-        <div style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px; border-radius: 999px; background: #FBEBE5; color: #B8300A; font-size: 14px; font-weight: 600; animation: vs-rise .7s .05s cubic-bezier(.2,.7,.2,1) both">
-          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a7 7 0 1 1 0 14H1V8a7 7 0 0 1 7-7z" fill="#D63A0C"></path></svg>
-          Pour celles et ceux qui codent avec l'IA
+    <div style="position: relative; z-index: 2; flex: 1; width: 100%; max-width: 1320px; box-sizing: border-box; margin: 0 auto; padding: clamp(48px, 10vh, 104px) 24px 128px; display: flex; flex-direction: column; align-items: center; gap: 36px; text-align: center">
+      <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(48px, 7.6vw, 124px); line-height: 0.96; letter-spacing: -0.05em">
+        <span class="vs-i-l1" style="display: block">Montrez à votre IA</span>
+        <span class="vs-i-l2" style="display: block; color: #FF6A3D">ce qu'il faut <span style="position: relative; display: inline-block">changer.<span aria-hidden="true" class="vs-i-ping"></span><span aria-hidden="true" class="vs-i-pin"><span class="vs-i-num">1</span><span class="vs-i-ok"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></span><span aria-hidden="true" class="vs-i-bulle"><span style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600"><span class="vs-rec"></span>#1<span class="vs-onde"><span style="animation-delay: -0.1s"></span><span style="animation-delay: -0.3s"></span><span style="animation-delay: -0.5s"></span><span style="animation-delay: -0.2s"></span><span style="animation-delay: -0.7s"></span><span style="animation-delay: -0.4s"></span><span style="animation-delay: -0.6s"></span><span style="animation-delay: -0.15s"></span><span style="animation-delay: -0.45s"></span><span style="animation-delay: -0.25s"></span></span><span style="color: #A1A1A8; font-variant-numeric: tabular-nums">0:02</span></span><span style="display: block; padding: 10px 12px; border: 2px solid #D63A0C; border-radius: 10px; background: #141416"><span class="vs-i-type">Cette phrase, en orange.</span></span></span></span></span>
+      </h1>
+      <p class="vs-i-sub" style="margin: 0; max-width: 640px; font-size: 20px; line-height: 1.45; color: #C7C7CC">Cliquez sur n'importe quel élément de votre app et dites ce que vous voulez. La capture, l'endroit exact et votre phrase partent ensemble à votre IA&nbsp;: plus rien à recadrer, coller ni rédiger.</p>
+      <div id="installer" class="vs-i-cta" style="width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+        <div style="width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 18px; border-radius: 14px; background: #1C1C1F; border: 1px solid #2E2E33; text-align: left">
+          <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
+          <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="Copier la commande d'installation" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 10px; background: #D63A0C; color: #FFFFFF; font-weight: 600; font-size: 14px; cursor: pointer">Copier</button>
         </div>
-        <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(44px, 5.4vw, 76px); line-height: 0.98; letter-spacing: -0.045em; animation: vs-rise .7s .12s cubic-bezier(.2,.7,.2,1) both">Montrez à votre IA <span style="color: #D63A0C">ce qu'il faut changer.</span></h1>
-        <p style="margin: 0; max-width: 500px; font-size: 20px; line-height: 1.45; color: #3A3A40; animation: vs-rise .7s .2s cubic-bezier(.2,.7,.2,1) both">Cliquez sur ce qui cloche dans votre app et dites ce que vous voulez. La capture, l'endroit exact et votre phrase partent ensemble à votre IA&nbsp;: plus rien à recadrer, coller ni rédiger.</p>
-        <div id="installer" style="display: flex; flex-direction: column; gap: 12px; animation: vs-rise .7s .28s cubic-bezier(.2,.7,.2,1) both">
-          <div style="display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 16px; border-radius: 12px; background: #17171A; max-width: 520px">
-            <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
-            <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="Copier la commande d'installation" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 9px; background: #D63A0C; color: #FFFFFF; font-weight: 600; font-size: 14px; cursor: pointer">Copier</button>
-          </div>
-          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 14px; color: #5E5E66">
-            <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1F7A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>14 jours gratuits, sans carte</span>
-            <span>Mac Apple Silicon</span>
-            <a href="https://dl.vibescreener.dev/VibeScreener-arm64.dmg" style="font-weight: 600">ou le .dmg</a>
-          </div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 18px; font-size: 14px; color: #A1A1A8">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>14 jours gratuits, sans carte</span>
+          <span>Mac Apple Silicon</span>
         </div>
       </div>
+    </div>
 
-      <div style="flex: 1.35 1 560px; min-width: 0; animation: vs-rise .9s .3s cubic-bezier(.2,.7,.2,1) both">
-        <div role="img" aria-label="Démonstration en quatre étapes sur une app de ventes. Un : le raccourci Contrôle Option Commande P (⌃⌥⌘P) fige l'écran, un clic sur la fenêtre la capture. Deux : trois clics posent trois points, chacun avec une demande dictée (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail). Trois : Claude Code lit la revue par le serveur MCP de VibeScreener. Quatre : les trois demandes sont appliquées dans l'app." style="position: relative; container-type: inline-size; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px rgba(23,23,26,0.08), 0 40px 80px -28px rgba(23,23,26,0.45)">
+    <div class="vs-i-cue" style="position: absolute; left: 0; right: 0; bottom: 30px; z-index: 2; display: flex; justify-content: center; pointer-events: none">
+      <a href="#demo" style="display: inline-flex; flex-direction: column; align-items: center; gap: 6px; color: #A1A1A8; text-decoration: none; font-size: 13px; font-weight: 600; pointer-events: auto">Voir la démo<svg class="vs-i-bob" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"></path></svg></a>
+    </div>
+    <button type="button" data-rejouer class="vs-i-cue vs-round" aria-label="Rejouer l'animation d'arrivée" style="position: absolute; right: 24px; bottom: 26px; z-index: 3; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #2E2E33; border-radius: 999px; background: #1C1C1F; color: #E5E5EA; cursor: pointer"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"></path><path d="M2.5 2.5v3h3"></path></svg></button>
+  </section>
+
+  <section id="demo" aria-label="Démonstration" style="padding: 16px 24px 128px; background: #0A0A0B">
+    <div style="max-width: 1120px; margin: 0 auto">
+      <div class="vs-zoom">
+        <div role="img" aria-label="Démonstration en quatre étapes sur une app de ventes. Un : le raccourci Contrôle Option Commande P (⌃⌥⌘P) capture l'écran. Deux : trois clics posent trois points directement sur la capture, chacun avec sa demande dictée (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail). Trois : Claude Code lit la revue par le serveur MCP de VibeScreener. Quatre : les trois demandes sont appliquées dans l'app." style="position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 60px 120px -40px rgba(0,0,0,0.9)">
           <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
   <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
 
@@ -308,7 +361,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(23,23,26,0.12); opacity: 0; animation: vs-frame 30s ease-out infinite"><span style="position: absolute; inset: 0.8cqw; border: 0.5cqw solid #D63A0C; border-radius: 1.2cqw; background: rgba(214,58,12,0.06)"></span></span>
           <span aria-hidden="true" style="position: absolute; left: 67cqw; top: 44cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-rc 30s ease-out infinite"></span>
           <span aria-hidden="true" style="position: absolute; inset: 0; background: #FFFFFF; pointer-events: none; opacity: 0; animation: vs-flash 30s linear infinite"></span>
-          <span aria-hidden="true" style="position: absolute; left: 50%; top: 8cqw; display: flex; align-items: center; gap: 1cqw; padding: 1cqw 1.8cqw; border-radius: 999px; background: rgba(23,23,26,0.88); color: #FFFFFF; font-size: 1.7cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 1cqw 3cqw rgba(0,0,0,0.25); opacity: 0; animation: vs-chip 30s ease-out infinite"><span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #D63A0C"></span>Écran capturé · cliquez sur ce qui cloche</span>
+          <span aria-hidden="true" style="position: absolute; left: 50%; top: 8cqw; display: flex; align-items: center; gap: 1cqw; padding: 1cqw 1.8cqw; border-radius: 999px; background: rgba(23,23,26,0.88); color: #FFFFFF; font-size: 1.7cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 1cqw 3cqw rgba(0,0,0,0.25); opacity: 0; animation: vs-chip 30s ease-out infinite"><span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #D63A0C"></span>Écran capturé · cliquez où vous voulez</span>
 
           <span aria-hidden="true" style="position: absolute; left: 34cqw; top: 29.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r1 30s ease-out infinite"></span>
           <span aria-hidden="true" style="position: absolute; left: 88.5cqw; top: 52.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r2 30s ease-out infinite"></span>
@@ -459,27 +512,30 @@ details[open] .vs-plus{transform:rotate(45deg)}
 
           <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 30s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
         </div>
-        <ol class="vs-bandeau" aria-label="Les quatre étapes de la démonstration">
-          <li style="animation: vs-s1 30s linear infinite"><span>1</span>Capture d'écran</li>
-          <li style="animation: vs-s2 30s linear infinite"><span>2</span>Commentez</li>
-          <li style="animation: vs-s3 30s linear infinite"><span>3</span>Claude Code lit la revue (MCP)</li>
-          <li style="animation: vs-s4 30s linear infinite"><span>4</span>Résultat</li>
-        </ol>
       </div>
+      <ol class="vs-prog" aria-label="Les quatre étapes de la démonstration">
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s1 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n1 30s linear infinite"><b>01</b>Capture d'écran</span></li>
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s2 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n2 30s linear infinite"><b>02</b>Commentaires sur la capture</span></li>
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s3 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n3 30s linear infinite"><b>03</b>L'IA lit la revue</span></li>
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s4 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n4 30s linear infinite"><b>04</b>Résultat</span></li>
+      </ol>
     </div>
   </section>
 
-  <div style="border-top: 1px solid #ECECEF; border-bottom: 1px solid #ECECEF">
+  <div style="border-bottom: 1px solid #ECECEF">
     <div style="max-width: 1200px; margin: 0 auto; padding: 22px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 28px; font-size: 15px; color: #5E5E66">
       <!-- Logos : Simple Icons (CC0), copiés ici pour n'appeler aucun tiers. -->
       <svg width="0" height="0" style="position: absolute" aria-hidden="true">
         <symbol id="logo-claude" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"></path></symbol>
       </svg>
-      <span>Pour</span>
-      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><use href="#logo-claude"></use></svg>Claude Code</span>
-      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"></path></svg>Cursor</span>
-      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"></path></svg>ChatGPT</span>
-      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><use href="#logo-claude"></use></svg>Claude</span>
+      <span>Fonctionne avec</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><use href="#logo-claude"></use></svg>Claude Code</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"></path></svg>Cursor</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"></path></svg>ChatGPT</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"></path></svg>Gemini</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"></path></svg>GitHub Copilot</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M23.55 5.067c-1.2038-.002-2.1806.973-2.1806 2.1765v4.8676c0 .972-.8035 1.7594-1.7597 1.7594-.568 0-1.1352-.286-1.4718-.7659l-4.9713-7.1003c-.4125-.5896-1.0837-.941-1.8103-.941-1.1334 0-2.1533.9635-2.1533 2.153v4.8957c0 .972-.7969 1.7594-1.7596 1.7594-.57 0-1.1363-.286-1.4728-.7658L.4076 5.1598C.2822 4.9798 0 5.0688 0 5.2882v4.2452c0 .2147.0656.4228.1884.599l5.4748 7.8183c.3234.462.8006.8052 1.3509.9298 1.3771.313 2.6446-.747 2.6446-2.0977v-4.893c0-.972.7875-1.7593 1.7596-1.7593h.003a1.798 1.798 0 0 1 1.4718.7658l4.9723 7.0994c.4135.5905 1.05.941 1.8093.941 1.1587 0 2.1515-.9645 2.1515-2.153v-4.8948c0-.972.7875-1.7594 1.7596-1.7594h.194a.22.22 0 0 0 .2204-.2202v-4.622a.22.22 0 0 0-.2203-.2203Z"></path></svg>Windsurf</span>
+      <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M17.143 3.429v3.428h-3.429v3.429h-3.428V6.857H6.857V3.43H3.43v13.714H0v3.428h10.286v-3.428H6.857v-3.429h3.429v3.429h3.429v-3.429h3.428v3.429h-3.428v3.428H24v-3.428h-3.43V3.429z"></path></svg>Mistral</span>
       <span>et toutes les autres IA</span>
     </div>
   </div>
@@ -529,19 +585,42 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 13px; line-height: 1.5; color: #A1A1A8">Hypothèses&nbsp;: à la main, 30 s par retour (capture, recadrage, collage dans un document, commentaire tapé) et 2 min pour assembler la revue. Avec VibeScreener, 5 s par retour (un clic, une phrase dite) et 5 s pour l'export.</p>
         </div>
       </div>
-      <div class="vs-reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px 40px; padding: 28px; border-radius: 20px; background: #FFFFFF">
-        <div style="display: flex; flex-direction: column; gap: 10px">
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.15; letter-spacing: -0.02em">Et des retours plus complets</h3>
-          <p style="margin: 0; color: #3A3A40">Taper chaque retour est pénible, alors on écrit le minimum et l'IA devine le reste. À l'oral, on dit sans effort ce qui cloche, pourquoi, et ce qu'on attend. L'IA a plus de contexte et vise juste plus souvent.</p>
+      <div class="vs-reveal" style="margin-top: 40px; display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 48px">
+          <h3 style="margin: 0; max-width: 560px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 48px); line-height: 1; letter-spacing: -0.04em">Et des retours plus complets.</h3>
+          <p style="margin: 0; max-width: 470px; font-size: 17px; color: #3A3A40">Taper chaque retour est pénible, alors on écrit le minimum et l'IA devine le reste. À l'oral, on dit sans effort ce qui ne va pas, pourquoi, et ce qu'on attend.</p>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 15px">
-          <div style="display: flex; flex-direction: column; gap: 4px">
-            <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #8E8E96">Tapé</span>
-            <span style="color: #5E5E66">«&nbsp;bouton trop petit&nbsp;»</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 20px; align-items: stretch">
+          <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #FFFFFF">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="16" height="10" rx="2"></rect><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M6.5 11.8h7"></path></svg>Tapé</span>
+              <span style="font-size: 14px; color: #6E6E76">3 mots</span>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
+              <span style="align-self: flex-end; max-width: 85%; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #EDEDF0; color: #17171A">bouton trop petit</span>
+              <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
+                <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #EDEDF0; color: #5E5E66; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
+                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #E4E4E8; color: #3A3A40">J'agrandis le texte du bouton, de 14 à 16&nbsp;px.</span>
+              </span>
+            </div>
+            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #ECECEF; font-size: 15px; font-weight: 600; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#EDEDF0"></circle><path d="M7 7l6 6M13 7l-6 6" stroke="#5E5E66" stroke-width="1.8" stroke-linecap="round"></path></svg>L'IA devine, et vise à côté.</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 4px">
-            <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #D63A0C">Dicté</span>
-            <span style="color: #17171A">«&nbsp;Ce bouton est trop petit sur mobile, on le rate avec le pouce. Mets-le en pleine largeur, comme celui du panier.&nbsp;»</span>
+          <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #17171A; color: #FFFFFF; box-shadow: 0 30px 60px -30px rgba(23,23,26,0.5)">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>Dicté</span>
+              <span style="font-size: 14px; color: #A1A1A8">21 mots</span>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
+              <span style="align-self: flex-end; max-width: 90%; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #2B1A13; box-shadow: inset 0 0 0 1px #5C2A17; color: #FFFFFF">
+                <span aria-hidden="true" class="vs-onde" style="flex: none; width: 120px; height: 14px"><span style="background: #FF8A66; animation-delay: -0.1s"></span><span style="background: #FF8A66; animation-delay: -0.3s"></span><span style="background: #FF8A66; animation-delay: -0.5s"></span><span style="background: #FF8A66; animation-delay: -0.2s"></span><span style="background: #FF8A66; animation-delay: -0.7s"></span><span style="background: #FF8A66; animation-delay: -0.4s"></span><span style="background: #FF8A66; animation-delay: -0.6s"></span><span style="background: #FF8A66; animation-delay: -0.15s"></span><span style="background: #FF8A66; animation-delay: -0.45s"></span><span style="background: #FF8A66; animation-delay: -0.25s"></span><span style="background: #FF8A66; animation-delay: -0.55s"></span><span style="background: #FF8A66; animation-delay: -0.35s"></span></span>
+                <span>Ce bouton est trop petit sur mobile, on le rate avec le pouce. Mets-le en pleine largeur, comme celui du panier.</span>
+              </span>
+              <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
+                <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #2E2E33; color: #C7C7CC; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
+                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #3A3A40; color: #E5E5EA">Sur mobile, le bouton passe en pleine largeur, avec le même style que «&nbsp;Ajouter au panier&nbsp;».</span>
+              </span>
+            </div>
+            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 15px; font-weight: 600; color: #4ADE80"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Juste du premier coup.</span>
           </div>
         </div>
       </div>
@@ -564,43 +643,23 @@ details[open] .vs-plus{transform:rotate(45deg)}
             <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px; font-weight: 600">P</span>
           </div>
           <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">1.</span> Capture d'écran</h3>
-          <p style="margin: 0; color: #5E5E66">Sur votre app, le raccourci fige l'écran. Un clic sur la fenêtre et elle est capturée.</p>
+          <p style="margin: 0; color: #5E5E66">Sur votre app, le raccourci capture l'écran. Un clic sur la fenêtre et elle est capturée.</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
-          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
-            <span style="display: flex; gap: 10px">
-              <span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px 18px 18px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span>
-              <span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px 18px 18px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span>
-              <span style="width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px 18px 18px 5px; background: #D63A0C; border: 3px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
-            </span>
-            <span style="height: 44px; display: flex; align-items: center; gap: 4px">
-                              <span style="width: 4px; height: 14px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.00s"></span>
-              
-                <span style="width: 4px; height: 26px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.09s"></span>
-              
-                <span style="width: 4px; height: 40px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.18s"></span>
-              
-                <span style="width: 4px; height: 22px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.27s"></span>
-              
-                <span style="width: 4px; height: 34px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.36s"></span>
-              
-                <span style="width: 4px; height: 46px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.45s"></span>
-              
-                <span style="width: 4px; height: 18px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.54s"></span>
-              
-                <span style="width: 4px; height: 30px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.63s"></span>
-              
-                <span style="width: 4px; height: 42px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.72s"></span>
-              
-                <span style="width: 4px; height: 24px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.81s"></span>
-              
-                <span style="width: 4px; height: 12px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.90s"></span>
-              
-                <span style="width: 4px; height: 28px; border-radius: 3px; background: #17171A; animation: vs-wave 1s ease-in-out infinite; animation-delay: -0.99s"></span>
-              
+          <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center">
+            <span style="position: relative; width: 184px; height: 112px; border-radius: 10px; background: #FFFFFF; box-shadow: 0 0 0 1px #E4E4E8, 0 10px 24px rgba(23,23,26,0.08)">
+              <span style="position: absolute; left: 0; top: 0; right: 0; height: 16px; box-sizing: border-box; border-radius: 10px 10px 0 0; background: #EEEEF0; border-bottom: 1px solid #E4E4E8"></span>
+              <span style="position: absolute; left: 12px; top: 28px; width: 70px; height: 8px; border-radius: 999px; background: #D9D9DE"></span>
+              <span style="position: absolute; left: 12px; top: 44px; width: 160px; height: 30px; border-radius: 6px; background: #F0F1F3"></span>
+              <span style="position: absolute; left: 12px; top: 82px; width: 110px; height: 8px; border-radius: 999px; background: #E4E4E8"></span>
+              <span style="position: absolute; left: 12px; top: 96px; width: 80px; height: 8px; border-radius: 999px; background: #E4E4E8"></span>
+              <span style="position: absolute; left: 80px; top: 6px; width: 26px; height: 26px; box-sizing: border-box; border: 3px solid #FFFFFF; border-radius: 13px 13px 13px 4px; background: #D63A0C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2)">1</span>
+              <span style="position: absolute; left: 150px; top: 26px; width: 26px; height: 26px; box-sizing: border-box; border: 3px solid #FFFFFF; border-radius: 13px 13px 13px 4px; background: #D63A0C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2)">2</span>
+              <span style="position: absolute; left: 118px; top: 70px; width: 26px; height: 26px; box-sizing: border-box; border: 3px solid #FFFFFF; border-radius: 13px 13px 13px 4px; background: #D63A0C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2)">3</span>
+              <span style="position: absolute; left: 132px; top: 98px; display: flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 11px; font-weight: 600; white-space: nowrap; box-shadow: 0 6px 14px rgba(0,0,0,0.25)"><span class="vs-rec" style="width: 7px; height: 7px"></span>#3<span class="vs-onde" style="flex: none; width: 36px; height: 10px; gap: 2px"><span style="animation-delay: -0.1s"></span><span style="animation-delay: -0.4s"></span><span style="animation-delay: -0.2s"></span><span style="animation-delay: -0.6s"></span><span style="animation-delay: -0.3s"></span><span style="animation-delay: -0.5s"></span></span></span>
             </span>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">2.</span> Effectuez vos commentaires</h3>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">2.</span> Commentez directement sur la capture</h3>
           <p style="margin: 0; color: #5E5E66">Un clic par demande, puis vous parlez&nbsp;: le micro s'ouvre tout seul.</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
@@ -885,18 +944,18 @@ details[open] .vs-plus{transform:rotate(45deg)}
       <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; max-width: 760px">
         <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66">À vous d'essayer</div>
         <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Cliquez dans l'app, pour voir.</h2>
-        <p style="margin: 0; font-size: 18px; color: #C7C7CC">Capturez l'écran, cliquez où vous voulez sur la capture, puis tapez ou dictez votre demande. Exportez, et regardez Claude Code modifier l'app.</p>
+        <p style="margin: 0; font-size: 18px; color: #C7C7CC">Capturez l'écran, puis cliquez où vous voulez sur la capture&nbsp;: la demande s'écrit toute seule, comme si vous la disiez. Exportez, et regardez Claude Code modifier l'app.</p>
       </div>
 
       <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
-          <ol class="vs-parcours" aria-label="Étapes de la démo">
-            <li data-etape="1" aria-current="step"><span>1</span>Capturez</li>
-            <li data-etape="2"><span>2</span>Commentez</li>
-            <li data-etape="3"><span>3</span>Exportez</li>
-            <li data-etape="4"><span>4</span>Le résultat</li>
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 18px">
+          <ol class="vs-dp" aria-label="Étapes de la démo">
+            <li data-etape="1" aria-current="step"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>1</b>Capturez</span></li>
+            <li data-etape="2"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>2</b>Commentez</span></li>
+            <li data-etape="3"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>3</b>Exportez</span></li>
+            <li data-etape="4"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>4</b>Le résultat</span></li>
           </ol>
-          <p style="margin: 0; min-height: 26px; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #E5E5EA"><span aria-hidden="true" style="flex: none; width: 9px; height: 9px; border-radius: 999px; background: #FF6A3D; animation: vs-pulse 1.2s ease-in-out infinite"></span><span data-demo="indice" aria-live="polite">Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.</span></p>
+          <p style="margin: 0; min-height: 26px; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #E5E5EA; text-align: center"><span aria-hidden="true" style="flex: none; width: 9px; height: 9px; border-radius: 999px; background: #FF6A3D; animation: vs-pulse 1.2s ease-in-out infinite"></span><span data-demo="indice" aria-live="polite">Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.</span></p>
         </div>
 
         <div class="vs-reveal" style="width: 100%; max-width: 1100px; container-type: inline-size">
@@ -925,8 +984,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
             <div class="vs-editeur" style="position: absolute; left: 0; top: var(--barre); width: 69cqw; bottom: 0; background: #0E0E10">
               <div aria-hidden="true" style="position: absolute; left: 50%; bottom: 1.4cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 1.4cqw; padding: 0.7cqw 1.4cqw; border-radius: 0.9cqw; background: #1C1C1F; border: 1px solid #2E2E33; color: #A1A1A8; font-size: 1.05cqw; white-space: nowrap">
                 <span><span style="color: #F2F2F3">Clic</span> poser un point</span>
-                <span><span style="color: #F2F2F3">Entrée</span> valider</span>
-                <span><span style="color: #F2F2F3">Échap</span> retirer un point vide</span>
+                <span>la demande s’écrit seule</span>
+                <span><span style="color: #F2F2F3">Exporter</span> quand c’est prêt</span>
               </div>
             </div>
 
@@ -1090,8 +1149,6 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <span style="position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 13cqw; height: 0.8cqw; border-radius: 0 0 1cqw 1cqw; background: #A6A9AF"></span>
         </div>
         </div>
-
-        <p style="margin: 0; max-width: 680px; font-size: 14px; line-height: 1.5; color: #A1A1A8; text-align: center">Dans cette démo, la dictée passe par votre navigateur, qui peut envoyer le son à son éditeur pour le transcrire. Dans l'app, elle se fait sur votre Mac, hors ligne. Rien de ce que vous tapez ici n'est envoyé ni gardé.</p>
       </div>
     </div>
   </section>
@@ -1190,7 +1247,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
       </div>
       <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; font-size: 15px">
         <span>14 jours gratuits, sans carte</span>
-        <a href="https://dl.vibescreener.dev/VibeScreener-arm64.dmg" style="color: #FFFFFF; font-weight: 700">Télécharger le .dmg</a>
+        <span>Mac Apple Silicon</span>
       </div>
     </div>
   </section>
@@ -1259,6 +1316,15 @@ for (const button of document.querySelectorAll('[data-copy]')) {
   });
 }
 
+// Intro plein écran : « Rejouer » relance toutes ses animations depuis le début.
+const intro = document.getElementById('haut');
+document.querySelector('[data-rejouer]').addEventListener('click', () => {
+  for (const a of intro.getAnimations({ subtree: true })) {
+    a.cancel();
+    a.play();
+  }
+});
+
 // Cartes des fonctionnalités : « + » retourne la carte sur son détail, une seule ouverte à la fois.
 // La face cachée est inerte (ni Tab ni lecteur d'écran) ; le focus suit la face visible.
 const cartes = [...document.querySelectorAll('.vs-carte')];
@@ -1280,70 +1346,61 @@ for (const carte of cartes) {
   }
 }
 
-// Démo « À vous d'essayer », en quatre étapes : capturer l'écran (⌃⌥⌘P ou le bouton), poser des
-// points où l'on veut avec une demande tapée ou dictée, exporter, puis voir Claude Code modifier
-// l'app. Positions en % de la largeur de la capture (zone [gauche, haut, largeur, hauteur], pin
-// [gauche, haut]). Un point posé sur un élément connu propose sa phrase, et l'app modifiée montre
-// le changement (calques repris du hero).
+// Démo « À vous d'essayer », en quatre étapes : capturer l'écran (⌃⌥⌘P ou le bouton), cliquer où
+// l'on veut sur la capture (la demande s'écrit toute seule, comme dictée), exporter, puis voir
+// Claude Code modifier l'app. Positions en % de la largeur de la capture (zone [gauche, haut,
+// largeur, hauteur], pin [gauche, haut]). Un point posé sur un élément connu écrit sa phrase, et
+// l'app modifiée montre le changement (calques repris du hero).
 { // bloc : les noms de la démo ne débordent pas sur le reste de la page
   const MAX_POINTS = 6;
   const DEMANDES = [
-    { label: 'le graphique', zone: [20, 29.5, 77, 18.5], pin: [37, 32.3], texte: 'Ajoute un filtre : 7 jours, 30 jours, 12 mois.',
+    { nom: 'Graphique', zone: [20, 29.5, 77, 18.5], pin: [37, 32.3], texte: 'Ajoute un filtre : 7 jours, 30 jours, 12 mois.',
       apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1.1cqw">7 j</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">30 j</span><span style="padding: 0.4cqw 1.1cqw">12 mois</span></span>' },
-    { label: 'le tableau', zone: [20, 49.5, 77, 17.9], pin: [91.5, 55.3], texte: 'Trie par montant et ajoute un export CSV.',
+    { nom: 'Tableau', zone: [20, 49.5, 77, 17.9], pin: [91.5, 55.3], texte: 'Trie par montant et ajoute un export CSV.',
       apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">↓ Exporter CSV</span></span>'
         + '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 87.6cqw; top: 54.4cqw; font-size: 1.3cqw; font-weight: 700; color: #0E7C66; animation: vs-fadein .4s ease-out both">↓</span>' },
-    { label: 'la recherche', zone: [58, 9.4, 20, 4.4], pin: [61, 11.6], texte: 'La recherche doit aussi trouver les e-mails.',
+    { nom: 'Recherche', zone: [58, 9.4, 20, 4.4], pin: [61, 11.6], texte: 'La recherche doit aussi trouver les e-mails.',
       apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; animation: vs-fadein .4s ease-out both">Commande ou e-mail…</span>' },
-    { label: 'les chiffres clés', zone: [20, 17, 77, 10.5], pin: [33, 21], texte: 'Sur mobile, mets ces cartes en carrousel.',
+    { nom: 'Chiffres clés', zone: [20, 17, 77, 10.5], pin: [33, 21], texte: 'Sur mobile, mets ces cartes en carrousel.',
       apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 56.4cqw; top: 27.9cqw; display: flex; gap: 0.6cqw; animation: vs-fadein .4s ease-out both"><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #D1D5DB"></span><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #D1D5DB"></span></span>' },
-    { label: 'le bouton Nouvelle vente', zone: [79.5, 9.4, 17.5, 4.4], pin: [88, 11], texte: 'Ouvre la nouvelle vente dans une fenêtre.' },
-    { label: 'le menu Clients', zone: [1.6, 25.9, 13.8, 3.6], pin: [12, 27.7], texte: 'Ajoute une page Clients avec l’historique.' },
+    { nom: 'Bouton Nouvelle vente', zone: [79.5, 9.4, 17.5, 4.4], pin: [88, 11], texte: 'Ouvre la nouvelle vente dans une fenêtre.' },
+    { nom: 'Menu Clients', zone: [1.6, 25.9, 13.8, 3.6], pin: [12, 27.7], texte: 'Ajoute une page Clients avec l’historique.' },
   ];
-  const ERREURS = {
-    'not-allowed': 'Micro refusé. Le clavier marche toujours.',
-    'service-not-allowed': 'Le navigateur refuse la dictée. Tapez votre demande.',
-    'audio-capture': 'Aucun micro trouvé. Tapez votre demande.',
-    'no-speech': 'Je n’ai rien entendu. Réessayez, ou tapez.',
-    network: 'Dictée indisponible pour l’instant. Tapez votre demande.',
-  };
+  // Hors des éléments connus, ou sur un élément déjà commenté.
+  const GENERIQUES = ['Aère cette zone : plus d’espace entre les blocs.', 'Mets ce bloc plus en avant, il passe inaperçu.'];
   const essai = document.getElementById('essayer');
   const piece = (name) => essai.querySelector(`[data-demo="${name}"]`);
   const ecran = piece('ecran'), capture = piece('capture'), liste = piece('liste'), claude = piece('claude');
   const exporter = piece('exporter'), recommencer = piece('recommencer'), capturer = piece('capturer');
-  const Reco = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let poses = [], enCours = null, reco = null, minuteurs = [], visible = false;
+  let poses = [], enCours = null, minuteurs = [], visible = false;
 
   const echappe = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
   const attendre = (ms, f) => minuteurs.push(setTimeout(f, ms));
-  const minutes = (ms) => { const s = Math.max(1, Math.round(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
-  const meta = (p) => (p.parle ? `Dicté · ${minutes(p.ms)}` : 'Tapé');
-  const aideTexte = (d) => (d ? 'Entrée pour valider. Laissé vide, la suggestion est reprise.' : 'Entrée pour valider, Échap pour retirer le point.');
   const ONDE = [6, 11, 15, 8, 13, 15, 7, 12, 9, 6].map((h, i) => `<span style="height: ${h}px; animation-delay: -${(i * 0.11).toFixed(2)}s"></span>`).join('');
-  const MICRO = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>';
   const COCHE = '<svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
-  // Compteurs, indice, bandeau d'étapes et bouton Exporter suivent l'état.
+  // Compteurs, indice, frise d'étapes et bouton Exporter suivent l'état.
   function etat() {
     const etape = ecran.dataset.etape, n = poses.length;
     for (const e of essai.querySelectorAll('[data-demo="nombre"]')) e.textContent = n + (n > 1 ? ' demandes' : ' demande');
-    piece('vide').hidden = n > 0;
-    const pret = etape === 'revue' && (n > 0 || !!enCours?.input.value.trim());
+    piece('vide').hidden = n > 0 || !!enCours;
+    const pret = etape === 'revue' && n > 0 && !enCours;
     exporter.setAttribute('aria-disabled', !pret);
-    exporter.classList.toggle('vs-appel', pret && n > 0);
-    const numero = { capture: 1, claude: 4, fait: 4 }[etape] || (n ? 3 : 2);
-    for (const li of essai.querySelectorAll('.vs-parcours li')) {
+    exporter.classList.toggle('vs-appel', pret);
+    const numero = { capture: 1, revue: 2, claude: 3, fait: 4 }[etape];
+    for (const li of essai.querySelectorAll('.vs-dp li')) {
       const k = Number(li.dataset.etape);
       if (k === numero) li.setAttribute('aria-current', 'step');
       else li.removeAttribute('aria-current');
-      li.classList.toggle('vs-passee', k < numero || etape === 'fait');
+      li.classList.toggle('vs-passee', k < numero);
+      li.querySelector('b').textContent = k < numero ? '✓' : k;
     }
     let indice;
     if (etape === 'capture') indice = 'Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.';
     else if (etape === 'claude') indice = 'Claude Code lit votre revue et modifie l’app…';
     else if (etape === 'fait') indice = 'C’est fait : l’app est modifiée, chaque point est coché. « Recommencer », en haut, pour rejouer.';
-    else if (enCours) indice = Reco ? 'Tapez votre demande ou dictez-la au micro, puis Entrée.' : 'Tapez votre demande, puis Entrée.';
-    else if (!n) indice = 'Cliquez n’importe où sur la capture pour poser un point.';
+    else if (enCours) indice = 'La demande s’écrit, comme si vous la disiez…';
+    else if (!n) indice = 'Cliquez où vous voulez sur la capture : la demande s’écrit toute seule.';
     else if (n >= MAX_POINTS) indice = `${MAX_POINTS} points, c’est le maximum ici. Cliquez sur Exporter, en haut à droite.`;
     else indice = 'Un autre point ? Cliquez ailleurs sur la capture. Sinon, Exporter, en haut à droite.';
     const zone = piece('indice');
@@ -1355,7 +1412,7 @@ for (const carte of cartes) {
     capture.tabIndex = revue ? 0 : -1;
     if (revue) {
       capture.setAttribute('role', 'button');
-      capture.setAttribute('aria-label', 'Capture de l’app : cliquez où vous voulez pour poser un point, ou Entrée pour en poser un sur l’élément suivant');
+      capture.setAttribute('aria-label', 'Capture de l’app : cliquez où vous voulez pour poser un point, ou Entrée pour en poser un sur l’élément suivant. La demande s’écrit toute seule.');
     } else {
       capture.removeAttribute('role');
       capture.removeAttribute('aria-label');
@@ -1378,47 +1435,33 @@ for (const carte of cartes) {
     });
   }
 
-  // Étape 2 : un point à l'endroit du clic, avec sa bulle (champ et micro).
+  // Étape 2 : un point à l'endroit du clic (ou sur l'élément visé), et sa demande s'écrit dans la bulle.
   function poser(x, y) {
-    fermer();
+    if (enCours) finir(enCours);
     if (poses.length >= MAX_POINTS) return etat();
     for (const e of capture.querySelectorAll('.vs-repere')) e.remove();
     const n = poses.length + 1;
-    const d = DEMANDES.find(({ zone: [zx, zy, w, h] }) => x >= zx && x <= zx + w && y >= zy && y <= zy + h);
+    const pris = new Set(poses.map((p) => p.d));
+    let d = DEMANDES.find(({ zone: [zx, zy, w, h] }) => x >= zx && x <= zx + w && y >= zy && y <= zy + h);
+    if (pris.has(d)) d = undefined;
+    else if (d) [x, y] = d.pin;
+    const texte = d ? d.texte : GENERIQUES[(n - 1) % GENERIQUES.length];
     capture.insertAdjacentHTML('beforeend', `<span class="vs-pose vs-pin" aria-hidden="true" style="left: ${x.toFixed(2)}cqw; top: ${y.toFixed(2)}cqw">${n}</span>`);
-    claude.insertAdjacentHTML('beforebegin', `<form class="vs-pose vs-bulle" aria-label="Point ${n}${d ? ', sur ' + d.label : ''}">
-    <div class="vs-tete"><span class="vs-rec"></span>#${n}<span class="vs-onde" aria-hidden="true">${ONDE}</span>${Reco ? `<button type="button" class="vs-micro" aria-pressed="false" aria-label="Dicter au micro">${MICRO}</button>` : ''}</div>
-    <input type="text" maxlength="140" autocomplete="off" enterkeyhint="done" aria-label="Demande du point ${n}" placeholder="${echappe(d ? d.texte : 'Votre demande…')}">
-    <small aria-live="polite">${aideTexte(d)}</small>
-  </form>`);
+    claude.insertAdjacentHTML('beforebegin', `<div class="vs-pose vs-bulle" aria-hidden="true">
+    <div class="vs-tete"><span class="vs-rec"></span>#${n}<span class="vs-onde">${ONDE}</span><span style="font-weight: 500; color: #A1A1A8">${d ? d.nom : 'Cette zone'}</span></div>
+    <span class="vs-champ"><span></span><span class="vs-caret"></span></span>
+  </div>`);
     const bulle = claude.previousElementSibling;
-    const p = { x, y, d, n, pin: capture.lastElementChild, bulle, input: bulle.querySelector('input'), aide: bulle.querySelector('small'), parle: false, ms: 0, debut: 0, erreur: '' };
+    const p = { x, y, d, n, texte, pin: capture.lastElementChild, bulle, frappe: 0 };
     enCours = p;
     placer(p);
-    bulle.addEventListener('submit', (e) => {
-      e.preventDefault();
-      arreter();
-      const tape = p.input.value.trim();
-      if (!tape && !d) return (p.aide.textContent = 'Écrivez ou dictez d’abord votre demande.');
-      garder(p, tape || d.texte, tape ? meta(p) : 'Suggestion');
-      capture.focus({ preventScroll: true });
-    });
-    p.input.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape') return;
-      // Comme dans l'app : Échap retire un point vide et ferme la bulle d'un point rempli.
-      e.preventDefault();
-      arreter();
-      const tape = p.input.value.trim();
-      if (tape) garder(p, tape, meta(p));
-      else retirer(p);
-      capture.focus({ preventScroll: true });
-    });
-    p.input.addEventListener('input', () => {
-      if (reco) arreter(); // taper pendant la dictée l'arrête, comme dans l'app
-      etat();
-    });
-    bulle.querySelector('.vs-micro')?.addEventListener('click', () => dicter(p));
-    p.input.focus({ preventScroll: true });
+    const champ = bulle.querySelector('.vs-champ > span');
+    p.frappe = setInterval(() => {
+      champ.textContent = texte.slice(0, champ.textContent.length + 1);
+      if (champ.textContent.length < texte.length) return;
+      clearInterval(p.frappe);
+      p.frappe = setTimeout(() => finir(p), 650);
+    }, 38);
     etat();
   }
   // Bulle sous le point (au-dessus s'il n'y a pas la place), sans sortir de l'écran.
@@ -1431,88 +1474,20 @@ for (const carte of cartes) {
     p.bulle.style.left = `${((left / e.width) * 100).toFixed(2)}cqw`;
     p.bulle.style.top = `${((top / e.width) * 100).toFixed(2)}cqw`;
   }
-  function garder(p, texte, quoi) {
+  // La demande est écrite (ou un autre clic l'a pressée) : elle passe dans la liste.
+  function finir(p) {
+    clearInterval(p.frappe);
+    clearTimeout(p.frappe);
     enCours = null;
     p.bulle.remove();
-    p.texte = texte;
     liste.querySelector('.vs-derniere')?.classList.remove('vs-derniere');
     liste.insertAdjacentHTML('beforeend', `<div class="vs-derniere" style="display: flex; gap: 0.9cqw; padding: 0.9cqw; border-radius: 0.9cqw; animation: vs-fadein .3s ease-out both">
     <span class="vs-num" style="width: 2cqw; height: 2cqw; flex: none; border-radius: 1cqw 1cqw 1cqw 0.25cqw; background: #D63A0C; font-size: 1cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">${p.n}</span>
-    <div style="display: flex; flex-direction: column; gap: 0.3cqw; min-width: 0"><span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere">${echappe(texte)}</span><span class="vs-meta" style="font-size: 0.95cqw; color: #8E8E96">${quoi}</span></div>
+    <div style="display: flex; flex-direction: column; gap: 0.3cqw; min-width: 0"><span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere">${echappe(p.texte)}</span><span class="vs-meta" style="font-size: 0.95cqw; color: #8E8E96">${p.d ? p.d.nom : 'Cette zone'}</span></div>
   </div>`);
     p.ligne = liste.lastElementChild;
     poses.push(p);
     etat();
-  }
-  function retirer(p) {
-    enCours = null;
-    p.pin.remove();
-    p.bulle.remove();
-    etat();
-  }
-  // Clic ailleurs ou export : le point en cours est gardé s'il a du texte, sinon retiré.
-  function fermer() {
-    const p = enCours;
-    if (!p) return;
-    arreter();
-    const tape = p.input.value.trim();
-    if (tape) garder(p, tape, meta(p));
-    else retirer(p);
-  }
-
-  // Dictée par le navigateur (Chrome, Edge, Safari) ; sans elle, pas de bouton micro.
-  function ecoute(p, on) {
-    p.bulle.classList.toggle('ecoute', on);
-    const micro = p.bulle.querySelector('.vs-micro');
-    micro.setAttribute('aria-pressed', on);
-    micro.setAttribute('aria-label', on ? 'Arrêter la dictée' : 'Dicter au micro');
-    if (on) p.debut = Date.now();
-    else if (p.debut) {
-      p.ms += Date.now() - p.debut;
-      p.debut = 0;
-    }
-    p.aide.textContent = on ? 'J’écoute… Entrée ou le micro pour finir.' : p.erreur || aideTexte(p.d);
-  }
-  function arreter() { // coupe la dictée sans attendre son dernier résultat
-    if (!reco) return;
-    const r = reco;
-    reco = null;
-    r.abort();
-    if (enCours) ecoute(enCours, false);
-  }
-  function dicter(p) {
-    if (reco) return reco.stop(); // second clic : la dictée finit, son dernier résultat arrive encore
-    const r = new Reco();
-    r.lang = 'fr-FR';
-    r.interimResults = true;
-    const avant = p.input.value.trim();
-    r.onresult = (e) => {
-      if (reco !== r) return;
-      const dit = Array.from(e.results, (res) => res[0].transcript).join('').trim();
-      if (!dit) return;
-      p.parle = true;
-      p.input.value = avant ? `${avant} ${dit}` : dit;
-      etat();
-    };
-    r.onerror = (e) => {
-      if (reco === r && e.error !== 'aborted') p.erreur = ERREURS[e.error] || 'La dictée ne marche pas ici. Tapez votre demande.';
-    };
-    r.onend = () => {
-      if (reco !== r) return;
-      reco = null;
-      ecoute(p, false);
-    };
-    p.erreur = '';
-    reco = r;
-    ecoute(p, true);
-    try {
-      r.start();
-    } catch {
-      reco = null;
-      p.erreur = 'La dictée ne marche pas ici. Tapez votre demande.';
-      ecoute(p, false);
-    }
-    if (matchMedia('(pointer: fine)').matches) p.input.focus({ preventScroll: true });
   }
 
   capturer.addEventListener('click', capturerEcran);
@@ -1525,6 +1500,7 @@ for (const carte of cartes) {
     if (e.target !== capture || (e.key !== 'Enter' && e.key !== ' ') || ecran.dataset.etape !== 'revue') return;
     e.preventDefault();
     const pris = new Set(poses.map((p) => p.d));
+    if (enCours) pris.add(enCours.d);
     const d = DEMANDES.find((d) => !pris.has(d));
     poser(...(d ? d.pin : [58, 40]));
   });
@@ -1532,9 +1508,7 @@ for (const carte of cartes) {
   // Étapes 3 et 4 : Claude Code déroule la revue, puis la fenêtre se ferme sur l'app modifiée.
   exporter.addEventListener('click', () => {
     if (ecran.dataset.etape !== 'revue' || exporter.getAttribute('aria-disabled') === 'true') return;
-    fermer();
     const n = poses.length;
-    if (!n) return etat();
     piece('appliquees').innerHTML = poses
       .map((p, i) => `<span style="padding-left: 2cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: vs-fadein .3s ease-out both; animation-delay: ${(1.5 + i * 0.35).toFixed(2)}s"><span style="color: #30D158">✓</span> #${p.n} ${echappe(p.texte)}</span>`)
       .join('');
@@ -1562,8 +1536,11 @@ for (const carte of cartes) {
   recommencer.addEventListener('click', () => {
     for (const t of minuteurs) clearTimeout(t);
     minuteurs = [];
-    arreter();
-    enCours = null;
+    if (enCours) {
+      clearInterval(enCours.frappe);
+      clearTimeout(enCours.frappe);
+      enCours = null;
+    }
     poses = [];
     for (const e of ecran.querySelectorAll('.vs-pose')) e.remove();
     liste.replaceChildren();
