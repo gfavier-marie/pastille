@@ -17,13 +17,15 @@ import {
   Menu,
   net,
   protocol,
+  screen,
   session as electronSession,
   shell,
   systemPreferences,
 } from 'electron';
-import { allAnnotations, findAnnotation, newNote, type Annotation, type Geometry, type Session } from '@pastille/shared';
+import { allAnnotations, findAnnotation, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab } from '../ipc.ts';
-import { createCapture, type CapturedImage } from './capture.ts';
+import { createCapture, listWindows, windowTarget, type CapturedImage } from './capture.ts';
+import { createClicks } from './clicks.ts';
 import { createDictation } from './dictation.ts';
 import { createMenubar } from './menubar.ts';
 import { exportSession } from './export/index.ts';
@@ -37,6 +39,8 @@ import { createLicense, POLAR, SITE_URL, TRIAL_DAYS } from './license.ts';
 import { createSettings, type Settings } from './settings.ts';
 import { createTranscriber } from './transcriber.ts';
 import { checkForUpdate, installUpdate, type Update } from './updater.ts';
+import { createVideo } from './video.ts';
+import { createVideoWindow } from './video-window.ts';
 import { downloadFile, MODEL_FILE, MODEL_URL } from './whisper.ts';
 
 const isMac = process.platform === 'darwin';
@@ -77,7 +81,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'pastille', privileges: { standard: true, secure: true, supportFetchAPI: true } },
 ]);
 
-type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing';
+type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing' | 'video';
 function loadPage(win: BrowserWindow, page: Page, hash = '') {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
   if (devUrl) void win.loadURL(`${devUrl}/${page}.html${hash && `#${hash}`}`);
@@ -133,6 +137,7 @@ let pocWindow: BrowserWindow | null = null;
 // La file attend que le modèle soit chargé ; sans moteur, la dictée passe en erreur (audio conservé).
 const dictation = createDictation(store, (wav) => transcriber.transcribe(wav));
 let shortcutRegistered = false;
+let captureAccelerator: string | null = null; // raccourci de capture enregistré
 let recording = false; // une dictée est en cours dans l'éditeur
 
 /** « Command+Control+Alt+P » → « ⌃⌥⌘P » ; « Control+Alt+P » → « Ctrl+Alt+P ». */
@@ -146,12 +151,13 @@ function shortcutLabel(accelerator: string) {
 
 /** Raccourci global ; s'il est déjà pris, l'ancien est gardé et l'échec signalé (§4.2). */
 function registerShortcut(accelerator: string): boolean {
-  globalShortcut.unregisterAll();
+  if (captureAccelerator) globalShortcut.unregister(captureAccelerator); // celui du mode vidéo reste
   try {
     shortcutRegistered = globalShortcut.register(accelerator, () => startCapture());
   } catch {
     shortcutRegistered = false;
   }
+  captureAccelerator = shortcutRegistered ? accelerator : null;
   return shortcutRegistered;
 }
 
@@ -206,6 +212,7 @@ function inspirationTarget() {
 }
 
 function startCapture() {
+  if (video.isRecording()) return; // le mode vidéo capture déjà à chaque clic
   // Essai fini sans licence : l'onglet Licence s'ouvre à la place. Sessions, exports et Claude Code restent libres.
   if (!license.canCapture()) {
     checkLicense(); // licence à revérifier : de nouveau en ligne, peut-être
@@ -232,7 +239,7 @@ async function onCapture(c: CapturedImage) {
   });
   // Clic : un point ; zone glissée sans ⌥ : un rectangle. Dans les deux cas, bulle ouverte et dictée lancée.
   const geometry: Geometry | undefined = c.point ? { kind: 'point', ...c.point } : c.zone && { kind: 'zone', ...c.zone };
-  const annotationId = geometry && addAnnotation(capture.id, geometry);
+  const annotationId = geometry && store.addAnnotation(capture.id, geometry);
   showEditor({ captureId: capture.id, annotationId, openBubble: !!annotationId, dictate: !!annotationId });
   reportCapture({
     ok: true,
@@ -253,21 +260,111 @@ function reportCapture(r: CaptureResult) {
   pocWindow?.webContents.send('capture:result', r);
 }
 
-function addAnnotation(captureId: string, geometry: Geometry): string {
-  const now = new Date().toISOString();
-  const annotation: Annotation = {
-    id: crypto.randomUUID(),
-    number: 0,
-    geometry,
-    text: '',
-    input: 'typed',
-    transcription: 'none',
-    sketches: [],
-    createdAt: now,
-    updatedAt: now,
-  };
-  store.update((s) => s.captures.find((c) => c.id === captureId)?.annotations.push(annotation), { undoable: true });
-  return annotation.id;
+// ——— Mode vidéo ———
+// ⌃⌥⌘R : on navigue dans son app, chaque clic suivi de paroles devient un point sur l'image d'avant
+// le clic (voir video.ts). ⌃⌥⌘R arrête et ouvre l'éditeur. Pas de fichier vidéo : la session reste ordinaire.
+
+const VIDEO_SHORTCUT = isMac ? 'Command+Control+Alt+R' : 'Control+Alt+R';
+const videoWindow = createVideoWindow({ preload, loadPage, onAudio: (chunk) => video.onAudio(chunk) });
+const logVideo = (entry: Record<string, unknown>) => console.log('VIDEO', JSON.stringify(entry));
+const video = createVideo({
+  store,
+  submit: (id, samples) => dictation.submit(id, encodeWav(samples)),
+  freeze: (displayId) => videoWindow.freeze(displayId),
+  crop: (frameId, rect) => videoWindow.crop(frameId, rect),
+  target: async (click) => {
+    const windows = listWindows(); // lancée dès le clic
+    const d = screen.getAllDisplays().find((x) => x.id === click.displayId) ?? screen.getPrimaryDisplay();
+    const { rect, hit } = windowTarget(await windows, d, { x: d.bounds.x + click.x, y: d.bounds.y + click.y });
+    return { rect, app: hit?.owner.name, title: hit?.title };
+  },
+  log: logVideo,
+});
+const inside = (p: { x: number; y: number }, r: Electron.Rectangle) => p.x >= r.x && p.y >= r.y && p.x < r.x + r.width && p.y < r.y + r.height;
+const clicks = createClicks({
+  // Nos fenêtres ne se commentent pas ; la barre ne compte que sous la pilule (le reste laisse passer les clics).
+  ignore: (p) =>
+    menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && inside(p, w.getBounds())),
+  onClick: (p, at) => {
+    const d = screen.getDisplayNearestPoint(p);
+    video.onClick({
+      displayId: d.id,
+      display: { width: d.bounds.width, height: d.bounds.height, scaleFactor: d.scaleFactor },
+      x: p.x - d.bounds.x,
+      y: p.y - d.bounds.y,
+      at,
+    });
+  },
+});
+let videoStarting = false;
+let videoMetrics: ReturnType<typeof setInterval> | undefined;
+
+async function toggleVideo() {
+  if (video.isRecording()) return stopVideo();
+  if (videoStarting || capture.isBusy()) return;
+  if (!license.canCapture()) {
+    checkLicense();
+    return showSettings('license');
+  }
+  if (!clicks.allowed()) {
+    clicks.ask();
+    const { response } = await dialog.showMessageBox({
+      type: 'warning',
+      message: 'Le mode vidéo a besoin de voir vos clics.',
+      detail: `Autorise VibeScreener dans Réglages Système > Confidentialité et sécurité > Accessibilité, puis relance l'enregistrement (${shortcutLabel(VIDEO_SHORTCUT)}).`,
+      buttons: ['Ouvrir les Réglages', 'Annuler'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (response === 0) void shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility');
+    return;
+  }
+  videoStarting = true;
+  try {
+    editor?.hide(); // on relit son app, pas l'éditeur
+    await videoWindow.start();
+    await clicks.start();
+    video.start();
+    logVideo({ started: true, displays: screen.getAllDisplays().length });
+    // Mesures du lot V0 : processeur (% d'un cœur, tous processus) et mémoire de l'app.
+    videoMetrics = setInterval(() => {
+      const metrics = app.getAppMetrics();
+      logVideo({
+        cpu: Math.round(metrics.reduce((n, m) => n + m.cpu.percentCPUUsage, 0)),
+        memoryMB: Math.round(metrics.reduce((n, m) => n + m.memory.workingSetSize, 0) / 1024),
+      });
+    }, 30_000);
+  } catch (err) {
+    clicks.stop();
+    videoWindow.stop();
+    void dialog.showMessageBox({ type: 'warning', message: err instanceof Error ? err.message : String(err) });
+  } finally {
+    videoStarting = false;
+    updateTrayMenu();
+  }
+}
+
+/** Arrête l'enregistrement : le dernier segment est enregistré avant de fermer flux et micro. */
+async function finishVideo() {
+  clearInterval(videoMetrics);
+  clicks.stop();
+  const summary = await video.stop();
+  videoWindow.stop();
+  updateTrayMenu();
+  return summary;
+}
+
+async function stopVideo() {
+  const summary = await finishVideo();
+  logVideo({ stopped: true, ...summary });
+  if (summary.firstCaptureId) showEditor({ captureId: summary.firstCaptureId });
+  else if (summary.notes) showEditor();
+  else {
+    void dialog.showMessageBox({
+      message: 'Aucun point enregistré.',
+      detail: 'Pendant l’enregistrement, clique sur un élément puis parle : chaque clic suivi de paroles devient un point.',
+    });
+  }
 }
 
 // ——— Export ———
@@ -354,6 +451,7 @@ async function menuState(): Promise<MenuState> {
     pending: pending.length,
     errors: error.length,
     shortcut: shortcutLabel(settings.get().shortcut),
+    video: { shortcut: shortcutLabel(VIDEO_SHORTCUT), since: video.isRecording() ? video.startedAt() : undefined },
     recents: recents.map(({ id, name, points, screens, updatedAt }) => ({ id, name, points, screens, updatedAt })),
     update: update?.version,
     license: license.view(),
@@ -376,7 +474,7 @@ async function confirmUpdate() {
     message: `Mettre à jour VibeScreener vers la version ${update.version} ?`,
     detail:
       "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés." +
-      (isMac ? "\nL'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro." : ''),
+      (isMac ? "\nL'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran, le micro et l'Accessibilité (mode vidéo)." : ''),
     buttons: ['Mettre à jour', 'Plus tard'],
     defaultId: 0,
     cancelId: 1,
@@ -395,6 +493,8 @@ function onMenuAction(a: MenuAction) {
   switch (a.type) {
     case 'capture':
       return startCapture();
+    case 'video':
+      return void toggleVideo();
     case 'editor':
       return showEditor();
     case 'sessions':
@@ -403,7 +503,7 @@ function onMenuAction(a: MenuAction) {
     case 'export':
       return void exportFromMenu('pdf');
     case 'new-session':
-      return void store.close();
+      return void finishVideo().then(() => store.close());
     case 'pair':
       return showPairing();
     case 'claude-code':
@@ -419,9 +519,9 @@ function onMenuAction(a: MenuAction) {
       if (lastExport) shell.showItemInFolder(lastExport);
       return;
     case 'open-recent':
-      return void store.open(a.id).then(() => showEditor());
+      return void finishVideo().then(() => store.open(a.id)).then(() => showEditor());
     case 'export-recent':
-      return void store.open(a.id).then(() => exportFromMenu('pdf'));
+      return void finishVideo().then(() => store.open(a.id)).then(() => exportFromMenu('pdf'));
     case 'update':
       return void confirmUpdate();
     case 'license':
@@ -433,7 +533,7 @@ const menubar = createMenubar({
   preload,
   loadPage,
   state: menuState,
-  recording: () => recording,
+  recording: () => recording || video.isRecording(),
   barEnabled: () => settings.get().floatingBar,
   onAction: onMenuAction,
 });
@@ -644,7 +744,7 @@ async function transcribe(wav: Uint8Array) {
 // ——— IPC ———
 
 ipcMain.handle('session:get', () => store.get());
-ipcMain.handle('annotation:add', (_e, captureId: string, geometry: Geometry) => addAnnotation(captureId, geometry));
+ipcMain.handle('annotation:add', (_e, captureId: string, geometry: Geometry) => store.addAnnotation(captureId, geometry));
 ipcMain.on('annotation:update', (_e, id: string, patch: { text?: string; geometry?: Geometry }) =>
   store.update(
     (s) => {
@@ -694,11 +794,7 @@ ipcMain.handle('session:trash', async (_e, id: string) => {
   return true;
 });
 // Remarques générales : une liste, chaque remarque tapée ou dictée comme un commentaire de point.
-ipcMain.handle('note:add', () => {
-  const note = newNote();
-  store.update((s) => (s.notes = [...(s.notes ?? []), note]), { undoable: true });
-  return note.id;
-});
+ipcMain.handle('note:add', () => store.addNote());
 ipcMain.on('note:update', (_e, id: string, text: string) =>
   store.update(
     (s) => {
@@ -942,10 +1038,13 @@ app.on('before-quit', (e) => {
   if (quitting) return;
   e.preventDefault();
   quitting = true;
-  void store.flush().finally(() => app.quit());
+  void finishVideo()
+    .then(() => store.flush())
+    .finally(() => app.quit());
 });
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  clicks.stop();
   tablet?.stop();
   transcriber.stop();
   mcp.close();
@@ -1039,6 +1138,19 @@ void app.whenReady().then(async () => {
       detail: 'Choisis-en un autre dans les réglages. Les captures restent possibles depuis l’icône de VibeScreener.',
     });
   }
+  try {
+    if (!globalShortcut.register(VIDEO_SHORTCUT, () => void toggleVideo())) throw new Error();
+  } catch {
+    void dialog.showMessageBox({
+      type: 'warning',
+      message: `Le raccourci ${shortcutLabel(VIDEO_SHORTCUT)} du mode vidéo est déjà pris par une autre application.`,
+      detail: 'Le mode vidéo reste disponible depuis l’icône de VibeScreener.',
+    });
+  }
+  // Écran branché ou débranché : les flux filmés ne correspondent plus, l'enregistrement s'arrête.
+  const stopOnDisplayChange = () => video.isRecording() && void stopVideo();
+  screen.on('display-added', stopOnDisplayChange);
+  screen.on('display-removed', stopOnDisplayChange);
   menubar.start();
   void lookForUpdate();
   checkLicense();

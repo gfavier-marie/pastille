@@ -9,6 +9,7 @@
 > - **Export PowerPoint (.pptx)** ajouté à la demande de l'utilisateur, au lot 4 : une diapo par écran, puis une par point.
 > - **Export Markdown** (§6.3, [S]) avancé au lot 1, à côté du PDF.
 > - Tablette (§11) : **iPad + Apple Pencil**. Validation **Mac et Windows** dès les POC.
+> - **Mode vidéo** (2026-10-07, demandé, voir `ROADMAP.md`) : ⌃⌥⌘R enregistre, chaque clic suivi de paroles devient un point sur l'image d'avant le clic ; pas de fichier vidéo, la session reste ordinaire.
 
 ## 1. Contexte et objectifs
 
@@ -397,7 +398,7 @@ La transcription est tranchée : Whisper en local. Les trois autres choix struct
 - Quelle tablette : iPad avec Apple Pencil, Android, ou les deux ? Cela oriente la gestion de la pression et du rejet de paume.
 - Faut-il un usage sans internet (train, réseau d'entreprise qui filtre les WebSockets) ? Si oui, le mode Wi-Fi local passe en V1.
 
-**Hors périmètre V1** : comptes et collaboration, Linux, annotation de vidéo, retouche d'image (flou, recadrage manuel), envoi direct à une API d'IA, intégration Jira ou GitHub.
+**Hors périmètre V1** : comptes et collaboration, Linux, annotation de vidéo (ajoutée ensuite sous forme de mode vidéo sans fichier vidéo, voir `ROADMAP.md`), retouche d'image (flou, recadrage manuel), envoi direct à une API d'IA, intégration Jira ou GitHub.
 
 **Évolution à fort potentiel [C]** : un serveur MCP local exposant la session ouverte. Claude Code lirait alors les retours et les images sans passer par un PDF, et pourrait cocher lui-même les points traités.
 

@@ -37,6 +37,8 @@ export const T = {
     noSessionHint: 'La prochaine capture en ouvre une.',
     tablet: 'Tablette connectée',
     capture: 'Nouvelle capture',
+    video: 'Enregistrer une vidéo',
+    stopVideo: "Arrêter l'enregistrement",
     editor: "Ouvrir l'éditeur",
     exportPdf: 'Exporter le PDF',
     newSession: 'Nouvelle session',

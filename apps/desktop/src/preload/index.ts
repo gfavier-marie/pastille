@@ -73,6 +73,13 @@ const api: PastilleApi = {
   transcribe: (samples) => ipcRenderer.invoke('dictee:transcribe', samples),
   transcribeSample: () => ipcRenderer.invoke('dictee:sample'),
 
+  onVideoStart: (cb) => on('video:start', cb),
+  videoStarted: (error) => ipcRenderer.send('video:started', error),
+  onVideoFreeze: (cb) => on('video:freeze', cb),
+  onVideoCrop: (cb) => on('video:crop', cb),
+  videoCropped: (frameId, image) => ipcRenderer.send('video:cropped', frameId, image),
+  videoAudio: (chunk) => ipcRenderer.send('video:audio', chunk),
+
   onOverlayShow: (cb) => void on('overlay:show', cb),
   onOverlayWindows: (cb) => void on('overlay:windows', cb),
   overlayReady: () => ipcRenderer.send('overlay:ready'),

@@ -26,6 +26,7 @@ export default defineConfig({
           bar: resolve(import.meta.dirname, 'src/renderer/bar.html'),
           welcome: resolve(import.meta.dirname, 'src/renderer/welcome.html'),
           pairing: resolve(import.meta.dirname, 'src/renderer/pairing.html'),
+          video: resolve(import.meta.dirname, 'src/renderer/video.html'),
         },
       },
     },

@@ -2,9 +2,10 @@
 // ouvert à l'avance (au raccourci de capture) pour que la voix démarre sans délai au clic,
 // et ~200 ms d'audio avant le clic sont gardés. Un seul enregistrement à la fois.
 
+import { VOICE_RMS } from '../../ipc.ts';
+
 export type RecorderState = { annotationId: string; elapsedMs: number; level: number } | null;
 
-const VOICE_RMS = 0.015; // au-dessus : quelqu'un parle
 const PRE_ROLL_CHUNKS = 2; // blocs de 100 ms gardés avant le clic
 
 type Recording = { annotationId: string; chunks: Float32Array[]; startedAt: number; lastVoiceAt: number; heardVoice: boolean };

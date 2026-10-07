@@ -39,6 +39,13 @@ export const Capture = (p: Props) => (
     <circle cx="8" cy="8" r="2" />
   </Stroke>
 );
+/** Caméra : mode vidéo. */
+export const Video = (p: Props) => (
+  <Stroke {...p}>
+    <rect x="1.5" y="4" width="9" height="8" rx="1.5" />
+    <path d="M10.5 7l4-2v6l-4-2" />
+  </Stroke>
+);
 export const Window = (p: Props) => (
   <Stroke {...p}>
     <rect x="2" y="3" width="12" height="10" rx="1.5" />

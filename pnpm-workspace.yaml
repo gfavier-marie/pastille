@@ -10,6 +10,7 @@ allowBuilds:
   electron-winstaller: false # Squirrel, inutile (installeur NSIS)
   esbuild: true
   get-windows: true
+  uiohook-napi: false # binaires précompilés fournis (prebuilds), rien à compiler
   workerd: true
 
 minimumReleaseAgeExclude:

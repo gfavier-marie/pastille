@@ -26,6 +26,7 @@ export function createMenubar(opts: MenubarOptions) {
   let hiddenAt = 0; // le clic sur l'icône qui a fait perdre le focus ne doit pas rouvrir le menu
   let bar: BrowserWindow | null = null;
   let barReady = false;
+  let barHovered = false; // souris sur la pilule : ses clics ne sont pas pour le mode vidéo
   let last: MenuState | null = null;
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -169,7 +170,10 @@ export function createMenubar(opts: MenubarOptions) {
     } else if (bar?.isVisible()) bar.hide();
   }
 
-  ipcMain.on('bar:hover', (_e, inside: boolean) => bar?.setIgnoreMouseEvents(!inside, { forward: true }));
+  ipcMain.on('bar:hover', (_e, inside: boolean) => {
+    barHovered = inside;
+    bar?.setIgnoreMouseEvents(!inside, { forward: true });
+  });
   ipcMain.on('menu:resize', (_e, height: number) => {
     if (!popover) return;
     popover.setSize(POPOVER_WIDTH, Math.ceil(height));
@@ -206,6 +210,9 @@ export function createMenubar(opts: MenubarOptions) {
     },
     refresh,
     hidePopover,
+    /** Souris sur la pilule de la barre (le reste de sa fenêtre laisse passer les clics). */
+    pointerInBar: () => barHovered && !!bar?.isVisible(),
+    isBar: (win: BrowserWindow) => win === bar,
     /** Après un export : message dans la barre flottante si elle est affichée. Faux sinon. */
     notifyExport(notice: ExportNotice): boolean {
       if (!bar?.isVisible()) return false;
