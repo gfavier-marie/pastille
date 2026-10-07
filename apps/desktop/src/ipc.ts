@@ -40,6 +40,7 @@ export type VideoFeedback = {
   stopShortcut?: string; // raccourci qui arrête l'enregistrement, affiché sur « Arrêter »
   tablet?: boolean;
   armed?: boolean; // ⌘ / Ctrl tenu : le prochain clic pose un point
+  writing?: boolean; // commentaire écrit en cours (point ou remarque générale), audio suspendu
   error?: string;
 } | null;
 
@@ -213,7 +214,8 @@ export type PastilleApi = {
   videoAudio(chunk: Float32Array): void; // micro, blocs de 100 ms à 16 kHz
   onVideoFeedback(cb: (state: VideoFeedback) => void): () => void;
   videoFeedbackHover(inside: boolean): void;
-  videoAction(action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration' | 'stop'): Promise<void>;
+  videoAction(action: 'draw' | 'inspiration' | 'write' | 'capture-inspiration' | 'cancel-inspiration' | 'stop'): Promise<void>;
+  videoText(text: string | null): Promise<void>; // fin du commentaire écrit ; null l'annule
   // Overlay
   onOverlayShow(cb: (data: OverlayShow) => void): void;
   onOverlayWindows(cb: (windows: OverlayWindow[]) => void): void;

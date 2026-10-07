@@ -1,6 +1,7 @@
 // Retour visuel de la vidéo : fenêtres transparentes, sans focus, qui laissent passer les clics
 // sauf sous le bandeau, et partout tant que ⌘ / Ctrl est tenu : le clic pose alors un point sans atteindre l'app.
-import { BrowserWindow, ipcMain, screen } from 'electron';
+// Elles ne prennent le clavier que le temps d'un commentaire écrit.
+import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import type { VideoFeedback } from '../ipc.ts';
 
 export function createVideoFeedback(opts: {
@@ -10,6 +11,7 @@ export function createVideoFeedback(opts: {
   let windows: { displayId: number; win: BrowserWindow; catching: boolean }[] = [];
   let state: VideoFeedback = null;
   let hoveredId: number | null = null;
+  let writerId: number | null = null; // bandeau qui a le champ du commentaire écrit
   const fromWindow = (senderId: number) => windows.find(({ win }) => !win.isDestroyed() && win.webContents.id === senderId);
 
   // Seulement aux changements : l'état arrive dix fois par seconde avec le micro.
@@ -31,6 +33,7 @@ export function createVideoFeedback(opts: {
   function stop() {
     state = null;
     hoveredId = null;
+    writerId = null;
     for (const { win } of windows) if (!win.isDestroyed()) win.destroy();
     windows = [];
   }
@@ -85,11 +88,25 @@ export function createVideoFeedback(opts: {
       if (win.isDestroyed()) continue;
       // Après un clic, seul son écran porte le point et la dictée ; avant, le micro est annoncé partout.
       const shown = !!next && (!next.click || next.click.displayId === displayId);
-      win.webContents.send('video:feedback', shown ? next : null);
+      win.webContents.send('video:feedback', shown ? { ...next, writing: !!next.writing && win.webContents.id === writerId } : null);
       if (!shown && hoveredId === win.webContents.id) hoveredId = null;
     }
     catchMouse();
   }
 
-  return { start, stop, update, pointerInControls: () => hoveredId !== null, owns: (senderId: number) => !!fromWindow(senderId), isWindow: (win: BrowserWindow) => windows.some((w) => w.win === win) };
+  /** Commentaire écrit : le bandeau qui l'a demandé prend le clavier, puis le rend. */
+  function focus(senderId: number) {
+    const w = fromWindow(senderId);
+    if (!w) return;
+    writerId = senderId;
+    w.win.setFocusable(true);
+    if (process.platform === 'darwin') app.focus({ steal: true });
+    w.win.focus();
+  }
+  function release() {
+    writerId = null;
+    for (const { win } of windows) if (!win.isDestroyed() && win.isFocusable()) win.setFocusable(false);
+  }
+
+  return { start, stop, update, focus, release, pointerInControls: () => hoveredId !== null, owns: (senderId: number) => !!fromWindow(senderId), isWindow: (win: BrowserWindow) => windows.some((w) => w.win === win) };
 }

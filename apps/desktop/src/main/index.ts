@@ -23,7 +23,7 @@ import {
   shell,
   systemPreferences,
 } from 'electron';
-import { allAnnotations, findAnnotation, isLang, pickLang, type Geometry, type Session } from '@pastille/shared';
+import { allAnnotations, findAnnotation, findComment, isLang, pickLang, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab, VideoFeedback } from '../ipc.ts';
 import { createCapture, listWindows, windowTarget, type CapturedImage } from './capture.ts';
 import { createClicks } from './clicks.ts';
@@ -328,6 +328,7 @@ let videoFeedbackState: VideoFeedback = null;
 let videoInspiration = false;
 let videoActionBusy = false;
 let videoArmed = false; // ⌘ / Ctrl tenu
+let videoWriting: { annotationId?: string } | null = null; // commentaire écrit en cours ; sans point : remarque générale
 let videoActionError: string | undefined;
 function refreshVideoFeedback() {
   videoFeedback.update(videoFeedbackState && {
@@ -335,7 +336,8 @@ function refreshVideoFeedback() {
     tablet: tablet?.isConnected() ?? false,
     inspiration: videoInspiration ? { shortcut: shortcutLabel(settings.get().shortcut), number: inspirationTarget()?.annotation.number } : undefined,
     // Pendant une inspiration, ⌘ + clic reste à l'app (ouvrir un onglet, par exemple).
-    armed: videoArmed && !videoInspiration && !videoActionBusy,
+    armed: videoArmed && !videoInspiration && !videoActionBusy && !videoWriting,
+    writing: !!videoWriting,
     stopShortcut: shortcutLabel(VIDEO_SHORTCUT),
     error: videoActionError,
   });
@@ -375,7 +377,7 @@ const inside = (p: { x: number; y: number }, r: Electron.Rectangle) => p.x >= r.
 const clicks = createClicks({
   // Nos fenêtres ne se commentent pas ; la barre ne compte que sous la pilule (le reste laisse passer les clics).
   ignore: (p) =>
-    videoInspiration || videoActionBusy || videoFeedback.pointerInControls() || menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && !videoFeedback.isWindow(w) && inside(p, w.getBounds())),
+    videoInspiration || videoActionBusy || !!videoWriting || videoFeedback.pointerInControls() || menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && !videoFeedback.isWindow(w) && inside(p, w.getBounds())),
   onClick: (p, at) => {
     const d = screen.getDisplayNearestPoint(p);
     video.onClick({
@@ -455,6 +457,7 @@ function finishVideo(): Promise<VideoSummary> {
     clicks.stop();
     if (videoInspiration && capture?.isBusy()) capture.cancel();
     cancelVideoInspiration();
+    videoWriting = null;
     videoFeedback.stop();
     const summary = await video.stop();
     videoWindow.stop();
@@ -1004,11 +1007,11 @@ async function transcribe(wav: Uint8Array) {
 
 // ——— IPC ———
 
-ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration' | 'stop') => {
+ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'write' | 'capture-inspiration' | 'cancel-inspiration' | 'stop') => {
   if (!videoFeedback.owns(e.sender.id) || !video.isRecording()) return;
   // « Arrêter » passe même pendant une autre action ; sans attendre : l'arrêt ferme la fenêtre qui le demande.
   if (action === 'stop') return void stopVideo();
-  if (videoActionBusy) return;
+  if (videoActionBusy || videoWriting) return;
   videoActionError = undefined;
   if (action === 'cancel-inspiration') {
     if (!capture.isBusy()) cancelVideoInspiration();
@@ -1018,18 +1021,22 @@ ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'captu
     if (videoInspiration && !capture.isBusy()) startCapture();
     return;
   }
-  if (action !== 'draw' && action !== 'inspiration') return;
+  if (action !== 'draw' && action !== 'inspiration' && action !== 'write') return;
   videoActionBusy = true;
-  if (action === 'inspiration') video.pause();
+  if (action !== 'draw') video.pause(); // la frappe au clavier ne doit pas compter comme de la parole
   try {
-    const point = await video.currentPoint();
-    if (!point || !video.isRecording()) throw new Error(T.videoFeedback.pointUnavailable);
-    tablet?.setFocus(point.annotationId);
+    // Sans clic, le commentaire écrit devient une remarque générale.
+    const point = action === 'write' && !videoFeedbackState?.click ? undefined : await video.currentPoint();
+    if (point === null || !video.isRecording()) throw new Error(T.videoFeedback.pointUnavailable);
+    if (point) tablet?.setFocus(point.annotationId);
     if (action === 'draw') {
       if (!tablet?.isConnected()) showPairing();
-    } else {
-      inspirationFor = point.annotationId;
+    } else if (action === 'inspiration') {
+      inspirationFor = point!.annotationId;
       videoInspiration = true;
+    } else {
+      videoWriting = { annotationId: point?.annotationId };
+      videoFeedback.focus(e.sender.id);
     }
   } catch (err) {
     videoActionError = err instanceof Error ? err.message : String(err);
@@ -1038,6 +1045,29 @@ ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'captu
     videoActionBusy = false;
     refreshVideoFeedback();
   }
+});
+
+// Fin du commentaire écrit (Entrée ou clic ailleurs) : le texte s'ajoute au point ou à une nouvelle remarque.
+ipcMain.handle('video:text', async (e, text: string | null) => {
+  const target = videoWriting;
+  if (!videoFeedback.owns(e.sender.id) || !target) return;
+  videoWriting = null;
+  videoFeedback.release();
+  video.resume();
+  refreshVideoFeedback();
+  const typed = text?.trim();
+  if (!typed) return;
+  const id = target.annotationId ?? (await store.addNote());
+  store.update(
+    (s) => {
+      const c = findComment(s, id);
+      if (!c) return;
+      c.input = c.text.trim() ? (c.input === 'typed' ? 'typed' : 'mixed') : 'typed';
+      c.text = [c.text.trim(), typed].filter(Boolean).join(' ');
+      c.updatedAt = new Date().toISOString();
+    },
+    { undoable: true },
+  );
 });
 
 ipcMain.handle('session:get', () => store.get());

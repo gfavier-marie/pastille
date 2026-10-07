@@ -83,6 +83,7 @@ const api: PastilleApi = {
   onVideoFeedback: (cb) => on('video:feedback', cb),
   videoFeedbackHover: (inside) => ipcRenderer.send('video:feedback-hover', inside),
   videoAction: (action) => ipcRenderer.invoke('video:action', action),
+  videoText: (text) => ipcRenderer.invoke('video:text', text),
 
   onOverlayShow: (cb) => void on('overlay:show', cb),
   onOverlayWindows: (cb) => void on('overlay:windows', cb),
