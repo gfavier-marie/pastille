@@ -76,7 +76,7 @@ export const it: Texts = {
     settings: 'Impostazioni…',
     quit: 'Esci da VibeScreener',
     update: (version: string) => `Aggiorna (versione ${version})`,
-    trial: (days: number) => `Prova gratuita: ${plural(days, 'giorno rimanente', 'giorni rimanenti')}`,
+    trial: (days: number) => `Prova gratuita: ${plural(days, 'giorno', 'giorni')}`,
     buy: 'Acquista',
     license: { expired: 'Prova terminata', revoked: 'Licenza non più valida', unverified: 'Licenza da verificare' },
     pending: (n: number) => `${plural(n, 'trascrizione', 'trascrizioni')} in corso`,
@@ -254,7 +254,7 @@ export const it: Texts = {
     shortcut: {
       title: 'Prova la scorciatoia',
       intro: (keys: number) =>
-        `Apri la pagina da rivedere, poi premi ${keys > 2 ? 'questi tre tasti' : 'questa scorciatoia'}. Dopo, VibeScreener resta ${isMac ? 'nel Dock e nella barra dei menu' : "nell'area di notifica"}.`,
+        `Apri la pagina da rivedere, poi premi ${keys > 2 ? 'questi tasti insieme' : 'questa scorciatoia'}. Dopo, VibeScreener resta ${isMac ? 'nel Dock e nella barra dei menu' : "nell'area di notifica"}.`,
       waiting: 'In attesa dei tasti…',
       steps: [
         ['Scorciatoia', 'Lo schermo si blocca.'],

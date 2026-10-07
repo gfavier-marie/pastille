@@ -65,7 +65,7 @@ export const es: Texts = {
     settings: 'Ajustes…',
     quit: 'Salir de VibeScreener',
     update: (version: string) => `Actualizar (versión ${version})`,
-    trial: (days: number) => `Prueba gratuita: ${plural(days, 'día restante', 'días restantes')}`,
+    trial: (days: number) => `Prueba gratuita: ${plural(days, 'día', 'días')}`,
     buy: 'Comprar',
     license: { expired: 'Prueba terminada', revoked: 'Licencia ya no válida', unverified: 'Licencia por verificar' },
     pending: (n: number) => `${plural(n, 'transcripción', 'transcripciones')} en curso`,
@@ -243,7 +243,7 @@ export const es: Texts = {
     shortcut: {
       title: 'Prueba el atajo',
       intro: (keys: number) =>
-        `Abre la página que quieres revisar y pulsa ${keys > 2 ? 'estas tres teclas' : 'este atajo'}. Después, VibeScreener se queda en ${isMac ? 'el Dock y la barra de menús' : 'el área de notificación'}.`,
+        `Abre la página que quieres revisar y pulsa ${keys > 2 ? 'estas teclas a la vez' : 'este atajo'}. Después, VibeScreener se queda en ${isMac ? 'el Dock y la barra de menús' : 'el área de notificación'}.`,
       waiting: 'Esperando la pulsación…',
       steps: [
         ['Atajo', 'La pantalla se congela.'],

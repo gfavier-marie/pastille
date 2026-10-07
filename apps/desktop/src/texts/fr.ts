@@ -246,7 +246,7 @@ export const fr = {
     shortcut: {
       title: 'Essayez le raccourci',
       intro: (keys: number) =>
-        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces trois touches' : 'ce raccourci'}. Ensuite, VibeScreener reste dans ${isMac ? 'le Dock et la barre de menus' : 'la zone de notification'}.`,
+        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces touches ensemble' : 'ce raccourci'}. Ensuite, VibeScreener reste dans ${isMac ? 'le Dock et la barre de menus' : 'la zone de notification'}.`,
       waiting: "En attente de l'appui…",
       steps: [
         ['Raccourci', "L'écran se fige."],

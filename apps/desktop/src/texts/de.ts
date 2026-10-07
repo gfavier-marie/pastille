@@ -65,7 +65,7 @@ export const de: Texts = {
     settings: 'Einstellungen…',
     quit: 'VibeScreener beenden',
     update: (version: string) => `Aktualisieren (Version ${version})`,
-    trial: (days: number) => `Kostenlose Testphase: noch ${plural(days, 'Tag', 'Tage')}`,
+    trial: (days: number) => `Testphase: noch ${plural(days, 'Tag', 'Tage')}`,
     buy: 'Kaufen',
     license: { expired: 'Testphase abgelaufen', revoked: 'Lizenz nicht mehr gültig', unverified: 'Lizenzprüfung ausstehend' },
     pending: (n: number) => plural(n, 'laufende Transkription', 'laufende Transkriptionen'),
@@ -243,7 +243,7 @@ export const de: Texts = {
     shortcut: {
       title: 'Probier das Tastenkürzel aus',
       intro: (keys: number) =>
-        `Öffne die zu prüfende Seite und drück dann ${keys > 2 ? 'diese drei Tasten' : 'dieses Tastenkürzel'}. Danach bleibt VibeScreener ${isMac ? 'im Dock und in der Menüleiste' : 'im Infobereich der Taskleiste'}.`,
+        `Öffne die zu prüfende Seite und drück dann ${keys > 2 ? 'diese Tasten zusammen' : 'dieses Tastenkürzel'}. Danach bleibt VibeScreener ${isMac ? 'im Dock und in der Menüleiste' : 'im Infobereich der Taskleiste'}.`,
       waiting: 'Warte auf Tastendruck…',
       steps: [
         ['Tastenkürzel', 'Der Bildschirm friert ein.'],
