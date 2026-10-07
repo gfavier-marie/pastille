@@ -5,7 +5,7 @@ import { DICTS } from './index.ts';
 // Textes identiques au français acceptés : noms propres et mots transparents.
 const SAME = new Set([
   'VibeScreener', 'Claude Code', 'Whisper large-v3-turbo', 'Whisper local', 'Transcription', 'Capture', 'Mode', 'Export',
-  'Microphone', 'Sessions', 'Points', 'Point', 'point', 'Inspiration', 'Position', 'Instructions', 'Clic', '⇧ Clic',
+  'Microphone', 'Sessions', 'Points', 'Point', 'point', 'Inspiration', 'Position', 'Instructions', 'Clic', '⇧ Clic', 'clic', 'Ctrl',
 ]);
 
 /** Chaque texte fixe avec son chemin (les fonctions, écrites à la main pour chaque langue, sont laissées de côté). */

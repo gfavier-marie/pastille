@@ -14,7 +14,9 @@ vi.mock('uiohook-napi', () => ({ uIOhook: Object.assign(new EventEmitter(), { st
 import { uIOhook } from 'uiohook-napi';
 import { createClicks } from './clicks.ts';
 
-const mouse = (overrides: Record<string, unknown> = {}) => ({ type: 7, button: 1, clicks: 1, shiftKey: false, altKey: false, ...overrides });
+const mouse = (overrides: Record<string, unknown> = {}) => ({ type: 7, button: 1, clicks: 1, shiftKey: false, altKey: false, metaKey: false, ctrlKey: false, ...overrides });
+const held = { metaKey: true, ctrlKey: true }; // ⌘ sur Mac, Ctrl ailleurs
+const key = (type: number, overrides: Record<string, unknown> = {}) => ({ type, keycode: 3675, shiftKey: false, altKey: false, metaKey: false, ctrlKey: false, ...overrides });
 
 beforeEach(() => {
   uIOhook.removeAllListeners();
@@ -26,7 +28,7 @@ describe('gestes globaux de la vidéo', () => {
     const clicked = vi.fn(), gesture = vi.fn();
     const clicks = createClicks({ ignore: () => false, onClick: clicked, onGesture: gesture });
     await clicks.start();
-    uIOhook.emit('mousedown', mouse());
+    uIOhook.emit('mousedown', mouse(held));
     expect(clicked).toHaveBeenCalledWith({ x: -800, y: 400 }, expect.any(Number));
     desktop.cursor = { x: -400, y: 700 };
     // uiohook-napi transmet « input » mais n'émet pas « mousemove » pour les glissements.
@@ -43,17 +45,56 @@ describe('gestes globaux de la vidéo', () => {
   it('ignore le bandeau, le bouton droit, les double-clics et les zones système', async () => {
     const clicked = vi.fn(), gesture = vi.fn();
     const ignore = vi.fn(() => true);
-    const clicks = createClicks({ ignore, onClick: clicked, onGesture: gesture });
+    const navigated = vi.fn();
+    const clicks = createClicks({ ignore, onClick: clicked, onNavigate: navigated, onGesture: gesture });
     await clicks.start();
+    uIOhook.emit('mousedown', mouse(held));
     uIOhook.emit('mousedown', mouse());
     ignore.mockReturnValue(false);
-    uIOhook.emit('mousedown', mouse({ button: 2 }));
-    uIOhook.emit('mousedown', mouse({ clicks: 2 }));
+    uIOhook.emit('mousedown', mouse({ button: 2, ...held }));
+    uIOhook.emit('mousedown', mouse({ clicks: 2, ...held }));
     desktop.cursor = { x: -800, y: 210 };
-    uIOhook.emit('mousedown', mouse());
+    uIOhook.emit('mousedown', mouse(held));
     uIOhook.emit('mouseup', mouse());
+    expect(clicked).not.toHaveBeenCalled();
+    expect(navigated).not.toHaveBeenCalled();
+    expect(gesture).not.toHaveBeenCalled();
+    clicks.stop();
+  });
+
+  it('un clic seul navigue : ni point ni geste', async () => {
+    const clicked = vi.fn(), navigated = vi.fn(), gesture = vi.fn();
+    const clicks = createClicks({ ignore: () => false, onClick: clicked, onNavigate: navigated, onGesture: gesture });
+    await clicks.start();
+    uIOhook.emit('mousedown', mouse());
+    desktop.cursor = { x: -400, y: 700 };
+    uIOhook.emit('input', mouse({ type: 10 }));
+    uIOhook.emit('mouseup', mouse({ type: 8 }));
+    expect(navigated).toHaveBeenCalledTimes(1);
     expect(clicked).not.toHaveBeenCalled();
     expect(gesture).not.toHaveBeenCalled();
     clicks.stop();
+  });
+
+  it('⌘ / Ctrl tenu arme nos fenêtres, jusqu’au relâchement du glissement, et se corrige au mouvement', async () => {
+    const armed = vi.fn();
+    const clicks = createClicks({ ignore: () => false, onClick: vi.fn(), onArmed: armed });
+    await clicks.start();
+    uIOhook.emit('input', key(4, held));
+    expect(armed).toHaveBeenLastCalledWith(true);
+    uIOhook.emit('input', mouse(held));
+    uIOhook.emit('mousedown', mouse(held));
+    uIOhook.emit('input', key(5)); // touche relâchée pendant le glissement
+    expect(armed).toHaveBeenCalledTimes(1);
+    const up = mouse({ type: 8 });
+    uIOhook.emit('input', up);
+    uIOhook.emit('mouseup', up);
+    expect(armed).toHaveBeenLastCalledWith(false);
+    uIOhook.emit('input', key(4, held));
+    uIOhook.emit('input', mouse({ type: 9 })); // relâchement manqué : le mouvement suivant le rattrape
+    expect(armed.mock.calls).toEqual([[true], [false], [true], [false]]);
+    uIOhook.emit('input', key(4, held));
+    clicks.stop();
+    expect(armed).toHaveBeenLastCalledWith(false);
   });
 });

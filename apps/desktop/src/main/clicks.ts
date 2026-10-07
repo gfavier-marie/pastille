@@ -1,6 +1,7 @@
 // Clics de souris dans tout le système, pour le mode vidéo : Electron n'écoute que le clavier
 // (globalShortcut). uiohook-napi (libuiohook) reçoit les clics des autres apps ; sur macOS, il
 // exige l'autorisation Accessibilité. On n'écoute que le bouton gauche, et seulement pendant l'enregistrement.
+// ⌘ + clic (Ctrl sous Windows) pose un point ; un clic seul sert à naviguer.
 // Le module natif n'est chargé qu'au premier enregistrement : s'il échoue, seul le mode vidéo est touché.
 
 import { screen, systemPreferences } from 'electron';
@@ -9,19 +10,33 @@ import type { Geometry } from '@pastille/shared';
 import { videoGesture } from './video-gesture.ts';
 
 type Point = { x: number; y: number };
+type HookEvent = UiohookKeyboardEvent | UiohookMouseEvent | UiohookWheelEvent;
 
 const LEFT_BUTTON = 1;
 const MOUSE_DRAGGED = 10; // libuiohook : transmis par « input », omis du « mousemove » de uiohook-napi
 const inside = (p: Point, r: Electron.Rectangle) => p.x >= r.x && p.y >= r.y && p.x < r.x + r.width && p.y < r.y + r.height;
+// Touche des points : ⌘ seule ne fait rien dans les apps Mac, Ctrl seule rien sous Windows (Alt y ouvre le menu).
+const pointKey = (e: HookEvent) => (process.platform === 'darwin' ? e.metaKey : e.ctrlKey);
 
 export function createClicks(opts: {
   ignore: (p: Point) => boolean; // clic sur une de nos fenêtres
-  onClick: (p: Point, at: number) => void; // position globale en DIP, Date.now() du clic
+  onClick: (p: Point, at: number) => void; // ⌘ + clic : position globale en DIP, Date.now() du clic
+  onNavigate?: () => void; // clic seul
+  onArmed?: (armed: boolean) => void; // ⌘ / Ctrl tenu : nos fenêtres doivent prendre le clic avant l'app
   onGesture?: (displayId: number, geometry: Geometry | undefined, crop: boolean, done: boolean) => void;
 }) {
   let hook: typeof import('uiohook-napi')['uIOhook'] | null = null;
   let running = false;
+  let armed = false;
   let gesture: { start: Point & { shift: boolean }; display: Electron.Display } | null = null;
+
+  // Chaque événement porte l'état des touches : un relâchement manqué se corrige au mouvement suivant.
+  // Pendant un glissement, nos fenêtres gardent la souris jusqu'au relâchement.
+  function arm(held: boolean) {
+    if (held === armed || gesture) return;
+    armed = held;
+    opts.onArmed?.(held);
+  }
 
   function onMouseDown(e: UiohookMouseEvent) {
     // Bouton gauche ; le 2ᵉ clic d'un double-clic ne compte pas.
@@ -32,6 +47,7 @@ export function createClicks(opts: {
     // Barre des menus, Dock, barre des tâches : rien à commenter.
     const display = screen.getDisplayNearestPoint(p);
     if (!inside(p, display.workArea) || opts.ignore(p)) return;
+    if (!pointKey(e)) return opts.onNavigate?.();
     gesture = { start: { ...p, shift: e.shiftKey }, display };
     opts.onClick(p, at);
   }
@@ -42,11 +58,15 @@ export function createClicks(opts: {
     const end = { ...screen.getCursorScreenPoint(), alt: e.altKey };
     const { geometry, crop } = videoGesture(start, end, display.bounds);
     opts.onGesture?.(display.id, geometry, crop, done);
-    if (done) gesture = null;
+    if (done) {
+      gesture = null;
+      arm(pointKey(e));
+    }
   }
   const onMouseMove = (e: UiohookMouseEvent) => updateGesture(e, false);
   const onMouseUp = (e: UiohookMouseEvent) => e.button === LEFT_BUTTON && updateGesture(e, true);
-  const onInput = (e: UiohookKeyboardEvent | UiohookMouseEvent | UiohookWheelEvent) => {
+  const onInput = (e: HookEvent) => {
+    arm(pointKey(e));
     if (Number(e.type) === MOUSE_DRAGGED && 'button' in e) updateGesture(e, false);
   };
 
@@ -83,6 +103,7 @@ export function createClicks(opts: {
       hook.stop();
       running = false;
       gesture = null;
+      arm(false);
     },
   };
 }

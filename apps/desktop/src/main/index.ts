@@ -284,8 +284,8 @@ function reportCapture(r: CaptureResult) {
 }
 
 // ——— Mode vidéo ———
-// ⌃⌥⌘R : on navigue dans son app, chaque clic suivi de paroles devient un point sur l'image d'avant
-// le clic (voir video.ts). ⌃⌥⌘R arrête et ouvre l'éditeur. Pas de fichier vidéo : la session reste ordinaire.
+// ⌃⌥⌘R : on navigue dans son app par des clics seuls ; ⌘ + clic (Ctrl + clic) suivi de paroles devient
+// un point (voir video.ts). ⌃⌥⌘R ou « Arrêter » ouvre l'éditeur. Pas de fichier vidéo : la session reste ordinaire.
 
 const VIDEO_SHORTCUT = isMac ? 'Command+Control+Alt+R' : 'Control+Alt+R';
 const videoWindow = createVideoWindow({ preload, loadPage, onAudio: (chunk) => video.onAudio(chunk) });
@@ -293,12 +293,16 @@ const videoFeedback = createVideoFeedback({ preload, loadPage });
 let videoFeedbackState: VideoFeedback = null;
 let videoInspiration = false;
 let videoActionBusy = false;
+let videoArmed = false; // ⌘ / Ctrl tenu
 let videoActionError: string | undefined;
 function refreshVideoFeedback() {
   videoFeedback.update(videoFeedbackState && {
     ...videoFeedbackState,
     tablet: tablet?.isConnected() ?? false,
     inspiration: videoInspiration ? { shortcut: shortcutLabel(settings.get().shortcut), number: inspirationTarget()?.annotation.number } : undefined,
+    // Pendant une inspiration, ⌘ + clic reste à l'app (ouvrir un onglet, par exemple).
+    armed: videoArmed && !videoInspiration && !videoActionBusy,
+    shortcut: shortcutLabel(VIDEO_SHORTCUT),
     error: videoActionError,
   });
 }
@@ -348,6 +352,11 @@ const clicks = createClicks({
       at,
       held: true,
     });
+  },
+  onNavigate: () => video.onNavigate(),
+  onArmed: (armed) => {
+    videoArmed = armed;
+    refreshVideoFeedback();
   },
   onGesture: (displayId, geometry, crop, done) => video.onGesture(displayId, geometry, crop, done),
 });
@@ -827,8 +836,10 @@ async function transcribe(wav: Uint8Array) {
 
 // ——— IPC ———
 
-ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration') => {
-  if (!videoFeedback.owns(e.sender.id) || !video.isRecording() || videoActionBusy) return;
+ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration' | 'stop') => {
+  if (!videoFeedback.owns(e.sender.id) || !video.isRecording()) return;
+  if (action === 'stop') return void stopVideo();
+  if (videoActionBusy) return;
   videoActionError = undefined;
   if (action === 'cancel-inspiration') {
     if (!capture.isBusy()) cancelVideoInspiration();

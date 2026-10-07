@@ -1,7 +1,7 @@
-// Mode vidéo : pendant l'enregistrement, chaque clic fige l'image de l'écran d'avant le clic et ouvre
-// un segment d'audio, clos au clic suivant ou à l'arrêt. Un segment où l'on a parlé devient un point
-// à l'endroit cliqué ; sans parole, il ne laisse rien. Ce qui est dit avant le premier clic devient une
-// remarque générale. Un point sur un écran presque inchangé rejoint la capture précédente.
+// Mode vidéo : pendant l'enregistrement, chaque ⌘ + clic (Ctrl + clic) fige l'image de l'écran et ouvre
+// un segment d'audio, clos au clic suivant (de point ou de navigation) ou à l'arrêt. Un segment où l'on
+// a parlé devient un point à l'endroit cliqué ; sans parole, il ne laisse rien. Ce qui est dit hors d'un
+// point devient une remarque générale. Un point sur un écran presque inchangé rejoint la capture précédente.
 // Sans import d'electron : testé avec des clics et des images factices.
 
 import type { Geometry } from '@pastille/shared';
@@ -234,6 +234,16 @@ export function createVideo(deps: VideoDeps) {
       const target = deps.target(click);
       close(segment);
       segment = { click: { ...click, frameId, target }, chunks: [], voicedChunks: 0 };
+      level = 0;
+      deps.onPoint?.(null);
+      feedback();
+    },
+
+    /** Clic seul : on navigue. Le point en cours se termine ; une remarque générale continue. */
+    onNavigate() {
+      if (!recording || paused || !segment.click) return;
+      close(segment);
+      segment = { chunks: [], voicedChunks: 0 };
       level = 0;
       deps.onPoint?.(null);
       feedback();

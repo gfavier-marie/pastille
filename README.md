@@ -56,7 +56,7 @@ Menu de l'icône > « Appairer une tablette », scanner le QR code avec l'appare
 
 ## Mode vidéo
 
-**⌃⌥⌘R** (Windows : **Ctrl+Alt+R**) démarre et arrête. Naviguez dans votre app : un clic suivi de paroles garde un point sur l'image d'avant le clic. La pastille et le bandeau de dictée donnent le retour à l'écran. **Glisser** encadre une zone ; **⇧ + glisser** trace une flèche ; **⌥/Alt + glisser** recadre l'image sur le cadre. Sans parole ni pièce jointe, les clics de navigation ne sont pas conservés.
+**⌃⌥⌘R** (Windows : **Ctrl+Alt+R**) démarre et arrête, comme le bouton **Arrêter** du bandeau. Naviguez normalement : un clic seul ne laisse rien. **⌘ + clic** (Windows : **Ctrl + clic**) pose un point, puis parlez : la dictée va à ce point jusqu'au clic suivant. Tant que ⌘ est tenu, le clic n'atteint pas l'app. **⌘ + glisser** encadre une zone ; avec **⇧** en plus, le geste trace une flèche ; avec **⌥/Alt** en plus, l'image est recadrée sur le cadre. Ce qui est dit hors d'un point devient une remarque générale ; un point sans parole ni pièce jointe n'est pas gardé. Le bandeau en bas de l'écran rappelle les touches et indique où va la voix.
 
 Le point dicté est envoyé à la tablette pendant l'enregistrement. Le bouton **Dessiner sur la tablette** permet aussi de garder un point sans dictée, puis d'y joindre un croquis. **Inspiration** suspend les clics et la dictée pendant la recherche : ouvrez la page modèle, puis utilisez le raccourci de capture ou **Capturer l’inspiration**. La capture rejoint le point d'origine et la vidéo reprend ; **Échap** dans la capture ou **Reprendre la vidéo** annule l'inspiration. À l'arrêt, tout se retrouve dans le même éditeur et les mêmes exports que les captures d'écran.
 
