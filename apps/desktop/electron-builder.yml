@@ -32,6 +32,8 @@ mac:
   # Demande d'accès au micro : anglais par défaut, traduite dans build/lproj (macOS prend la langue du système).
   extendInfo:
     NSMicrophoneUsageDescription: VibeScreener uses the microphone to dictate your comments.
+    # Pas d'icône dans le Dock au lancement : elle n'apparaît que tant qu'une fenêtre est ouverte (dock.ts).
+    LSUIElement: true
   extraResources:
     - from: build/lproj
       to: .

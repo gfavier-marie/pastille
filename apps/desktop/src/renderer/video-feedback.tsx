@@ -66,7 +66,7 @@ function App() {
         <strong>{state.inspiration ? v.chooseInspiration : c ? v.point(c.number) : v.general}</strong>
         {!state.inspiration && <><Wave levels={levels.current} /><time>{clock(state.elapsedMs)}</time></>}
         <button type="button" className="stop" onClick={() => void window.pastille.videoAction('stop')}>
-          <span className="stop-icon" />{v.stop}{state.shortcut && <kbd>{state.shortcut}</kbd>}
+          <I.Stop size={13} />{v.stop}{state.stopShortcut && <kbd>{state.stopShortcut}</kbd>}
         </button>
       </div>
       {state.inspiration ? <>

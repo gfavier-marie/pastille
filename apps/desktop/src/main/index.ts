@@ -1,6 +1,6 @@
 // Processus principal : toute la logique vit ici, les fenêtres ne font qu'afficher.
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync, mkdirSync, mkdtempSync, renameSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, normalize, sep } from 'node:path';
@@ -16,6 +16,7 @@ import {
   ipcMain,
   Menu,
   net,
+  Notification,
   protocol,
   screen,
   session as electronSession,
@@ -27,6 +28,7 @@ import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction
 import { createCapture, listWindows, windowTarget, type CapturedImage } from './capture.ts';
 import { createClicks } from './clicks.ts';
 import { createDictation } from './dictation.ts';
+import { createDock } from './dock.ts';
 import { createMenubar } from './menubar.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
@@ -38,7 +40,7 @@ import { encodeWav, wavDurationMs } from './wav.ts';
 import { createLicense, POLAR, SITE_URL, TRIAL_DAYS } from './license.ts';
 import { createSettings, type Settings } from './settings.ts';
 import { createTranscriber } from './transcriber.ts';
-import { checkForUpdate, installUpdate, type Update } from './updater.ts';
+import { checkForUpdate, runInstaller, updateFiles, updateOutcome, type Update } from './updater.ts';
 import { createVideo, type VideoSummary } from './video.ts';
 import { createVideoWindow } from './video-window.ts';
 import { createVideoFeedback } from './video-feedback.ts';
@@ -172,6 +174,26 @@ function registerShortcut(accelerator: string): boolean {
   return shortcutRegistered;
 }
 
+// ——— Icône du Dock (macOS) : seulement tant qu'une fenêtre est ouverte ———
+
+let editorOpen = false; // éditeur ouvert pour l'utilisateur, même masqué le temps d'une capture
+const dock = createDock({
+  open: () => editorOpen || !!settingsWindow || !!welcomeWindow || !!pairingWindow || !!pocWindow,
+  busy: () => !!capture?.isBusy(),
+  isVisible: () => app.dock?.isVisible() ?? false,
+  show: async () => app.dock?.show(),
+  hide: () => app.dock?.hide(),
+});
+/** À l'ouverture ou à la fermeture d'une fenêtre. L'icône qui revient prend le focus : il est rendu à `win`. */
+function syncDock(win?: BrowserWindow) {
+  if (!isMac || autotest) return;
+  void dock.sync().then((shown) => {
+    if (!shown || !win || win.isDestroyed() || !win.isVisible()) return;
+    app.focus({ steal: true });
+    win.focus();
+  });
+}
+
 // ——— Éditeur ———
 
 function createEditor() {
@@ -192,8 +214,11 @@ function createEditor() {
   win.on('close', (e) => {
     if (!quitting) {
       e.preventDefault();
-      if (isMac) win.hide();
-      else win.minimize();
+      if (isMac) {
+        win.hide();
+        editorOpen = false;
+        syncDock();
+      } else win.minimize();
     }
   });
   loadPage(win, 'editor');
@@ -206,9 +231,18 @@ function showEditor(focus?: EditorFocus) {
   editor ??= createEditor();
   if (focus) editor.webContents.send('editor:focus', focus);
   if (editor.isMinimized()) editor.restore();
+  editorOpen = true;
   editor.show();
   if (isMac) app.focus({ steal: true });
   editor.focus();
+  syncDock(editor);
+}
+
+/** Éditeur masqué pour une vidéo : comme fermé, l'icône du Dock s'en va avec lui. */
+function hideEditor() {
+  editor?.hide();
+  editorOpen = false;
+  syncDock();
 }
 
 // ——— Captures ———
@@ -302,7 +336,7 @@ function refreshVideoFeedback() {
     inspiration: videoInspiration ? { shortcut: shortcutLabel(settings.get().shortcut), number: inspirationTarget()?.annotation.number } : undefined,
     // Pendant une inspiration, ⌘ + clic reste à l'app (ouvrir un onglet, par exemple).
     armed: videoArmed && !videoInspiration && !videoActionBusy,
-    shortcut: shortcutLabel(VIDEO_SHORTCUT),
+    stopShortcut: shortcutLabel(VIDEO_SHORTCUT),
     error: videoActionError,
   });
 }
@@ -387,7 +421,7 @@ async function toggleVideo() {
   }
   videoStarting = true;
   try {
-    editor?.hide(); // on relit son app, pas l'éditeur
+    hideEditor(); // on relit son app, pas l'éditeur
     await videoWindow.start();
     await videoFeedback.start();
     await clicks.start();
@@ -530,6 +564,7 @@ async function menuState(): Promise<MenuState> {
     video: { shortcut: shortcutLabel(VIDEO_SHORTCUT), since: video.isRecording() ? video.startedAt() : undefined },
     recents: recents.map(({ id, name, points, screens, updatedAt }) => ({ id, name, points, screens, updatedAt })),
     update: update?.version,
+    updateProgress,
     license: license.view(),
   };
 }
@@ -537,15 +572,30 @@ async function menuState(): Promise<MenuState> {
 // ——— Mises à jour (app installée sur Mac ou Windows) ———
 
 let update: Update | null = null;
+let updateCheckedAt = 0;
+let updateChecking = false;
+let updateProgress: number | undefined; // téléchargement en cours (%) ; garde aussi contre un 2ᵉ clic
+const updateDir = () => join(app.getPath('userData'), 'update');
+const updateLog = () => join(app.getPath('userData'), 'update.log');
 
+/** Au lancement, toutes les 6 h et à l'ouverture du menu (au plus toutes les 10 min). Un échec
+ *  (hors ligne, serveur lent) garde la version connue au lieu de faire disparaître « Mettre à jour ». */
 async function lookForUpdate() {
-  if (!app.isPackaged || !(isMac || process.platform === 'win32') || autotest) return;
-  update = await checkForUpdate(app.getVersion());
+  if (!app.isPackaged || !(isMac || process.platform === 'win32') || autotest || updateChecking) return;
+  updateChecking = true;
+  try {
+    update = await checkForUpdate(app.getVersion());
+    updateCheckedAt = Date.now();
+  } catch {
+    // nouvel essai à la prochaine ouverture du menu
+  } finally {
+    updateChecking = false;
+  }
   updateTrayMenu();
 }
 
 async function confirmUpdate() {
-  if (!update) return;
+  if (!update || updateProgress !== undefined) return;
   const { response } = await dialog.showMessageBox({
     message: T.main.update(update.version),
     detail: T.main.updateDetail + (isMac ? `\n${T.main.updateDetailMac}` : ''),
@@ -553,9 +603,71 @@ async function confirmUpdate() {
     defaultId: 0,
     cancelId: 1,
   });
-  if (response !== 0) return;
-  await store.flush();
-  installUpdate(update, join(app.getPath('userData'), 'update.log'));
+  if (response === 0) await installUpdate(update);
+}
+
+/** L'app télécharge l'installeur et le script (progression dans le menu et à côté de l'icône),
+ *  lance le script puis se ferme ; il la remplace et la rouvre. */
+async function installUpdate(target: Update) {
+  if (updateProgress !== undefined) return;
+  const files = updateFiles(process.platform, target.version, updateDir());
+  updateProgress = 0;
+  updateTrayMenu();
+  notify(T.main.updateStarted(target.version));
+  try {
+    await rm(updateDir(), { recursive: true, force: true });
+    await mkdir(updateDir(), { recursive: true });
+    await downloadFile(files.script.url, files.script.path);
+    await downloadFile(files.installer.url, files.installer.path, (done, total) => {
+      const pct = total ? Math.floor((done / total) * 100) : 0;
+      if (pct === updateProgress) return;
+      updateProgress = pct;
+      updateTrayMenu();
+    });
+    await store.flush();
+    settings.update({ updatingTo: target.version });
+    await runInstaller({ installer: files.installer.path, script: files.script.path }, updateLog());
+  } catch (err) {
+    settings.update({ updatingTo: '' });
+    updateProgress = undefined;
+    updateTrayMenu();
+    const { response } = await dialog.showMessageBox({
+      type: 'warning',
+      message: T.main.updateFailed,
+      detail: err instanceof Error ? err.message : String(err),
+      buttons: [T.main.retry, T.main.cancel],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (response === 0) void installUpdate(target);
+    return;
+  }
+  app.quit();
+}
+
+/** Lancement qui suit une mise à jour depuis l'app : réussie, on le dit ; sinon, le journal dit pourquoi. */
+function reportUpdate() {
+  const { updatingTo } = settings.get();
+  const outcome = updateOutcome(updatingTo, app.getVersion());
+  if (!outcome) return;
+  settings.update({ updatingTo: '' });
+  void rm(updateDir(), { recursive: true, force: true });
+  if (outcome === 'done') return notify(T.main.updateDone(app.getVersion()));
+  void dialog
+    .showMessageBox({
+      type: 'warning',
+      message: T.main.updateIncomplete(updatingTo),
+      detail: T.main.updateIncompleteDetail(app.getVersion()),
+      buttons: [T.main.openLog, T.main.close],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    .then(({ response }) => response === 0 && void shell.openPath(updateLog()));
+}
+
+/** Notification du système (Windows : grâce à l'AppUserModelId posé au démarrage). */
+function notify(body: string) {
+  if (Notification.isSupported()) new Notification({ title: 'VibeScreener', body }).show();
 }
 
 let lastExport: string | null = null;
@@ -570,14 +682,17 @@ function onMenuAction(a: MenuAction) {
     case 'video':
       return void toggleVideo();
     case 'editor':
-      return showEditor();
+      return openApp();
     case 'sessions':
       showEditor();
       return editor?.webContents.send('editor:sessions');
     case 'export':
       return void exportFromMenu('pdf');
     case 'new-session':
-      return void finishVideo().then(() => store.close());
+      // Session fermée, éditeur vide : on y choisit une capture ou une vidéo.
+      return void finishVideo()
+        .then(() => store.close())
+        .then(() => showEditor());
     case 'pair':
       return showPairing();
     case 'claude-code':
@@ -610,6 +725,7 @@ const menubar = createMenubar({
   recording: () => recording || video.isRecording(),
   barEnabled: () => settings.get().floatingBar,
   onAction: onMenuAction,
+  onOpen: () => Date.now() - updateCheckedAt > 10 * 60_000 && void lookForUpdate(),
 });
 const updateTrayMenu = () => menubar.refresh();
 
@@ -632,11 +748,15 @@ function showPairing() {
       webPreferences: { preload },
     });
     pairingWindow.setContentProtection(true);
-    pairingWindow.on('closed', () => (pairingWindow = null));
+    pairingWindow.on('closed', () => {
+      pairingWindow = null;
+      syncDock();
+    });
     loadPage(pairingWindow, 'pairing');
   }
   pairingWindow.show();
   if (isMac) app.focus({ steal: true });
+  syncDock(pairingWindow);
 }
 
 // Correction d'erreur maximale : le logo posé au centre du code ne gêne pas la lecture.
@@ -656,7 +776,7 @@ function showSettings(tab?: SettingsTab) {
     settingsWindow = new BrowserWindow({
       width: 760,
       height: 640,
-      minWidth: 640,
+      minWidth: 700, // sept onglets
       minHeight: 480,
       title: T.main.windows.settings,
       backgroundColor: '#F5F5F7',
@@ -665,20 +785,25 @@ function showSettings(tab?: SettingsTab) {
       webPreferences: { preload },
     });
     settingsWindow.setContentProtection(true);
-    settingsWindow.on('closed', () => (settingsWindow = null));
+    settingsWindow.on('closed', () => {
+      settingsWindow = null;
+      syncDock();
+    });
     loadPage(settingsWindow, 'settings');
     if (tab) settingsWindow.webContents.once('did-finish-load', () => settingsWindow?.webContents.send('settings:tab', tab));
   } else if (tab) settingsWindow.webContents.send('settings:tab', tab);
   settingsWindow.show();
   if (isMac) app.focus({ steal: true });
+  syncDock(settingsWindow);
 }
 
 let welcomeWindow: BrowserWindow | null = null;
+const WELCOME_HEIGHT = 560; // trois autorisations à l’étape 1
 function showWelcome() {
   if (!welcomeWindow) {
     welcomeWindow = new BrowserWindow({
       width: 720,
-      height: 520,
+      height: WELCOME_HEIGHT,
       useContentSize: true,
       resizable: false,
       minimizable: false,
@@ -689,18 +814,56 @@ function showWelcome() {
       webPreferences: { preload },
     });
     welcomeWindow.setContentProtection(true);
-    welcomeWindow.on('closed', () => (welcomeWindow = null));
+    // Autorisations relues chaque seconde : l'assistant suit les Réglages Système, et revient devant
+    // dès qu'une autorisation est donnée (il était passé derrière eux).
+    let before = permissions();
+    const poll = setInterval(() => {
+      const now = permissions();
+      if (JSON.stringify(now) === JSON.stringify(before)) return;
+      const granted = (Object.keys(now) as (keyof typeof now)[]).some((k) => now[k] === 'granted' && before[k] !== 'granted');
+      before = now;
+      broadcastSettings();
+      if (granted && welcomeWindow) bringToFront(welcomeWindow);
+    }, 1000);
+    welcomeWindow.on('closed', () => {
+      clearInterval(poll);
+      welcomeWindow = null;
+      syncDock();
+    });
     loadPage(welcomeWindow, 'welcome');
   }
   welcomeWindow.show();
   if (isMac) app.focus({ steal: true });
+  syncDock(welcomeWindow);
 }
 
-/** Autorisations système : enregistrement de l'écran (macOS seulement) et micro. */
+/** macOS 14+ refuse souvent qu'une app passe d'elle-même au premier plan : la fenêtre se met un
+ *  instant au-dessus de tout, le temps de reprendre le focus. */
+function bringToFront(win: BrowserWindow) {
+  win.setAlwaysOnTop(true, 'floating');
+  win.show();
+  if (isMac) app.focus({ steal: true });
+  win.focus();
+  setTimeout(() => !win.isDestroyed() && win.setAlwaysOnTop(false), 1500);
+}
+
+/** Ouvrir l'app (Dock, 2ᵉ lancement, « Ouvrir l'éditeur ») : l'éditeur, et l'assistant par-dessus
+ *  tant qu'il n'est pas fini. */
+function openApp() {
+  showEditor();
+  if (setupNeeded()) showWelcome();
+}
+
+/** Autorisations système : enregistrement de l'écran (macOS seulement), micro, et Accessibilité
+ *  (macOS, pour les clics du mode vidéo ; facultative). */
 function permissions() {
   const status = (kind: 'screen' | 'microphone') =>
     isMac || process.platform === 'win32' ? systemPreferences.getMediaAccessStatus(kind) : 'granted';
-  return { screen: isMac ? status('screen') : 'granted', microphone: status('microphone') };
+  return {
+    screen: isMac ? status('screen') : 'granted',
+    microphone: status('microphone'),
+    accessibility: clicks.allowed() ? 'granted' : 'denied',
+  };
 }
 
 /** L'assistant s'ouvre au premier lancement, puis tant qu'une autorisation nécessaire manque
@@ -716,9 +879,9 @@ function settingsState(): SettingsState {
     ...settings.view(),
     platform: isMac ? 'mac' : process.platform === 'win32' ? 'win' : 'other',
     shortcutLabel: shortcutLabel(settings.get().shortcut),
+    videoShortcutLabel: shortcutLabel(VIDEO_SHORTCUT),
     shortcutOk: shortcutRegistered,
     permissions: permissions(),
-    modelPresent: transcriber.status().state !== 'missing' || settings.get().engine === 'api',
     whisper: transcriber.status(),
     tabletPaired: tablet?.isPaired() ?? false,
     tabletConnected: tablet?.isConnected() ?? false,
@@ -776,10 +939,11 @@ ipcMain.handle('settings:download-model', async (e) => {
     return { ok: false, error: String(err) };
   }
 });
-ipcMain.handle('settings:permission', async (_e, kind: 'screen' | 'microphone') => {
+ipcMain.handle('settings:permission', async (_e, kind: 'screen' | 'microphone' | 'accessibility') => {
   if (kind === 'microphone' && isMac && (await systemPreferences.askForMediaAccess('microphone'))) return broadcastSettings();
   if (kind === 'screen') await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 1, height: 1 } }).catch(() => {});
-  const pane = kind === 'screen' ? 'Privacy_ScreenCapture' : 'Privacy_Microphone';
+  if (kind === 'accessibility') clicks.ask(); // inscrit l'app dans la liste : il ne reste qu'à la cocher
+  const pane = { screen: 'Privacy_ScreenCapture', microphone: 'Privacy_Microphone', accessibility: 'Privacy_Accessibility' }[kind];
   void shell.openExternal(
     isMac ? `x-apple.systempreferences:com.apple.preference.security?${pane}` : 'ms-settings:privacy-microphone',
   );
@@ -821,10 +985,14 @@ function showPoc() {
   if (!pocWindow) {
     pocWindow = new BrowserWindow({ width: 560, height: 760, title: 'VibeScreener — mesures', webPreferences: { preload } });
     pocWindow.setContentProtection(true);
-    pocWindow.on('closed', () => (pocWindow = null));
+    pocWindow.on('closed', () => {
+      pocWindow = null;
+      syncDock();
+    });
     loadPage(pocWindow, 'poc');
   }
   pocWindow.show();
+  syncDock(pocWindow);
 }
 
 async function transcribe(wav: Uint8Array) {
@@ -838,6 +1006,7 @@ async function transcribe(wav: Uint8Array) {
 
 ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration' | 'stop') => {
   if (!videoFeedback.owns(e.sender.id) || !video.isRecording()) return;
+  // « Arrêter » passe même pendant une autre action ; sans attendre : l'arrêt ferme la fenêtre qui le demande.
   if (action === 'stop') return void stopVideo();
   if (videoActionBusy) return;
   videoActionError = undefined;
@@ -981,6 +1150,7 @@ ipcMain.handle('dictee:sample', async () =>
   transcribe(new Uint8Array(await readFile(join(app.getAppPath(), 'fixtures', 'dictee-fr.wav')))),
 );
 ipcMain.on('capture:start', () => startCapture());
+ipcMain.on('video:toggle', () => void toggleVideo());
 
 // ——— Test de bout en bout sans interaction ———
 
@@ -1033,6 +1203,12 @@ async function runEditorAutotest() {
   await wait(600);
   await writeFile(join(out, 'sessions.png'), (await editor.webContents.capturePage()).toPNG());
   editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
+  // Menu ≡ de l'en-tête (entrées du menu de l'icône), puis refermé (Échap).
+  await wait(300);
+  await editor.webContents.executeJavaScript(`document.querySelector('.app-menu .menu-btn').click()`);
+  await wait(400);
+  await writeFile(join(out, 'editor-menu.png'), (await editor.webContents.capturePage()).toPNG());
+  editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
   // Onglet « Remarques générales » du panneau de droite.
   await wait(300);
   await editor.webContents.executeJavaScript(`document.querySelectorAll('[role="tab"]')[1].click()`);
@@ -1043,6 +1219,9 @@ async function runEditorAutotest() {
   await new Promise<void>((r) => settingsWindow!.webContents.once('did-finish-load', () => r()));
   await wait(1000);
   await writeFile(join(out, 'settings.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
+  settingsWindow!.webContents.send('settings:tab', 'permissions');
+  await wait(400);
+  await writeFile(join(out, 'settings-permissions.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
   settingsWindow!.webContents.send('settings:tab', 'claude');
   await wait(400);
   await writeFile(join(out, 'settings-claude.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
@@ -1067,7 +1246,7 @@ async function photographScreens(out: string) {
   }
   const move = (win: BrowserWindow, x: number, y: number) => win.webContents.sendInputEvent({ type: 'mouseMove', x, y });
 
-  for (const step of [1, 2, 3]) await photo(`welcome-${step}`, 'welcome', 720, 520, undefined, String(step));
+  for (const step of [1, 2, 3]) await photo(`welcome-${step}`, 'welcome', 720, WELCOME_HEIGHT, undefined, String(step));
   await photo('pairing', 'pairing', 720, pairingHeight(false));
   await photo('menu', 'menu', 330, 560);
   await photo('bar', 'bar', 640, 64);
@@ -1164,9 +1343,11 @@ function appMenu() {
 let capture: ReturnType<typeof createCapture>;
 let quitting = false;
 
-if (!autotest && !app.requestSingleInstanceLock()) app.quit();
-// « VibeScreener.exe --quit » : install.ps1 ferme proprement l'app avant de la remplacer.
-app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : showEditor()));
+// « VibeScreener.exe --quit » : install.ps1 ferme proprement l'app avant de la remplacer (le verrou est
+// demandé d'abord : c'est lui qui prévient l'app lancée). Si l'ancienne l'a déjà rendu en se fermant,
+// cette copie s'arrête aussi au lieu de démarrer pendant l'installation.
+if ((!autotest && !app.requestSingleInstanceLock()) || process.argv.includes('--quit')) app.quit();
+app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : openApp()));
 app.on('window-all-closed', () => {
   // L'app reste active sans fenêtre : icône de la barre de menus (zone de notification sous Windows).
 });
@@ -1187,6 +1368,8 @@ app.on('will-quit', () => {
 });
 
 void app.whenReady().then(async () => {
+  // Windows : sans cet identifiant (celui de l'installeur), les notifications ne s'affichent pas.
+  if (process.platform === 'win32') app.setAppUserModelId('fr.pastille.desktop');
   if (isMac) {
     Menu.setApplicationMenu(appMenu());
     if (!app.isPackaged) app.dock?.setIcon(join(app.getAppPath(), 'build', 'icon.png')); // l'app installée a la sienne
@@ -1290,6 +1473,7 @@ void app.whenReady().then(async () => {
   screen.on('display-added', stopOnDisplayChange);
   screen.on('display-removed', stopOnDisplayChange);
   menubar.start();
+  reportUpdate();
   void lookForUpdate();
   checkLicense();
   // L'app reste lancée des jours ; la clé n'est revérifiée qu'une fois par jour.
@@ -1299,11 +1483,14 @@ void app.whenReady().then(async () => {
   }, 6 * 3600_000);
   if (process.env.PASTILLE_POC) showPoc(); // fenêtre de mesures du lot 0, hors du menu
   editor = createEditor(); // préchargé pour s'ouvrir sans attendre après une capture
-  app.on('activate', () => showEditor()); // macOS : clic sur l'icône du Dock
+  syncDock(); // en développement, sans LSUIElement : l'icône part si aucune fenêtre ne s'ouvre
+  app.on('activate', () => openApp()); // macOS : clic sur l'icône du Dock, ou app relancée depuis le Finder
+  // Assistant de premier lancement (§4.9), rouvert tant qu'il n'est pas fini ou qu'une autorisation manque ;
+  // ouvert sans attendre le chargement de Whisper. Sans assistant, un modèle manquant ouvre les réglages.
+  if (setupNeeded()) showWelcome();
   void transcriber.restart().then(() => {
-    // Assistant de premier lancement (§4.9), rouvert si une autorisation manque. Sinon, un modèle manquant ouvre les réglages.
-    if (setupNeeded()) showWelcome();
-    else if (settings.get().engine === 'local' && transcriber.status().state === 'missing') showSettings('transcription');
+    broadcastSettings();
+    if (!welcomeWindow && settings.get().engine === 'local' && transcriber.status().state === 'missing') showSettings('transcription');
   });
   dictation.resume();
   void tablet?.start();

@@ -60,6 +60,7 @@ export function createVideoFeedback(opts: {
       });
       win.setIgnoreMouseEvents(true, { forward: true });
       win.setAlwaysOnTop(true, 'screen-saver');
+      // Sans skipTransformProcessType, Electron cache l'icône du Dock dès la première vidéo.
       win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
       win.setContentProtection(true);
       return { displayId: d.id, win, catching: false };

@@ -1,7 +1,8 @@
 # Installe (ou met à jour) VibeScreener sur Windows, branche Claude Code et lance l'app, dans PowerShell :
 #   irm https://vibescreener.dev/install.ps1 | iex
 # Téléchargé par curl.exe, l'installeur n'est pas marqué « venu d'Internet » : pas d'alerte SmartScreen
-# malgré l'absence de signature. PASTILLE_EXE_URL choisit un autre installeur (essais, CI).
+# malgré l'absence de signature. PASTILLE_EXE_URL choisit un autre installeur (essais, CI) ;
+# PASTILLE_EXE_FILE donne un installeur déjà téléchargé (mise à jour depuis l'app).
 & {
   $ErrorActionPreference = 'Stop'
   $url = if ($env:PASTILLE_EXE_URL) { $env:PASTILLE_EXE_URL } else { 'https://dl.vibescreener.dev/VibeScreener-Setup.exe' }
@@ -87,15 +88,21 @@
   if (-not [Environment]::Is64BitOperatingSystem) { Write-Host $t.win64; return }
 
   $setup = Join-Path $env:TEMP 'VibeScreener-Setup.exe'
-  Write-Host $t.download
-  curl.exe -fL --progress-bar -o $setup $url # curl.exe est fourni avec Windows 10 et 11
-  if ($LASTEXITCODE) { throw ($t.downloadFailed -f $url) }
+  if ($env:PASTILLE_EXE_FILE) { Copy-Item -LiteralPath $env:PASTILLE_EXE_FILE -Destination $setup -Force }
+  else {
+    Write-Host $t.download
+    curl.exe -fL --progress-bar -o $setup $url # curl.exe est fourni avec Windows 10 et 11
+    if ($LASTEXITCODE) { throw ($t.downloadFailed -f $url) }
+  }
 
-  # Version en cours : fermée proprement (sessions enregistrées) avant d'être remplacée.
+  # Version en cours : fermée proprement (sessions enregistrées) avant d'être remplacée ;
+  # encore là après 30 s, elle est arrêtée, sinon l'installeur ne pourrait pas remplacer ses fichiers.
+  # L'installeur (NSIS) désinstalle lui-même l'ancienne version avant de poser la nouvelle.
   if (Get-Process VibeScreener -ErrorAction SilentlyContinue) {
     Write-Host $t.update
     if (Test-Path $app) { & $app --quit }
-    Wait-Process VibeScreener -Timeout 10 -ErrorAction SilentlyContinue
+    Wait-Process VibeScreener -Timeout 30 -ErrorAction SilentlyContinue
+    Stop-Process -Name VibeScreener -Force -ErrorAction SilentlyContinue
   }
 
   # Installation silencieuse, sans droits administrateur ; sessions et réglages restent.

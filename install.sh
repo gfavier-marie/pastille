@@ -2,7 +2,8 @@
 # Installe (ou met à jour) VibeScreener sur Mac, branche Claude Code et lance l'app :
 #   curl -fsSL https://vibescreener.dev/install.sh | sh
 # Téléchargé par curl, le .dmg n'est pas mis en quarantaine : pas d'alerte Gatekeeper
-# malgré l'absence de signature Apple. PASTILLE_DMG_URL choisit un autre .dmg (essais).
+# malgré l'absence de signature Apple. PASTILLE_DMG_URL choisit un autre .dmg (essais) ;
+# PASTILLE_DMG_FILE donne un .dmg déjà téléchargé (mise à jour depuis l'app).
 set -e
 
 URL="${PASTILLE_DMG_URL:-https://dl.vibescreener.dev/VibeScreener-arm64.dmg}"
@@ -35,6 +36,21 @@ t() {
     es:update) echo "Actualizando $2" ;;
     de:update) echo "$2 wird aktualisiert" ;;
     it:update) echo "Aggiornamento di $2" ;;
+    fr:baddmg) echo "Le fichier téléchargé ne contient pas VibeScreener : rien n'a été modifié." ;;
+    en:baddmg) echo "The downloaded file does not contain VibeScreener: nothing was changed." ;;
+    es:baddmg) echo "El archivo descargado no contiene VibeScreener: no se ha cambiado nada." ;;
+    de:baddmg) echo "Die geladene Datei enthält VibeScreener nicht: Es wurde nichts geändert." ;;
+    it:baddmg) echo "Il file scaricato non contiene VibeScreener: non è stato modificato nulla." ;;
+    fr:running) echo "$2 ne se ferme pas : quittez-la, puis relancez la commande." ;;
+    en:running) echo "$2 does not quit: quit it, then run the command again." ;;
+    es:running) echo "$2 no se cierra: ciérrala y vuelve a ejecutar el comando." ;;
+    de:running) echo "$2 lässt sich nicht beenden: Beende die App und führe den Befehl erneut aus." ;;
+    it:running) echo "$2 non si chiude: chiudila, poi esegui di nuovo il comando." ;;
+    fr:stale) echo "Ancienne version impossible à supprimer, à retirer à la main : $2" ;;
+    en:stale) echo "Could not remove an old version, delete it yourself: $2" ;;
+    es:stale) echo "No se pudo eliminar una versión antigua, bórrala a mano: $2" ;;
+    de:stale) echo "Alte Version konnte nicht entfernt werden, bitte selbst löschen: $2" ;;
+    it:stale) echo "Impossibile rimuovere una vecchia versione, eliminala a mano: $2" ;;
     fr:installed) echo "VibeScreener installée : $2" ;;
     en:installed) echo "VibeScreener installed: $2" ;;
     es:installed) echo "VibeScreener instalada: $2" ;;
@@ -80,29 +96,50 @@ fi
 tmp=$(mktemp -d)
 trap 'hdiutil detach -quiet "$tmp/mnt" 2>/dev/null; rm -rf "$tmp"' EXIT
 
-t download
-curl -fL --progress-bar "$URL" -o "$tmp/VibeScreener.dmg"
+if [ -n "${PASTILLE_DMG_FILE:-}" ]; then
+  cp "$PASTILLE_DMG_FILE" "$tmp/VibeScreener.dmg"
+else
+  t download
+  curl -fL --progress-bar "$URL" -o "$tmp/VibeScreener.dmg"
+fi
+
+# Le nouveau .dmg est ouvert et vérifié avant de toucher à l'ancienne app.
+hdiutil attach -nobrowse -quiet -mountpoint "$tmp/mnt" "$tmp/VibeScreener.dmg" || { t baddmg >&2; exit 1; }
+[ -d "$tmp/mnt/VibeScreener.app" ] || { t baddmg >&2; exit 1; }
 
 DEST=/Applications
 [ -w "$DEST" ] || { DEST="$HOME/Applications"; mkdir -p "$DEST"; }
 APP="$DEST/VibeScreener.app"
 
-# Version précédente, sous ce nom ou sous l'ancien (Pastille) : quittée puis remplacée.
-# Les sessions et réglages restent ; l'app les reprend au premier lancement.
+# Version lancée, sous ce nom ou sous l'ancien (Pastille), où qu'elle soit installée :
+# quittée proprement (sessions enregistrées). Encore lancée après 30 s : on n'y touche pas.
 for name in VibeScreener Pastille; do
-  [ -d "$DEST/$name.app" ] || continue
-  t update "$DEST/$name.app"
+  pgrep -xq "$name" || continue
   osascript -e "if application \"$name\" is running then tell application \"$name\" to quit" >/dev/null 2>&1 || true
   i=0
-  while pgrep -xq "$name" && [ $i -lt 50 ]; do sleep 0.2; i=$((i + 1)); done
-  # Sans signature Apple, chaque version est une nouvelle app pour macOS : les anciennes
-  # autorisations resteraient affichées sans fonctionner. Elles seront redemandées.
-  tccutil reset ScreenCapture fr.pastille.desktop >/dev/null 2>&1 || true
-  tccutil reset Microphone fr.pastille.desktop >/dev/null 2>&1 || true
-  rm -rf "$DEST/$name.app"
+  while pgrep -xq "$name" && [ $i -lt 150 ]; do sleep 0.2; i=$((i + 1)); done
+  if pgrep -xq "$name"; then t running "$name" >&2; exit 1; fi
 done
 
-hdiutil attach -nobrowse -quiet -mountpoint "$tmp/mnt" "$tmp/VibeScreener.dmg"
+# Anciennes versions, dans les deux dossiers d'applications (une copie oubliée dans l'autre
+# pouvait encore être lancée) : supprimées. Les sessions et réglages restent.
+old=
+for dir in /Applications "$HOME/Applications"; do
+  for name in VibeScreener Pastille; do
+    [ -d "$dir/$name.app" ] || continue
+    t update "$dir/$name.app"
+    old=1
+    rm -rf "$dir/$name.app" 2>/dev/null || t stale "$dir/$name.app" >&2
+  done
+done
+if [ -n "$old" ]; then
+  # Sans signature Apple, chaque version est une nouvelle app pour macOS : les anciennes
+  # autorisations resteraient affichées sans fonctionner. Elles seront redemandées.
+  for service in ScreenCapture Microphone Accessibility; do
+    tccutil reset "$service" fr.pastille.desktop >/dev/null 2>&1 || true
+  done
+fi
+
 ditto "$tmp/mnt/VibeScreener.app" "$APP"
 t installed "$APP"
 

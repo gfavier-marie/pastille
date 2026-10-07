@@ -1,11 +1,12 @@
 // Réglages (§4.8), en onglets : général (capture, commentaire, export, démarrage),
-// transcription (moteur, modèle, glossaire), contexte du projet et instructions du PDF, tablette.
+// autorisations du système, transcription (moteur, modèle, glossaire), contexte du projet et instructions du PDF, tablette.
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LANG_NAMES, LANGS } from '@pastille/shared';
 import type { Settings, SettingsState, SettingsTab } from '../../ipc.ts';
 import * as I from '../icons.tsx';
+import { permissionRows } from '../permissions.tsx';
 import { T } from '../texts.ts';
 
 const api = window.pastille;
@@ -44,6 +45,7 @@ const Section = (p: { title: string; children: ReactNode; hint?: ReactNode }) =>
 
 const TABS: { id: SettingsTab; icon: ReactNode }[] = [
   { id: 'general', icon: <I.Sliders size={20} /> },
+  { id: 'permissions', icon: <I.CheckCircle size={20} /> },
   { id: 'transcription', icon: <I.Mic size={20} /> },
   { id: 'export', icon: <I.Doc size={20} /> },
   { id: 'devices', icon: <I.Tablet size={20} /> },
@@ -368,6 +370,30 @@ function App() {
     </Section>
   );
 
+  // Autorisations : mêmes lignes que l'assistant ; rafraîchies au retour des Réglages du système (focus).
+  const permissions = (
+    <Section title={S.permissions} hint={<p className="hint">{S.permissionsHint}</p>}>
+      {permissionRows(s).map((r) => (
+        <div className="row" key={r.kind}>
+          <span className="device-icon">{r.icon}</span>
+          <span className="label">
+            {r.title}
+            <small>{r.why}</small>
+            <small className="state">
+              <span className={`dot ${r.ok ? '' : 'off'}`} />
+              {r.ok ? T.welcome.permissions.granted : S.notGranted}
+            </small>
+          </span>
+          {!r.ok && (
+            <button type="button" className={`btn ${r.optional ? '' : 'primary'}`} onClick={() => void api.askPermission(r.kind)}>
+              {T.welcome.permissions.allow}
+            </button>
+          )}
+        </div>
+      ))}
+    </Section>
+  );
+
   const devices = (
     <Section title={S.tablet} hint={<p className="hint">{S.tabletHint}</p>}>
       <div className="row">
@@ -459,7 +485,7 @@ function App() {
         </div>
       </div>
       <div className="content" role="tabpanel">
-        {{ general, transcription, export: exportPdf, devices, claude, license }[tab]}
+        {{ general, permissions, transcription, export: exportPdf, devices, claude, license }[tab]}
       </div>
     </div>
   );

@@ -77,6 +77,7 @@ export const de: Texts = {
     settings: 'Einstellungen…',
     quit: 'VibeScreener beenden',
     update: (version: string) => `Aktualisieren (Version ${version})`,
+    updating: (pct: number) => `Update wird geladen … ${pct} %`,
     trial: (days: number) => `Testphase: noch ${plural(days, 'Tag', 'Tage')}`,
     buy: 'Kaufen',
     license: { expired: 'Testphase abgelaufen', revoked: 'Lizenz nicht mehr gültig', unverified: 'Lizenzprüfung ausstehend' },
@@ -117,7 +118,12 @@ export const de: Texts = {
   },
 
   settings: {
-    tabs: { general: 'Allgemein', transcription: 'Transkription', export: 'PDF-Export', devices: 'Geräte', claude: 'Claude Code', license: 'Lizenz' },
+    tabs: { general: 'Allgemein', permissions: 'Berechtigungen', transcription: 'Transkription', export: 'PDF-Export', devices: 'Geräte', claude: 'Claude Code', license: 'Lizenz' },
+    permissions: 'Systemberechtigungen',
+    permissionsHint: isMac
+      ? 'Da VibeScreener nicht von Apple signiert ist, vergisst macOS sie bei jedem Update: Erteile sie hier erneut. Bedienungshilfen braucht nur der Videomodus.'
+      : 'Das Mikrofon stellst du unter Einstellungen › Datenschutz und Sicherheit › Mikrofon ein.',
+    notGranted: 'Nicht erlaubt',
     capture: 'Screenshot',
     shortcut: 'Tastenkürzel',
     shortcutAria: (label: string) => `Tastenkürzel ändern, aktuell ${label}`,
@@ -238,6 +244,8 @@ export const de: Texts = {
       relaunch: 'macOS verlangt nach der Bildschirmfreigabe evtl. einen Neustart von VibeScreener – dieser Assistent öffnet sich dann wieder.',
       keyboardOnly: 'Kein Mikro? Nur Tastatur nutzen',
       keyboardChosen: 'Nur Tastatur: Das Mikro wird nicht verwendet.',
+      accessibility: 'Bedienungshilfen',
+      accessibilityWhy: 'Optional: für den Videomodus, der deinen Klicks folgt.',
     },
     model: {
       title: 'Das Diktiermodell wird geladen',
@@ -255,7 +263,7 @@ export const de: Texts = {
     shortcut: {
       title: 'Probier das Tastenkürzel aus',
       intro: (keys: number) =>
-        `Öffne die zu prüfende Seite und drück dann ${keys > 2 ? 'diese Tasten zusammen' : 'dieses Tastenkürzel'}. Danach bleibt VibeScreener ${isMac ? 'im Dock und in der Menüleiste' : 'im Infobereich der Taskleiste'}.`,
+        `Öffne die zu prüfende Seite und drück dann ${keys > 2 ? 'diese Tasten zusammen' : 'dieses Tastenkürzel'}. Danach bleibt VibeScreener ${isMac ? 'in der Menüleiste' : 'im Infobereich der Taskleiste'}.`,
       waiting: 'Warte auf Tastendruck…',
       steps: [
         ['Tastenkürzel', 'Der Bildschirm friert ein.'],
@@ -264,6 +272,9 @@ export const de: Texts = {
       ] as [string, string][],
       openAtLogin: `VibeScreener beim Start ${isMac ? 'des Macs' : 'des Computers'} öffnen`,
       other: 'Anderes Tastenkürzel wählen',
+      videoTitle: 'Neu: der Videomodus',
+      video: (shortcut: string) =>
+        `${shortcut} startet eine Aufnahme: Navigiere per Klick; klick mit ${isMac ? '⌘' : 'Strg'} auf ein Element und sprich, um daraus einen Punkt zu machen. ${shortcut} oder „Beenden“ stoppt sie.`,
     },
     trial: (days: number) => `Kostenlose Testphase: noch ${plural(days, 'Tag', 'Tage')}, alle Funktionen, ohne Kreditkarte.`,
   },
@@ -367,6 +378,8 @@ export const de: Texts = {
     emptyTitle: 'Noch keine Screenshots',
     emptyBefore: 'Drück auf dem zu prüfenden Bildschirm',
     emptyAfter: 'und klick dann auf das zu korrigierende Element.',
+    emptyVideoBefore: 'Für ein Video drück',
+    emptyVideoAfter: `und navigiere: Ein Klick mit ${isMac ? '⌘' : 'Strg'} auf ein Element mit gesprochenem Kommentar wird zu einem Punkt.`,
     micError: (err: unknown) => `Mikro nicht verfügbar: ${err}`,
     zoomedImage: 'Vergrößertes Bild',
   },
@@ -383,10 +396,19 @@ export const de: Texts = {
     exportCancelled: 'Export abgebrochen.',
     note: (n: number) => `Anmerkung ${n}`,
     update: (version: string) => `VibeScreener auf Version ${version} aktualisieren?`,
-    updateDetail: 'Die App schließt sich, wird aktualisiert und öffnet sich wieder (etwa eine Minute). Sessions und Einstellungen bleiben erhalten.',
+    updateDetail: 'Die App lädt das Update (Fortschritt im Menü des Symbols), schließt sich dann, wird aktualisiert und öffnet sich wieder. Sessions und Einstellungen bleiben erhalten.',
     updateDetailMac: 'Da die App nicht von Apple signiert ist, fragt macOS erneut nach der Erlaubnis für Bildschirmaufnahme, Mikrofon und Bedienungshilfen (Videomodus).',
     updateNow: 'Aktualisieren',
     later: 'Später',
+    updateStarted: (version: string) => `Version ${version} wird geladen … VibeScreener schließt sich und öffnet sich danach von selbst wieder.`,
+    updateFailed: 'Das Update konnte nicht geladen werden.',
+    retry: 'Erneut versuchen',
+    updateDone: (version: string) => `VibeScreener ist aktuell: Version ${version}.`,
+    updateIncomplete: (version: string) => `Das Update auf Version ${version} wurde nicht abgeschlossen.`,
+    updateIncompleteDetail: (current: string) =>
+      `VibeScreener ist noch auf Version ${current}. Das Installationsprotokoll nennt den Grund. Versuche es erneut über das Menü des Symbols oder mit dem Installationsbefehl der Website.`,
+    openLog: 'Protokoll öffnen',
+    close: 'Schließen',
     shortcutTaken: (label: string) => `${label} ist bereits von einer anderen App belegt.`,
     shortcutTakenAtStart: (label: string) => `Das Tastenkürzel ${label} ist bereits von einer anderen App belegt.`,
     shortcutTakenDetail: 'Wähl in den Einstellungen ein anderes. Screenshots gehen weiterhin über das VibeScreener-Symbol.',
@@ -451,6 +473,7 @@ export const de: Texts = {
       download: (status: number, url: string) => `Download fehlgeschlagen (${status}): ${url}`,
       stopped: (stderr: string) => `whisper-server wurde beim Start beendet:\n${stderr}`,
       timeout: 'whisper-server antwortet nach 120 s nicht',
+      stalled: (url: string) => `Download unterbrochen (seit 60 s nichts empfangen): ${url}`,
     },
   },
 

@@ -37,9 +37,9 @@ export type VideoFeedback = {
   kept?: boolean;
   paused?: boolean;
   inspiration?: { shortcut: string; number?: number };
+  stopShortcut?: string; // raccourci qui arrête l'enregistrement, affiché sur « Arrêter »
   tablet?: boolean;
   armed?: boolean; // ⌘ / Ctrl tenu : le prochain clic pose un point
-  shortcut?: string; // raccourci qui arrête l'enregistrement
   error?: string;
 } | null;
 
@@ -94,9 +94,9 @@ export type ExportFormat = 'pdf' | 'markdown' | 'pptx';
 export type SettingsState = SettingsView & {
   platform: 'mac' | 'win' | 'other';
   shortcutLabel: string;
+  videoShortcutLabel: string; // raccourci fixe du mode vidéo, affiché
   shortcutOk: boolean;
-  permissions: { screen: string; microphone: string }; // granted, denied, not-determined…
-  modelPresent: boolean;
+  permissions: { screen: string; microphone: string; accessibility: string }; // granted, denied, not-determined…
   whisper: WhisperStatus;
   tabletPaired: boolean;
   tabletConnected: boolean;
@@ -107,7 +107,7 @@ export type SettingsState = SettingsView & {
 /** Fenêtre d'appairage : le code QR (image) et l'état de la tablette. */
 export type PairingState = { qr: string; connected: boolean };
 
-export type SettingsTab = 'general' | 'transcription' | 'export' | 'devices' | 'claude' | 'license';
+export type SettingsTab = 'general' | 'permissions' | 'transcription' | 'export' | 'devices' | 'claude' | 'license';
 export type ExportResult = { ok: true; path: string } | { ok: false; error: string };
 
 /** Une session enregistrée, telle que listée (menu de l'icône, liste de toutes les sessions). */
@@ -124,6 +124,7 @@ export type MenuState = {
   video: { shortcut: string; since?: number }; // mode vidéo : raccourci affiché, début de l'enregistrement en cours (Date.now())
   recents: SessionSummary[];
   update?: string; // version plus récente publiée
+  updateProgress?: number; // téléchargement de la mise à jour en cours (%)
   license: LicenseView;
 };
 
@@ -177,7 +178,7 @@ export type PastilleApi = {
   chooseExportDir(): Promise<string | undefined>;
   downloadModel(): Promise<{ ok: boolean; error?: string }>;
   onDownloadProgress(cb: (percent: number) => void): () => void;
-  askPermission(kind: 'screen' | 'microphone'): Promise<void>;
+  askPermission(kind: 'screen' | 'microphone' | 'accessibility'): Promise<void>;
   revokeTablet(): Promise<void>;
   pairTablet(): void;
   getPairing(): Promise<PairingState>;
@@ -198,6 +199,7 @@ export type PastilleApi = {
   // Fenêtre POC
   onCaptureResult(cb: (r: CaptureResult) => void): () => void;
   startCapture(): void;
+  toggleVideo(): void;
   shortcutStatus(): Promise<{ accelerator: string; registered: boolean }>;
   whisperStatus(): Promise<WhisperStatus>;
   transcribe(samples: Float32Array): Promise<TranscribeResult>;

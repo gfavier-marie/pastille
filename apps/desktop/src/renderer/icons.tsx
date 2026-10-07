@@ -39,6 +39,12 @@ export const Capture = (p: Props) => (
     <circle cx="8" cy="8" r="2" />
   </Stroke>
 );
+/** Carré : arrêter l'enregistrement. */
+export const Stop = (p: Props) => (
+  <Stroke {...p}>
+    <rect x="4" y="4" width="8" height="8" rx="1.5" />
+  </Stroke>
+);
 /** Caméra : mode vidéo. */
 export const Video = (p: Props) => (
   <Stroke {...p}>
@@ -80,6 +86,11 @@ export const Sliders = (p: Props) => (
     <path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7" />
     <circle cx="10.5" cy="4.5" r="1.5" />
     <circle cx="5.5" cy="11.5" r="1.5" />
+  </Stroke>
+);
+export const Menu = (p: Props) => (
+  <Stroke {...p}>
+    <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
   </Stroke>
 );
 export const Power = (p: Props) => (
