@@ -79,7 +79,8 @@ export function createCapture(opts: CaptureOptions) {
         webPreferences: { preload: opts.preload },
       });
       win.setAlwaysOnTop(true, 'screen-saver');
-      win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+      // Sans skipTransformProcessType, Electron cache l'icône du Dock (le panneau passe déjà au-dessus du plein écran).
+      win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
       win.setContentProtection(true); // jamais dans nos propres captures
       opts.loadPage(win, 'overlay');
       return { display, win };
