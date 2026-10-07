@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{mentions.mentions_legales_vibescreener}}</title>
+<meta name="description" content="{{mentions.editeur_hebergeur_vendeur_site}}">
+{{head}}
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="wrap top">
+  <a class="brand" href="{{root}}/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
+  <nav class="nav" aria-label="Sections"><a href="{{root}}/#tarifs">{{intro.tarifs}}</a><a href="{{root}}/#faq">FAQ</a>{{switcher}}</nav>
+</header>
+
+<main class="wrap doc">
+  <h1>{{footer.mentions_legales}}</h1>
+  <p class="updated">{{mentions.derniere_mise_jour_6}}</p>{{legalNote}}
+
+  <h2>{{mentions.editeur}}</h2>
+  <p>{{mentions.site_vibescreener_dev_application}}</p>
+  <ul>
+    <li>{{mentions.completer_nom_prenom_ou}}</li>
+    <li>{{mentions.completer_statut_par_exemple}}</li>
+    <li>{{mentions.siret_completer_siret}}</li>
+    <li>{{mentions.adresse_completer_adresse}}</li>
+    <li>{{mentions.e_mail_completer_e}}</li>
+  </ul>
+  <p>{{mentions.directeur_publication_completer_nom}}</p>
+
+  <h2>{{mentions.hebergement}}</h2>
+  <p>{{mentions.site_telechargements_relais_tablette}}</p>
+
+  <h2>{{mentions.vente_licences}}</h2>
+  <p>{{mentions.licences_sont_vendues_par}}</p>
+
+  <h2>{{mentions.propriete_intellectuelle}}</h2>
+  <p>{{mentions.site_application_vibescreener_code}}</p>
+  <p>{{mentions.claude_claude_code_anthropic}}</p>
+
+  <h2>{{mentions.donnees_personnelles}}</h2>
+  <p>{{mentions.site_ne_depose_aucun}}</p>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="brand" href="{{root}}/"><img src="/favicon.png" alt="" width="26" height="26">VibeScreener</a>
+    <nav aria-label="{{footer.informations}}">
+      <a href="{{root}}/mentions-legales">{{footer.mentions_legales}}</a>
+      <a href="{{root}}/licence">{{footer.licence_utilisation}}</a>
+      <a href="{{root}}/confidentialite">{{footer.confidentialite}}</a>
+      <a href="{{root}}/licences-tierces">{{footer.licences_tierces}}</a>
+    </nav>
+    <p>{{footer.contact_completer_e_mail}}</p>
+  </div>
+</footer>
+</body>
+</html>

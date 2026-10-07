@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { slugify, stamp, type Session } from '@pastille/shared';
+import { T } from '../../texts/index.ts';
 import { buildExport } from './build.ts';
 import { toMarkdown } from './markdown.ts';
 import { toPdfHtml } from './pdf-html.ts';
@@ -40,7 +41,7 @@ export async function exportSession(opts: {
   if (format === 'markdown') {
     const dir = join(outDir, base);
     const doc = await buildExport(session, sessionDir, dir, opts.instructions);
-    await writeFile(join(dir, 'revue.md'), toMarkdown(doc));
+    await writeFile(join(dir, `${T.exports.reviewFile}.md`), toMarkdown(doc));
     return dir;
   }
 
@@ -72,7 +73,7 @@ export async function exportSession(opts: {
     for (let i = 0; i < parts; i++) {
       const screens = doc.screens.slice(i * size, (i + 1) * size);
       if (!screens.length) continue;
-      const file = join(outDir, `${base}-partie-${i + 1}-sur-${parts}.pdf`);
+      const file = join(outDir, `${base}-${T.exports.partFile(i + 1, parts)}.pdf`);
       await writeFile(file, await print(`partie-${i + 1}.html`, toPdfHtml(doc, { index: i + 1, total: parts, screens })));
       files.push(file);
     }

@@ -22,7 +22,7 @@ import {
   shell,
   systemPreferences,
 } from 'electron';
-import { allAnnotations, findAnnotation, type Geometry, type Session } from '@pastille/shared';
+import { allAnnotations, findAnnotation, isLang, pickLang, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab, VideoFeedback } from '../ipc.ts';
 import { createCapture, listWindows, windowTarget, type CapturedImage } from './capture.ts';
 import { createClicks } from './clicks.ts';
@@ -42,8 +42,8 @@ import { checkForUpdate, installUpdate, type Update } from './updater.ts';
 import { createVideo, type VideoSummary } from './video.ts';
 import { createVideoWindow } from './video-window.ts';
 import { createVideoFeedback } from './video-feedback.ts';
-import { T } from '../renderer/texts.ts';
 import { downloadFile, MODEL_FILE, MODEL_URL } from './whisper.ts';
+import { setLang, T } from '../texts/index.ts';
 
 const isMac = process.platform === 'darwin';
 const repoRoot = join(app.getAppPath(), '..', '..');
@@ -84,13 +84,21 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing' | 'video' | 'video-feedback';
+/** La langue de l'interface voyage dans l'adresse de la page (?lang=en), lue par renderer/texts.ts. */
 function loadPage(win: BrowserWindow, page: Page, hash = '') {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
-  if (devUrl) void win.loadURL(`${devUrl}/${page}.html${hash && `#${hash}`}`);
-  else void win.loadFile(join(import.meta.dirname, '../renderer', `${page}.html`), { hash });
+  if (devUrl) void win.loadURL(`${devUrl}/${page}.html?lang=${T.lang}${hash && `#${hash}`}`);
+  else void win.loadFile(join(import.meta.dirname, '../renderer', `${page}.html`), { hash, query: { lang: T.lang } });
 }
 
-const settings = createSettings(app.getPath('userData'), app.getPath('documents'));
+// Langue : celle du système (anglais si elle n'est pas traduite), sauf choix dans les réglages ;
+// PASTILLE_LANG la force (tests, photos des fenêtres dans une langue donnée).
+const forcedLang = isLang(process.env.PASTILLE_LANG) ? process.env.PASTILLE_LANG : undefined;
+const settings = createSettings(app.getPath('userData'), app.getPath('documents'), {
+  system: pickLang(app.getPreferredSystemLanguages()),
+  forced: forcedLang,
+});
+setLang(settings.uiLang());
 const store = createSessionStore(
   app.getPath('userData'),
   (s) => {
@@ -359,9 +367,9 @@ async function toggleVideo() {
     clicks.ask();
     const { response } = await dialog.showMessageBox({
       type: 'warning',
-      message: 'Le mode vidéo a besoin de voir vos clics.',
-      detail: `Autorise VibeScreener dans Réglages Système > Confidentialité et sécurité > Accessibilité, puis relance l'enregistrement (${shortcutLabel(VIDEO_SHORTCUT)}).`,
-      buttons: ['Ouvrir les Réglages', 'Annuler'],
+      message: T.main.video.clicks,
+      detail: T.main.video.clicksDetail(shortcutLabel(VIDEO_SHORTCUT)),
+      buttons: [T.main.video.openSettings, T.main.cancel],
       defaultId: 0,
       cancelId: 1,
     });
@@ -420,8 +428,8 @@ async function stopVideo() {
   else if (summary.notes) showEditor();
   else {
     void dialog.showMessageBox({
-      message: 'Aucun point enregistré.',
-      detail: 'Pendant l’enregistrement, clique sur un élément puis parle : chaque clic suivi de paroles devient un point.',
+      message: T.main.video.empty,
+      detail: T.main.video.emptyDetail,
     });
   }
 }
@@ -440,21 +448,21 @@ async function printHtml(htmlFile: string): Promise<Uint8Array> {
 
 async function runExport(format: ExportFormat): Promise<ExportResult> {
   const session = store.get();
-  if (!session || session.captures.length === 0) return { ok: false, error: 'Rien à exporter : aucune capture.' };
+  if (!session || session.captures.length === 0) return { ok: false, error: T.main.nothingToExport };
   const { pending, error } = dictation.unfinished();
   if (!autotest && (pending.length || error.length)) {
     const list = (labels: string[]) => labels.join(', ');
     const { response } = await dialog.showMessageBox({
       type: 'warning',
-      message: 'Certaines dictées ne sont pas encore transcrites.',
-      detail: [pending.length && `En cours : ${list(pending)}`, error.length && `En erreur : ${list(error)}`]
+      message: T.main.untranscribed,
+      detail: [pending.length && T.main.untranscribedPending(list(pending)), error.length && T.main.untranscribedError(list(error))]
         .filter(Boolean)
         .join('\n'),
-      buttons: ['Exporter quand même', 'Annuler'],
+      buttons: [T.main.exportAnyway, T.main.cancel],
       defaultId: 1,
       cancelId: 1,
     });
-    if (response === 1) return { ok: false, error: 'Export annulé.' };
+    if (response === 1) return { ok: false, error: T.main.exportCancelled };
   }
   try {
     await store.flush();
@@ -530,11 +538,9 @@ async function lookForUpdate() {
 async function confirmUpdate() {
   if (!update) return;
   const { response } = await dialog.showMessageBox({
-    message: `Mettre à jour VibeScreener vers la version ${update.version} ?`,
-    detail:
-      "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés." +
-      (isMac ? "\nL'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran, le micro et l'Accessibilité (mode vidéo)." : ''),
-    buttons: ['Mettre à jour', 'Plus tard'],
+    message: T.main.update(update.version),
+    detail: T.main.updateDetail + (isMac ? `\n${T.main.updateDetailMac}` : ''),
+    buttons: [T.main.updateNow, T.main.later],
     defaultId: 0,
     cancelId: 1,
   });
@@ -613,7 +619,7 @@ function showPairing() {
       minimizable: false,
       maximizable: false,
       fullscreenable: false,
-      title: 'Appairer une tablette',
+      title: T.main.windows.pairing,
       webPreferences: { preload },
     });
     pairingWindow.setContentProtection(true);
@@ -643,7 +649,7 @@ function showSettings(tab?: SettingsTab) {
       height: 640,
       minWidth: 640,
       minHeight: 480,
-      title: 'Réglages de VibeScreener',
+      title: T.main.windows.settings,
       backgroundColor: '#F5F5F7',
       // macOS : titre et onglets dans une même barre d'outils.
       ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 14 } } : {}),
@@ -669,7 +675,7 @@ function showWelcome() {
       minimizable: false,
       maximizable: false,
       fullscreenable: false,
-      title: 'Bienvenue dans VibeScreener',
+      title: T.main.windows.welcome,
       ...(isMac ? { titleBarStyle: 'hiddenInset' as const, trafficLightPosition: { x: 16, y: 13 } } : {}),
       webPreferences: { preload },
     });
@@ -727,9 +733,10 @@ ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
   const before = settings.get();
   if (patch.shortcut && patch.shortcut !== before.shortcut && !registerShortcut(patch.shortcut)) {
     registerShortcut(before.shortcut);
-    return { ok: false, error: `${shortcutLabel(patch.shortcut)} est déjà pris par une autre application.` };
+    return { ok: false, error: T.main.shortcutTaken(shortcutLabel(patch.shortcut)) };
   }
   const after = settings.update(patch);
+  if (settings.uiLang() !== T.lang) applyLang();
   // Contexte du projet : il s'applique aussi à la session ouverte (historique compris, ⌘Z ne le défait pas).
   if (after.context !== before.context) store.update((s) => (s.context = after.context || undefined), { patchHistory: true });
   if (patch.openAtLogin !== undefined && !autotest) app.setLoginItemSettings({ openAtLogin: patch.openAtLogin });
@@ -779,7 +786,25 @@ ipcMain.handle('license:activate', async (_e, key: string) => {
   broadcastSettings();
   return r;
 });
-ipcMain.on('license:open', (_e, page: 'buy' | 'portal') => void shell.openExternal(page === 'buy' ? `${SITE_URL}/#tarifs` : polar.portal));
+// Le site français est à la racine, les autres langues dans /en/, /es/…
+ipcMain.on('license:open', (_e, page: 'buy' | 'portal') =>
+  void shell.openExternal(page === 'buy' ? `${SITE_URL}${T.lang === 'fr' ? '' : `/${T.lang}`}/#tarifs` : polar.portal),
+);
+
+/** Nouvelle langue choisie dans les réglages : menu, info-bulle et fenêtres ouvertes passent dans cette langue. */
+function applyLang() {
+  setLang(settings.uiLang());
+  if (isMac) Menu.setApplicationMenu(appMenu());
+  updateTrayMenu();
+  // Chaque fenêtre relit son état au chargement ; les fenêtres d'impression PDF n'ont pas de langue dans l'adresse.
+  for (const win of BrowserWindow.getAllWindows()) {
+    const url = new URL(win.webContents.getURL() || 'about:blank');
+    if (!url.searchParams.has('lang')) continue;
+    if (/\/video(-feedback)?\.html$/.test(url.pathname)) continue; // mode vidéo : un rechargement couperait l'enregistrement
+    url.searchParams.set('lang', T.lang);
+    void win.loadURL(url.href);
+  }
+}
 
 // ——— Fenêtre de mesures du lot 0 ———
 
@@ -873,15 +898,15 @@ ipcMain.handle('session:trash', async (_e, id: string) => {
   if (!target || dirname(dir) !== store.sessionsDir) return false;
   const { response } = await dialog.showMessageBox({
     type: 'warning',
-    message: `Mettre la session « ${target.name} » à la corbeille ?`,
-    detail: 'Ses captures et ses commentaires partent avec elle. Elle reste récupérable depuis la corbeille.',
-    buttons: ['Mettre à la corbeille', 'Annuler'],
+    message: T.main.trash(target.name),
+    detail: T.main.trashDetail,
+    buttons: [T.main.trashConfirm, T.main.cancel],
     defaultId: 1,
     cancelId: 1,
   });
   if (response !== 0) return false;
   if (store.get()?.id === id) await store.close();
-  await shell.trashItem(dir).catch((err) => dialog.showMessageBox({ type: 'warning', message: `Mise à la corbeille impossible : ${err}` }));
+  await shell.trashItem(dir).catch((err) => dialog.showMessageBox({ type: 'warning', message: T.main.trashFailed(String(err)) }));
   updateTrayMenu();
   return true;
 });
@@ -955,6 +980,7 @@ async function runEditorAutotest() {
   await writeFile(join(app.getPath('userData'), 'state.json'), JSON.stringify({ currentSessionId: session.id }));
   await store.restore();
 
+  settings.update({ language: 'fr' }); // l'échantillon dicté est en français, quelle que soit la langue de l'interface
   await transcriber.restart();
   editor = createEditor();
   await new Promise<void>((r) => editor!.webContents.once('did-finish-load', () => r()));
@@ -1088,36 +1114,37 @@ async function runTabletAutotest() {
 /** macOS : menu de l'app (visible avec l'icône du Dock). Édition garde copier, coller et annuler dans les champs ;
  *  hors d'un champ, l'éditeur intercepte ⌘Z lui-même pour annuler dans la session. */
 function appMenu() {
+  const M = T.main.appMenu;
   return Menu.buildFromTemplate([
     {
       label: 'VibeScreener',
       submenu: [
-        { role: 'about', label: 'À propos de VibeScreener' },
+        { role: 'about', label: M.about },
         { type: 'separator' },
-        { label: 'Réglages…', accelerator: 'Command+,', click: () => showSettings() },
+        { label: M.settings, accelerator: 'Command+,', click: () => showSettings() },
         { type: 'separator' },
-        { role: 'hide', label: 'Masquer VibeScreener' },
-        { role: 'quit', label: 'Quitter VibeScreener' },
+        { role: 'hide', label: M.hide },
+        { role: 'quit', label: M.quit },
       ],
     },
     {
-      label: 'Édition',
+      label: M.edit,
       submenu: [
-        { role: 'undo', label: 'Annuler' },
-        { role: 'redo', label: 'Rétablir' },
+        { role: 'undo', label: M.undo },
+        { role: 'redo', label: M.redo },
         { type: 'separator' },
-        { role: 'cut', label: 'Couper' },
-        { role: 'copy', label: 'Copier' },
-        { role: 'paste', label: 'Coller' },
-        { role: 'selectAll', label: 'Tout sélectionner' },
+        { role: 'cut', label: M.cut },
+        { role: 'copy', label: M.copy },
+        { role: 'paste', label: M.paste },
+        { role: 'selectAll', label: M.selectAll },
       ],
     },
     {
-      label: 'Fenêtre',
+      label: M.window,
       role: 'window',
       submenu: [
-        { role: 'minimize', label: 'Réduire' },
-        { role: 'close', label: 'Fermer' },
+        { role: 'minimize', label: M.minimize },
+        { role: 'close', label: M.close },
       ],
     },
   ]);
@@ -1182,7 +1209,7 @@ void app.whenReady().then(async () => {
     info: () => {
       const session = store.get();
       return {
-        session: session?.name ?? 'Nouvelle revue',
+        session: session?.name ?? T.main.newReview,
         screen: (session?.captures.length ?? 0) + 1,
         nextNumber: (session ? allAnnotations(session).length : 0) + 1,
         inspiration: inspirationTarget()?.annotation.number,
@@ -1227,15 +1254,15 @@ void app.whenReady().then(async () => {
     (err: NodeJS.ErrnoException) => ({
       error:
         err.code === 'EADDRINUSE'
-          ? `Le port ${MCP_PORT} est déjà pris (une autre copie de VibeScreener ?) : Claude Code ne peut pas se connecter.`
-          : `Serveur pour Claude Code indisponible : ${err.message}`,
+          ? T.main.mcpPortTaken(MCP_PORT)
+          : T.main.mcpUnavailable(err.message),
     }),
   );
   if (!registerShortcut(settings.get().shortcut)) {
     void dialog.showMessageBox({
       type: 'warning',
-      message: `Le raccourci ${shortcutLabel(settings.get().shortcut)} est déjà pris par une autre application.`,
-      detail: 'Choisis-en un autre dans les réglages. Les captures restent possibles depuis l’icône de VibeScreener.',
+      message: T.main.shortcutTakenAtStart(shortcutLabel(settings.get().shortcut)),
+      detail: T.main.shortcutTakenDetail,
     });
   }
   try {
@@ -1243,8 +1270,8 @@ void app.whenReady().then(async () => {
   } catch {
     void dialog.showMessageBox({
       type: 'warning',
-      message: `Le raccourci ${shortcutLabel(VIDEO_SHORTCUT)} du mode vidéo est déjà pris par une autre application.`,
-      detail: 'Le mode vidéo reste disponible depuis l’icône de VibeScreener.',
+      message: T.main.video.shortcutTaken(shortcutLabel(VIDEO_SHORTCUT)),
+      detail: T.main.video.shortcutTakenDetail,
     });
   }
   // Écran branché ou débranché : les flux filmés ne correspondent plus, l'enregistrement s'arrête.

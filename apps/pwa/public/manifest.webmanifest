@@ -1,7 +1,6 @@
 {
-  "name": "VibeScreener — croquis",
+  "name": "VibeScreener",
   "short_name": "VibeScreener",
-  "lang": "fr",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",

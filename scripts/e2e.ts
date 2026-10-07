@@ -15,7 +15,9 @@ const out = join(root, 'e2e-output');
 const electron = createRequire(join(root, 'apps/desktop/package.json'))('electron') as unknown as string;
 const [bin, args] = process.env.PASTILLE_E2E_APP ? [process.env.PASTILLE_E2E_APP, []] : [electron, [join(root, 'apps/desktop')]];
 const log = execFileSync(bin, args, {
-  env: { ...process.env, PASTILLE_AUTOTEST: 'editor', PASTILLE_AUTOTEST_OUT: out },
+  // Interface en français par défaut (le runner Windows de la CI est en anglais) ;
+  // PASTILLE_LANG=de pnpm e2e photographie les fenêtres et produit les exports dans une autre langue.
+  env: { ...process.env, PASTILLE_AUTOTEST: 'editor', PASTILLE_AUTOTEST_OUT: out, PASTILLE_LANG: process.env.PASTILLE_LANG ?? 'fr' },
   encoding: 'utf8',
   timeout: 300_000,
 });

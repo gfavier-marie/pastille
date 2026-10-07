@@ -68,3 +68,14 @@ strong { font-weight: 600; }
   .nav { gap: 16px; }
   .doc { padding-top: 40px; padding-bottom: 72px; }
 }
+
+/* Sélecteur de langue (généré par build.ts) */
+.nav { align-items: center; }
+.langs { position: relative; font-size: 14px; font-weight: 600; }
+.langs summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; color: var(--ink-2); }
+.langs summary::-webkit-details-marker { display: none; }
+.langs summary:hover, .langs[open] summary { background: var(--bg-soft); color: var(--ink); }
+.langs ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; margin: 0; padding: 6px; list-style: none; min-width: 160px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12); }
+.langs a { display: block; padding: 8px 12px; border-radius: 8px; color: var(--ink-2); font-weight: 500; }
+.langs a:hover { background: var(--bg-soft); color: var(--ink); }
+.langs a[aria-current] { color: var(--accent-text); font-weight: 600; }

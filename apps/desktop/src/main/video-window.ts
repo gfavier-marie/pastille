@@ -3,6 +3,7 @@
 
 import { BrowserWindow, desktopCapturer, ipcMain, screen } from 'electron';
 import type { VideoCrop, VideoImage, VideoSource } from '../ipc.ts';
+import { T } from '../texts/index.ts';
 
 export type VideoWindowOptions = {
   preload: string;
@@ -36,11 +37,7 @@ export function createVideoWindow(opts: VideoWindowOptions) {
       if (src) list.push({ displayId: d.id, sourceId: src.id, width: Math.round(d.size.width * d.scaleFactor), height: Math.round(d.size.height * d.scaleFactor) });
     });
     if (list.length < displays.length) {
-      throw new Error(
-        process.platform === 'darwin'
-          ? "Enregistrement impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance VibeScreener."
-          : "Enregistrement impossible : l'écran n'a pas pu être lu.",
-      );
+      throw new Error(process.platform === 'darwin' ? T.main.video.denied : T.main.video.unreadable);
     }
 
     const w = new BrowserWindow({
@@ -58,12 +55,12 @@ export function createVideoWindow(opts: VideoWindowOptions) {
     const error = await new Promise<string | undefined>((resolve) => {
       started = resolve;
       w.webContents.send('video:start', list);
-      setTimeout(() => resolve("les écrans ou le micro ne répondent pas."), 15_000);
+      setTimeout(() => resolve(T.main.video.noResponse), 15_000);
     });
     started = null;
     if (error) {
       stop();
-      throw new Error(`Enregistrement impossible : ${error}`);
+      throw new Error(T.main.video.failed(error));
     }
   }
 

@@ -6,7 +6,8 @@ import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
 import PptxGenJS from 'pptxgenjs';
 import { PIN_COLOR } from '@pastille/shared';
-import { INSPIRATION_NOTE, type ExportDoc } from './build.ts';
+import { T } from '../../texts/index.ts';
+import type { ExportDoc } from './build.ts';
 
 const W = 13.333; // 16:9, en pouces
 const H = 7.5;
@@ -26,6 +27,7 @@ async function fitted(path: string, box: Box) {
 
 /** `dir` : dossier où buildExport a écrit les images (chemins relatifs du document). */
 export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
+  const E = T.exports, C = E.columns;
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
   pptx.title = doc.name;
@@ -33,14 +35,14 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
 
   const title = pptx.addSlide();
   title.addText(doc.name, { x: 0.8, y: 2.4, w: W - 1.6, h: 1, fontFace: FONT, fontSize: 36, bold: true });
-  title.addText(`${doc.date} · ${doc.screens.length} écran(s) · ${doc.points.length} point(s)`, {
+  title.addText(`${doc.date} · ${T.screens(doc.screens.length)} · ${T.points(doc.points.length)}`, {
     x: 0.8, y: 3.4, w: W - 1.6, h: 0.5, fontFace: FONT, fontSize: 18, color: MUTED,
   });
   if (doc.context) title.addText(doc.context, { x: 0.8, y: 4.1, w: W - 1.6, h: 1, fontFace: FONT, fontSize: 16 });
 
   if (doc.notes.length) {
     const notes = pptx.addSlide();
-    notes.addText('Remarques générales', { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
+    notes.addText(E.notes, { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
     notes.addText(
       doc.notes.map((text) => ({ text, options: { bullet: true, breakLine: true } })),
       { x: 0.5, y: 1.1, w: W - 1, h: H - 1.6, fontFace: FONT, fontSize: 18, valign: 'top', fit: 'shrink', paraSpaceAfter: 8 },
@@ -48,9 +50,9 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
   }
 
   const summary = pptx.addSlide();
-  summary.addText('Récapitulatif', { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
-  const header = ['#', 'Écran', 'Commentaire', 'Croquis', 'Inspiration'].map((text) => ({ text, options: { bold: true, fill: { color: 'F4F4F5' } } }));
-  const yesNo = (list: unknown[]) => (list.length ? 'oui' : 'non');
+  summary.addText(E.summary, { x: 0.5, y: 0.3, w: W - 1, h: 0.6, fontFace: FONT, fontSize: 24, bold: true });
+  const header = ['#', C.screen, C.comment, C.sketch, C.inspiration].map((text) => ({ text, options: { bold: true, fill: { color: 'F4F4F5' } } }));
+  const yesNo = (list: unknown[]) => (list.length ? E.yes : E.no);
   summary.addTable(
     [header, ...doc.points.map((p) => [`#${p.number}`, String(p.screen), p.text || '—', yesNo(p.sketches), yesNo(p.inspirations)].map((text) => ({ text })))],
     {
@@ -69,10 +71,10 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
       const slide = pptx.addSlide();
       slide.addText(`#${p.number}`, { x: 0.5, y: 0.4, w: 2, h: 0.8, fontFace: FONT, fontSize: 40, bold: true, color: PIN });
       slide.addText(s.title, { x: 2.3, y: 0.5, w: W - 2.8, h: 0.6, fontFace: FONT, fontSize: 14, color: MUTED });
-      slide.addText(p.text || '(sans commentaire)', {
+      slide.addText(p.text || E.noComment, {
         x: 0.5, y: 1.4, w: 5.6, h: 4.6, fontFace: FONT, fontSize: 24, valign: 'top', italic: !p.text,
       });
-      slide.addText(`Position : ${p.position}`, { x: 0.5, y: H - 1, w: 5.6, h: 0.4, fontFace: FONT, fontSize: 11, color: MUTED });
+      slide.addText(E.position + E.colon + p.position, { x: 0.5, y: H - 1, w: 5.6, h: 0.4, fontFace: FONT, fontSize: 11, color: MUTED });
       const images = [p.crop, ...p.sketches];
       const boxH = (H - 2) / images.length - 0.15;
       for (const [i, img] of images.entries()) {
@@ -82,7 +84,7 @@ export async function toPptx(doc: ExportDoc, dir: string): Promise<Buffer> {
       if (!p.inspirations.length) continue;
       const inspiration = pptx.addSlide();
       inspiration.addText(`#${p.number}`, { x: 0.5, y: 0.4, w: 2, h: 0.8, fontFace: FONT, fontSize: 40, bold: true, color: PIN });
-      inspiration.addText(`Inspiration : ${INSPIRATION_NOTE}`, { x: 2.3, y: 0.5, w: W - 2.8, h: 0.6, fontFace: FONT, fontSize: 14, color: MUTED });
+      inspiration.addText(E.inspiration + E.colon + E.inspirationNote, { x: 2.3, y: 0.5, w: W - 2.8, h: 0.6, fontFace: FONT, fontSize: 14, color: MUTED });
       const boxW = (W - 1) / p.inspirations.length;
       for (const [i, k] of p.inspirations.entries()) {
         inspiration.addImage(await fitted(join(dir, k.image), { x: 0.5 + i * boxW, y: 1.4, w: boxW - 0.2, h: H - 2.1 }));

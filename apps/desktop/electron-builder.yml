@@ -29,8 +29,12 @@ mac:
   identity: '-'
   hardenedRuntime: false
   artifactName: ${productName}-${arch}.${ext} # lien stable : dl.vibescreener.dev/VibeScreener-arm64.dmg
+  # Demande d'accès au micro : anglais par défaut, traduite dans build/lproj (macOS prend la langue du système).
   extendInfo:
-    NSMicrophoneUsageDescription: VibeScreener utilise le micro pour dicter les commentaires.
+    NSMicrophoneUsageDescription: VibeScreener uses the microphone to dictate your comments.
+  extraResources:
+    - from: build/lproj
+      to: .
 win:
   target: nsis
   # Pas de certificat de signature : un .exe téléchargé par le navigateur déclenche SmartScreen

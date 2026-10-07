@@ -4,7 +4,8 @@
 import { readFileSync } from 'node:fs';
 import { cpus, platform, arch, totalmem } from 'node:os';
 import { join } from 'node:path';
-import { findModel, findWhisperBin, startWhisperServer, UI_PROMPT } from '../src/main/whisper.ts';
+import { fr } from '../src/texts/fr.ts';
+import { findModel, findWhisperBin, startWhisperServer } from '../src/main/whisper.ts';
 import { wavDurationMs } from '../src/main/wav.ts';
 
 const repoRoot = join(import.meta.dirname, '..', '..', '..');
@@ -22,7 +23,7 @@ if (!bin || !model) {
 const wav = new Uint8Array(readFileSync(wavPath));
 const audioMs = wavDurationMs(wav);
 console.log(`Démarrage de whisper-server (${bin})…`);
-const server = await startWhisperServer({ bin, model, prompt: UI_PROMPT });
+const server = await startWhisperServer({ bin, model, language: 'fr', prompt: fr.glossary });
 
 const runs: { text: string; ms: number }[] = [];
 for (let i = 0; i < RUNS; i++) runs.push(await server.transcribe(wav));

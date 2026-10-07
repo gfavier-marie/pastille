@@ -31,6 +31,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm --filter @pastille/desktop build
+      - run: pnpm --filter @pastille/site build
 
   # Relais (+ PWA) et site, à chaque push sur main, une fois Cloudflare configuré.
   deploy:
@@ -157,13 +158,14 @@ jobs:
       - run: |
           v="${GITHUB_REF_NAME#v}"
           [ "$v" = "$(node -p "require('./apps/desktop/package.json').version")" ] || { echo "Le tag $GITHUB_REF_NAME ne correspond pas à la version de apps/desktop/package.json" >&2; exit 1; }
-          put() { pnpm exec wrangler r2 object put "vibescreener-downloads/$1" --file "$2" --remote --cache-control "$3"; }
+          put() { pnpm exec wrangler r2 object put "vibescreener-downloads/$1" --file "$2" --remote --cache-control "$3" ${4:+--content-type "$4"}; }
           for f in VibeScreener-arm64.dmg VibeScreener-Setup.exe; do
             put "v$v/$f" "dist/$f" "public, max-age=31536000, immutable"
             put "$f" "dist/$f" "public, max-age=300"
           done
-          put install.sh install.sh "public, max-age=300"
-          put install.ps1 install.ps1 "public, max-age=300"
+          # Messages en cinq langues : sans charset, irm (Windows PowerShell 5.1) lirait le script en ISO-8859-1.
+          put install.sh install.sh "public, max-age=300" "text/plain; charset=utf-8"
+          put install.ps1 install.ps1 "public, max-age=300" "text/plain; charset=utf-8"
           printf '{"version":"%s"}\n' "$v" > latest.json
           put latest.json latest.json "no-cache"
         env:

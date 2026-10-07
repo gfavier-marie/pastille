@@ -4,8 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "build": "node build.ts",
+    "dev": "node build.ts && wrangler dev",
+    "deploy": "node build.ts && wrangler deploy",
+    "typecheck": "tsc -p ."
   },
   "devDependencies": {
     "wrangler": "^4.147.0"

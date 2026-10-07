@@ -5,6 +5,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { allAnnotations, findComment, type Session } from '@pastille/shared';
+import { T } from '../texts/index.ts';
 import type { SessionStore } from './session-store.ts';
 
 type Job = { sessionId: string; annotationId: string; audio: string }; // annotationId : point ou remarque
@@ -97,7 +98,7 @@ export function createDictation(store: SessionStore, transcribe: (wav: Uint8Arra
       const list = session
         ? [
             ...allAnnotations(session).map((a) => [a.transcription, `#${a.number}`]),
-            ...(session.notes ?? []).map((n, i) => [n.transcription, `remarque ${i + 1}`]),
+            ...(session.notes ?? []).map((n, i) => [n.transcription, T.main.note(i + 1)]),
           ]
         : [];
       return {

@@ -270,3 +270,13 @@ Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accor
 **Limites à signaler** : indicateur d'enregistrement d'écran affiché tout du long (macOS 15+ peut redemander l'autorisation d'une capture continue) ; le curseur apparaît dans les images (la pastille le recouvre) ; sous Windows l'icône de la zone de notification ne change pas (la barre est le seul témoin) et AltGr+R est à vérifier en AZERTY.
 
 **Plus tard [C], non prévu** : dessin à la souris pendant l'enregistrement (le dessin sur tablette est disponible), fichier vidéo rejouable, images du parcours sans parole, horodatage dans les exports, raccourci vidéo réglable.
+
+### Multilingue (7 oct.)
+
+App, PWA tablette, scripts d'installation et site en cinq langues : français, anglais, espagnol, allemand, italien.
+
+- [x] App : dictionnaires `apps/desktop/src/texts/` partagés par les fenêtres et le processus principal (dialogues, menu Mac, info-bulle, exports, MCP aux noms d'outils inchangés) ; réglage « Langue de l'interface » (automatique = langue du système, anglais sinon ; installations existantes gardées en français) ; glossaire Whisper et instructions par défaut qui suivent la langue ; demande d'accès au micro traduite sur macOS
+- [x] PWA selon la langue de la tablette ; `install.sh` / `install.ps1` selon la langue du système (servis en UTF-8)
+- [x] Site : modèles + dictionnaires + `build.ts` ; français à la racine, `/en/`, `/es/`, `/de/`, `/it/` ; hreflang, sélecteur de langue, redirection à la première visite selon la langue du navigateur (robots exclus) ; pages légales traduites (« la version française fait foi »)
+- [ ] Relecture des traductions par des locuteurs natifs, surtout les pages légales
+- [ ] Photos des fenêtres dans chaque langue (`PASTILLE_LANG=de pnpm e2e`), pour les textes trop longs

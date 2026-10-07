@@ -9,15 +9,11 @@ import { availableParallelism } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { T } from '../texts/index.ts';
 import { renameRetry } from './rename.ts';
 
 export const MODEL_FILE = 'ggml-large-v3-turbo-q5_0.bin';
 export const MODEL_URL = `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${MODEL_FILE}`;
-
-// Le prompt initial oriente Whisper vers le jargon d'interface.
-export const UI_PROMPT =
-  "Retour d'interface : bouton, border-radius de 8 px, padding, margin, header, footer, " +
-  'sidebar, navbar, modale, dropdown, hover, focus, flexbox, grid, z-index, opacité.';
 
 /**
  * Contexte audio réduit pour les dictées courtes : l'encodeur traite sinon toujours 30 s,
@@ -62,7 +58,7 @@ export function findModel(dirs: string[]): string | undefined {
 /** Téléchargement avec progression ; le fichier n'apparaît qu'une fois complet. */
 export async function downloadFile(url: string, dest: string, onProgress?: (done: number, total: number) => void) {
   const res = await fetch(url);
-  if (!res.ok || !res.body) throw new Error(`Téléchargement impossible (${res.status}) : ${url}`);
+  if (!res.ok || !res.body) throw new Error(T.main.whisper.download(res.status, url));
   const total = Number(res.headers.get('content-length') ?? 0);
   let done = 0;
   const body = Readable.fromWeb(res.body as never);
@@ -79,7 +75,7 @@ export async function transcribeWithApi(
   const form = new FormData();
   form.append('file', new Blob([wav.slice()], { type: 'audio/wav' }), 'audio.wav');
   form.append('model', opts.model);
-  form.append('language', opts.language);
+  if (opts.language !== 'auto') form.append('language', opts.language); // sans langue, l'API la détecte
   form.append('prompt', opts.prompt);
   const res = await fetch(`${opts.url.replace(/\/$/, '')}/audio/transcriptions`, {
     method: 'POST',
@@ -126,10 +122,10 @@ export async function startWhisperServer(opts: {
   const url = `http://127.0.0.1:${port}`;
   // Le serveur répond une fois le modèle chargé.
   for (;;) {
-    if (exited) throw new Error(`whisper-server s'est arrêté au démarrage :\n${stderr}`);
+    if (exited) throw new Error(T.main.whisper.stopped(stderr));
     if (performance.now() - t0 > 120_000) {
       child.kill();
-      throw new Error('whisper-server ne répond pas après 120 s');
+      throw new Error(T.main.whisper.timeout);
     }
     try {
       const res = await fetch(url + '/');

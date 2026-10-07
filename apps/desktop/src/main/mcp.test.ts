@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createFakeSession } from './export/fixture.ts';
+import { en } from '../texts/en.ts';
+import { setLang } from '../texts/index.ts';
 import { createMcp } from './mcp.ts';
 import { createSessionStore } from './session-store.ts';
 
@@ -76,6 +78,21 @@ describe('serveur MCP', async () => {
     const missing = await call('voir_ecran', { ecran: 9 });
     expect(missing.isError).toBe(true);
     expect(textOf(missing)).toContain('a 5 écrans');
+  });
+
+  it("parle la langue de l'interface, noms d'outils inchangés", async () => {
+    setLang('en');
+    try {
+      const list = (await mcp.handle({ id: 90, method: 'tools/list' })) as { result: { tools: { name: string; description: string }[] } };
+      expect(list.result.tools.map((t) => t.name)).toEqual(['lister_sessions', 'lire_revue', 'voir_ecran']);
+      expect(list.result.tools[0]!.description).toBe(en.mcp.listTool);
+      const text = textOf(await call('lire_revue'));
+      expect(text).toContain(`## ${en.exports.screen(3)} — Google Chrome`);
+      expect(text).toContain(en.mcp.seeScreens(5));
+      expect(text).not.toMatch(/Écran|Contexte|croquis/);
+    } finally {
+      setLang('fr');
+    }
   });
 
   describe('en HTTP', () => {

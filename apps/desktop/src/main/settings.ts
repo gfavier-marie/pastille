@@ -3,14 +3,15 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { safeStorage } from 'electron';
-import { DEFAULT_INSTRUCTIONS } from './export/build.ts';
-import { UI_PROMPT } from './whisper.ts';
+import { isLang, type Lang } from '@pastille/shared';
+import { DICTS } from '../texts/index.ts';
 
 export type Settings = {
+  uiLanguage: 'auto' | Lang; // langue de l'interface, des exports et du MCP ; auto = celle du système
   shortcut: string; // accélérateur Electron
   commentMode: 'auto' | 'push' | 'keyboard'; // dictée automatique, appuyer pour parler (⌥), clavier seul
   silenceMs: number; // 0 = pas d'arrêt sur silence
-  language: string;
+  language: string; // langue de dictée (code Whisper ou « auto »)
   exportDir: string;
   engine: 'local' | 'api';
   apiUrl: string;
@@ -28,20 +29,26 @@ export type Settings = {
 /** Ce que voit la fenêtre de réglages : jamais la clé elle-même. */
 export type SettingsView = Settings & { hasApiKey: boolean };
 
-export function createSettings(dataDir: string, documentsDir: string) {
+/** `system` : langue du système ; `forced` (PASTILLE_LANG) passe avant le réglage. */
+export function createSettings(dataDir: string, documentsDir: string, lang: { system: Lang; forced?: Lang } = { system: 'fr' }) {
   const path = join(dataDir, 'settings.json');
+  const uiLangOf = (s: Pick<Settings, 'uiLanguage'>): Lang => lang.forced ?? (isLang(s.uiLanguage) ? s.uiLanguage : lang.system);
+  // Glossaire de la langue de dictée (celui de l'interface en détection automatique), instructions de la langue de l'interface.
+  const glossaryOf = (s: Settings) => DICTS[isLang(s.language) ? s.language : uiLangOf(s)].glossary;
+  const instructionsOf = (s: Settings) => DICTS[uiLangOf(s)].instructions;
   const defaults: Settings = {
+    uiLanguage: 'auto',
     // ⇧⌘2, l'ancien défaut, est intercepté par d'autres apps sur certains Mac sans que l'enregistrement échoue.
     shortcut: process.platform === 'darwin' ? 'Command+Control+Alt+P' : 'Control+Alt+P',
     commentMode: 'auto',
     silenceMs: 3000,
-    language: 'fr',
+    language: lang.forced ?? lang.system, // dictée dans la langue de l'interface au premier lancement
     exportDir: join(documentsDir, 'VibeScreener'),
     engine: 'local',
     apiUrl: 'https://api.openai.com/v1',
     apiModel: 'whisper-1',
-    glossary: UI_PROMPT,
-    instructions: DEFAULT_INSTRUCTIONS,
+    glossary: '', // défauts de la langue, posés plus bas
+    instructions: '',
     context: '',
     firstRunDone: false,
     copyPdf: true,
@@ -49,7 +56,13 @@ export function createSettings(dataDir: string, documentsDir: string) {
     floatingBar: false,
     mcpSeenAt: '',
   };
-  const stored = existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
+  const existed = existsSync(path);
+  const stored = existed ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<Settings> & { apiKey?: string }) : {};
+  if (existed && stored.uiLanguage === undefined) stored.uiLanguage = 'fr'; // installée avant le multilingue : reste en français
+  // Glossaire et instructions laissés au défaut d'une langue (save() écrit tout) : ils suivent la langue choisie.
+  const dicts = Object.values(DICTS);
+  if (dicts.some((d) => d.glossary === stored.glossary)) delete stored.glossary;
+  if (dicts.some((d) => d.instructions === stored.instructions)) delete stored.instructions;
   if (stored.exportDir === join(documentsDir, 'Pastille')) delete stored.exportDir; // ancien nom de l'app
   if (stored.shortcut === 'CommandOrControl+Shift+2') delete stored.shortcut; // ancien défaut, écrit par save() : prend le nouveau
   // Le contexte passait autrefois d'une session à la suivante (state.json) : il devient la valeur de départ du réglage.
@@ -60,6 +73,8 @@ export function createSettings(dataDir: string, documentsDir: string) {
     } catch {} // state.json illisible : pas de contexte de départ
   }
   let settings: Settings = { ...defaults, ...stored };
+  settings.glossary = stored.glossary ?? glossaryOf(settings);
+  settings.instructions = stored.instructions ?? instructionsOf(settings);
   let apiKey = stored.apiKey ?? '';
 
   function save() {
@@ -70,10 +85,16 @@ export function createSettings(dataDir: string, documentsDir: string) {
     get: () => settings,
     view: (): SettingsView => ({ ...settings, hasApiKey: !!apiKey }),
     update(patch: Partial<Settings>) {
+      const before = settings;
       settings = { ...settings, ...patch };
+      // Restés au défaut, glossaire et instructions suivent un changement de langue.
+      if (patch.glossary === undefined && before.glossary === glossaryOf(before)) settings.glossary = glossaryOf(settings);
+      if (patch.instructions === undefined && before.instructions === instructionsOf(before)) settings.instructions = instructionsOf(settings);
       save();
       return settings;
     },
+    /** Langue de l'interface, des exports et du MCP. */
+    uiLang: () => uiLangOf(settings),
     setApiKey(key: string) {
       apiKey = key && safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key).toString('base64') : '';
       save();
@@ -85,6 +106,5 @@ export function createSettings(dataDir: string, documentsDir: string) {
         return ''; // chiffrée sous l'ancien nom de l'app : à saisir de nouveau
       }
     },
-    defaults,
   };
 }

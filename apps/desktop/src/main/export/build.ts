@@ -6,21 +6,13 @@ import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
 import { allAnnotations, bounds, drawAnnotations, type Annotation, type Capture, type Ctx2D, type Inspiration, type Session } from '@pastille/shared';
+import { T } from '../../texts/index.ts';
 
 const MAX_SCREEN_WIDTH = 2000;
 const CROP_W = 600;
 const CROP_H = 400;
 const CROP_MARGIN = 60; // pixels source autour d'une zone ou d'une flèche
 const JPEG_QUALITY = 80;
-
-export const DEFAULT_INSTRUCTIONS = `Ce document liste {N} retours sur une interface, numérotés de #1 à #{N}.
-Chaque retour indique un élément sur une capture d'écran : la pastille numérotée et le
-recadrage montrent l'élément visé, un rectangle désigne une zone, une flèche un déplacement.
-Applique chaque retour dans le code. Si un retour est ambigu, pose une question plutôt
-que de deviner. À la fin, liste les numéros traités et ceux qui ne l'ont pas été.`;
-
-/** Écrit à côté de chaque inspiration, pour que l'IA ne la prenne pas pour l'écran à corriger. */
-export const INSPIRATION_NOTE = "capture d'un autre site, modèle du résultat souhaité (ce n'est pas l'écran à modifier)";
 
 export type ExportPoint = {
   number: number;
@@ -46,7 +38,7 @@ export type ExportDoc = {
 };
 
 export function screenTitle(index: number, capture: Capture): string {
-  return [`Écran ${index}`, capture.source?.app, capture.source?.windowTitle].filter(Boolean).join(' — ');
+  return [T.exports.screen(index), capture.source?.app, capture.source?.windowTitle].filter(Boolean).join(' — ');
 }
 
 /** « Google Chrome — Tarifs » : d'où vient une inspiration capturée sur une fenêtre. */
@@ -56,13 +48,12 @@ export function sourceLabel(source: Inspiration['source']): string | undefined {
 
 /** Position lisible en pixels de la capture (« x 120, y 340 sur 1600 × 1000 »). */
 export function position(a: Annotation, c: Capture): string {
-  const px = (v: number, size: number) => Math.round(v * size);
-  const size = `sur ${c.width} × ${c.height}`;
+  const X = (v: number) => Math.round(v * c.width), Y = (v: number) => Math.round(v * c.height);
+  const E = T.exports, size = E.on(c.width, c.height);
   const g = a.geometry;
-  if (g.kind === 'point') return `x ${px(g.x, c.width)}, y ${px(g.y, c.height)} ${size}`;
-  if (g.kind === 'zone')
-    return `zone x ${px(g.x, c.width)}, y ${px(g.y, c.height)}, ${px(g.w, c.width)} × ${px(g.h, c.height)} ${size}`;
-  return `flèche de (${px(g.x1, c.width)}, ${px(g.y1, c.height)}) à (${px(g.x2, c.width)}, ${px(g.y2, c.height)}) ${size}`;
+  if (g.kind === 'point') return E.point(X(g.x), Y(g.y), size);
+  if (g.kind === 'zone') return E.zone(X(g.x), Y(g.y), X(g.w), Y(g.h), size);
+  return E.arrow(X(g.x1), Y(g.y1), X(g.x2), Y(g.y2), size);
 }
 
 /** Région source (pixels) du zoom : 600 × 400 autour du point, ou la boîte de l'annotation + marge, au ratio 3:2. */
@@ -130,7 +121,7 @@ export async function buildExport(
   session: Session,
   sessionDir: string,
   outDir: string,
-  instructionsTemplate = DEFAULT_INSTRUCTIONS,
+  instructionsTemplate = T.instructions,
 ): Promise<ExportDoc> {
   await mkdir(join(outDir, 'images'), { recursive: true });
   const total = allAnnotations(session).length;
@@ -177,7 +168,7 @@ export async function buildExport(
 
   return {
     name: session.name,
-    date: new Date(session.createdAt).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' }),
+    date: T.exports.date(session.createdAt),
     context: session.context?.trim() || undefined,
     notes: (session.notes ?? []).map((n) => n.text.trim()).filter(Boolean),
     instructions: instructionsTemplate.replaceAll('{N}', String(total)),

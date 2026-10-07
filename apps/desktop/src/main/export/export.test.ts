@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
 import { describe, expect, it } from 'vitest';
+import { setLang } from '../../texts/index.ts';
+import { en } from '../../texts/en.ts';
 import { buildExport } from './build.ts';
 import { createFakeSession } from './fixture.ts';
 import { exportSession } from './index.ts';
@@ -37,6 +39,23 @@ describe('export', () => {
     // Captures limitées à 2000 px, zooms d'environ 600 × 400.
     const crop = await loadImage(join(dir, 'images/point-1.jpg'));
     expect([crop.width, crop.height]).toEqual([600, 400]);
+  });
+
+  it("suit la langue de l'interface (noms de fichiers compris)", async () => {
+    setLang('en');
+    try {
+      const { session, dir: sessionDir } = await createFakeSession(await mkdtemp(join(tmpdir(), 'pastille-sessions-')), 2);
+      const outDir = await mkdtemp(join(tmpdir(), 'pastille-out-'));
+      const dir = await exportSession({ session, sessionDir, outDir, format: 'markdown', printHtml: async () => new Uint8Array() });
+      const md = await readFile(join(dir, `${en.exports.reviewFile}.md`), 'utf8');
+      expect(md).toContain(en.instructions.split('\n')[0]!.replaceAll('{N}', '10'));
+      expect(md).toContain(`## ${en.exports.summary}`);
+      expect(md).toContain(`## ${en.exports.screen(1)} — `);
+      expect(md).toContain(`**${en.exports.context}**: Back-office React`);
+      expect(md).not.toMatch(/Écran|Récapitulatif|Contexte|sans commentaire|oui|non \|/);
+    } finally {
+      setLang('fr');
+    }
   });
 
   it('le HTML du PDF contient le récapitulatif avant les écrans', async () => {

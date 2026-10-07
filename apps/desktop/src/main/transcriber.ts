@@ -2,6 +2,7 @@
 // API compatible OpenAI en secours si elle est choisie dans les réglages.
 
 import type { WhisperStatus } from '../ipc.ts';
+import { T } from '../texts/index.ts';
 import type { createSettings } from './settings.ts';
 import { findModel, findWhisperBin, startWhisperServer, transcribeWithApi, type WhisperServer } from './whisper.ts';
 
@@ -21,7 +22,7 @@ export function createTranscriber(opts: {
     const bin = findWhisperBin(opts.binDirs);
     const model = findModel(opts.modelDirs);
     if (!bin || !model) {
-      status = { state: 'missing', detail: !model ? 'Modèle Whisper absent : télécharge-le dans les réglages.' : 'whisper-server introuvable.' };
+      status = { state: 'missing', detail: !model ? T.main.whisper.modelMissing : T.main.whisper.binMissing };
       return;
     }
     const { language, glossary } = opts.settings.get();
@@ -59,7 +60,7 @@ export function createTranscriber(opts: {
         });
       }
       await ready;
-      if (!server) throw new Error(`Transcription indisponible : ${JSON.stringify(status)}`);
+      if (!server) throw new Error(T.main.whisper.unavailable(JSON.stringify(status)));
       return (await server.transcribe(wav)).text;
     },
     stop: () => server?.stop(),

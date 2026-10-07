@@ -1,6 +1,9 @@
-// Textes de la PWA, regroupés pour une traduction future.
+// Textes de la PWA en cinq langues, choisis d'après la langue de la tablette (anglais si elle n'est pas traduite).
+// Toute nouvelle chaîne s'ajoute dans les cinq dictionnaires (même forme que le français).
 
-export const T = {
+import { pickLang, type Lang } from '@pastille/shared';
+
+const fr = {
   labels: {
     toolbar: 'Outils de dessin',
     pen: 'Stylo',
@@ -34,3 +37,150 @@ export const T = {
   welcomeText: "Installez-la : Partager › Sur l'écran d'accueil. Elle s'ouvrira ensuite sans barre d'adresse.",
   welcomeStart: 'Commencer à dessiner',
 };
+
+type Texts = typeof fr;
+
+const en: Texts = {
+  labels: {
+    toolbar: 'Drawing tools',
+    pen: 'Pen',
+    eraser: 'Eraser',
+    '#1D1D1F': 'Black',
+    '#E5341F': 'Red',
+    '#2563EB': 'Blue',
+    '4': 'Thin stroke',
+    '10': 'Thick stroke',
+    undo: 'Undo',
+    clear: 'Clear canvas',
+  },
+  backgrounds: { blanc: 'White background', quadrillé: 'Grid background', recadrage: 'Background: screenshot' },
+  connected: 'Connected to the computer',
+  offline: 'Offline',
+  offlineBanner: 'No network: your drawing stays here, send it once you are back online.',
+  notPaired: 'Tablet not paired',
+  notPairedHint: 'Scan the QR code shown by VibeScreener on the computer.',
+  waiting: 'VibeScreener',
+  waitingHint: 'Waiting for VibeScreener on the computer…',
+  point: (n) => `Point #${n}`,
+  noComment: 'No comment',
+  noSelection: 'No point selected',
+  noSelectionHint: (n) => `It will go to the last point, #${n}.`,
+  noPoint: 'No point on the computer',
+  noPointHint: 'Drop a point on the computer to attach a sketch to it.',
+  send: (n) => (n ? `Send to #${n}` : 'Send'),
+  sent: (n) => `Attached to point #${n}`,
+  notConfirmed: 'Not confirmed, try again',
+  welcomeTitle: 'Tablet paired',
+  welcomeText: 'Install it: Share › Add to Home Screen. It will then open without an address bar.',
+  welcomeStart: 'Start drawing',
+};
+
+const es: Texts = {
+  labels: {
+    toolbar: 'Herramientas de dibujo',
+    pen: 'Lápiz',
+    eraser: 'Goma',
+    '#1D1D1F': 'Negro',
+    '#E5341F': 'Rojo',
+    '#2563EB': 'Azul',
+    '4': 'Trazo fino',
+    '10': 'Trazo grueso',
+    undo: 'Deshacer',
+    clear: 'Borrar el lienzo',
+  },
+  backgrounds: { blanc: 'Fondo blanco', quadrillé: 'Fondo cuadriculado', recadrage: 'Fondo: captura' },
+  connected: 'Conectada al ordenador',
+  offline: 'Sin conexión',
+  offlineBanner: 'Sin red: el dibujo se queda aquí, envíalo cuando vuelva la conexión.',
+  notPaired: 'Tableta no vinculada',
+  notPairedHint: 'Escanea el código QR que muestra VibeScreener en el ordenador.',
+  waiting: 'VibeScreener',
+  waitingHint: 'Esperando a VibeScreener en el ordenador…',
+  point: (n) => `Punto #${n}`,
+  noComment: 'Sin comentario',
+  noSelection: 'Ningún punto seleccionado',
+  noSelectionHint: (n) => `Se enviará al último punto, #${n}.`,
+  noPoint: 'Ningún punto en el ordenador',
+  noPointHint: 'Pon un punto en el ordenador para adjuntarle un boceto.',
+  send: (n) => (n ? `Enviar al #${n}` : 'Enviar'),
+  sent: (n) => `Adjuntado al punto #${n}`,
+  notConfirmed: 'Envío sin confirmar, inténtalo de nuevo',
+  welcomeTitle: 'Tableta vinculada',
+  welcomeText: 'Instálala: Compartir › Añadir a pantalla de inicio. Después se abrirá sin barra de direcciones.',
+  welcomeStart: 'Empezar a dibujar',
+};
+
+const de: Texts = {
+  labels: {
+    toolbar: 'Zeichenwerkzeuge',
+    pen: 'Stift',
+    eraser: 'Radierer',
+    '#1D1D1F': 'Schwarz',
+    '#E5341F': 'Rot',
+    '#2563EB': 'Blau',
+    '4': 'Dünner Strich',
+    '10': 'Dicker Strich',
+    undo: 'Widerrufen',
+    clear: 'Zeichenfläche leeren',
+  },
+  backgrounds: { blanc: 'Weißer Hintergrund', quadrillé: 'Karierter Hintergrund', recadrage: 'Hintergrund: Screenshot' },
+  connected: 'Mit dem Computer verbunden',
+  offline: 'Offline',
+  offlineBanner: 'Kein Netz: Die Zeichnung bleibt hier, sende sie, sobald du wieder online bist.',
+  notPaired: 'Tablet nicht gekoppelt',
+  notPairedHint: 'Scanne den QR-Code, den VibeScreener auf dem Computer anzeigt.',
+  waiting: 'VibeScreener',
+  waitingHint: 'Warte auf VibeScreener auf dem Computer …',
+  point: (n) => `Punkt #${n}`,
+  noComment: 'Kein Kommentar',
+  noSelection: 'Kein Punkt ausgewählt',
+  noSelectionHint: (n) => `Geht an den letzten Punkt, #${n}.`,
+  noPoint: 'Kein Punkt auf dem Computer',
+  noPointHint: 'Setze auf dem Computer einen Punkt, um ihm eine Skizze anzuhängen.',
+  send: (n) => (n ? `An #${n} senden` : 'Senden'),
+  sent: (n) => `An Punkt #${n} angehängt`,
+  notConfirmed: 'Nicht bestätigt, versuch es noch mal',
+  welcomeTitle: 'Tablet gekoppelt',
+  welcomeText: 'Installiere es: Teilen › Zum Home-Bildschirm. Danach öffnet es sich ohne Adressleiste.',
+  welcomeStart: 'Loszeichnen',
+};
+
+const it: Texts = {
+  labels: {
+    toolbar: 'Strumenti di disegno',
+    pen: 'Penna',
+    eraser: 'Gomma',
+    '#1D1D1F': 'Nero',
+    '#E5341F': 'Rosso',
+    '#2563EB': 'Blu',
+    '4': 'Tratto sottile',
+    '10': 'Tratto spesso',
+    undo: 'Annulla',
+    clear: 'Cancella la tela',
+  },
+  backgrounds: { blanc: 'Sfondo bianco', quadrillé: 'Sfondo a quadretti', recadrage: 'Sfondo: cattura' },
+  connected: 'Connesso al computer',
+  offline: 'Offline',
+  offlineBanner: 'Nessuna rete: il disegno resta qui, invialo quando torna la connessione.',
+  notPaired: 'Tablet non abbinato',
+  notPairedHint: 'Scansiona il codice QR mostrato da VibeScreener sul computer.',
+  waiting: 'VibeScreener',
+  waitingHint: 'In attesa di VibeScreener sul computer…',
+  point: (n) => `Punto #${n}`,
+  noComment: 'Nessun commento',
+  noSelection: 'Nessun punto selezionato',
+  noSelectionHint: (n) => `L’invio andrà all’ultimo punto, #${n}.`,
+  noPoint: 'Nessun punto sul computer',
+  noPointHint: 'Aggiungi un punto sul computer per allegargli uno schizzo.',
+  send: (n) => (n ? `Invia al #${n}` : 'Invia'),
+  sent: (n) => `Allegato al punto #${n}`,
+  notConfirmed: 'Invio non confermato, riprova',
+  welcomeTitle: 'Tablet abbinato',
+  welcomeText: 'Installalo: Condividi › Aggiungi alla schermata Home. Poi si aprirà senza barra degli indirizzi.',
+  welcomeStart: 'Inizia a disegnare',
+};
+
+export const DICTS: Record<Lang, Texts> = { fr, en, es, de, it };
+const lang = pickLang(navigator.languages);
+export const T = DICTS[lang];
+document.documentElement.lang = lang;

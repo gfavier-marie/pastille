@@ -3,6 +3,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { LANG_NAMES, LANGS } from '@pastille/shared';
 import type { Settings, SettingsState, SettingsTab } from '../../ipc.ts';
 import * as I from '../icons.tsx';
 import { T } from '../texts.ts';
@@ -200,6 +201,20 @@ function App() {
       </Section>
 
       <Section title={S.app}>
+        <div className="row">
+          <label className="label" htmlFor="ui-language">
+            {S.uiLanguage}
+          </label>
+          {/* Changer de langue recharge les fenêtres ouvertes, celle-ci comprise. */}
+          <select id="ui-language" value={s.uiLanguage} onChange={(e) => void update({ uiLanguage: e.target.value as Settings['uiLanguage'] })}>
+            <option value="auto">{S.uiLanguageAuto}</option>
+            {LANGS.map((l) => (
+              <option key={l} value={l} lang={l}>
+                {LANG_NAMES[l]}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="row">
           <span className="label">{S.openAtLogin}</span>
           <Switch on={s.openAtLogin} label={S.openAtLogin} onChange={(on) => void update({ openAtLogin: on })} />

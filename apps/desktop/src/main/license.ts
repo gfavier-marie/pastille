@@ -5,6 +5,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { T } from '../texts/index.ts';
 
 /** Durée de l'essai en jours ; la changer vaut aussi pour les essais en cours. */
 export const TRIAL_DAYS = 14;
@@ -85,17 +86,18 @@ export function createLicense(opts: {
   /** Active la clé sur ce Mac (Polar limite le nombre de Mac par clé). */
   async function activate(input: string): Promise<{ ok: true } | { ok: false; error: string }> {
     const key = input.trim();
-    if (!key) return { ok: false, error: 'Collez la clé reçue par e-mail.' };
-    if (!polar.org) return { ok: false, error: "Les licences ne sont pas encore en vente : réessayez bientôt." };
+    const L = T.main.license;
+    if (!key) return { ok: false, error: L.emptyKey };
+    if (!polar.org) return { ok: false, error: L.notForSale };
     let res: Response;
     try {
       res = await post('activate', { key, label: `Mac ${stored.installId.slice(0, 8)}` });
     } catch {
-      return { ok: false, error: 'Polar est injoignable : vérifiez la connexion à Internet.' };
+      return { ok: false, error: L.offline };
     }
-    if (res.status === 404 || res.status === 422) return { ok: false, error: "Clé inconnue : vérifiez-la dans l'e-mail reçu après l'achat." };
-    if (res.status === 403) return { ok: false, error: 'Clé refusée : déjà activée sur le nombre maximal de Mac, révoquée ou expirée.' };
-    if (!res.ok) return { ok: false, error: `Polar ne répond pas correctement (erreur ${res.status}) : réessayez plus tard.` };
+    if (res.status === 404 || res.status === 422) return { ok: false, error: L.unknownKey };
+    if (res.status === 403) return { ok: false, error: L.refused };
+    if (!res.ok) return { ok: false, error: L.polarError(res.status) };
     const activation = (await res.json()) as { id: string };
     Object.assign(stored, { key, activationId: activation.id, checkedAt: new Date(now()).toISOString(), valid: true });
     save();
