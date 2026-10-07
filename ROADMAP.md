@@ -237,7 +237,7 @@ Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accor
 
 - [x] Code des deux briques et du cœur (7 oct.) : `clicks.ts`, fenêtre cachée `video` (+ `video-window.ts`), `video.ts` avec ses règles (parole, silences, remarque, regroupement) et 8 tests ; ⌃⌥⌘R et « Enregistrer une vidéo » dans le menu de l'icône ; lignes `VIDEO` (par clic : délai clic → image figée, âge de l'image ; toutes les 30 s : processeur et mémoire)
 - [x] App empaquetée construite en local : `uiohook-napi` est dans `app.asar.unpacked` et se charge depuis l'app (vérifié sans la lancer)
-- [ ] Essai réel sur le Mac (app empaquetée lancée par `open`, journal dans un fichier) : Accessibilité, clics, image d'avant le clic, frappe au clavier, 10 min de mesures
+- [ ] Essai réel sur le Mac, dans l'app publiée (0.8.0, demandé le 7 oct. : l'app de test locale butait sur l'autorisation d'écran, liée à l'app installée de même identifiant) : Accessibilité, clics, image d'avant le clic, frappe au clavier, 10 min de mesures
 
 *Critère : 10 clics sur une page qui réagit au clic donnent 10 images « avant le clic » ; clic → image figée < 50 ms ; VibeScreener < 20 % d'un cœur hors transcription.*
 *Repli si les clics globaux ne tiennent pas : « une touche = un point » par `globalShortcut`, sans module natif ni Accessibilité.*
