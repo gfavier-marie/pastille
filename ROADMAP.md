@@ -354,3 +354,4 @@ Aujourd'hui : un échec de vérification efface la mise à jour connue (contrôl
 - [x] Site : le sélecteur fixé ne revenait plus à sa place en remontant (emplacement réduit à une largeur nulle, invisible pour l'observateur) et pouvait rester rattaché au hero (animation d'apparition) ; corrigé et vérifié du haut au bas de la page, aller et retour
 - [x] Version **0.13.0** (avec le champ de commentaire du bandeau vidéo)
 - [ ] Essai réel : bouton « Mettre à jour » sur Mac et PC ; commentaire écrit et cadre fixe au défilement pendant la vidéo
+- [x] Logo E3 sur le site (en-têtes et pieds de page, landing et pages légales) : « vibe » en Fraunces italique, « screener » dans des coins de viseur aérés ; Fraunces hébergée ici, réduite aux lettres de « vibe » (3 Ko), créditée dans les licences tierces

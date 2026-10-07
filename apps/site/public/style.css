@@ -33,7 +33,7 @@ strong { font-weight: 600; }
 
 /* En-tête */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 72px; border-bottom: 1px solid var(--line); max-width: none; }
-.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font: 700 20px/1 var(--display); letter-spacing: -0.02em; text-decoration: none; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 21px; text-decoration: none; }
 .brand img { width: 28px; height: 28px; border-radius: 7px; }
 .brand:hover { color: var(--ink); }
 .nav { display: flex; gap: 24px; font-size: 15px; }
@@ -58,7 +58,7 @@ strong { font-weight: 600; }
 /* Pied de page */
 .foot { padding: 28px 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
 .foot .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
-.foot .brand { font: 600 15px/1 var(--font); letter-spacing: 0; }
+.foot .brand { font-size: 16px; }
 .foot .brand img { width: 18px; height: 18px; border-radius: 4px; }
 .foot nav { display: flex; flex-wrap: wrap; gap: 8px 24px; }
 

@@ -3,3 +3,17 @@
 @font-face { font-family: 'Instrument Sans'; font-weight: 400 700; font-display: swap; src: url(/fonts/instrument-sans.woff2) format('woff2'); }
 @font-face { font-family: 'JetBrains Mono'; font-weight: 400 500; font-display: swap; src: url(/fonts/jetbrains-mono.woff2) format('woff2'); }
 @font-face { font-family: 'DM Sans'; font-weight: 400 700; font-display: swap; src: url(/fonts/dm-sans.woff2) format('woff2'); }
+/* Fraunces italique, seulement les lettres de « vibe », pour le logo. */
+@font-face { font-family: 'Fraunces'; font-style: italic; font-weight: 600; font-display: swap; src: url(/fonts/fraunces-italic-vibe.woff2) format('woff2'); unicode-range: U+62, U+65, U+69, U+76; }
+
+/* Logo (E3) : « vibe » en italique, « screener » dans des coins de viseur aérés, collés au mot (boîte rognée
+   sur la hauteur des lettres). Sur fond clair : .clair. La taille suit le font-size. */
+.vs-logo { --logo-vibe: #ff6a3d; --logo-cad: #ff6a3d; --logo-trait: 1.5px; display: inline-flex; align-items: center; line-height: 1; white-space: nowrap; }
+.vs-logo.clair { --logo-vibe: #b8300a; --logo-cad: #d63a0c; }
+.vs-logo-vibe { font-family: 'Fraunces', serif; font-style: italic; font-weight: 600; color: var(--logo-vibe); }
+.vs-logo-cad { position: relative; display: inline-block; margin-left: .1em; padding: .24em .26em .2em; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.03em; text-box-trim: trim-both; text-box-edge: ex alphabetic; }
+.vs-logo-cad i { position: absolute; width: .24em; height: .24em; border: 0 solid var(--logo-cad); }
+.vs-logo-cad i:nth-of-type(1) { left: 0; top: 0; border-left-width: var(--logo-trait); border-top-width: var(--logo-trait); border-top-left-radius: 1px; }
+.vs-logo-cad i:nth-of-type(2) { right: 0; top: 0; border-right-width: var(--logo-trait); border-top-width: var(--logo-trait); border-top-right-radius: 1px; }
+.vs-logo-cad i:nth-of-type(3) { left: 0; bottom: 0; border-left-width: var(--logo-trait); border-bottom-width: var(--logo-trait); border-bottom-left-radius: 1px; }
+.vs-logo-cad i:nth-of-type(4) { right: 0; bottom: 0; border-right-width: var(--logo-trait); border-bottom-width: var(--logo-trait); border-bottom-right-radius: 1px; }
