@@ -125,7 +125,6 @@ export type MenuState = {
   video: { shortcut: string; since?: number }; // mode vidéo : raccourci affiché, début de l'enregistrement en cours (Date.now())
   recents: SessionSummary[];
   update?: string; // version plus récente publiée
-  updateProgress?: number; // téléchargement de la mise à jour en cours (%)
   license: LicenseView;
 };
 

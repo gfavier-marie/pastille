@@ -1,14 +1,10 @@
 // Mises à jour (app installée) : la dernière version publiée (latest.json, écrit par la CI au tag,
-// sur le bucket R2 des téléchargements) est comparée à celle de l'app. « Mettre à jour » télécharge,
-// app ouverte et progression affichée, l'installeur de cette version et le script d'installation
-// (install.sh sur Mac, install.ps1 sur Windows), puis lance le script, détaché, et ferme l'app :
-// il remplace l'app et la rouvre. Sans signature Apple, macOS redemande ensuite l'enregistrement
-// de l'écran, le micro et l'Accessibilité (limite de plateforme, voir install.sh).
-// PASTILLE_DOWNLOADS vise un autre bucket (essais).
+// sur le bucket R2 des téléchargements) est comparée à celle de l'app. « Mettre à jour » montre la
+// commande d'installation du site, à coller dans un terminal : le script ferme l'app, la remplace et
+// la rouvre. Sans signature Apple, macOS redemande ensuite l'enregistrement de l'écran, le micro et
+// l'Accessibilité (limite de plateforme, voir install.sh). PASTILLE_DOWNLOADS vise un autre bucket (essais).
 
-import { spawn } from 'node:child_process';
-import { openSync } from 'node:fs';
-import { join } from 'node:path';
+import { SITE_URL } from './license.ts';
 
 const DOWNLOADS = process.env.PASTILLE_DOWNLOADS ?? 'https://dl.vibescreener.dev'; // domaine provisoire (M0)
 
@@ -31,46 +27,15 @@ export async function checkForUpdate(current: string): Promise<Update | null> {
   return isNewer(version, current) ? { version } : null;
 }
 
-type Download = { url: string; path: string };
-
-/** Ce que la mise à jour télécharge dans `dir` avant de fermer l'app : ensuite, plus besoin du réseau. */
-export function updateFiles(platform: NodeJS.Platform, version: string, dir: string): { installer: Download; script: Download } {
-  const [installer, script] = platform === 'win32' ? ['VibeScreener-Setup.exe', 'install.ps1'] : ['VibeScreener-arm64.dmg', 'install.sh'];
-  return {
-    installer: { url: `${DOWNLOADS}/v${version}/${installer}`, path: join(dir, installer) },
-    script: { url: `${DOWNLOADS}/${script}`, path: join(dir, script) },
-  };
-}
-
-/** Commande du script d'installation. Les chemins passent par l'environnement, jamais dans la
- *  commande : un dossier au nom accentué ou avec une apostrophe ne la casse pas. */
-export function installerCommand(platform: NodeJS.Platform, files: { installer: string; script: string }) {
+/** Commande d'installation du site, la même que sur la page d'accueil, et le terminal où la coller. */
+export function updateCommand(platform: NodeJS.Platform): { command: string; terminal: string } {
   return platform === 'win32'
-    ? {
-        cmd: 'powershell.exe',
-        // Lu en UTF-8 comme par la CI : PowerShell 5.1 lirait un .ps1 sans BOM dans la page de code locale.
-        args: ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', 'Get-Content -LiteralPath $env:PASTILLE_SCRIPT -Raw -Encoding UTF8 | Invoke-Expression'],
-        env: { PASTILLE_SCRIPT: files.script, PASTILLE_EXE_FILE: files.installer },
-      }
-    : { cmd: '/bin/sh', args: [files.script], env: { PASTILLE_DMG_FILE: files.installer } };
+    ? { command: `irm ${SITE_URL}/install.ps1 | iex`, terminal: 'PowerShell' }
+    : { command: `curl -fsSL ${SITE_URL}/install.sh | sh`, terminal: 'Terminal' };
 }
 
-/** Lance le script d'installation, qui survit à la fermeture de l'app ; sa sortie va dans `logFile`.
- *  Résolu une fois le script démarré : l'app ne se ferme pas pour rien. */
-export function runInstaller(files: { installer: string; script: string }, logFile: string): Promise<void> {
-  const { cmd, args, env } = installerCommand(process.platform, files);
-  const log = openSync(logFile, 'w');
-  const child = spawn(cmd, args, { detached: true, stdio: ['ignore', log, log], windowsHide: true, env: { ...process.env, ...env } });
-  return new Promise((resolve, reject) => {
-    child.once('error', reject);
-    child.once('spawn', () => {
-      child.unref();
-      resolve();
-    });
-  });
-}
-
-/** Au lancement qui suit une mise à jour vers `updatingTo` : réussie si l'app est au moins à cette version. */
+/** Au lancement qui suit une mise à jour lancée par une version antérieure à la 0.13.0 (téléchargée
+ *  par l'app) : réussie si l'app est au moins à cette version. */
 export function updateOutcome(updatingTo: string, version: string): 'done' | 'failed' | null {
   if (!updatingTo) return null;
   return isNewer(updatingTo, version) ? 'failed' : 'done';

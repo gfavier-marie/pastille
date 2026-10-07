@@ -40,7 +40,7 @@ import { encodeWav, wavDurationMs } from './wav.ts';
 import { createLicense, POLAR, SITE_URL, TRIAL_DAYS } from './license.ts';
 import { createSettings, type Settings } from './settings.ts';
 import { createTranscriber } from './transcriber.ts';
-import { checkForUpdate, runInstaller, updateFiles, updateOutcome, type Update } from './updater.ts';
+import { checkForUpdate, updateCommand, updateOutcome, type Update } from './updater.ts';
 import { createVideo, type VideoSummary } from './video.ts';
 import { createVideoWindow } from './video-window.ts';
 import { createVideoFeedback } from './video-feedback.ts';
@@ -567,7 +567,6 @@ async function menuState(): Promise<MenuState> {
     video: { shortcut: shortcutLabel(VIDEO_SHORTCUT), since: video.isRecording() ? video.startedAt() : undefined },
     recents: recents.map(({ id, name, points, screens, updatedAt }) => ({ id, name, points, screens, updatedAt })),
     update: update?.version,
-    updateProgress,
     license: license.view(),
   };
 }
@@ -577,7 +576,6 @@ async function menuState(): Promise<MenuState> {
 let update: Update | null = null;
 let updateCheckedAt = 0;
 let updateChecking = false;
-let updateProgress: number | undefined; // téléchargement en cours (%) ; garde aussi contre un 2ᵉ clic
 const updateDir = () => join(app.getPath('userData'), 'update');
 const updateLog = () => join(app.getPath('userData'), 'update.log');
 
@@ -597,58 +595,23 @@ async function lookForUpdate() {
   updateTrayMenu();
 }
 
+/** La commande d'installation du site, à coller dans un terminal : plus fiable qu'une mise à jour
+ *  téléchargée et lancée par l'app elle-même. */
 async function confirmUpdate() {
-  if (!update || updateProgress !== undefined) return;
+  if (!update) return;
+  const { command, terminal } = updateCommand(process.platform);
   const { response } = await dialog.showMessageBox({
     message: T.main.update(update.version),
-    detail: T.main.updateDetail + (isMac ? `\n${T.main.updateDetailMac}` : ''),
-    buttons: [T.main.updateNow, T.main.later],
+    detail: `${T.main.updateDetail(terminal)}\n\n${command}` + (isMac ? `\n\n${T.main.updateDetailMac}` : ''),
+    buttons: [T.main.copyCommand, T.main.close],
     defaultId: 0,
     cancelId: 1,
   });
-  if (response === 0) await installUpdate(update);
+  if (response === 0) clipboard.writeText(command);
 }
 
-/** L'app télécharge l'installeur et le script (progression dans le menu et à côté de l'icône),
- *  lance le script puis se ferme ; il la remplace et la rouvre. */
-async function installUpdate(target: Update) {
-  if (updateProgress !== undefined) return;
-  const files = updateFiles(process.platform, target.version, updateDir());
-  updateProgress = 0;
-  updateTrayMenu();
-  notify(T.main.updateStarted(target.version));
-  try {
-    await rm(updateDir(), { recursive: true, force: true });
-    await mkdir(updateDir(), { recursive: true });
-    await downloadFile(files.script.url, files.script.path);
-    await downloadFile(files.installer.url, files.installer.path, (done, total) => {
-      const pct = total ? Math.floor((done / total) * 100) : 0;
-      if (pct === updateProgress) return;
-      updateProgress = pct;
-      updateTrayMenu();
-    });
-    await store.flush();
-    settings.update({ updatingTo: target.version });
-    await runInstaller({ installer: files.installer.path, script: files.script.path }, updateLog());
-  } catch (err) {
-    settings.update({ updatingTo: '' });
-    updateProgress = undefined;
-    updateTrayMenu();
-    const { response } = await dialog.showMessageBox({
-      type: 'warning',
-      message: T.main.updateFailed,
-      detail: err instanceof Error ? err.message : String(err),
-      buttons: [T.main.retry, T.main.cancel],
-      defaultId: 0,
-      cancelId: 1,
-    });
-    if (response === 0) void installUpdate(target);
-    return;
-  }
-  app.quit();
-}
-
-/** Lancement qui suit une mise à jour depuis l'app : réussie, on le dit ; sinon, le journal dit pourquoi. */
+/** Lancement qui suit une mise à jour lancée par une version antérieure (téléchargée par l'app) :
+ *  réussie, on le dit ; sinon, le journal dit pourquoi. */
 function reportUpdate() {
   const { updatingTo } = settings.get();
   const outcome = updateOutcome(updatingTo, app.getVersion());

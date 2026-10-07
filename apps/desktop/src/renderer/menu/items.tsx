@@ -75,9 +75,9 @@ export function MenuItems({ s, act, inEditor = false }: { s: MenuState; act: (a:
         </button>
       )}
       {s.update && (
-        <button type="button" className="item update" disabled={s.updateProgress !== undefined} onClick={() => act({ type: 'update' })}>
+        <button type="button" className="item update" onClick={() => act({ type: 'update' })}>
           <I.Download />
-          <span>{s.updateProgress !== undefined ? T.menu.updating(s.updateProgress) : T.menu.update(s.update)}</span>
+          <span>{T.menu.update(s.update)}</span>
         </button>
       )}
       <button type="button" className="item" onClick={() => act({ type: 'pair' })}>

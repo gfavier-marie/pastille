@@ -239,9 +239,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
 html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!important}
 .vs-page[data-mode="video"] .vs-i-ping{display:none}
 /* Sélecteur de mode, unique : dans le hero, puis fixé en haut de l'écran une fois sorti par le haut (.vs-fixe,
-   posée par le script). .vs-i-sel garde sa place pour que la page ne saute pas. */
-.vs-i-sel{min-height:58px}
-.vs-i-sel.vs-fixe{animation:none}
+   posée par le script). .vs-i-sel garde sa place, et sa largeur : vide, l'observateur ne le verrait plus revenir. */
+.vs-i-sel{width:100%;min-height:58px;display:flex;justify-content:center}
 .vs-sel{display:inline-flex;padding:4px;gap:4px;border-radius:999px;background:#1C1C1F;border:1px solid #2E2E33}
 .vs-sel button{height:48px;display:inline-flex;align-items:center;gap:10px;padding:0 20px;border:0;border-radius:999px;background:transparent;color:#C7C7CC;font-size:16px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .2s ease,color .2s ease}
 .vs-sel button:hover{color:#FFFFFF;background:#26262A}
@@ -2316,9 +2315,14 @@ function choisirMode(mode) {
   if (mode === 'video') rejouerDemo(demoVideo);
 }
 for (const button of document.querySelectorAll('[data-choisir]')) button.addEventListener('click', () => choisirMode(button.dataset.choisir));
+// Une fois fixé, son apparition (animation de transform) est arrêtée pour de bon : un transform, même
+// fini, ferait de .vs-i-sel le repère du position:fixed, et la retirer plus tard la relancerait.
 const selecteur = document.querySelector('.vs-i-sel');
-new IntersectionObserver(([e]) => selecteur.classList.toggle('vs-fixe', e.intersectionRatio < 1 && e.boundingClientRect.top < 14),
-  { rootMargin: '-14px 0px 0px 0px', threshold: 1 }).observe(selecteur);
+new IntersectionObserver(([e]) => {
+  const fixe = e.intersectionRatio < 1 && e.boundingClientRect.top < 14;
+  if (fixe) selecteur.style.animation = 'none';
+  selecteur.classList.toggle('vs-fixe', fixe);
+}, { rootMargin: '-14px 0px 0px 0px', threshold: 1 }).observe(selecteur);
 
 // Démo « À vous d'essayer », en quatre étapes : capturer l'écran (⌃⌥⌘P ou le bouton), cliquer où
 // l'on veut sur la capture (la demande s'écrit toute seule, comme dictée), exporter, puis voir

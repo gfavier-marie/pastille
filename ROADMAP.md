@@ -346,3 +346,11 @@ Aujourd'hui : un échec de vérification efface la mise à jour connue (contrôl
 - [x] Calculateur « Combien de temps gagnez-vous ? » déplacé juste avant les tarifs ; les étapes suivent directement les logos
 - [x] Vérifié en local (bureau et 375 px, capture et vidéo) : sélecteur fixé, aucun glyphe de touche hors des démos, ordre des sections
 - [ ] Déploiement (`pnpm site:deploy`) sur ton feu vert
+
+### Lot I — Mise à jour par la commande du site, version 0.13.0
+
+- [x] « Mettre à jour » n'installe plus rien : une fenêtre donne la commande d'installation du site (`curl … | sh` sur Mac, `irm … | iex` sous Windows) et le terminal où la coller, avec « Copier la commande ». Le script ferme l'app, la remplace et la rouvre. Plus de téléchargement dans l'app ni de pourcentage dans le menu (moins de cas d'échec)
+- [x] Le bilan au lancement (`updatingTo`) reste pour les mises à jour lancées depuis une version ≤ 0.12.0
+- [x] Site : le sélecteur fixé ne revenait plus à sa place en remontant (emplacement réduit à une largeur nulle, invisible pour l'observateur) et pouvait rester rattaché au hero (animation d'apparition) ; corrigé et vérifié du haut au bas de la page, aller et retour
+- [x] Version **0.13.0** (avec le champ de commentaire du bandeau vidéo)
+- [ ] Essai réel : bouton « Mettre à jour » sur Mac et PC ; commentaire écrit et cadre fixe au défilement pendant la vidéo
