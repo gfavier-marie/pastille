@@ -136,6 +136,7 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 
 - **[M]** Menu : Nouvelle session, Ouvrir l'éditeur, Exporter le PDF, Appairer une tablette (QR), Réglages, Quitter.
 - **[S]** L'icône signale l'état : session active, nombre de points, tablette connectée, transcriptions en cours.
+- Les mêmes entrées sont reprises dans le menu ≡ en haut à droite de l'éditeur (demandé le 7 oct. 2026).
 
 ### 4.8 Réglages
 

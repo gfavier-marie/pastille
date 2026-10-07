@@ -4,8 +4,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { allAnnotations, type Annotation, type Note, type Session } from '@pastille/shared';
-import { imageUrl, type ExportFormat, type SessionSummary, type SettingsState } from '../../ipc.ts';
+import { imageUrl, type ExportFormat, type MenuAction, type MenuState, type SessionSummary, type SettingsState } from '../../ipc.ts';
 import * as I from '../icons.tsx';
+import { MenuItems } from '../menu/items.tsx';
 import { T } from '../texts.ts';
 import { createRecorder, type RecorderState } from './recorder.ts';
 import { Stage } from './Stage.tsx';
@@ -141,6 +142,7 @@ function App() {
   const [bubbleOpen, setBubbleOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [exportMenu, setExportMenu] = useState(false);
+  const [appMenu, setAppMenu] = useState<MenuState | null>(null); // menu ≡ ouvert : entrées du menu de l'icône
   const [sessionsOpen, setSessionsOpen] = useState(false); // liste de toutes les sessions
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [rec, setRec] = useState<RecorderState>(null);
@@ -302,6 +304,41 @@ function App() {
     if (exportPdf) void runExport('pdf');
   }
 
+  /** Entrées du menu ≡ : celles qui touchent l'éditeur passent par ses fonctions (toast, sélection remise à zéro), les autres par le processus principal. */
+  function menuAction(a: MenuAction) {
+    setAppMenu(null);
+    recorder.stop(true);
+    if (a.type === 'export') void runExport('pdf');
+    else if (a.type === 'sessions') setSessionsOpen(true);
+    else if (a.type === 'open-recent' || a.type === 'export-recent') void openSession(a.id, a.type === 'export-recent');
+    else api.menuAction(a);
+  }
+
+  // Menu ≡ : en haut à droite, dans l'en-tête comme dans l'éditeur vide. L'état est lu à l'ouverture.
+  const appMenuButton = (
+    <div className="app-menu">
+      <button
+        type="button"
+        className="menu-btn"
+        aria-label={T.menu.label}
+        title={T.menu.label}
+        aria-haspopup="menu"
+        aria-expanded={!!appMenu}
+        onClick={() => (appMenu ? setAppMenu(null) : void api.getMenuState().then(setAppMenu))}
+      >
+        <I.Menu size={16} />
+      </button>
+      {appMenu && (
+        <>
+          <div className="menu-backdrop" onMouseDown={() => setAppMenu(null)} />
+          <div className="menu" role="menu" aria-label={T.menu.label}>
+            <MenuItems s={appMenu} act={menuAction} inEditor />
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   const sessionsPanel = sessionsOpen && (
     <SessionsPanel
       currentId={session?.id}
@@ -337,9 +374,12 @@ function App() {
   // Raccourcis (§4.6).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (sessionsOpen) {
-        // Liste des sessions ouverte : seul Échap agit (la fermer).
-        if (e.key === 'Escape') setSessionsOpen(false);
+      if (sessionsOpen || appMenu) {
+        // Liste des sessions ou menu ≡ ouvert : seul Échap agit (le fermer).
+        if (e.key === 'Escape') {
+          setSessionsOpen(false);
+          setAppMenu(null);
+        }
         return;
       }
       const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -469,6 +509,7 @@ function App() {
             {T.editor.allSessions}
           </button>
         </div>
+        {appMenuButton}
         {sessionsPanel}
       </div>
     );
@@ -669,6 +710,7 @@ function App() {
             </div>
           )}
         </div>
+        {appMenuButton}
       </header>
 
       <main>

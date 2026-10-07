@@ -88,6 +88,11 @@ export const Sliders = (p: Props) => (
     <circle cx="5.5" cy="11.5" r="1.5" />
   </Stroke>
 );
+export const Menu = (p: Props) => (
+  <Stroke {...p}>
+    <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
+  </Stroke>
+);
 export const Power = (p: Props) => (
   <Stroke {...p}>
     <path d="M8 2v5" />
