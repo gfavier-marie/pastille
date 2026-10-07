@@ -14,11 +14,17 @@ function App() {
   const lastClick = useRef<VideoFeedback>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fieldRef = useRef<HTMLTextAreaElement>(null);
   const written = useRef(false); // le commentaire écrit n'est envoyé qu'une fois (Entrée, Échap ou clic ailleurs)
-  useEffect(() => { if (state?.writing) written.current = false; }, [state?.writing]);
+  useEffect(() => {
+    if (!state?.writing) return;
+    written.current = false;
+    fieldRef.current?.focus();
+  }, [state?.writing]);
   function finishWriting(text: string | null) {
     if (written.current) return;
     written.current = true;
+    if (fieldRef.current) fieldRef.current.value = '';
     void window.pastille.videoText(text);
   }
   const geometry = state?.click?.geometry;
@@ -30,6 +36,13 @@ function App() {
     catch (err) { setError(err instanceof Error ? err.message : String(err)); }
     finally { setBusy(false); }
   }
+
+  // La molette ne doit rien déplacer ici (voir overscroll-behavior dans la page).
+  useEffect(() => {
+    const block = (e: WheelEvent) => e.preventDefault();
+    window.addEventListener('wheel', block, { passive: false });
+    return () => window.removeEventListener('wheel', block);
+  }, []);
 
   useEffect(() => window.pastille.onVideoFeedback((next) => {
     const previous = lastClick.current?.click;
@@ -82,29 +95,31 @@ function App() {
           <button type="button" className="primary" disabled={busy} onClick={() => void act('capture-inspiration')}><I.Capture size={13} />{v.captureInspiration}</button>
           <button type="button" disabled={busy} onClick={() => void act('cancel-inspiration')}>{v.resume}</button>
         </div>
-      </> : state.writing ? <>
-        <textarea className="feedback-text" autoFocus rows={2} placeholder={v.writePlaceholder}
+      </> : <>
+        {!state.writing && <div className="feedback-meta" role="status">{state.voiced ? T.editor.recording : c ? (state.kept ? '' : v.speak) : v.microphone}</div>}
+        {/* Champ toujours là, comme la bulle du mode capture. La fenêtre ne prend pas le clavier
+            (l'app relue le garde) : un clic dans le champ le demande, puis on tape. */}
+        <textarea ref={fieldRef} className={`feedback-text${state.writing ? ' writing' : ''}`} rows={state.writing ? 2 : 1}
+          readOnly={!state.writing} placeholder={v.writePlaceholder}
+          onMouseDown={(e) => { if (!state.writing) { e.preventDefault(); void act('write'); } }}
           onKeyDown={(e) => {
+            if (!state.writing) return;
             if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); finishWriting(e.currentTarget.value); }
             else if (e.key === 'Escape') finishWriting(null);
           }}
-          onBlur={(e) => finishWriting(e.currentTarget.value)} />
-        <div className="feedback-hint">{v.writeHint}</div>
-      </> : <>
-        <div className="feedback-meta" role="status">{state.voiced ? T.editor.recording : c ? (state.kept ? '' : v.speak) : v.microphone}</div>
-        <div className="feedback-tools">
-          <button type="button" disabled={busy} onClick={() => void act('write')}><I.Keyboard size={13} />{v.write}</button>
-          {c && <>
+          onBlur={(e) => { if (state.writing) finishWriting(e.currentTarget.value); }} />
+        {state.writing ? <div className="feedback-hint">{v.writeHint}</div> : <>
+          {c && <div className="feedback-tools">
             <button type="button" disabled={busy} title={state.tablet ? v.drawingReady : T.menu.pair} onClick={() => void act('draw')}><I.Tablet size={13} />{v.drawing}</button>
             <button type="button" disabled={busy} onClick={() => void act('inspiration')}><I.Picture size={13} />{T.editor.inspiration}</button>
-          </>}
-        </div>
-        <div className="feedback-keys">
-          <span><kbd className="point-key">{v.key}</kbd> + <kbd>{v.click}</kbd> → {v.placePoint}</span>
-          <span className="sep">·</span>
-          <span><kbd>{v.click}</kbd> → {v.navigate}</span>
-        </div>
-        <div className="feedback-hint">{v.gestures}</div>
+          </div>}
+          <div className="feedback-keys">
+            <span><kbd className="point-key">{v.key}</kbd> + <kbd>{v.click}</kbd> → {v.placePoint}</span>
+            <span className="sep">·</span>
+            <span><kbd>{v.click}</kbd> → {v.navigate}</span>
+          </div>
+          <div className="feedback-hint">{v.gestures}</div>
+        </>}
       </>}
       {(state.error || error) && <div className="feedback-error" role="alert">{state.error || error}</div>}
     </div>}
