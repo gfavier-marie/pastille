@@ -54,6 +54,7 @@ export const fr = {
     inspirationHint: (shortcut: string) => `Ouvrez la page modèle, puis ${shortcut}`,
     captureInspiration: 'Capturer l’inspiration',
     resume: 'Reprendre la vidéo',
+    stop: 'Arrêter',
     pointUnavailable: 'Le point ne peut pas être enregistré. Cliquez à nouveau sur un élément.',
   },
 
@@ -76,6 +77,7 @@ export const fr = {
     settings: 'Réglages…',
     quit: 'Quitter VibeScreener',
     update: (version: string) => `Mettre à jour (version ${version})`,
+    updating: (pct: number) => `Téléchargement de la mise à jour… ${pct} %`,
     trial: (days: number) => `Essai gratuit : ${plural(days, 'jour restant', 'jours restants')}`,
     buy: 'Acheter',
     license: { expired: 'Essai terminé', revoked: 'Licence plus valable', unverified: 'Licence à vérifier' },
@@ -116,7 +118,12 @@ export const fr = {
   },
 
   settings: {
-    tabs: { general: 'Général', transcription: 'Transcription', export: 'Export PDF', devices: 'Appareils', claude: 'Claude Code', license: 'Licence' },
+    tabs: { general: 'Général', permissions: 'Autorisations', transcription: 'Transcription', export: 'Export PDF', devices: 'Appareils', claude: 'Claude Code', license: 'Licence' },
+    permissions: 'Autorisations du système',
+    permissionsHint: isMac
+      ? "VibeScreener n'étant pas signée par Apple, macOS les oublie à chaque mise à jour : redonnez-les ici. L'Accessibilité ne sert qu'au mode vidéo."
+      : 'Le micro se règle dans Paramètres › Confidentialité et sécurité › Microphone.',
+    notGranted: 'Non autorisée',
     capture: 'Capture',
     shortcut: 'Raccourci de capture',
     shortcutAria: (label: string) => `Modifier le raccourci, actuellement ${label}`,
@@ -237,6 +244,8 @@ export const fr = {
       relaunch: "macOS peut demander de relancer VibeScreener après l'autorisation d'écran : cet assistant se rouvrira.",
       keyboardOnly: 'Pas de micro ? Passer en clavier seul',
       keyboardChosen: 'Clavier seul : le micro ne sera pas utilisé.',
+      accessibility: 'Accessibilité',
+      accessibilityWhy: 'Facultative : pour le mode vidéo, qui suit vos clics.',
     },
     model: {
       title: 'Le modèle de dictée se télécharge',
@@ -254,7 +263,7 @@ export const fr = {
     shortcut: {
       title: 'Essayez le raccourci',
       intro: (keys: number) =>
-        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces touches ensemble' : 'ce raccourci'}. Ensuite, VibeScreener reste dans ${isMac ? 'le Dock et la barre de menus' : 'la zone de notification'}.`,
+        `Ouvrez la page à relire, puis appuyez sur ${keys > 2 ? 'ces touches ensemble' : 'ce raccourci'}. Ensuite, VibeScreener reste dans ${isMac ? 'la barre de menus' : 'la zone de notification'}.`,
       waiting: "En attente de l'appui…",
       steps: [
         ['Raccourci', "L'écran se fige."],
@@ -263,6 +272,9 @@ export const fr = {
       ] as [string, string][],
       openAtLogin: `Ouvrir VibeScreener au démarrage ${isMac ? 'du Mac' : 'de l’ordinateur'}`,
       other: 'Choisir un autre raccourci',
+      videoTitle: 'Nouveau : le mode vidéo',
+      video: (shortcut: string) =>
+        `${shortcut} lance un enregistrement : naviguez, cliquez sur un élément et parlez, chaque clic commenté devient un point. ${shortcut} l'arrête.`,
     },
     trial: (days: number) => `Essai gratuit : encore ${plural(days, 'jour')}, toutes les fonctions, sans carte bancaire.`,
   },
@@ -366,6 +378,8 @@ export const fr = {
     emptyTitle: "Aucune capture pour l'instant",
     emptyBefore: "Sur l'écran à relire, appuyez sur",
     emptyAfter: "puis cliquez sur l'élément à corriger.",
+    emptyVideoBefore: 'Pour une vidéo, appuyez sur',
+    emptyVideoAfter: 'puis naviguez : chaque clic suivi de paroles devient un point.',
     micError: (err: unknown) => `Micro indisponible : ${err}`,
     zoomedImage: 'Image agrandie',
   },
@@ -383,10 +397,19 @@ export const fr = {
     exportCancelled: 'Export annulé.',
     note: (n: number) => `remarque ${n}`,
     update: (version: string) => `Mettre à jour VibeScreener vers la version ${version} ?`,
-    updateDetail: "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés.",
+    updateDetail: "L'app télécharge la mise à jour (progression dans le menu de l'icône), puis se ferme, se met à jour et se rouvre. Sessions et réglages sont conservés.",
     updateDetailMac: "L'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran, le micro et l'Accessibilité (mode vidéo).",
     updateNow: 'Mettre à jour',
     later: 'Plus tard',
+    updateStarted: (version: string) => `Téléchargement de la version ${version}… VibeScreener se fermera puis se rouvrira d'elle-même.`,
+    updateFailed: "La mise à jour n'a pas pu être téléchargée.",
+    retry: 'Réessayer',
+    updateDone: (version: string) => `VibeScreener est à jour : version ${version}.`,
+    updateIncomplete: (version: string) => `La mise à jour vers la version ${version} n'a pas abouti.`,
+    updateIncompleteDetail: (current: string) =>
+      `VibeScreener est restée en version ${current}. Le journal de l'installation dit pourquoi. Réessayez depuis le menu de l'icône, ou avec la commande d'installation du site.`,
+    openLog: 'Ouvrir le journal',
+    close: 'Fermer',
     shortcutTaken: (label: string) => `${label} est déjà pris par une autre application.`,
     shortcutTakenAtStart: (label: string) => `Le raccourci ${label} est déjà pris par une autre application.`,
     shortcutTakenDetail: 'Choisissez-en un autre dans les réglages. Les captures restent possibles depuis l’icône de VibeScreener.',
@@ -454,6 +477,7 @@ export const fr = {
       download: (status: number, url: string) => `Téléchargement impossible (${status}) : ${url}`,
       stopped: (stderr: string) => `whisper-server s'est arrêté au démarrage :\n${stderr}`,
       timeout: 'whisper-server ne répond pas après 120 s',
+      stalled: (url: string) => `Téléchargement interrompu (plus rien reçu depuis 60 s) : ${url}`,
     },
   },
 

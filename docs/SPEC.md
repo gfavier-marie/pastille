@@ -50,7 +50,7 @@ Chaque interaction se juge au nombre de gestes : rien ne doit obliger à choisir
 
 La boucle centrale ne coûte qu'un clic par commentaire ; le raccourci ne sert qu'à changer d'écran.
 
-1. Lancer Pastille : elle se loge dans le Dock et la barre de menus, ou la zone de notification.
+1. Lancer Pastille : elle se loge dans la barre de menus (icône du Dock seulement tant qu'une fenêtre est ouverte), ou la zone de notification.
 2. Sur l'écran à relire, appuyer sur le raccourci : l'écran se fige.
 3. Cliquer sur l'élément à corriger : la fenêtre est capturée et l'éditeur s'ouvre avec le point #1 posé, micro ouvert. Glisser encadre plutôt une zone (#1, un rectangle) sur la fenêtre ; ⌥ + glisser recadre la capture sur la zone, sans point.
 4. Parler : « Ce bouton, radius de 8 px et un peu plus large. » Aucune validation.
@@ -61,7 +61,7 @@ La boucle centrale ne coûte qu'un clic par commentaire ; le raccourci ne sert q
 
 ## 4. Application desktop (macOS et Windows)
 
-L'application vit dans le Dock et la barre de menus (Mac) ou la zone de notification (Windows, l'éditeur fermé reste réduit dans la barre des tâches) et se résume à trois écrans : l'overlay de capture, l'éditeur et les réglages.
+L'application vit dans la barre de menus (Mac, icône du Dock tant qu'une fenêtre est ouverte) ou la zone de notification (Windows, l'éditeur fermé reste réduit dans la barre des tâches) et se résume à trois écrans : l'overlay de capture, l'éditeur et les réglages.
 
 Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus tard.
 

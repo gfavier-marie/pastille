@@ -1,9 +1,11 @@
 // Premier lancement (§4.9), en trois étapes : autorisations, modèle de dictée, essai du raccourci.
+// Rouvert à chaque lancement tant que « Terminer » n'a pas été atteint ou qu'une autorisation manque.
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Settings, SettingsState } from '../../ipc.ts';
 import * as I from '../icons.tsx';
+import { permissionRows } from '../permissions.tsx';
 import { T } from '../texts.ts';
 
 const api = window.pastille;
@@ -33,8 +35,8 @@ function App() {
 
   // Étape 2 : le téléchargement démarre seul si le modèle manque.
   useEffect(() => {
-    if (step === 2 && s && s.engine === 'local' && !s.modelPresent && download === null && !error) void getModel();
-  }, [step, s?.modelPresent]);
+    if (step === 2 && s && s.engine === 'local' && s.whisper.state === 'missing' && download === null && !error) void getModel();
+  }, [step, s?.whisper.state]);
 
   if (!s) return null;
 
@@ -48,12 +50,6 @@ function App() {
     if (!r.ok) setError(r.error);
   }
 
-  // L'essai du raccourci est facultatif : arrivé là, fermer l'assistant ne le fait plus revenir
-  // (sauf autorisation retirée ; un modèle manquant ouvre les réglages).
-  async function toShortcut() {
-    await update({ firstRunDone: true });
-    setStep(3);
-  }
 
   async function finish() {
     await update({ firstRunDone: true });
@@ -80,40 +76,22 @@ function App() {
       <>
         <Intro title={W.permissions.title} text={W.permissions.intro} />
         <div className="card">
-          {mac && (
-            <div className="row">
-              <span className="icon-box">
-                <I.Screen size={20} />
-              </span>
+          {permissionRows(s).map((r) => (
+            <div className="row" key={r.kind}>
+              <span className="icon-box">{r.icon}</span>
               <span className="what">
-                <b>{W.permissions.screen}</b>
-                <span>{W.permissions.screenWhy}</span>
+                <b>{r.title}</b>
+                <span>{r.why}</span>
               </span>
-              {screenOk ? (
+              {r.ok ? (
                 <Granted />
               ) : (
-                <button type="button" className="btn primary tall" onClick={() => void api.askPermission('screen')}>
+                <button type="button" className={`btn tall ${r.optional ? '' : 'primary'}`} onClick={() => void api.askPermission(r.kind)}>
                   {W.permissions.allow}
                 </button>
               )}
             </div>
-          )}
-          <div className="row">
-            <span className="icon-box">
-              <I.Mic size={20} />
-            </span>
-            <span className="what">
-              <b>{W.permissions.mic}</b>
-              <span>{keyboard ? W.permissions.keyboardChosen : W.permissions.micWhy}</span>
-            </span>
-            {micOk ? (
-              <Granted />
-            ) : (
-              <button type="button" className="btn primary tall" onClick={() => void api.askPermission('microphone')}>
-                {W.permissions.allow}
-              </button>
-            )}
-          </div>
+          ))}
         </div>
         {mac && (
           <p className="aside">
@@ -143,11 +121,15 @@ function App() {
       </>
     );
   } else if (step === 2) {
-    const ready = s.modelPresent;
+    // Fichier présent : Whisper se charge (quelques secondes), puis prêt ; ou en erreur, avec sa raison.
     const api_ = s.engine === 'api';
+    const state = s.whisper.state;
+    const ready = api_ || state === 'ready';
+    const present = state !== 'missing';
+    const failed = error ?? (s.whisper.state === 'error' ? s.whisper.detail : undefined);
     body = (
       <>
-        <Intro title={ready ? W.model.titleReady : W.model.title} text={api_ ? W.model.apiChosen : W.model.intro} />
+        <Intro title={ready || (present && !failed) ? W.model.titleReady : W.model.title} text={api_ ? W.model.apiChosen : W.model.intro} />
         {!api_ && (
           <div className="card pad">
             <div className="row" style={{ padding: 0 }}>
@@ -156,26 +138,31 @@ function App() {
               </span>
               <span className="what">
                 <b>{W.model.name}</b>
-                <span>{error ?? W.model.detail}</span>
+                <span className={failed ? 'failed' : undefined}>{failed ?? W.model.detail}</span>
               </span>
-              {ready ? (
-                <Granted label={W.model.ready} />
-              ) : error ? (
+              {failed ? (
                 <button type="button" className="btn tall" onClick={() => void getModel()}>
                   {W.model.retry}
                 </button>
+              ) : ready ? (
+                <Granted label={W.model.ready} />
+              ) : present && download === null ? (
+                <span className="loading">
+                  <I.Spinner size={12} />
+                  {T.settings.modelState.loading}
+                </span>
               ) : null}
             </div>
-            <div className="progress" role="progressbar" aria-label={W.model.name} aria-valuemin={0} aria-valuemax={100} aria-valuenow={ready ? 100 : (download ?? 0)}>
-              <i style={{ width: `${ready ? 100 : (download ?? 0)}%` }} />
+            <div className="progress" role="progressbar" aria-label={W.model.name} aria-valuemin={0} aria-valuemax={100} aria-valuenow={present ? 100 : (download ?? 0)}>
+              <i style={{ width: `${present ? 100 : (download ?? 0)}%` }} />
             </div>
             <div className="figures">
-              <span>{ready ? W.model.progress(100) : W.model.progress(download ?? 0)}</span>
-              {!ready && <span>{download ?? 0} %</span>}
+              <span>{present ? W.model.progress(100) : W.model.progress(download ?? 0)}</span>
+              {!present && <span>{download ?? 0} %</span>}
             </div>
           </div>
         )}
-        {!ready && !api_ && (
+        {!present && !api_ && (
           <p className="note">
             <I.Keyboard size={15} />
             <span>{W.model.note}</span>
@@ -198,7 +185,7 @@ function App() {
         <button type="button" className="btn tall" onClick={() => setStep(1)}>
           {W.back}
         </button>
-        <button type="button" className="btn primary tall" onClick={() => void toShortcut()}>
+        <button type="button" className="btn primary tall" onClick={() => setStep(3)}>
           {W.continue}
         </button>
       </>
@@ -226,6 +213,12 @@ function App() {
             </li>
           ))}
         </ol>
+        <p className="aside news">
+          <I.Video size={15} />
+          <span>
+            <b>{W.shortcut.videoTitle}</b> {W.shortcut.video(s.videoShortcutLabel)}
+          </span>
+        </p>
         <label className="check">
           <input type="checkbox" checked={s.openAtLogin} onChange={(e) => void update({ openAtLogin: e.target.checked })} />
           {W.shortcut.openAtLogin}

@@ -100,7 +100,7 @@ function App() {
         <span>{T.menu.exportPdf}</span>
         {mac && <kbd>⌘E</kbd>}
       </button>
-      <button type="button" className="item" disabled={!session} onClick={() => act({ type: 'new-session' })}>
+      <button type="button" className="item" onClick={() => act({ type: 'new-session' })}>
         <I.Plus />
         <span>{T.menu.newSession}</span>
       </button>
@@ -139,9 +139,9 @@ function App() {
         </button>
       )}
       {s.update && (
-        <button type="button" className="item update" onClick={() => act({ type: 'update' })}>
+        <button type="button" className="item update" disabled={s.updateProgress !== undefined} onClick={() => act({ type: 'update' })}>
           <I.Download />
-          <span>{T.menu.update(s.update)}</span>
+          <span>{s.updateProgress !== undefined ? T.menu.updating(s.updateProgress) : T.menu.update(s.update)}</span>
         </button>
       )}
       <button type="button" className="item" onClick={() => act({ type: 'pair' })}>

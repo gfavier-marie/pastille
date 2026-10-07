@@ -40,9 +40,9 @@ Télécharger [VibeScreener-Setup.exe](https://dl.vibescreener.dev/VibeScreener-
 
 ## Premier lancement
 
-VibeScreener vit dans le Dock et la barre de menus (zone de notification sous Windows). Un assistant en trois étapes :
+VibeScreener vit dans la barre de menus (zone de notification sous Windows) ; sur Mac, son icône n'est dans le Dock que tant qu'une fenêtre est ouverte. Un assistant en trois étapes :
 
-1. **Autorisations** : enregistrement de l'écran (Mac seulement, puis relancer VibeScreener) et micro.
+1. **Autorisations** : enregistrement de l'écran (Mac seulement, puis relancer VibeScreener) et micro ; sur Mac, Accessibilité en option pour le mode vidéo (⌃⌥⌘R). Tant qu'il n'est pas terminé, l'assistant revient à chaque lancement. Les autorisations restent ensuite dans Réglages › Autorisations (macOS les oublie à chaque mise à jour, l'app n'étant pas signée).
 2. **Modèle de dictée** : téléchargé tout seul (547 Mo, une seule fois). La dictée se fait ensuite sur l'ordinateur, hors ligne.
 3. **Raccourci** : **⌃⌥⌘P** (Windows : **Ctrl+Alt+P**) fige l'écran ; clic sur l'élément, on parle, c'est noté. **⌘E** (**Ctrl+E**) exporte.
 

@@ -147,6 +147,7 @@ function App() {
   const levels = useRef<number[]>([]);
   const [tab, setTab] = useState<'points' | 'notes'>('points'); // onglet du panneau de droite
   const [shortcut, setShortcut] = useState(isMac ? '⌃⌥⌘P' : 'Ctrl+Alt+P');
+  const [videoShortcut, setVideoShortcut] = useState(isMac ? '⌃⌥⌘R' : 'Ctrl+Alt+R');
   const [tablet, setTablet] = useState(false);
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis ou inspiration agrandi
   const [newNoteId, setNewNoteId] = useState<string | null>(null); // remarque juste ajoutée, à mettre au focus
@@ -199,6 +200,7 @@ function App() {
       prefs.current = { commentMode: s.commentMode, silenceMs: s.silenceMs };
       setCommentMode(s.commentMode);
       setShortcut(s.shortcutLabel);
+      setVideoShortcut(s.videoShortcutLabel);
     };
     void api.getSettings().then(applyPrefs);
     const offSettings = api.onSettingsChanged(applyPrefs);
@@ -433,12 +435,19 @@ function App() {
     };
   });
 
-  // « Nouvelle capture » : au bout des vignettes, et dans l'éditeur vide.
+  // « Nouvelle capture » et « Enregistrer une vidéo » : au bout des vignettes, et dans l'éditeur vide.
   const newCapture = (
     <button type="button" className="btn primary new-capture" onClick={() => api.startCapture()}>
       <I.Plus size={14} />
       {T.editor.newCapture}
       <kbd>{shortcut}</kbd>
+    </button>
+  );
+  const newVideo = (
+    <button type="button" className="btn new-capture" onClick={() => api.toggleVideo()}>
+      <I.Video size={14} />
+      {T.menu.video}
+      <kbd>{videoShortcut}</kbd>
     </button>
   );
 
@@ -449,9 +458,12 @@ function App() {
         <h1>{T.editor.emptyTitle}</h1>
         <p>
           {T.editor.emptyBefore} <kbd>{shortcut}</kbd> {T.editor.emptyAfter}
+          <br />
+          {T.editor.emptyVideoBefore} <kbd>{videoShortcut}</kbd> {T.editor.emptyVideoAfter}
         </p>
         <div className="actions">
           {newCapture}
+          {newVideo}
           <button type="button" className="btn" onClick={() => setSessionsOpen(true)}>
             <I.Folder size={14} />
             {T.editor.allSessions}
@@ -934,6 +946,7 @@ function App() {
           </div>
         ))}
         {newCapture}
+        {newVideo}
       </nav>
 
       {exportMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 9 }} onMouseDown={() => setExportMenu(false)} />}

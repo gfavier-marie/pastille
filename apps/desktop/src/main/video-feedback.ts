@@ -42,12 +42,14 @@ export function createVideoFeedback(opts: {
         fullscreenable: false,
         enableLargerThanScreen: true,
         skipTaskbar: true,
-        ...(process.platform === 'darwin' ? { acceptFirstMouse: true } : {}),
+        // macOS : panneau, comme l'overlay de capture, pour passer au-dessus d'une app en plein écran.
+        ...(process.platform === 'darwin' ? { type: 'panel' as const, acceptFirstMouse: true } : {}),
         webPreferences: { preload: opts.preload, backgroundThrottling: false },
       });
       win.setIgnoreMouseEvents(true, { forward: true });
       win.setAlwaysOnTop(true, 'screen-saver');
-      win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+      // Sans skipTransformProcessType, Electron cache l'icône du Dock dès la première vidéo.
+      win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
       win.setContentProtection(true);
       return { displayId: d.id, win };
     });

@@ -51,6 +51,7 @@ export const en: Texts = {
     inspirationHint: (shortcut: string) => `Open the reference page, then ${shortcut}`,
     captureInspiration: 'Capture inspiration',
     resume: 'Resume recording',
+    stop: 'Stop',
     pointUnavailable: 'The point could not be saved. Click an element again.',
   },
 
@@ -73,6 +74,7 @@ export const en: Texts = {
     settings: 'Settings…',
     quit: 'Quit VibeScreener',
     update: (version: string) => `Update to version ${version}`,
+    updating: (pct: number) => `Downloading the update… ${pct}%`,
     trial: (days: number) => `Free trial: ${plural(days, 'day left', 'days left')}`,
     buy: 'Buy',
     license: { expired: 'Trial ended', revoked: 'License no longer valid', unverified: 'License needs checking' },
@@ -113,7 +115,12 @@ export const en: Texts = {
   },
 
   settings: {
-    tabs: { general: 'General', transcription: 'Transcription', export: 'PDF Export', devices: 'Devices', claude: 'Claude Code', license: 'License' },
+    tabs: { general: 'General', permissions: 'Permissions', transcription: 'Transcription', export: 'PDF Export', devices: 'Devices', claude: 'Claude Code', license: 'License' },
+    permissions: 'System permissions',
+    permissionsHint: isMac
+      ? 'VibeScreener isn’t signed by Apple, so macOS forgets them after each update: grant them again here. Accessibility is only used by video mode.'
+      : 'The microphone is set in Settings › Privacy & security › Microphone.',
+    notGranted: 'Not allowed',
     capture: 'Capture',
     shortcut: 'Capture shortcut',
     shortcutAria: (label: string) => `Change the shortcut, currently ${label}`,
@@ -234,6 +241,8 @@ export const en: Texts = {
       relaunch: 'macOS may ask you to relaunch VibeScreener after allowing screen recording. This setup will then reopen.',
       keyboardOnly: 'No mic? Switch to keyboard only',
       keyboardChosen: 'Keyboard only: the mic won’t be used.',
+      accessibility: 'Accessibility',
+      accessibilityWhy: 'Optional: for video mode, which follows your clicks.',
     },
     model: {
       title: 'Downloading the dictation model',
@@ -251,7 +260,7 @@ export const en: Texts = {
     shortcut: {
       title: 'Try the shortcut',
       intro: (keys: number) =>
-        `Open the page you want to review, then press ${keys > 2 ? 'these keys together' : 'this shortcut'}. After that, VibeScreener stays in ${isMac ? 'the Dock and the menu bar' : 'the notification area'}.`,
+        `Open the page you want to review, then press ${keys > 2 ? 'these keys together' : 'this shortcut'}. After that, VibeScreener stays in ${isMac ? 'the menu bar' : 'the notification area'}.`,
       waiting: 'Waiting for you to press it…',
       steps: [
         ['Shortcut', 'The screen freezes.'],
@@ -260,6 +269,9 @@ export const en: Texts = {
       ] as [string, string][],
       openAtLogin: `Open VibeScreener when ${isMac ? 'your Mac' : 'your computer'} starts up`,
       other: 'Choose another shortcut',
+      videoTitle: 'New: video mode',
+      video: (shortcut: string) =>
+        `${shortcut} starts a recording: browse, click an element and speak; each commented click becomes a point. ${shortcut} stops it.`,
     },
     trial: (days: number) => `Free trial: ${plural(days, 'day', 'days')} left, every feature, no credit card needed.`,
   },
@@ -363,6 +375,8 @@ export const en: Texts = {
     emptyTitle: 'No captures yet',
     emptyBefore: 'On the screen you want to review, press',
     emptyAfter: 'then click the element to fix.',
+    emptyVideoBefore: 'For a video, press',
+    emptyVideoAfter: 'then browse: each click followed by speech becomes a point.',
     micError: (err: unknown) => `Microphone unavailable: ${err}`,
     zoomedImage: 'Enlarged image',
   },
@@ -380,10 +394,19 @@ export const en: Texts = {
     exportCancelled: 'Export canceled.',
     note: (n: number) => `note ${n}`,
     update: (version: string) => `Update VibeScreener to version ${version}?`,
-    updateDetail: 'The app will close, update and reopen (about a minute). Your sessions and settings are kept.',
+    updateDetail: 'The app downloads the update (progress in the menu bar icon’s menu), then closes, updates and reopens. Your sessions and settings are kept.',
     updateDetailMac: 'Since the app isn’t signed by Apple, macOS will ask again for Screen Recording, microphone and Accessibility (video mode) access.',
     updateNow: 'Update',
     later: 'Later',
+    updateStarted: (version: string) => `Downloading version ${version}… VibeScreener will close and reopen on its own.`,
+    updateFailed: 'The update could not be downloaded.',
+    retry: 'Try again',
+    updateDone: (version: string) => `VibeScreener is up to date: version ${version}.`,
+    updateIncomplete: (version: string) => `The update to version ${version} did not complete.`,
+    updateIncompleteDetail: (current: string) =>
+      `VibeScreener is still on version ${current}. The installation log says why. Try again from the icon’s menu, or with the install command from the website.`,
+    openLog: 'Open the log',
+    close: 'Close',
     shortcutTaken: (label: string) => `${label} is already used by another app.`,
     shortcutTakenAtStart: (label: string) => `The shortcut ${label} is already used by another app.`,
     shortcutTakenDetail: 'Choose another one in Settings. You can still capture from the VibeScreener icon.',
@@ -449,6 +472,7 @@ export const en: Texts = {
       download: (status: number, url: string) => `Download failed (${status}): ${url}`,
       stopped: (stderr: string) => `whisper-server stopped during startup:\n${stderr}`,
       timeout: 'whisper-server not responding after 120 s',
+      stalled: (url: string) => `Download interrupted (nothing received for 60 s): ${url}`,
     },
   },
 

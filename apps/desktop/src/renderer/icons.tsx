@@ -39,6 +39,12 @@ export const Capture = (p: Props) => (
     <circle cx="8" cy="8" r="2" />
   </Stroke>
 );
+/** Carré : arrêter l'enregistrement. */
+export const Stop = (p: Props) => (
+  <Stroke {...p}>
+    <rect x="4" y="4" width="8" height="8" rx="1.5" />
+  </Stroke>
+);
 /** Caméra : mode vidéo. */
 export const Video = (p: Props) => (
   <Stroke {...p}>

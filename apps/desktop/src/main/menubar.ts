@@ -17,6 +17,7 @@ export type MenubarOptions = {
   recording: () => boolean; // dictée en cours
   barEnabled: () => boolean; // réglage « barre flottante »
   onAction: (action: MenuAction) => void;
+  onOpen?: () => void; // menu ouvert (revérifier les mises à jour, par exemple)
 };
 
 export function createMenubar(opts: MenubarOptions) {
@@ -54,10 +55,12 @@ export function createMenubar(opts: MenubarOptions) {
             ? 'trayPendingTemplate'
             : 'trayTemplate';
     if (name !== iconName) tray.setImage(image((iconName = name)));
-    if (isMac) tray.setTitle(s.session ? String(s.session.points) : '');
+    // Mise à jour en cours : son pourcentage à côté de l'icône, à la place du nombre de points.
+    if (isMac) tray.setTitle(s.updateProgress !== undefined ? `${s.updateProgress} %` : s.session ? String(s.session.points) : '');
     tray.setToolTip(
       [
         s.session ? T.main.tray.session(s.session.name, s.session.points) : 'VibeScreener',
+        s.updateProgress !== undefined ? T.menu.updating(s.updateProgress) : '',
         opts.recording() ? T.main.tray.recording : '',
         s.pending ? T.main.tray.pending(s.pending) : '',
         s.errors ? T.main.tray.errors(s.errors) : '',
@@ -114,6 +117,7 @@ export function createMenubar(opts: MenubarOptions) {
     popover ??= createPopover();
     if (popover.isVisible()) return hidePopover();
     if (Date.now() - hiddenAt < 300) return;
+    opts.onOpen?.();
     refresh();
     placePopover();
     popover.show();

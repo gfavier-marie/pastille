@@ -62,6 +62,7 @@ export const it: Texts = {
     inspirationHint: (shortcut: string) => `Apri la pagina di riferimento, poi premi ${shortcut}`,
     captureInspiration: 'Cattura l’ispirazione',
     resume: 'Riprendi la registrazione',
+    stop: 'Interrompi',
     pointUnavailable: 'Impossibile salvare il punto. Fai di nuovo clic su un elemento.',
   },
 
@@ -84,6 +85,7 @@ export const it: Texts = {
     settings: 'Impostazioni…',
     quit: 'Esci da VibeScreener',
     update: (version: string) => `Aggiorna (versione ${version})`,
+    updating: (pct: number) => `Download dell'aggiornamento… ${pct}%`,
     trial: (days: number) => `Prova gratuita: ${plural(days, 'giorno', 'giorni')}`,
     buy: 'Acquista',
     license: { expired: 'Prova terminata', revoked: 'Licenza non più valida', unverified: 'Licenza da verificare' },
@@ -124,7 +126,12 @@ export const it: Texts = {
   },
 
   settings: {
-    tabs: { general: 'Generali', transcription: 'Trascrizione', export: 'Esporta PDF', devices: 'Dispositivi', claude: 'Claude Code', license: 'Licenza' },
+    tabs: { general: 'Generali', permissions: 'Autorizzazioni', transcription: 'Trascrizione', export: 'Esporta PDF', devices: 'Dispositivi', claude: 'Claude Code', license: 'Licenza' },
+    permissions: 'Autorizzazioni di sistema',
+    permissionsHint: isMac
+      ? "VibeScreener non è firmata da Apple, quindi macOS le dimentica a ogni aggiornamento: concedile di nuovo qui. L'accessibilità serve solo alla modalità video."
+      : 'Il microfono si imposta in Impostazioni › Privacy e sicurezza › Microfono.',
+    notGranted: 'Non consentita',
     capture: 'Cattura',
     shortcut: 'Scorciatoia di cattura',
     shortcutAria: (label: string) => `Modifica la scorciatoia, attualmente ${label}`,
@@ -245,6 +252,8 @@ export const it: Texts = {
       relaunch: "macOS potrebbe chiederti di riavviare VibeScreener dopo aver consentito la registrazione dello schermo: questa procedura si riaprirà.",
       keyboardOnly: 'Niente microfono? Passa a solo tastiera',
       keyboardChosen: 'Solo tastiera: il microfono non verrà usato.',
+      accessibility: 'Accessibilità',
+      accessibilityWhy: 'Facoltativa: per la modalità video, che segue i tuoi clic.',
     },
     model: {
       title: 'Il modello di dettatura si sta scaricando',
@@ -262,7 +271,7 @@ export const it: Texts = {
     shortcut: {
       title: 'Prova la scorciatoia',
       intro: (keys: number) =>
-        `Apri la pagina da rivedere, poi premi ${keys > 2 ? 'questi tasti insieme' : 'questa scorciatoia'}. Dopo, VibeScreener resta ${isMac ? 'nel Dock e nella barra dei menu' : "nell'area di notifica"}.`,
+        `Apri la pagina da rivedere, poi premi ${keys > 2 ? 'questi tasti insieme' : 'questa scorciatoia'}. Dopo, VibeScreener resta ${isMac ? 'nella barra dei menu' : "nell'area di notifica"}.`,
       waiting: 'In attesa dei tasti…',
       steps: [
         ['Scorciatoia', 'Lo schermo si blocca.'],
@@ -271,6 +280,9 @@ export const it: Texts = {
       ] as [string, string][],
       openAtLogin: `Apri VibeScreener all'avvio ${isMac ? 'del Mac' : 'del computer'}`,
       other: "Scegli un'altra scorciatoia",
+      videoTitle: 'Novità: la modalità video',
+      video: (shortcut: string) =>
+        `${shortcut} avvia una registrazione: naviga, fai clic su un elemento e parla; ogni clic commentato diventa un punto. ${shortcut} la interrompe.`,
     },
     trial: (days: number) => `Prova gratuita: ancora ${plural(days, 'giorno', 'giorni')}, tutte le funzioni, senza carta di credito.`,
   },
@@ -374,6 +386,8 @@ export const it: Texts = {
     emptyTitle: 'Ancora nessuna cattura',
     emptyBefore: 'Sullo schermo da rivedere, premi',
     emptyAfter: "poi fai clic sull'elemento da correggere.",
+    emptyVideoBefore: 'Per un video, premi',
+    emptyVideoAfter: 'poi naviga: ogni clic seguito da un commento a voce diventa un punto.',
     micError: (err: unknown) => `Microfono non disponibile: ${err}`,
     zoomedImage: 'Immagine ingrandita',
   },
@@ -390,10 +404,19 @@ export const it: Texts = {
     exportCancelled: 'Esportazione annullata.',
     note: (n: number) => `nota ${n}`,
     update: (version: string) => `Aggiornare VibeScreener alla versione ${version}?`,
-    updateDetail: "L'app si chiude, si aggiorna e si riapre (circa un minuto). Sessioni e impostazioni vengono conservate.",
+    updateDetail: "L'app scarica l'aggiornamento (avanzamento nel menu dell'icona), poi si chiude, si aggiorna e si riapre. Sessioni e impostazioni vengono conservate.",
     updateDetailMac: "Poiché l'app non è firmata da Apple, macOS chiederà di nuovo l'autorizzazione per la registrazione dello schermo, il microfono e l'accessibilità (modalità video).",
     updateNow: 'Aggiorna',
     later: 'Più tardi',
+    updateStarted: (version: string) => `Download della versione ${version}… VibeScreener si chiuderà e si riaprirà da sola.`,
+    updateFailed: "Impossibile scaricare l'aggiornamento.",
+    retry: 'Riprova',
+    updateDone: (version: string) => `VibeScreener è aggiornata: versione ${version}.`,
+    updateIncomplete: (version: string) => `L'aggiornamento alla versione ${version} non è andato a buon fine.`,
+    updateIncompleteDetail: (current: string) =>
+      `VibeScreener è rimasta alla versione ${current}. Il registro dell'installazione spiega perché. Riprova dal menu dell'icona o con il comando di installazione del sito.`,
+    openLog: 'Apri il registro',
+    close: 'Chiudi',
     shortcutTaken: (label: string) => `${label} è già in uso da un'altra applicazione.`,
     shortcutTakenAtStart: (label: string) => `La scorciatoia ${label} è già in uso da un'altra applicazione.`,
     shortcutTakenDetail: "Scegline un'altra nelle impostazioni. Puoi comunque catturare dall'icona di VibeScreener.",
@@ -458,6 +481,7 @@ export const it: Texts = {
       download: (status: number, url: string) => `Download non riuscito (${status}): ${url}`,
       stopped: (stderr: string) => `whisper-server si è arrestato all'avvio:\n${stderr}`,
       timeout: 'whisper-server non risponde dopo 120 s',
+      stalled: (url: string) => `Download interrotto (nessun dato da 60 s): ${url}`,
     },
   },
 

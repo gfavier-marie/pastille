@@ -68,6 +68,7 @@ const api: PastilleApi = {
 
   onCaptureResult: (cb) => on('capture:result', cb),
   startCapture: () => ipcRenderer.send('capture:start'),
+  toggleVideo: () => ipcRenderer.send('video:toggle'),
   shortcutStatus: () => ipcRenderer.invoke('shortcut:status'),
   whisperStatus: () => ipcRenderer.invoke('whisper:status'),
   transcribe: (samples) => ipcRenderer.invoke('dictee:transcribe', samples),

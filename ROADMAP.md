@@ -280,3 +280,52 @@ App, PWA tablette, scripts d'installation et site en cinq langues : français, a
 - [x] Site : modèles + dictionnaires + `build.ts` ; français à la racine, `/en/`, `/es/`, `/de/`, `/it/` ; hreflang, sélecteur de langue, redirection à la première visite selon la langue du navigateur (robots exclus) ; pages légales traduites (« la version française fait foi »)
 - [ ] Relecture des traductions par des locuteurs natifs, surtout les pages légales
 - [ ] Photos des fenêtres dans chaque langue (`PASTILLE_LANG=de pnpm e2e`), pour les textes trop longs
+
+## Corrections — revue du 7 oct. 2026 (14h25)
+
+8 remarques générales sur l'app, 1 point sur le site (lus par le MCP). Choix validés le 7 oct. : icône du Dock seulement tant qu'une fenêtre est ouverte ; « Nouvelle session » ouvre l'éditeur vide avec deux boutons, capture et vidéo ; Accessibilité non bloquante dans l'assistant. La dictée en panne (collègue sur Mac et Windows, puis sur PC) venait d'une version pas à jour : rien à changer, mais les mises à jour passent en priorité.
+
+### Lot G — Site : frise sous la démo (#1)
+
+L'IntersectionObserver relance la démo à son arrivée à l'écran, pas la frise `.vs-prog`, qui tourne depuis le chargement : décalée du temps de défilement.
+
+- [x] Frise relancée avec la démo, placée dans `.vs-zoom` (même zoom au défilement)
+- [x] Fin de cycle en fondu au lieu du recul des quatre barres ; `prefers-reduced-motion` : frise figée sur l'image affichée
+- [x] Vérifié en local (bureau et 375 px) : frise et démo repartent ensemble après un défilement, fondu en fin de cycle
+- [ ] Déploiement (`pnpm site:deploy`) sur ton feu vert
+
+### Lot D — Mises à jour fiables et visibles
+
+Aujourd'hui : un échec de vérification efface la mise à jour connue (contrôle toutes les 6 h seulement) ; après la confirmation, rien ne se voit pendant ~1 min ; un 2ᵉ clic lance un 2ᵉ script ; les échecs ne vont que dans `update.log` ; après relance, rien ne dit que l'app a changé.
+
+- [x] Vérification avec délai maximal (10 s), dernière version connue gardée en cas d'échec, revérifiée à l'ouverture du menu (au plus toutes les 10 min)
+- [x] L'app télécharge elle-même l'installeur : « Téléchargement de la mise à jour… 42 % » dans le menu, un seul à la fois, erreur affichée avec « Réessayer »
+- [x] Le script (téléchargé lui aussi) reçoit le fichier par `PASTILLE_DMG_FILE` / `PASTILLE_EXE_FILE` (les `*_URL` restent pour les anciennes apps), chemins passés par l'environnement et non dans la commande ; l'app se ferme d'elle-même. Windows : `--quit` lu aussi au lancement, pour qu'une app qui se ferme encore ne se relance pas pendant l'installation
+- [x] Téléchargements (`downloadFile`) abandonnés après 60 s sans données, au lieu d'un pourcentage figé
+- [x] Au lancement suivant : « VibeScreener mis à jour (x.y.z) », ou « La mise à jour n'a pas abouti » avec le journal (Windows : `setAppUserModelId` pour que la notification s'affiche)
+- [x] Commande d'installation du site (`install.sh`, `install.ps1`) : toute ancienne version désinstallée avant la nouvelle
+  - Mac : copies de VibeScreener (ou Pastille) cherchées dans `/Applications` **et** `~/Applications`, pas seulement dans le dossier d'installation (une ancienne copie restait et pouvait être relancée) ; l'app lancée est quittée où qu'elle soit
+  - Mac : le nouveau .dmg est ouvert et vérifié **avant** de supprimer l'ancienne app (aujourd'hui, un .dmg illisible laissait le Mac sans app)
+  - Mac : Accessibilité remise à zéro comme l'écran et le micro ; attente de fermeture 30 s, abandon avec message plutôt que remplacer une app encore lancée
+  - Windows : l'installeur NSIS désinstalle déjà l'ancienne version ; l'app encore lancée après 10 s est arrêtée au lieu de faire échouer l'installation
+- [x] Tests : `updater.test.ts` (version gardée en cas d'échec, fichiers par plateforme, chemins hors de la commande, bilan au lancement), `whisper.test.ts` (téléchargement bloqué abandonné sans fichier)
+- [ ] Essai réel : mise à jour depuis le menu sur Mac et sur PC (progression, fermeture, notification au retour) ; commande du site avec une ancienne copie dans l'autre dossier d'applications
+- *Limite : la mise à jour vers cette version passe encore par l'ancien code de l'app (mais déjà par le nouvel `install.sh`) ; le nouveau parcours sert à partir de la suivante.*
+
+### Lot E — Assistant et autorisations
+
+- [x] Ligne « Accessibilité — pour le mode vidéo » (Mac, facultative) ; le mode vidéo (⌃⌥⌘R) présenté à la dernière étape
+- [x] L'étape 2 suit l'état réel de Whisper (chargement, prêt, erreur) au lieu de « modèle présent »
+- [x] L'assistant revient tant qu'il n'est pas fini : ouvert avant le chargement de Whisper ; terminé au bouton « Terminer » seulement ; revient au premier plan dès qu'une autorisation est accordée (retour des Réglages Système) ; Dock, 2ᵉ lancement et « Ouvrir l'éditeur » le montrent tant qu'il manque une autorisation
+- [x] Réglages : onglet « Autorisations » (écran, micro, Accessibilité), mêmes lignes que l'assistant
+- [x] Vérifié dans un navigateur avec un faux preload (pages construites) : étapes 1 à 3, étape 2 en chargement et en erreur, onglet Autorisations, éditeur vide à deux boutons, panneau vidéo avec « Arrêter », menu pendant le téléchargement d'une mise à jour
+- [ ] Essai réel sur Mac : retour de l'assistant depuis les Réglages Système, Accessibilité accordée sans relancer
+
+### Lot F — Dock, nouvelle session, vidéo
+
+- [x] **Cause probable de l'icône du Dock qui disparaît** : le panneau de la vidéo (`video-feedback.ts`) appelle `setVisibleOnAllWorkspaces` sans `skipTransformProcessType`, ce qui fait cacher l'icône du Dock par Electron dès la première vidéo (la capture et la barre ont déjà l'option)
+- [x] Mac : icône du Dock seulement tant qu'une fenêtre est ouverte (`LSUIElement` + petit module `dock.ts` piloté par l'état des fenêtres, masquage différé de 1,5 s), sans clignotement pendant une capture ; « Ouvrir l'éditeur » la fait revenir
+- [x] « Nouvelle session » ouvre l'éditeur vide : « ＋ Nouvelle capture ⌃⌥⌘P » et « ● Enregistrer une vidéo ⌃⌥⌘R » (bouton vidéo aussi au bout des vignettes)
+- [x] Bouton « Arrêter ⌃⌥⌘R » dans le panneau du bas pendant la vidéo, actif même pendant une autre action
+- [x] Tests : `dock.test.ts` (apparition immédiate, retrait différé, annulé si une fenêtre se rouvre, attente de la fin d'une capture) ; textes, README et SPEC sans « le Dock »
+- [ ] `pnpm test`, `pnpm typecheck`, photos e2e par la CI ; essai réel sur Mac et PC ; version **0.10.0** sur ton feu vert

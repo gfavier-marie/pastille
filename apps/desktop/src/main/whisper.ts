@@ -55,15 +55,31 @@ export function findModel(dirs: string[]): string | undefined {
   return candidates.find((c): c is string => !!c && existsSync(c));
 }
 
-/** Téléchargement avec progression ; le fichier n'apparaît qu'une fois complet. */
-export async function downloadFile(url: string, dest: string, onProgress?: (done: number, total: number) => void) {
-  const res = await fetch(url);
-  if (!res.ok || !res.body) throw new Error(T.main.whisper.download(res.status, url));
-  const total = Number(res.headers.get('content-length') ?? 0);
-  let done = 0;
-  const body = Readable.fromWeb(res.body as never);
-  body.on('data', (chunk: Buffer) => onProgress?.((done += chunk.length), total));
-  await pipeline(body, createWriteStream(dest + '.part'));
+/** Téléchargement avec progression ; le fichier n'apparaît qu'une fois complet. Abandonné après
+ *  `stallMs` sans données, plutôt qu'une progression figée pour toujours. */
+export async function downloadFile(url: string, dest: string, onProgress?: (done: number, total: number) => void, stallMs = 60_000) {
+  const abort = new AbortController();
+  let timer = setTimeout(() => abort.abort(), stallMs);
+  const alive = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => abort.abort(), stallMs);
+  };
+  try {
+    const res = await fetch(url, { signal: abort.signal });
+    if (!res.ok || !res.body) throw new Error(T.main.whisper.download(res.status, url));
+    const total = Number(res.headers.get('content-length') ?? 0);
+    let done = 0;
+    const body = Readable.fromWeb(res.body as never);
+    body.on('data', (chunk: Buffer) => {
+      alive();
+      onProgress?.((done += chunk.length), total);
+    });
+    await pipeline(body, createWriteStream(dest + '.part'));
+  } catch (err) {
+    throw abort.signal.aborted ? new Error(T.main.whisper.stalled(url)) : err;
+  } finally {
+    clearTimeout(timer);
+  }
   await renameRetry(dest + '.part', dest);
 }
 

@@ -56,6 +56,11 @@ function App() {
     return () => window.removeEventListener('resize', draw);
   }, [state?.click?.x, state?.click?.y, state?.click?.number, geometry]);
 
+  // Arrêter : toujours actif, même pendant une autre action.
+  const stop = <button type="button" className="stop" onClick={() => void window.pastille.videoAction('stop')}>
+    <I.Stop size={13} />{T.videoFeedback.stop}{state?.stopShortcut && <kbd>{state.stopShortcut}</kbd>}
+  </button>;
+
   return <>
     <canvas ref={canvasRef} aria-hidden="true" />
     {state && <div className="feedback" onMouseEnter={() => window.pastille.videoFeedbackHover(true)} onMouseLeave={() => window.pastille.videoFeedbackHover(false)}>
@@ -73,11 +78,13 @@ function App() {
         <div className="feedback-tools">
           <button type="button" className="primary" disabled={busy} onClick={() => void act('capture-inspiration')}><I.Capture size={13} />{T.videoFeedback.captureInspiration}</button>
           <button type="button" disabled={busy} onClick={() => void act('cancel-inspiration')}>{T.videoFeedback.resume}</button>
+          {stop}
         </div>
       </> : <>
         <div className="feedback-tools">
           <button type="button" disabled={!state.click || busy} title={state.tablet ? T.videoFeedback.drawingReady : T.menu.pair} onClick={() => void act('draw')}><I.Tablet size={13} />{T.videoFeedback.drawing}</button>
           <button type="button" disabled={!state.click || busy} onClick={() => void act('inspiration')}><I.Picture size={13} />{T.editor.inspiration}</button>
+          {stop}
         </div>
         <div className="feedback-hint">{T.videoFeedback.gestures}</div>
       </>}
