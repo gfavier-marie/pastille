@@ -40,12 +40,23 @@ export const fr = {
   transcriptions: (n: number) => plural(n, 'transcription'),
   reveal: isMac ? 'Afficher dans le Finder' : "Afficher dans l'Explorateur",
 
+  // Retour visuel du mode vidéo (pastille qui suit la souris)
+  videoFeedback: {
+    microphone: 'Micro ouvert',
+    point: (n: number) => `Point ${n}`,
+    general: 'Remarque générale',
+    speak: 'Parlez pour garder ce point',
+    ready: 'Cliquez puis parlez',
+  },
+
   menu: {
     label: 'VibeScreener',
     noSession: 'Aucune session ouverte',
     noSessionHint: 'La prochaine capture en ouvre une.',
     tablet: 'Tablette connectée',
     capture: 'Nouvelle capture',
+    video: 'Enregistrer une vidéo',
+    stopVideo: "Arrêter l'enregistrement",
     editor: "Ouvrir l'éditeur",
     exportPdf: 'Exporter le PDF',
     newSession: 'Nouvelle session',
@@ -365,7 +376,7 @@ export const fr = {
     note: (n: number) => `remarque ${n}`,
     update: (version: string) => `Mettre à jour VibeScreener vers la version ${version} ?`,
     updateDetail: "L'app se ferme, se met à jour et se rouvre (environ une minute). Sessions et réglages sont conservés.",
-    updateDetailMac: "L'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran et le micro.",
+    updateDetailMac: "L'app n'étant pas signée par Apple, macOS redemandera l'autorisation d'enregistrement de l'écran, le micro et l'Accessibilité (mode vidéo).",
     updateNow: 'Mettre à jour',
     later: 'Plus tard',
     shortcutTaken: (label: string) => `${label} est déjà pris par une autre application.`,
@@ -380,6 +391,22 @@ export const fr = {
     captureDenied:
       "Capture impossible : autorisez l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relancez VibeScreener.",
     captureFailed: "Capture impossible : l'écran n'a pas pu être lu.",
+    // Mode vidéo (⌃⌥⌘R)
+    video: {
+      clicks: 'Le mode vidéo a besoin de voir vos clics.',
+      clicksDetail: (shortcut: string) =>
+        `Autorisez VibeScreener dans Réglages Système > Confidentialité et sécurité > Accessibilité, puis relancez l'enregistrement (${shortcut}).`,
+      openSettings: 'Ouvrir les Réglages',
+      empty: 'Aucun point enregistré.',
+      emptyDetail: 'Pendant l’enregistrement, cliquez sur un élément puis parlez : chaque clic suivi de paroles devient un point.',
+      shortcutTaken: (label: string) => `Le raccourci ${label} du mode vidéo est déjà pris par une autre application.`,
+      shortcutTakenDetail: 'Le mode vidéo reste disponible depuis l’icône de VibeScreener.',
+      denied:
+        "Enregistrement impossible : autorisez l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relancez VibeScreener.",
+      unreadable: "Enregistrement impossible : l'écran n'a pas pu être lu.",
+      noResponse: 'les écrans ou le micro ne répondent pas.',
+      failed: (err: string) => `Enregistrement impossible : ${err}`,
+    },
     tray: {
       session: (name: string, points: number) => `VibeScreener — ${name} (${plural(points, 'point')})`,
       recording: 'dictée en cours',

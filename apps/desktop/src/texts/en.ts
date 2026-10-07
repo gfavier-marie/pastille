@@ -37,12 +37,23 @@ export const en: Texts = {
   transcriptions: (n: number) => plural(n, 'transcription', 'transcriptions'),
   reveal: isMac ? 'Show in Finder' : 'Show in File Explorer',
 
+  // Retour visuel du mode vidéo (pastille qui suit la souris)
+  videoFeedback: {
+    microphone: 'Mic on',
+    point: (n: number) => `Point ${n}`,
+    general: 'General note',
+    speak: 'Speak to keep this point',
+    ready: 'Click, then speak',
+  },
+
   menu: {
     label: 'VibeScreener',
     noSession: 'No open session',
     noSessionHint: 'Your next capture will start one.',
     tablet: 'Tablet connected',
     capture: 'New capture',
+    video: 'Record a video',
+    stopVideo: 'Stop recording',
     editor: 'Open editor',
     exportPdf: 'Export PDF',
     newSession: 'New session',
@@ -362,7 +373,7 @@ export const en: Texts = {
     note: (n: number) => `note ${n}`,
     update: (version: string) => `Update VibeScreener to version ${version}?`,
     updateDetail: 'The app will close, update and reopen (about a minute). Your sessions and settings are kept.',
-    updateDetailMac: 'Since the app isn’t signed by Apple, macOS will ask again for Screen Recording and microphone access.',
+    updateDetailMac: 'Since the app isn’t signed by Apple, macOS will ask again for Screen Recording, microphone and Accessibility (video mode) access.',
     updateNow: 'Update',
     later: 'Later',
     shortcutTaken: (label: string) => `${label} is already used by another app.`,
@@ -377,6 +388,20 @@ export const en: Texts = {
     captureDenied:
       'Can’t capture: allow screen recording (System Settings > Privacy & Security), then relaunch VibeScreener.',
     captureFailed: 'Can’t capture: the screen couldn’t be read.',
+    video: {
+      clicks: 'Video mode needs to see your clicks.',
+      clicksDetail: (shortcut: string) =>
+        `Allow VibeScreener in System Settings > Privacy & Security > Accessibility, then start recording again (${shortcut}).`,
+      openSettings: 'Open Settings',
+      empty: 'No points recorded.',
+      emptyDetail: 'While recording, click an element and then speak: every click followed by speech becomes a point.',
+      shortcutTaken: (label: string) => `The video mode shortcut ${label} is already used by another app.`,
+      shortcutTakenDetail: 'Video mode is still available from the VibeScreener icon.',
+      denied: 'Can’t record: allow Screen Recording (System Settings > Privacy & Security), then restart VibeScreener.',
+      unreadable: 'Can’t record: the screen couldn’t be read.',
+      noResponse: 'the screens or the microphone aren’t responding.',
+      failed: (err: string) => `Can’t record: ${err}`,
+    },
     tray: {
       session: (name: string, points: number) => `VibeScreener — ${name} (${plural(points, 'point', 'points')})`,
       recording: 'dictating',

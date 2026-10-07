@@ -1,7 +1,7 @@
 {
   "name": "@pastille/desktop",
   "productName": "VibeScreener",
-  "version": "0.7.2",
+  "version": "0.8.1",
   "private": true,
   "type": "module",
   "main": "out/main/index.js",
@@ -18,7 +18,8 @@
     "pptxgenjs": "^4.0.1",
     "qrcode": "^1.5.4",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "uiohook-napi": "^1.5.5"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.6",

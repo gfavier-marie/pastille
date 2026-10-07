@@ -9,28 +9,12 @@ import * as I from '../icons.tsx';
 import { T } from '../texts.ts';
 import { createRecorder, type RecorderState } from './recorder.ts';
 import { Stage } from './Stage.tsx';
+import { Wave, WAVE_BARS, clock } from '../dictation-feedback.tsx';
 
 const api = window.pastille;
 const isMac = navigator.userAgent.includes('Mac');
 const MOD = isMac ? '⌘' : 'Ctrl+';
-const WAVE_BARS = 18;
 const BUBBLE_WIDTH = 312;
-
-/** Durée d'enregistrement « m:ss ». */
-const clock = (ms: number) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
-
-/** Onde de la dictée : les derniers niveaux du micro, du plus ancien au plus récent. */
-function Wave(props: { levels: number[]; small?: boolean }) {
-  const max = props.small ? 18 : 22;
-  const levels = [...Array(Math.max(0, WAVE_BARS - props.levels.length)).fill(0), ...props.levels.slice(-WAVE_BARS)];
-  return (
-    <div className={`wave ${props.small ? 'small' : ''}`} aria-hidden="true">
-      {levels.map((l, i) => (
-        <span key={i} style={{ height: 3 + Math.min(1, l * 14) * (max - 3) }} />
-      ))}
-    </div>
-  );
-}
 
 /** Numéro d'un point : goutte pour un point, rond pour une zone ou une flèche. */
 const Badge = ({ a }: { a: Annotation }) => (

@@ -37,12 +37,23 @@ export const es: Texts = {
   transcriptions: (n: number) => plural(n, 'transcripción', 'transcripciones'),
   reveal: isMac ? 'Mostrar en el Finder' : 'Mostrar en el Explorador de archivos',
 
+  // Retour visuel du mode vidéo (pastille qui suit la souris)
+  videoFeedback: {
+    microphone: 'Micro abierto',
+    point: (n: number) => `Punto ${n}`,
+    general: 'Nota general',
+    speak: 'Habla para conservar este punto',
+    ready: 'Haz clic y luego habla',
+  },
+
   menu: {
     label: 'VibeScreener',
     noSession: 'Ninguna sesión abierta',
     noSessionHint: 'La próxima captura abrirá una.',
     tablet: 'Tableta conectada',
     capture: 'Nueva captura',
+    video: 'Grabar un vídeo',
+    stopVideo: 'Detener la grabación',
     editor: 'Abrir el editor',
     exportPdf: 'Exportar el PDF',
     newSession: 'Nueva sesión',
@@ -361,7 +372,7 @@ export const es: Texts = {
     note: (n: number) => `nota ${n}`,
     update: (version: string) => `¿Actualizar VibeScreener a la versión ${version}?`,
     updateDetail: 'La app se cierra, se actualiza y se vuelve a abrir (alrededor de un minuto). Se conservan las sesiones y los ajustes.',
-    updateDetailMac: 'Como la app no está firmada por Apple, macOS volverá a pedir permiso para la grabación de pantalla y el micro.',
+    updateDetailMac: 'Como la app no está firmada por Apple, macOS volverá a pedir permiso para la grabación de pantalla, el micro y la accesibilidad (modo vídeo).',
     updateNow: 'Actualizar',
     later: 'Más tarde',
     shortcutTaken: (label: string) => `${label} ya lo usa otra aplicación.`,
@@ -376,6 +387,20 @@ export const es: Texts = {
     captureDenied:
       'No se puede capturar: permite la grabación de pantalla (Ajustes del Sistema > Privacidad y seguridad) y reinicia VibeScreener.',
     captureFailed: 'No se puede capturar: no se ha podido leer la pantalla.',
+    video: {
+      clicks: 'El modo vídeo necesita ver tus clics.',
+      clicksDetail: (shortcut: string) =>
+        `Autoriza VibeScreener en Ajustes del Sistema > Privacidad y seguridad > Accesibilidad y vuelve a iniciar la grabación (${shortcut}).`,
+      openSettings: 'Abrir Ajustes',
+      empty: 'No se ha guardado ningún punto.',
+      emptyDetail: 'Durante la grabación, haz clic en un elemento y luego habla: cada clic seguido de voz se convierte en un punto.',
+      shortcutTaken: (label: string) => `Otra aplicación ya usa el atajo ${label} del modo vídeo.`,
+      shortcutTakenDetail: 'El modo vídeo sigue disponible desde el icono de VibeScreener.',
+      denied: 'No se puede grabar: autoriza la grabación de pantalla (Ajustes del Sistema > Privacidad y seguridad) y vuelve a abrir VibeScreener.',
+      unreadable: 'No se puede grabar: no se ha podido leer la pantalla.',
+      noResponse: 'las pantallas o el micro no responden.',
+      failed: (err: string) => `No se puede grabar: ${err}`,
+    },
     tray: {
       session: (name: string, points: number) => `VibeScreener — ${name} (${plural(points, 'punto', 'puntos')})`,
       recording: 'dictado en curso',

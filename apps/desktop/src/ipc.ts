@@ -25,6 +25,35 @@ export type OverlayPick =
   | { kind: 'zone'; x: number; y: number; w: number; h: number; crop?: boolean } // ⌥ : recadrer ; sinon zone montrée sur la fenêtre
   | { kind: 'cancel' };
 
+/** Mode vidéo : un écran filmé par la fenêtre cachée (source de desktopCapturer), taille en pixels physiques. */
+export type VideoSource = { displayId: number; sourceId: string; width: number; height: number };
+
+/** Retour à l'écran pendant la vidéo : point provisoire et état réel du micro. */
+export type VideoFeedback = {
+  click?: { displayId: number; x: number; y: number; number: number; at: number };
+  elapsedMs: number;
+  level: number;
+  voiced: boolean;
+} | null;
+
+/** Image figée au clic, recadrée sur la cible : rectangle en 0–1 de l'écran ; null la jette. */
+export type VideoCrop = { frameId: number; rect: { x: number; y: number; width: number; height: number } | null };
+
+/** Image recadrée, sa vignette en niveaux de gris (pour reconnaître un écran inchangé) et ses mesures. */
+export type VideoImage = {
+  png: Uint8Array;
+  width: number; // pixels physiques
+  height: number;
+  thumb: Uint8Array; // VIDEO_THUMB.width × VIDEO_THUMB.height octets
+  frozenAt: number; // Date.now() quand l'image a été figée
+  frameAgeMs: number; // âge de l'image à ce moment
+};
+
+export const VIDEO_THUMB = { width: 64, height: 36 };
+
+/** Niveau RMS du micro au-dessus duquel quelqu'un parle (dictée de l'éditeur et mode vidéo). */
+export const VOICE_RMS = 0.015;
+
 /** Mesures d'une capture, affichées par la fenêtre POC. */
 export type CaptureResult =
   | {
@@ -85,13 +114,14 @@ export type MenuState = {
   pending: number; // transcriptions en cours
   errors: number; // transcriptions en erreur
   shortcut: string; // raccourci de capture, affiché (« ⌃⌥⌘P »)
+  video: { shortcut: string; since?: number }; // mode vidéo : raccourci affiché, début de l'enregistrement en cours (Date.now())
   recents: SessionSummary[];
   update?: string; // version plus récente publiée
   license: LicenseView;
 };
 
 export type MenuAction =
-  | { type: 'capture' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'claude-code' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' | 'license' }
+  | { type: 'capture' | 'video' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'claude-code' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' | 'license' }
   | { type: 'open-recent' | 'export-recent'; id: string };
 
 /** Message de la barre flottante après un export. */
@@ -165,6 +195,14 @@ export type PastilleApi = {
   whisperStatus(): Promise<WhisperStatus>;
   transcribe(samples: Float32Array): Promise<TranscribeResult>;
   transcribeSample(): Promise<TranscribeResult>;
+  // Fenêtre cachée du mode vidéo
+  onVideoStart(cb: (sources: VideoSource[]) => void): () => void;
+  videoStarted(error?: string): void; // flux et micro ouverts, ou l'erreur
+  onVideoFreeze(cb: (f: { frameId: number; displayId: number }) => void): () => void;
+  onVideoCrop(cb: (c: VideoCrop) => void): () => void;
+  videoCropped(frameId: number, image: VideoImage | null): void;
+  videoAudio(chunk: Float32Array): void; // micro, blocs de 100 ms à 16 kHz
+  onVideoFeedback(cb: (state: VideoFeedback) => void): () => void;
   // Overlay
   onOverlayShow(cb: (data: OverlayShow) => void): void;
   onOverlayWindows(cb: (windows: OverlayWindow[]) => void): void;

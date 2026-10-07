@@ -85,6 +85,11 @@ function App() {
           <kbd>{s.shortcut}</kbd>
         </button>
       </div>
+      <button type="button" className="item" onClick={() => act({ type: 'video' })}>
+        <I.Video />
+        <span>{s.video.since ? T.menu.stopVideo : T.menu.video}</span>
+        <kbd>{s.video.shortcut}</kbd>
+      </button>
 
       <button type="button" className="item" onClick={() => act({ type: 'editor' })}>
         <I.Window />

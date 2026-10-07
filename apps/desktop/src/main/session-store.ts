@@ -4,7 +4,18 @@
 import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { findAnnotation, newSession, renumber, upgradeSession, type Capture, type Inspiration, type Session } from '@pastille/shared';
+import {
+  findAnnotation,
+  newNote,
+  newSession,
+  renumber,
+  upgradeSession,
+  type Annotation,
+  type Capture,
+  type Geometry,
+  type Inspiration,
+  type Session,
+} from '@pastille/shared';
 import { T } from '../texts/index.ts';
 import { renameRetry } from './rename.ts';
 
@@ -139,6 +150,32 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     return capture;
   }
 
+  /** Nouveau point vide sur une capture (annulable) ; son numéro est attribué par la numérotation. */
+  function addAnnotation(captureId: string, geometry: Geometry): string {
+    const now = new Date().toISOString();
+    const annotation: Annotation = {
+      id: crypto.randomUUID(),
+      number: 0,
+      geometry,
+      text: '',
+      input: 'typed',
+      transcription: 'none',
+      sketches: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    update((s) => s.captures.find((c) => c.id === captureId)?.annotations.push(annotation), { undoable: true });
+    return annotation.id;
+  }
+
+  /** Nouvelle remarque générale vide (annulable), dans la session ouverte ou une nouvelle. */
+  async function addNote(): Promise<string> {
+    await ensure();
+    const note = newNote();
+    update((s) => (s.notes = [...(s.notes ?? []), note]), { undoable: true });
+    return note.id;
+  }
+
   /** Inspiration jointe à un point (annulable) ; l'image reste sur le disque pour que ⌘Z puisse la rétablir. */
   async function addInspiration(annotationId: string, png: Uint8Array, source?: Inspiration['source']) {
     const s = session;
@@ -249,6 +286,8 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
     recent,
     open,
     addCapture,
+    addAnnotation,
+    addNote,
     addInspiration,
     flush,
     close,

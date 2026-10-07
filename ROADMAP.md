@@ -218,6 +218,56 @@ Sur main, cette branche. Les remarques vont de la plus gênante à la plus lourd
 - [ ] Essai réel sur Mac : Échap puis ⌘Z, Dock et menu de l'app, zone avec et sans ⌥, retour de l'éditeur au premier plan après une capture ; Windows (Alt + glisser, éditeur réduit) par la CI puis sur un PC
 - [ ] Version suivante et Release (tag `v*`) sur ton feu vert.
 
+## Mode vidéo, à la XAnnotate (demandé le 7 oct. 2026)
+
+On relit son app sans s'arrêter : ⌃⌥⌘R (Windows : Ctrl+Alt+R) lance l'enregistrement, on navigue, et **chaque clic suivi de paroles devient un point**, posé sur l'image de l'écran juste avant le clic. Un clic sans parole ne laisse rien ; ce qui est dit avant le premier clic devient une remarque générale ; les points d'une page qui n'a presque pas changé vont sur le même écran. ⌃⌥⌘R arrête et ouvre l'éditeur.
+
+Choix validés le 7 oct. : un clic = un point ; **pas de fichier vidéo** (images clés + parole, comme XAnnotate) : la vidéo devient une session ordinaire, éditeur, exports, MCP et modèle de données inchangés ; 2ᵉ raccourci fixe ⌃⌥⌘R ; points regroupés par écran.
+
+Une seule nouvelle dépendance : `uiohook-napi` (clics globaux, qu'Electron ne sait pas écouter). Sur Mac, elle exige l'autorisation **Accessibilité**, oubliée à chaque mise à jour (app signée ad hoc), comme l'enregistrement d'écran.
+
+### Lot V0 — Lever les deux risques
+
+Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accord avant de lancer l'app.
+
+- [ ] **Clics globaux** (`clicks.ts`, `uiohook-napi`) dans l'app empaquetée : chargement depuis `app.asar.unpacked`, demande d'Accessibilité, clics reçus quand une autre app est au premier plan, pas de plantage en tapant au clavier (point fragile connu de libuiohook sur macOS), autorisation perdue après une mise à jour
+- [ ] **Image d'avant le clic** : fenêtre cachée `video`, un flux `getUserMedia` par écran (10 images/s, résolution physique), dernière image gardée (`MediaStreamTrackProcessor`) ; sur un menu qui s'ouvre au clic, l'image montre l'état d'avant
+- [ ] **Coût** : CPU et mémoire pendant 10 min, sur 1 puis 2 écrans
+- [ ] **Fenêtre visée** : la liste des fenêtres, prise juste après le clic, n'est pas faussée par un menu ou une popup qui s'ouvre
+
+- [x] Code des deux briques et du cœur (7 oct.) : `clicks.ts`, fenêtre cachée `video` (+ `video-window.ts`), `video.ts` avec ses règles (parole, silences, remarque, regroupement) et 8 tests ; ⌃⌥⌘R et « Enregistrer une vidéo » dans le menu de l'icône ; lignes `VIDEO` (par clic : délai clic → image figée, âge de l'image ; toutes les 30 s : processeur et mémoire)
+- [x] App empaquetée construite en local : `uiohook-napi` est dans `app.asar.unpacked` et se charge depuis l'app (vérifié sans la lancer)
+- [ ] Essai réel sur le Mac, dans l'app publiée (0.8.0, demandé le 7 oct. : l'app de test locale butait sur l'autorisation d'écran, liée à l'app installée de même identifiant) : Accessibilité, clics, image d'avant le clic, frappe au clavier, 10 min de mesures
+
+*Critère : 10 clics sur une page qui réagit au clic donnent 10 images « avant le clic » ; clic → image figée < 50 ms ; VibeScreener < 20 % d'un cœur hors transcription.*
+*Repli si les clics globaux ne tiennent pas : « une touche = un point » par `globalShortcut`, sans module natif ni Accessibilité.*
+
+### Lot V1 — Le mode vidéo de bout en bout
+
+- [x] Retour visuel pendant la vidéo (7 oct.) : même pastille numérotée que la capture d'écran au clic, bandeau « Micro ouvert » puis « Dictée en cours », onde du micro et durée ; fenêtres transparentes sans focus qui laissent passer les clics, sur l'écran du point ; les clics sans parole ne consomment pas de numéro. Tests des états et de la numérotation, rendu vérifié avec un micro simulé
+- [ ] Essai réel du retour visuel sur Mac et Windows, dont plusieurs écrans et app en plein écran. `setContentProtection(true)` ne garantit pas l'exclusion du retour des images sur les macOS utilisant ScreenCaptureKit (limite Electron : https://www.electronjs.org/docs/latest/api/browser-window#winsetcontentprotectionenable)
+- [ ] ⌃⌥⌘R démarre et arrête (signalé s'il est déjà pris), aussi dans le menu de l'icône ; barre « ● 0:42 · 3 points · Arrêter » affichée pendant l'enregistrement, même barre flottante désactivée
+- [ ] Segments (`video.ts`, sans `electron`, testable) : l'audio d'un clic au suivant ; parole = au moins 3 morceaux de 100 ms au-dessus du seuil de la dictée ; silences de plus d'1 s retirés avant Whisper ; finalisés dans l'ordre
+- [ ] Clic + parole → point (recadré sur la fenêtre cliquée, même logique que la capture) ; clic seul → rien ; paroles avant le 1ᵉʳ clic → remarque générale ; même fenêtre et vignette quasi identique → même écran
+- [ ] Clics ignorés : bouton droit, 2ᵉ clic d'un double-clic, hors de la zone utile (barre des menus, Dock, barre des tâches), sur nos fenêtres
+- [ ] Arrêt → éditeur sur le premier écran enregistré, transcriptions déjà en route ; sans point : « Cliquez sur un élément puis parlez »
+- [ ] Licence expirée (même blocage que la capture), Accessibilité manquante (message + Réglages Système) ; pendant l'enregistrement ⌃⌥⌘P est sans effet, « Nouvelle session » et « Ouvrir » l'arrêtent d'abord, un changement d'écrans aussi
+- [ ] `addAnnotation` passe dans le store, avec un `addNote` qui crée la session au besoin ; repérage de la fenêtre sous un point extrait de `capture.ts` (`windowTarget`)
+- [ ] Tests unitaires `video.test.ts`
+
+*Critère : 10 retours sur 3 pages en < 2 min sans s'arrêter ; à l'arrêt, 3 écrans et 10 points bien placés et transcrits, aucune trace des clics de navigation ; le PDF et le Markdown donnés à Claude restituent les 10 retours.*
+
+### Lot V2 — CI, docs, version
+
+- [ ] `PASTILLE_AUTOTEST=video` sur le Windows de la CI : faux micro (phrases séparées par des silences), clics simulés, vraie capture ; points transcrits, rien pour les clics sans parole
+- [ ] `pnpm e2e` photographie la barre en enregistrement
+- [ ] `docs/SPEC.md` (§4.10 Mode vidéo), README (autorisation Accessibilité), `CLAUDE.md`
+- [ ] Version suivante et tag `v*` sur ton feu vert
+
+**Limites à signaler** : indicateur d'enregistrement d'écran affiché tout du long (macOS 15+ peut redemander l'autorisation d'une capture continue) ; le curseur apparaît dans les images (la pastille le recouvre) ; sous Windows l'icône de la zone de notification ne change pas (la barre est le seul témoin) et AltGr+R est à vérifier en AZERTY.
+
+**Plus tard [C], non prévu** : dessin pendant l'enregistrement, fichier vidéo rejouable, images du parcours sans parole, horodatage dans les exports, raccourci vidéo réglable, croquis de la tablette pendant l'enregistrement.
+
 ### Multilingue (7 oct.)
 
 App, PWA tablette, scripts d'installation et site en cinq langues : français, anglais, espagnol, allemand, italien.

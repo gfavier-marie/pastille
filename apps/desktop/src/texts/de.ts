@@ -37,12 +37,23 @@ export const de: Texts = {
   transcriptions: (n: number) => plural(n, 'Transkription', 'Transkriptionen'),
   reveal: isMac ? 'Im Finder zeigen' : 'Im Explorer anzeigen',
 
+  // Retour visuel du mode vidéo (pastille qui suit la souris)
+  videoFeedback: {
+    microphone: 'Mikro an',
+    point: (n: number) => `Punkt ${n}`,
+    general: 'Allgemeine Anmerkung',
+    speak: 'Sprich, um diesen Punkt zu behalten',
+    ready: 'Klicken, dann sprechen',
+  },
+
   menu: {
     label: 'VibeScreener',
     noSession: 'Keine Session offen',
     noSessionHint: 'Der nächste Screenshot startet eine.',
     tablet: 'Tablet verbunden',
     capture: 'Neuer Screenshot',
+    video: 'Video aufnehmen',
+    stopVideo: 'Aufnahme beenden',
     editor: 'Editor öffnen',
     exportPdf: 'PDF exportieren',
     newSession: 'Neue Session',
@@ -361,7 +372,7 @@ export const de: Texts = {
     note: (n: number) => `Anmerkung ${n}`,
     update: (version: string) => `VibeScreener auf Version ${version} aktualisieren?`,
     updateDetail: 'Die App schließt sich, wird aktualisiert und öffnet sich wieder (etwa eine Minute). Sessions und Einstellungen bleiben erhalten.',
-    updateDetailMac: 'Da die App nicht von Apple signiert ist, fragt macOS erneut nach der Erlaubnis für Bildschirmaufnahme und Mikrofon.',
+    updateDetailMac: 'Da die App nicht von Apple signiert ist, fragt macOS erneut nach der Erlaubnis für Bildschirmaufnahme, Mikrofon und Bedienungshilfen (Videomodus).',
     updateNow: 'Aktualisieren',
     later: 'Später',
     shortcutTaken: (label: string) => `${label} ist bereits von einer anderen App belegt.`,
@@ -376,6 +387,20 @@ export const de: Texts = {
     captureDenied:
       'Screenshot nicht möglich: Erlaube die Bildschirmaufnahme (Systemeinstellungen > Datenschutz & Sicherheit) und starte VibeScreener neu.',
     captureFailed: 'Screenshot nicht möglich: Der Bildschirm konnte nicht gelesen werden.',
+    video: {
+      clicks: 'Der Videomodus muss deine Klicks sehen.',
+      clicksDetail: (shortcut: string) =>
+        `Erlaube VibeScreener unter Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen und starte die Aufnahme erneut (${shortcut}).`,
+      openSettings: 'Einstellungen öffnen',
+      empty: 'Kein Punkt aufgenommen.',
+      emptyDetail: 'Klick während der Aufnahme auf ein Element und sprich dann: Jeder Klick mit gesprochenem Text wird ein Punkt.',
+      shortcutTaken: (label: string) => `Das Kürzel ${label} für den Videomodus wird schon von einer anderen App verwendet.`,
+      shortcutTakenDetail: 'Der Videomodus bleibt über das VibeScreener-Symbol verfügbar.',
+      denied: 'Aufnahme nicht möglich: Erlaube die Bildschirmaufnahme (Systemeinstellungen > Datenschutz & Sicherheit) und starte VibeScreener neu.',
+      unreadable: 'Aufnahme nicht möglich: Der Bildschirm konnte nicht gelesen werden.',
+      noResponse: 'Bildschirme oder Mikrofon antworten nicht.',
+      failed: (err: string) => `Aufnahme nicht möglich: ${err}`,
+    },
     tray: {
       session: (name: string, points: number) => `VibeScreener — ${name} (${plural(points, 'Punkt', 'Punkte')})`,
       recording: 'Diktat läuft',

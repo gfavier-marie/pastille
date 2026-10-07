@@ -122,9 +122,7 @@ export function createCapture(opts: CaptureOptions) {
   async function start(): Promise<void> {
     if (pending) return;
     const t0 = performance.now();
-    const windows = openWindows({ accessibilityPermission: false, screenRecordingPermission: true }).catch(
-      () => [] as WindowInfo[],
-    );
+    const windows = listWindows();
     const windowsMs = windows.then(() => performance.now() - t0);
 
     // Nos fenêtres ne doivent jamais apparaître dans la capture.
@@ -209,17 +207,8 @@ export function createCapture(opts: CaptureOptions) {
     } else {
       // Fenêtre sous le clic, ou sous le centre de la zone ; à défaut, l'écran entier.
       const at = zone ? { x: zone.rect.x + zone.rect.width / 2, y: zone.rect.y + zone.rect.height / 2 } : pick;
-      const gx = d.bounds.x + at.x;
-      const gy = d.bounds.y + at.y;
-      hit = (await p.windows).find((w) => {
-        const b = toDip(w.bounds);
-        return isCandidate(w) && gx >= b.x && gy >= b.y && gx < b.x + b.width && gy < b.y + b.height;
-      });
-      const inter = hit && onDisplay(toDip(hit.bounds), d);
-      if (inter) {
-        rect = inter;
-        target = 'window';
-      }
+      ({ rect, hit } = windowTarget(await p.windows, d, { x: d.bounds.x + at.x, y: d.bounds.y + at.y }));
+      if (hit) target = 'window';
     }
 
     const px = {
@@ -259,6 +248,21 @@ export function createCapture(opts: CaptureOptions) {
   }
 
   return { start, autoPick, isBusy: () => pending !== null };
+}
+
+/** Fenêtres des autres applications, de l'avant vers l'arrière ; liste vide si elle n'a pas pu être lue. */
+export const listWindows = () =>
+  openWindows({ accessibilityPermission: false, screenRecordingPermission: true }).catch(() => [] as WindowInfo[]);
+
+/** Fenêtre sous un point (global, DIP) et sa partie visible sur l'écran, relative à celui-ci ;
+ *  à défaut, l'écran entier. Partagé par la capture et le mode vidéo. */
+export function windowTarget(windows: WindowInfo[], d: Display, at: { x: number; y: number }): { rect: Rectangle; hit?: WindowInfo } {
+  const hit = windows.find((w) => {
+    const b = toDip(w.bounds);
+    return isCandidate(w) && at.x >= b.x && at.y >= b.y && at.x < b.x + b.width && at.y < b.y + b.height;
+  });
+  const inter = hit && onDisplay(toDip(hit.bounds), d);
+  return inter ? { rect: inter, hit } : { rect: { x: 0, y: 0, width: d.bounds.width, height: d.bounds.height } };
 }
 
 /** Fenêtres visées par un clic : pas les nôtres, pas les minuscules (icônes, menus). */
