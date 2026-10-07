@@ -83,12 +83,19 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-n2{0%,16.27%{color:#8A8A93}17.07%,60.93%{color:#FFFFFF}61.73%,100%{color:#8A8A93}}
 @keyframes vs-n3{0%,60.93%{color:#8A8A93}61.73%,84.27%{color:#FFFFFF}85.07%,100%{color:#8A8A93}}
 @keyframes vs-n4{0%,84.27%{color:#8A8A93}85.07%,99.6%{color:#FFFFFF}100%{color:#8A8A93}}
-.vs-prog{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.vs-trk{display:block;height:3px;border-radius:999px;background:#2A2A2F;overflow:hidden}
-.vs-fill{display:block;height:100%;background:#FF6A3D;transform-origin:0 50%;transform:scaleX(0)}
-.vs-lab{display:flex;align-items:baseline;gap:8px;margin-top:12px;font-size:14px;font-weight:600;line-height:1.3;color:#8A8A93}
-.vs-lab b{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:12px}
-@media (max-width:640px){.vs-prog{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Frise en puces : la progression balaie le fond de la puce, l'étape en cours s'élargit (vs-w1..4, mêmes repères). */
+@keyframes vs-w1{0%,16.27%{flex-grow:1.8}17.07%,99.6%{flex-grow:1}100%{flex-grow:1.8}}
+@keyframes vs-w2{0%,16.27%{flex-grow:1}17.07%,60.93%{flex-grow:1.8}61.73%,100%{flex-grow:1}}
+@keyframes vs-w3{0%,60.93%{flex-grow:1}61.73%,84.27%{flex-grow:1.8}85.07%,100%{flex-grow:1}}
+@keyframes vs-w4{0%,84.27%{flex-grow:1}85.07%,99.6%{flex-grow:1.8}100%{flex-grow:1}}
+.vs-prog,.vs-dp{list-style:none;padding:0;display:flex;gap:8px}
+.vs-prog{margin:28px 0 0}
+.vs-prog li,.vs-dp li{flex:1 1 0;min-width:0;position:relative;height:40px;box-sizing:border-box;border-radius:999px;background:#1C1C1F;border:1px solid #2E2E33;overflow:hidden}
+.vs-trk,.vs-dp-trk{position:absolute;inset:0}
+.vs-fill{display:block;height:100%;background:rgba(255,106,61,.24);transform-origin:0 50%;transform:scaleX(0)}
+.vs-lab,.vs-dp-lab{position:relative;display:block;padding:0 16px;font-size:14px;font-weight:600;line-height:38px;color:#8A8A93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-lab b,.vs-dp-lab b{margin-right:8px;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:12px}
+@media (max-width:640px){.vs-prog,.vs-dp{flex-wrap:wrap}.vs-prog li,.vs-dp li{flex-basis:calc(50% - 4px)}}
 @keyframes vs-zoom{from{transform:scale(.86);opacity:.5}to{transform:none;opacity:1}}
 @supports (animation-timeline: view()){.vs-zoom{animation:vs-zoom linear both;animation-timeline:view();animation-range:entry 0% cover 40%}}
 /* Intro plein écran : le viseur se referme (0,1 s), l'éclair, le titre sort du flou, le point #1 se pose (1,6 s),
@@ -189,15 +196,14 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-round{transition:transform .2s ease, background .2s ease}
 .vs-round:hover{transform:scale(1.08)}
 /* Démo « À vous d'essayer » : étapes capture → revue → claude → fait (data-etape de l'écran), en frise. */
-.vs-dp{list-style:none;margin:0;padding:0;width:100%;max-width:760px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.vs-dp-trk{display:block;height:3px;border-radius:999px;background:#2E2E33;overflow:hidden}
-.vs-dp-fill{display:block;width:0;height:100%;background:#FF6A3D;transition:width .5s cubic-bezier(.2,.7,.2,1)}
-.vs-dp-lab{display:flex;align-items:baseline;gap:8px;margin-top:10px;font-size:14px;font-weight:600;color:#8A8A93}
-.vs-dp-lab b{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:12px}
+.vs-dp{margin:0;width:100%;max-width:760px}
+.vs-dp li{transition:flex-grow .5s cubic-bezier(.2,.7,.2,1),border-color .3s ease}
+.vs-dp-fill{display:block;width:0;height:100%;background:rgba(255,106,61,.24);transition:width .5s cubic-bezier(.2,.7,.2,1),background .3s ease}
 .vs-dp li.vs-passee .vs-dp-lab{color:#C7C7CC}
+.vs-dp li.vs-passee .vs-dp-fill{width:100%;background:rgba(255,255,255,.06)}
+.vs-dp li[aria-current="step"]{flex-grow:1.8;border-color:rgba(255,106,61,.55)}
 .vs-dp li[aria-current="step"] .vs-dp-lab{color:#FFFFFF}
-.vs-dp li.vs-passee .vs-dp-fill,.vs-dp li[aria-current="step"] .vs-dp-fill{width:100%}
-@media (max-width:640px){.vs-dp{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.vs-dp li[aria-current="step"] .vs-dp-fill{width:100%}
 .vs-ecran{--barre:max(4.4cqw, 28px)}
 .vs-bureau,.vs-editeur{transition:opacity .4s ease .15s}
 .vs-ecran[data-etape="capture"] .vs-editeur,.vs-ecran:not([data-etape="capture"]) .vs-bureau{opacity:0;visibility:hidden;transition:none}
@@ -232,20 +238,17 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-page[data-mode="capture"] .si-video,.vs-page[data-mode="video"] .si-capture{display:none!important}
 html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!important}
 .vs-page[data-mode="video"] .vs-i-ping{display:none}
-/* Sélecteur de mode (hero) et pastille collante. La rangée collante a une hauteur nulle : la pastille garde
-   sa propre hauteur (align-items:flex-start, sinon elle serait écrasée à 0). */
-.vs-sel{display:inline-flex;padding:4px;gap:4px;border-radius:14px;background:#1C1C1F;border:1px solid #2E2E33}
-.vs-sel button{height:48px;display:inline-flex;align-items:center;gap:10px;padding:0 18px;border:0;border-radius:10px;background:transparent;color:#C7C7CC;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s ease,color .2s ease}
+/* Sélecteur de mode, unique : dans le hero, puis fixé en haut de l'écran une fois sorti par le haut (.vs-fixe,
+   posée par le script). .vs-i-sel garde sa place pour que la page ne saute pas. */
+.vs-i-sel{min-height:58px}
+.vs-i-sel.vs-fixe{animation:none}
+.vs-sel{display:inline-flex;padding:4px;gap:4px;border-radius:999px;background:#1C1C1F;border:1px solid #2E2E33}
+.vs-sel button{height:48px;display:inline-flex;align-items:center;gap:10px;padding:0 20px;border:0;border-radius:999px;background:transparent;color:#C7C7CC;font-size:16px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .2s ease,color .2s ease}
 .vs-sel button:hover{color:#FFFFFF;background:#26262A}
 .vs-sel button[aria-pressed="true"]{background:#FFFFFF;color:#17171A}
-.vs-sel kbd{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;font-weight:500;padding:3px 6px;border-radius:6px;background:#2A2A2E;color:#A1A1A8}
-.vs-sel button[aria-pressed="true"] kbd{background:#EDEDF0;color:#5E5E66}
-.vs-collant{position:sticky;top:0;z-index:60;height:0;display:flex;justify-content:center;align-items:flex-start;pointer-events:none}
-.vs-pastille{margin-top:14px;pointer-events:auto;display:inline-flex;align-items:center;gap:4px;padding:4px;border-radius:999px;background:rgba(23,23,26,.86);border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 32px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.vs-pastille button{height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 16px;border:0;border-radius:999px;background:transparent;color:#C7C7CC;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .2s ease,color .2s ease}
-.vs-pastille button:hover{color:#FFFFFF}
-.vs-pastille button[aria-pressed="true"]{background:#FFFFFF;color:#17171A}
-@media (max-width:520px){.vs-sel kbd{display:none}.vs-sel button{padding:0 14px;font-size:15px}.vs-pastille button{padding:0 12px}}
+.vs-fixe .vs-sel{position:fixed;top:14px;left:50%;z-index:60;transform:translateX(-50%);background:rgba(23,23,26,.86);border-color:rgba(255,255,255,.14);box-shadow:0 12px 32px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);animation:vs-sel-in .25s ease both}
+@keyframes vs-sel-in{from{opacity:.6}to{opacity:1}}
+@media (max-width:520px){.vs-sel button{padding:0 14px;font-size:15px}}
 
 /* ---------- Mode vidéo : maquette de l'app Comptoir en classes (reprise du design ; unités : largeur de la maquette) ---------- */
 .mock{position:relative;width:100%;aspect-ratio:16/11;overflow:hidden;background:#FFFFFF;container-type:inline-size;font-family:'DM Sans',system-ui,sans-serif;color:#111827;line-height:1.2}
@@ -326,6 +329,8 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
 @keyframes v-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes v-on{from{color:#8A8A93}to{color:#FFFFFF}}
 @keyframes v-off{from{color:#FFFFFF}to{color:#8A8A93}}
+@keyframes v-grow{from{flex-grow:1}to{flex-grow:1.8}}
+@keyframes v-shrink{from{flex-grow:1.8}to{flex-grow:1}}
 @keyframes v-cur{0%{left:88cqw;top:62cqw;opacity:0}2.5%{left:88cqw;top:62cqw;opacity:1}7.5%{left:88cqw;top:62cqw}10.5%{left:40cqw;top:34cqw}11%,23%{left:40cqw;top:34cqw}26.5%,30%{left:8.5cqw;top:27.7cqw}33%,44.5%{left:64cqw;top:11.6cqw}47.5%,50%{left:8.5cqw;top:24cqw}52%,52.5%{left:21cqw;top:18.5cqw}56%,64.5%{left:96cqw;top:63.5cqw}67%{left:88cqw;top:62cqw;opacity:1}69%,100%{left:88cqw;top:62cqw;opacity:0}}
 .vrec{position:absolute;right:2cqw;top:1.25cqw;height:3.5cqw;display:flex;align-items:center;gap:.9cqw;padding:0 1.4cqw 0 1.1cqw;border-radius:999px;background:#17171A;color:#FFFFFF;font-size:1.4cqw;font-weight:600;white-space:nowrap}
 .vrec-dot{width:1.1cqw;height:1.1cqw;border-radius:999px;background:#FF453A;animation:vs-pulse 1.2s ease-in-out infinite}
@@ -415,11 +420,11 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
 .langs-up a{color:#3A3A40}.langs-up a:hover{background:#F5F5F7;color:#17171A}.langs-up a[aria-current]{color:#B8300A}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}
   /* La démo reste sur une image de l'étape 02 (points, bulle #1) : la frise aussi. */
-  .vs-prog li:first-child .vs-fill{transform:none}.vs-prog li:nth-child(2) .vs-lab{color:#FFFFFF}}
+  .vs-prog li:first-child .vs-fill{transform:none}.vs-prog li:nth-child(2){flex-grow:1.8}.vs-prog li:nth-child(2) .vs-lab{color:#FFFFFF}}
 </style>
 </head>
 <body>
-<!-- data-mode : mode de revue montré (capture ou video), changé par le sélecteur. overflow-x: clip (et non hidden) laisse la pastille collante fonctionner. -->
+<!-- data-mode : mode de revue montré (capture ou video), changé par le sélecteur. overflow-x: clip (et non hidden) ne crée pas de conteneur de défilement. -->
 <div class="vs-page" data-mode="capture" style="font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; color: #17171A; background: #FFFFFF; font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip">
 
   <section id="haut" style="position: relative; min-height: 100svh; display: flex; flex-direction: column; background: #0A0A0B; color: #FFFFFF; overflow: hidden">
@@ -455,7 +460,6 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
       <span style="position: absolute; left: 0; bottom: 0; width: 64px; height: 64px; border-left: 3px solid #FF453A; border-bottom: 3px solid #FF453A; border-radius: 0 0 0 10px"></span>
       <span style="position: absolute; right: 0; bottom: 0; width: 64px; height: 64px; border-right: 3px solid #FF453A; border-bottom: 3px solid #FF453A; border-radius: 0 0 10px 0"></span>
       <span style="position: absolute; left: 22px; top: 20px; display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; color: #FF8A80"><span class="vs-rec"></span>REC</span>
-      <span style="position: absolute; right: 22px; top: 20px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #8E8E96"><span class="si-mac">⌃⌥⌘R</span><span class="si-win">Ctrl+Alt+R</span></span>
     </div>
 
     <div style="position: relative; z-index: 2; flex: 1; width: 100%; max-width: 1320px; box-sizing: border-box; margin: 0 auto; padding: clamp(48px, 10vh, 104px) 24px 128px; display: flex; flex-direction: column; align-items: center; gap: 32px; text-align: center">
@@ -467,8 +471,8 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
       <p class="vs-i-vsub si-video" style="margin: 0; max-width: 660px; font-size: 20px; line-height: 1.45; color: #C7C7CC">{{video.lancez_parcourez}}</p>
       <div class="vs-i-sel">
         <div class="vs-sel" role="group" aria-label="{{video.mode_revue}}">
-          <button type="button" data-choisir="capture" aria-pressed="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 6V3.5A1.5 1.5 0 0 1 3.5 2H6M12 2h2.5A1.5 1.5 0 0 1 16 3.5V6M16 12v2.5a1.5 1.5 0 0 1-1.5 1.5H12M6 16H3.5A1.5 1.5 0 0 1 2 14.5V12"></path><circle cx="9" cy="9" r="2.2" fill="currentColor" stroke="none"></circle></svg>{{video.capture_ecran}}<kbd class="si-mac">⌃⌥⌘P</kbd><kbd class="si-win">Ctrl+Alt+P</kbd></button>
-          <button type="button" data-choisir="video" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="9" cy="9" r="3.6" fill="#FF453A"></circle></svg>{{video.video}}<kbd class="si-mac">⌃⌥⌘R</kbd><kbd class="si-win">Ctrl+Alt+R</kbd></button>
+          <button type="button" data-choisir="capture" aria-pressed="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 6V3.5A1.5 1.5 0 0 1 3.5 2H6M12 2h2.5A1.5 1.5 0 0 1 16 3.5V6M16 12v2.5a1.5 1.5 0 0 1-1.5 1.5H12M6 16H3.5A1.5 1.5 0 0 1 2 14.5V12"></path><circle cx="9" cy="9" r="2.2" fill="currentColor" stroke="none"></circle></svg>{{video.capture_ecran}}</button>
+          <button type="button" data-choisir="video" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="9" cy="9" r="3.6" fill="#FF453A"></circle></svg>{{video.video}}</button>
         </div>
       </div>
       <div id="installer" class="vs-i-cta" style="width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 14px">
@@ -489,17 +493,9 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
     <button type="button" data-rejouer class="vs-i-cue vs-round" aria-label="{{intro.rejouer_animation_arrivee}}" style="position: absolute; right: 24px; bottom: 26px; z-index: 3; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #2E2E33; border-radius: 999px; background: #1C1C1F; color: #E5E5EA; cursor: pointer"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"></path><path d="M2.5 2.5v3h3"></path></svg></button>
   </section>
 
-  <!-- Pastille collante : le choix du mode reste à portée pendant tout le défilement. -->
-  <div class="vs-collant">
-    <div class="vs-pastille" role="group" aria-label="{{video.mode_revue}}">
-      <button type="button" data-choisir="capture" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 6V3.5A1.5 1.5 0 0 1 3.5 2H6M12 2h2.5A1.5 1.5 0 0 1 16 3.5V6M16 12v2.5a1.5 1.5 0 0 1-1.5 1.5H12M6 16H3.5A1.5 1.5 0 0 1 2 14.5V12"></path><circle cx="9" cy="9" r="2.2" fill="currentColor" stroke="none"></circle></svg>{{video.capture_ecran}}</button>
-      <button type="button" data-choisir="video" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="9" cy="9" r="3.6" fill="#FF453A"></circle></svg>{{video.video}}</button>
-    </div>
-  </div>
-
-  <section id="demo" aria-label="{{demo.demonstration}}" style="padding: 16px 24px 128px; background: #0A0A0B">
-    <!-- Démo et frise tiennent dans la hauteur de l'écran. -->
-    <div style="max-width: min(1120px, calc((100svh - 170px) * 16 / 11)); margin: 0 auto">
+  <section id="demo" aria-label="{{demo.demonstration}}" style="padding: 80px 24px 128px; background: #0A0A0B">
+    <!-- Démo et frise tiennent dans la hauteur de l'écran, sous le sélecteur de mode fixé en haut. -->
+    <div style="max-width: min(1120px, calc((100svh - 234px) * 16 / 11)); margin: 0 auto">
       <div class="vs-zoom si-capture">
         <div role="img" aria-label="{{demo.demonstration_quatre_etapes_sur}}" style="position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 60px 120px -40px rgba(0,0,0,0.9)">
           <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
@@ -769,10 +765,10 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
           <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 30s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
         </div>
       <ol class="vs-prog" aria-label="{{demo.quatre_etapes_demonstration}}">
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s1 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n1 30s linear infinite">{{demo.t_01capture_ecran}}</span></li>
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s2 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n2 30s linear infinite">{{demo.t_02commentaires_sur_capture}}</span></li>
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s3 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n3 30s linear infinite">{{demo.t_03l_ia_lit_revue}}</span></li>
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s4 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n4 30s linear infinite">{{demo.t_04resultat}}</span></li>
+        <li style="animation: vs-w1 30s linear infinite"><span class="vs-trk"><span class="vs-fill" style="animation: vs-s1 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n1 30s linear infinite">{{demo.t_01capture_ecran}}</span></li>
+        <li style="animation: vs-w2 30s linear infinite"><span class="vs-trk"><span class="vs-fill" style="animation: vs-s2 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n2 30s linear infinite">{{demo.t_02commentaires_sur_capture}}</span></li>
+        <li style="animation: vs-w3 30s linear infinite"><span class="vs-trk"><span class="vs-fill" style="animation: vs-s3 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n3 30s linear infinite">{{demo.t_03l_ia_lit_revue}}</span></li>
+        <li style="animation: vs-w4 30s linear infinite"><span class="vs-trk"><span class="vs-fill" style="animation: vs-s4 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n4 30s linear infinite">{{demo.t_04resultat}}</span></li>
       </ol>
       </div>
       <!-- Mode vidéo : 40 s, trois pages parcourues sans s'arrêter (relancée toutes les 40 s par le script). -->
@@ -950,10 +946,10 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
           </div>
         </div>
         <ol class="vs-prog" aria-label="{{demo.quatre_etapes_demonstration}}">
-          <li><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 3s linear 0s both"></span></span><span class="vs-lab" style="animation: v-on .2s 0s both, v-off .3s 3s forwards">{{video.frise_1}}</span></li>
-          <li><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 25.5s linear 3s both"></span></span><span class="vs-lab" style="animation: v-on .2s 3s both, v-off .3s 28.5s forwards">{{video.frise_2}}</span></li>
-          <li><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 7.5s linear 28.5s both"></span></span><span class="vs-lab" style="animation: v-on .2s 28.5s both, v-off .3s 36s forwards">{{video.frise_3}}</span></li>
-          <li><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 4s linear 36s both"></span></span><span class="vs-lab" style="animation: v-on .2s 36s both">{{demo.t_04resultat}}</span></li>
+          <li style="animation: v-grow .3s 0s both, v-shrink .3s 3s forwards"><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 3s linear 0s both"></span></span><span class="vs-lab" style="animation: v-on .2s 0s both, v-off .3s 3s forwards">{{video.frise_1}}</span></li>
+          <li style="animation: v-grow .3s 3s both, v-shrink .3s 28.5s forwards"><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 25.5s linear 3s both"></span></span><span class="vs-lab" style="animation: v-on .2s 3s both, v-off .3s 28.5s forwards">{{video.frise_2}}</span></li>
+          <li style="animation: v-grow .3s 28.5s both, v-shrink .3s 36s forwards"><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 7.5s linear 28.5s both"></span></span><span class="vs-lab" style="animation: v-on .2s 28.5s both, v-off .3s 36s forwards">{{video.frise_3}}</span></li>
+          <li style="animation: v-grow .3s 36s both"><span class="vs-trk"><span class="vs-fill" style="animation: v-fill 4s linear 36s both"></span></span><span class="vs-lab" style="animation: v-on .2s 36s both">{{demo.t_04resultat}}</span></li>
         </ol>
       </div>
     </div>
@@ -977,93 +973,6 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
     </div>
   </div>
 
-  <section id="gain" style="padding: 104px 0; background: #F5F5F7">
-    <div style="max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
-      <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{gain.combien_temps_vous_gagnez}}</h2>
-        <p style="margin: 0; font-size: 18px; color: #3A3A40">{{gain.reglez_selon_vos_revues}}</p>
-      </div>
-      <div class="vs-reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: stretch">
-
-        <div style="display: flex; flex-direction: column; gap: 28px; padding: 28px; border-radius: 20px; background: #FFFFFF">
-          <div style="display: flex; flex-direction: column; gap: 10px">
-            <label for="gain-ecrans" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span><span class="si-capture">{{gain.ecrans_par_revue}}</span><span class="si-video">{{video.pages_par_revue}}</span></span><output for="gain-ecrans" data-out="gain-ecrans" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">10</output></label>
-            <input id="gain-ecrans" type="range" min="1" max="30" value="10" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
-            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span><span class="si-capture">{{gain.t_30_ecrans}}</span><span class="si-video">{{video.t_30_pages}}</span></span></span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 10px">
-            <label for="gain-retours" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span><span class="si-capture">{{gain.retours_par_ecran}}</span><span class="si-video">{{video.retours_par_page}}</span></span><output for="gain-retours" data-out="gain-retours" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">3</output></label>
-            <input id="gain-retours" type="range" min="1" max="10" value="3" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
-            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_10_retours}}</span></span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 10px">
-            <label for="gain-revues" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>{{gain.revues_par_semaine}}</span><output for="gain-revues" data-out="gain-revues" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">5</output></label>
-            <input id="gain-revues" type="range" min="1" max="20" value="5" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
-            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_20_revues}}</span></span>
-          </div>
-        </div>
-
-        <div aria-live="polite" style="display: flex; flex-direction: column; gap: 24px; padding: 28px; border-radius: 20px; background: #17171A; color: #FFFFFF">
-          <div style="display: flex; flex-direction: column; gap: 4px">
-            <span style="font-size: 15px; color: #C7C7CC">{{gain.temps_gagne_par_mois}}</span>
-            <span data-out="mois" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(56px, 7vw, 88px); line-height: 1; letter-spacing: -0.04em; color: #FF6A3D; font-variant-numeric: tabular-nums">5 h 12</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 10px">
-            <span style="font-size: 15px; color: #C7C7CC">{{gain.par_revue_30_retours}}</span>
-            <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; font-size: 15px">
-              <span style="color: #C7C7CC">{{gain.main}}</span>
-              <span data-out="main" style="font-weight: 600; font-variant-numeric: tabular-nums">{{gain.t_17_min}}</span>
-              <span style="grid-column: 1 / -1; height: 10px; margin-bottom: 8px; border-radius: 999px; background: #5E5E66"></span>
-              <span style="font-weight: 600">{{gain.avec_vibescreener}}</span>
-              <span data-out="vs" style="font-weight: 600; font-variant-numeric: tabular-nums; color: #FF6A3D">{{gain.t_2_min_35}}</span>
-              <span style="grid-column: 1 / -1"><span data-out="barre" style="display: block; width: 15.2%; height: 10px; border-radius: 999px; background: #FF6A3D; transition: width .2s ease"></span></span>
-            </div>
-          </div>
-          <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 13px; line-height: 1.5; color: #A1A1A8"><span class="si-capture">{{gain.hypotheses_main_30_s}}</span><span class="si-video">{{video.hypotheses}}</span></p>
-        </div>
-      </div>
-      <div class="vs-reveal" style="margin-top: 40px; display: flex; flex-direction: column; gap: 28px">
-        <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 48px">
-          <h3 style="margin: 0; max-width: 560px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 48px); line-height: 1; letter-spacing: -0.04em">{{gain.retours_plus_complets}}</h3>
-          <p style="margin: 0; max-width: 470px; font-size: 17px; color: #3A3A40">{{gain.taper_chaque_retour_est}}</p>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 20px; align-items: stretch">
-          <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #FFFFFF">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="16" height="10" rx="2"></rect><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M6.5 11.8h7"></path></svg>{{gain.tape}}</span>
-              <span style="font-size: 14px; color: #6E6E76">{{gain.t_3_mots}}</span>
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
-              <span style="align-self: flex-end; max-width: 85%; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #EDEDF0; color: #17171A">{{gain.bouton_trop_petit}}</span>
-              <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
-                <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #EDEDF0; color: #5E5E66; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
-                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #E4E4E8; color: #3A3A40">{{gain.j_agrandis_texte_bouton}}</span>
-              </span>
-            </div>
-            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #ECECEF; font-size: 15px; font-weight: 600; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#EDEDF0"></circle><path d="M7 7l6 6M13 7l-6 6" stroke="#5E5E66" stroke-width="1.8" stroke-linecap="round"></path></svg>{{gain.ia_devine_vise_cote}}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #17171A; color: #FFFFFF; box-shadow: 0 30px 60px -30px rgba(23,23,26,0.5)">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>{{gain.dicte}}</span>
-              <span style="font-size: 14px; color: #A1A1A8">{{gain.t_21_mots}}</span>
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
-              <span style="align-self: flex-end; max-width: 90%; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #2B1A13; box-shadow: inset 0 0 0 1px #5C2A17; color: #FFFFFF">
-                <span aria-hidden="true" class="vs-onde" style="flex: none; width: 120px; height: 14px"><span style="background: #FF8A66; animation-delay: -0.1s"></span><span style="background: #FF8A66; animation-delay: -0.3s"></span><span style="background: #FF8A66; animation-delay: -0.5s"></span><span style="background: #FF8A66; animation-delay: -0.2s"></span><span style="background: #FF8A66; animation-delay: -0.7s"></span><span style="background: #FF8A66; animation-delay: -0.4s"></span><span style="background: #FF8A66; animation-delay: -0.6s"></span><span style="background: #FF8A66; animation-delay: -0.15s"></span><span style="background: #FF8A66; animation-delay: -0.45s"></span><span style="background: #FF8A66; animation-delay: -0.25s"></span><span style="background: #FF8A66; animation-delay: -0.55s"></span><span style="background: #FF8A66; animation-delay: -0.35s"></span></span>
-                <span>{{gain.ce_bouton_est_trop}}</span>
-              </span>
-              <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
-                <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #2E2E33; color: #C7C7CC; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
-                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #3A3A40; color: #E5E5EA">{{gain.sur_mobile_bouton_passe}}</span>
-              </span>
-            </div>
-            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 15px; font-weight: 600; color: #4ADE80"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{gain.juste_premier_coup}}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section id="comment" style="padding: 104px 0; background: #FFFFFF">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 10px">
@@ -1075,10 +984,7 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
       <ol class="vs-etapes si-capture">
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
           <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 8px">
-            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌃</span>
-            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌥</span>
-            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌘</span>
-            <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px; font-weight: 600">P</span>
+            <span style="height: 56px; display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid #D9D9DE; border-bottom-width: 3px; border-radius: 999px; background: #FFFFFF; color: #17171A; font-size: 18px; font-weight: 600"><svg width="22" height="22" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2 6V3.5A1.5 1.5 0 0 1 3.5 2H6M12 2h2.5A1.5 1.5 0 0 1 16 3.5V6M16 12v2.5a1.5 1.5 0 0 1-1.5 1.5H12M6 16H3.5A1.5 1.5 0 0 1 2 14.5V12"></path><circle cx="9" cy="9" r="2.2" fill="currentColor" stroke="none"></circle></svg>{{video.capture_ecran}}</span>
           </div>
           <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em">{{comment.t_1_capture_ecran}}</h3>
           <p style="margin: 0; color: #5E5E66">{{comment.sur_votre_app_raccourci}}</p>
@@ -1123,10 +1029,7 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
           <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
             <div aria-hidden="true" style="position: relative; height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center; gap: 8px">
               <span style="position: absolute; left: 16px; top: 14px; display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: #B42318"><span class="vs-rec" style="width: 7px; height: 7px"></span>REC</span>
-              <span style="width: 48px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌃</span>
-              <span style="width: 48px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌥</span>
-              <span style="width: 48px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌘</span>
-              <span style="width: 48px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #F3B8B2; border-bottom-width: 4px; border-radius: 11px; background: #FFF5F4; color: #B42318; font-size: 21px; font-weight: 600">R</span>
+              <span style="height: 56px; display: inline-flex; align-items: center; gap: 10px; padding: 0 22px; border: 1px solid #D9D9DE; border-bottom-width: 3px; border-radius: 999px; background: #FFFFFF; color: #17171A; font-size: 18px; font-weight: 600"><svg width="22" height="22" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="9" cy="9" r="3.6" fill="#FF453A"></circle></svg>{{video.video}}</span>
             </div>
             <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em">{{video.etape_1}}</h3>
             <p style="margin: 0; color: #5E5E66">{{video.etape_1_texte}}</p>
@@ -1142,7 +1045,6 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
                 <span style="position: absolute; left: 100px; top: 58px; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 999px; border: 2px solid #D63A0C; animation: f-ring 1.8s ease-out infinite"></span>
                 <span style="position: absolute; left: 100px; top: 32px; width: 26px; height: 26px; border: 3px solid #FFFFFF; border-radius: 13px 13px 13px 4px; background: #D63A0C; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2)">1</span>
                 <svg viewBox="0 0 24 24" style="position: absolute; left: 99px; top: 57px; width: 18px; height: 18px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.25))"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
-                <span style="position: absolute; left: 118px; top: 60px; height: 18px; padding: 0 5px; display: flex; align-items: center; box-sizing: border-box; border: 1px solid #D9D9DE; border-bottom-width: 2px; border-radius: 5px; background: #FFFFFF; font-size: 11px; font-weight: 600; color: #17171A"><span class="si-mac">⌘</span><span class="si-win">Ctrl</span></span>
                 <span style="position: absolute; left: 24px; bottom: -14px; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: rgba(28,28,30,.96); color: #FFFFFF; font-size: 11px; font-weight: 600; white-space: nowrap; box-shadow: 0 6px 14px rgba(0,0,0,0.25)"><span style="width: 7px; height: 7px; border-radius: 999px; background: #FF453A"></span>{{video.dictee_en_cours}}<span class="vs-onde" style="flex: none; width: 34px; height: 10px; gap: 2px"><span style="animation-delay: -0.1s"></span><span style="animation-delay: -0.4s"></span><span style="animation-delay: -0.2s"></span><span style="animation-delay: -0.6s"></span><span style="animation-delay: -0.3s"></span><span style="animation-delay: -0.5s"></span></span><span style="font-weight: 500; color: #C7C7CC">0:03</span></span>
               </span>
             </div>
@@ -2051,6 +1953,93 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
     </div>
   </section>
 
+  <section id="gain" style="padding: 104px 0; background: #F5F5F7">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
+      <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{gain.combien_temps_vous_gagnez}}</h2>
+        <p style="margin: 0; font-size: 18px; color: #3A3A40">{{gain.reglez_selon_vos_revues}}</p>
+      </div>
+      <div class="vs-reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: stretch">
+
+        <div style="display: flex; flex-direction: column; gap: 28px; padding: 28px; border-radius: 20px; background: #FFFFFF">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <label for="gain-ecrans" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span><span class="si-capture">{{gain.ecrans_par_revue}}</span><span class="si-video">{{video.pages_par_revue}}</span></span><output for="gain-ecrans" data-out="gain-ecrans" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">10</output></label>
+            <input id="gain-ecrans" type="range" min="1" max="30" value="10" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
+            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span><span class="si-capture">{{gain.t_30_ecrans}}</span><span class="si-video">{{video.t_30_pages}}</span></span></span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <label for="gain-retours" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span><span class="si-capture">{{gain.retours_par_ecran}}</span><span class="si-video">{{video.retours_par_page}}</span></span><output for="gain-retours" data-out="gain-retours" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">3</output></label>
+            <input id="gain-retours" type="range" min="1" max="10" value="3" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
+            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_10_retours}}</span></span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <label for="gain-revues" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>{{gain.revues_par_semaine}}</span><output for="gain-revues" data-out="gain-revues" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">5</output></label>
+            <input id="gain-revues" type="range" min="1" max="20" value="5" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
+            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_20_revues}}</span></span>
+          </div>
+        </div>
+
+        <div aria-live="polite" style="display: flex; flex-direction: column; gap: 24px; padding: 28px; border-radius: 20px; background: #17171A; color: #FFFFFF">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 15px; color: #C7C7CC">{{gain.temps_gagne_par_mois}}</span>
+            <span data-out="mois" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(56px, 7vw, 88px); line-height: 1; letter-spacing: -0.04em; color: #FF6A3D; font-variant-numeric: tabular-nums">5 h 12</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <span style="font-size: 15px; color: #C7C7CC">{{gain.par_revue_30_retours}}</span>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; font-size: 15px">
+              <span style="color: #C7C7CC">{{gain.main}}</span>
+              <span data-out="main" style="font-weight: 600; font-variant-numeric: tabular-nums">{{gain.t_17_min}}</span>
+              <span style="grid-column: 1 / -1; height: 10px; margin-bottom: 8px; border-radius: 999px; background: #5E5E66"></span>
+              <span style="font-weight: 600">{{gain.avec_vibescreener}}</span>
+              <span data-out="vs" style="font-weight: 600; font-variant-numeric: tabular-nums; color: #FF6A3D">{{gain.t_2_min_35}}</span>
+              <span style="grid-column: 1 / -1"><span data-out="barre" style="display: block; width: 15.2%; height: 10px; border-radius: 999px; background: #FF6A3D; transition: width .2s ease"></span></span>
+            </div>
+          </div>
+          <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 13px; line-height: 1.5; color: #A1A1A8"><span class="si-capture">{{gain.hypotheses_main_30_s}}</span><span class="si-video">{{video.hypotheses}}</span></p>
+        </div>
+      </div>
+      <div class="vs-reveal" style="margin-top: 40px; display: flex; flex-direction: column; gap: 28px">
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 48px">
+          <h3 style="margin: 0; max-width: 560px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 48px); line-height: 1; letter-spacing: -0.04em">{{gain.retours_plus_complets}}</h3>
+          <p style="margin: 0; max-width: 470px; font-size: 17px; color: #3A3A40">{{gain.taper_chaque_retour_est}}</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 20px; align-items: stretch">
+          <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #FFFFFF">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="16" height="10" rx="2"></rect><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M6.5 11.8h7"></path></svg>{{gain.tape}}</span>
+              <span style="font-size: 14px; color: #6E6E76">{{gain.t_3_mots}}</span>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
+              <span style="align-self: flex-end; max-width: 85%; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #EDEDF0; color: #17171A">{{gain.bouton_trop_petit}}</span>
+              <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
+                <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #EDEDF0; color: #5E5E66; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
+                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #E4E4E8; color: #3A3A40">{{gain.j_agrandis_texte_bouton}}</span>
+              </span>
+            </div>
+            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #ECECEF; font-size: 15px; font-weight: 600; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#EDEDF0"></circle><path d="M7 7l6 6M13 7l-6 6" stroke="#5E5E66" stroke-width="1.8" stroke-linecap="round"></path></svg>{{gain.ia_devine_vise_cote}}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #17171A; color: #FFFFFF; box-shadow: 0 30px 60px -30px rgba(23,23,26,0.5)">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>{{gain.dicte}}</span>
+              <span style="font-size: 14px; color: #A1A1A8">{{gain.t_21_mots}}</span>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
+              <span style="align-self: flex-end; max-width: 90%; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #2B1A13; box-shadow: inset 0 0 0 1px #5C2A17; color: #FFFFFF">
+                <span aria-hidden="true" class="vs-onde" style="flex: none; width: 120px; height: 14px"><span style="background: #FF8A66; animation-delay: -0.1s"></span><span style="background: #FF8A66; animation-delay: -0.3s"></span><span style="background: #FF8A66; animation-delay: -0.5s"></span><span style="background: #FF8A66; animation-delay: -0.2s"></span><span style="background: #FF8A66; animation-delay: -0.7s"></span><span style="background: #FF8A66; animation-delay: -0.4s"></span><span style="background: #FF8A66; animation-delay: -0.6s"></span><span style="background: #FF8A66; animation-delay: -0.15s"></span><span style="background: #FF8A66; animation-delay: -0.45s"></span><span style="background: #FF8A66; animation-delay: -0.25s"></span><span style="background: #FF8A66; animation-delay: -0.55s"></span><span style="background: #FF8A66; animation-delay: -0.35s"></span></span>
+                <span>{{gain.ce_bouton_est_trop}}</span>
+              </span>
+              <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
+                <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #2E2E33; color: #C7C7CC; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
+                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #3A3A40; color: #E5E5EA">{{gain.sur_mobile_bouton_passe}}</span>
+              </span>
+            </div>
+            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 15px; font-weight: 600; color: #4ADE80"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{gain.juste_premier_coup}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="tarifs" style="padding: 104px 0; background: #FFFFFF">
     <div style="max-width: 1000px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 40px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
@@ -2164,7 +2153,7 @@ html[data-os="win"] .si-mac,html:not([data-os="win"]) .si-win{display:none!impor
       </div>
       <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; font-size: 15px">
         <span>{{intro.t_14_jours_gratuits_sans}}</span>
-        <span>{{video.capture_ecran}} <span class="si-mac">⌃⌥⌘P</span><span class="si-win">Ctrl+Alt+P</span> · {{video.video}} <span class="si-mac">⌃⌥⌘R</span><span class="si-win">Ctrl+Alt+R</span></span>
+        <span>{{video.capture_ecran}} · {{video.video}}</span>
         <span class="si-mac">Mac Apple Silicon</span><span class="si-win">{{video.windows}}</span>
       </div>
     </div>
@@ -2312,7 +2301,7 @@ for (const carte of cartes) {
   }
 }
 
-// Mode de revue (capture d'écran ou vidéo) : sélecteur du hero et pastille collante. Le CSS n'affiche que les
+// Mode de revue (capture d'écran ou vidéo) : sélecteur unique, dans le hero puis fixé en haut de l'écran. Le CSS n'affiche que les
 // blocs du mode choisi ; ceux qui apparaissent démarrent leurs animations. Dans l'arrivée, seule la séquence du
 // point repart (.vs-rejoue : délais raccourcis), puis la commande d'installation réapparaît.
 function choisirMode(mode) {
@@ -2327,6 +2316,9 @@ function choisirMode(mode) {
   if (mode === 'video') rejouerDemo(demoVideo);
 }
 for (const button of document.querySelectorAll('[data-choisir]')) button.addEventListener('click', () => choisirMode(button.dataset.choisir));
+const selecteur = document.querySelector('.vs-i-sel');
+new IntersectionObserver(([e]) => selecteur.classList.toggle('vs-fixe', e.intersectionRatio < 1 && e.boundingClientRect.top < 14),
+  { rootMargin: '-14px 0px 0px 0px', threshold: 1 }).observe(selecteur);
 
 // Démo « À vous d'essayer », en quatre étapes : capturer l'écran (⌃⌥⌘P ou le bouton), cliquer où
 // l'on veut sur la capture (la demande s'écrit toute seule, comme dictée), exporter, puis voir

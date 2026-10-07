@@ -251,6 +251,8 @@ Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accor
 - [x] Retour visuel pendant la vidéo (7 oct.) : même pastille numérotée que la capture d'écran au clic, bandeau « Micro ouvert » puis « Dictée en cours », onde du micro et durée ; fenêtres transparentes sans focus qui laissent passer les clics, sur l'écran du point ; les clics sans parole ne consomment pas de numéro. Tests des états et de la numérotation, rendu vérifié avec un micro simulé
 - [x] Ergonomie revue après le premier essai (7 oct.) : clic seul = navigation, qui termine le point en cours ; ⌘ + clic (Ctrl + clic) = point, ⌘ + glisser = cadre (+ ⇧ flèche, + ⌥/Alt recadrer). Tant que ⌘ / Ctrl est tenu, les fenêtres du retour prennent la souris : le clic n'atteint pas l'app (pas d'onglet ouvert par un ⌘-clic) ; elles sont des panneaux macOS qui n'activent pas VibeScreener. Bandeau : bouton « Arrêter ⌃⌥⌘R », touches affichées (⌘ s'allume quand on la tient), voix dirigée vers « Point N » ou « Remarque générale », placé au-dessus du Dock / de la barre des tâches. Tests des clics (navigation, touche tenue pendant un glissement, relâchement manqué) et de la remarque après navigation
 - [x] Commentaire écrit pendant la vidéo (demandé le 7 oct.) : bouton « Écrire » dans le bandeau ; le texte rejoint le point en cours, ou une remarque générale sans point. Le bandeau prend le clavier le temps de la saisie (micro suspendu, clics ignorés) ; Entrée ou clic ailleurs valide, Échap annule. Rendu vérifié dans un navigateur avec un IPC simulé
+- [x] Revue du 7 oct. (19 h 12) : le bouton « Écrire » devient un champ toujours affiché dans le bandeau (un clic dedans prend le clavier, la fenêtre restant non focalisable le reste du temps) ; page du bandeau sans défilement (`overscroll-behavior: none`, molette bloquée), cause supposée du cadre ⌘ + glisser qui bougeait au défilement
+- [ ] Essai réel : le cadre tracé reste fixe quand l'app défile
 - [ ] Essai réel du commentaire écrit sur Mac et Windows : le champ reçoit bien la frappe (panneau macOS rendu focalisable), puis un clic rend la main à l'app relue
 - [ ] Essai réel de cette ergonomie sur Mac et Windows : ⌘ + clic sans effet dans l'app (lien, bouton), clic seul qui navigue, VibeScreener qui ne passe pas au premier plan, ⌘ + Tab et raccourcis clavier inchangés, menu au survol (garder la souris immobile en appuyant sur ⌘)
 - [ ] Essai réel du retour visuel sur Mac et Windows, dont plusieurs écrans et app en plein écran. `setContentProtection(true)` ne garantit pas l'exclusion du retour des images sur les macOS utilisant ScreenCaptureKit (limite Electron : https://www.electronjs.org/docs/latest/api/browser-window#winsetcontentprotectionenable)
@@ -335,3 +337,12 @@ Aujourd'hui : un échec de vérification efface la mise à jour connue (contrôl
 - [x] Tests : `dock.test.ts` (apparition immédiate, retrait différé, annulé si une fenêtre se rouvre, attente de la fin d'une capture) ; textes, README et SPEC sans « le Dock »
 - [x] `pnpm test`, `pnpm typecheck` ; version **0.10.0** (avec le menu ≡ de l'éditeur de la 0.9.2)
 - [ ] Photos e2e par la CI ; essai réel sur Mac et PC
+
+### Lot H — Site : revue du 7 oct. (19 h 12)
+
+- [x] Un seul sélecteur de mode : celui du hero, fixé en haut de l'écran une fois sorti par le haut (la pastille collante en double est retirée) ; démo décalée sous lui
+- [x] Plus de raccourcis hors des démos (`#demo`, `#essayer`) : sélecteur, cadre REC du hero, étapes « Comment ça marche » (bouton du mode à la place des touches), fonctionnalités, FAQ, appel final ; textes reformulés dans les cinq langues (« clic de commentaire » au lieu de ⌘ + clic)
+- [x] Frises des deux démos en puces : progression dans le fond de la puce, étape en cours élargie ; 2 × 2 sous 640 px
+- [x] Calculateur « Combien de temps gagnez-vous ? » déplacé juste avant les tarifs ; les étapes suivent directement les logos
+- [x] Vérifié en local (bureau et 375 px, capture et vidéo) : sélecteur fixé, aucun glyphe de touche hors des démos, ordre des sections
+- [ ] Déploiement (`pnpm site:deploy`) sur ton feu vert
