@@ -9,7 +9,7 @@
 > - **Export PowerPoint (.pptx)** ajouté à la demande de l'utilisateur, au lot 4 : une diapo par écran, puis une par point.
 > - **Export Markdown** (§6.3, [S]) avancé au lot 1, à côté du PDF.
 > - Tablette (§11) : **iPad + Apple Pencil**. Validation **Mac et Windows** dès les POC.
-> - **Mode vidéo** (2026-10-07, demandé, voir `ROADMAP.md`) : ⌃⌥⌘R enregistre, chaque clic suivi de paroles devient un point sur l'image d'avant le clic ; pas de fichier vidéo, la session reste ordinaire.
+> - **Mode vidéo** (2026-10-07, demandé, voir `ROADMAP.md`) : ⌃⌥⌘R enregistre ; on navigue par des clics seuls, et ⌘ + clic (Ctrl + clic) suivi de paroles devient un point ; pas de fichier vidéo, la session reste ordinaire.
 
 ## 1. Contexte et objectifs
 

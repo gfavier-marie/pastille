@@ -228,6 +228,26 @@ describe('mode vidéo', () => {
     expect(summary).toEqual({ firstCaptureId: capture.id, points: 1, notes: 0 });
   });
 
+  it('un clic seul termine le point ; la parole qui suit devient une remarque générale, que la navigation ne coupe pas', async () => {
+    const { store, video, submitted, feedback, focused, say, wait } = await setup();
+    video.start();
+    video.onClick(click(500, 400));
+    say(4);
+    video.onNavigate();
+    expect(feedback.at(-1)?.click).toBeUndefined();
+    expect(focused.at(-1)).toBeNull();
+    say(3);
+    video.onNavigate();
+    wait(2);
+    say(3);
+    const summary = await video.stop();
+    const session = store.get()!;
+    expect(session.captures[0]!.annotations).toHaveLength(1);
+    expect(session.notes).toHaveLength(1);
+    expect(submitted).toEqual([{ id: session.captures[0]!.annotations[0]!.id, length: 4 * CHUNK }, { id: session.notes![0]!.id, length: 8 * CHUNK }]);
+    expect(summary).toMatchObject({ points: 1, notes: 1 });
+  });
+
   it('clic sans parole (navigation) ou simple bruit : rien n’est gardé', async () => {
     const { store, video, submitted, dropped, say, wait } = await setup();
     video.start();

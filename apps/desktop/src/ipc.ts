@@ -39,6 +39,7 @@ export type VideoFeedback = {
   inspiration?: { shortcut: string; number?: number };
   stopShortcut?: string; // raccourci qui arrête l'enregistrement, affiché sur « Arrêter »
   tablet?: boolean;
+  armed?: boolean; // ⌘ / Ctrl tenu : le prochain clic pose un point
   error?: string;
 } | null;
 

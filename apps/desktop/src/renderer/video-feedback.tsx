@@ -56,37 +56,37 @@ function App() {
     return () => window.removeEventListener('resize', draw);
   }, [state?.click?.x, state?.click?.y, state?.click?.number, geometry]);
 
-  // Arrêter : toujours actif, même pendant une autre action.
-  const stop = <button type="button" className="stop" onClick={() => void window.pastille.videoAction('stop')}>
-    <I.Stop size={13} />{T.videoFeedback.stop}{state?.stopShortcut && <kbd>{state.stopShortcut}</kbd>}
-  </button>;
-
+  const v = T.videoFeedback;
+  const c = state?.click;
   return <>
     <canvas ref={canvasRef} aria-hidden="true" />
-    {state && <div className="feedback" onMouseEnter={() => window.pastille.videoFeedbackHover(true)} onMouseLeave={() => window.pastille.videoFeedbackHover(false)}>
+    {state && <div className={`feedback${state.armed ? ' armed' : ''}`} onMouseEnter={() => window.pastille.videoFeedbackHover(true)} onMouseLeave={() => window.pastille.videoFeedbackHover(false)}>
       <div className="feedback-head">
         <span className="rec-dot" />
-        <strong role="status">{state.inspiration ? T.videoFeedback.chooseInspiration : state.voiced ? T.editor.recording : T.videoFeedback.microphone}</strong>
+        <strong>{state.inspiration ? v.chooseInspiration : c ? v.point(c.number) : v.general}</strong>
         {!state.inspiration && <><Wave levels={levels.current} /><time>{clock(state.elapsedMs)}</time></>}
-      </div>
-      <div className="feedback-meta">
-        <span>{state.inspiration?.number ? T.videoFeedback.point(state.inspiration.number) : state.click ? T.videoFeedback.point(state.click.number) : T.videoFeedback.general}</span>
-        {!state.voiced && !state.kept && !state.inspiration && <span>· {state.click ? T.videoFeedback.speak : T.videoFeedback.ready}</span>}
+        <button type="button" className="stop" onClick={() => void window.pastille.videoAction('stop')}>
+          <I.Stop size={13} />{v.stop}{state.stopShortcut && <kbd>{state.stopShortcut}</kbd>}
+        </button>
       </div>
       {state.inspiration ? <>
-        <div className="feedback-hint">{T.videoFeedback.inspirationHint(state.inspiration.shortcut)}</div>
+        <div className="feedback-hint">{state.inspiration.number ? `${v.point(state.inspiration.number)} · ` : ''}{v.inspirationHint(state.inspiration.shortcut)}</div>
         <div className="feedback-tools">
-          <button type="button" className="primary" disabled={busy} onClick={() => void act('capture-inspiration')}><I.Capture size={13} />{T.videoFeedback.captureInspiration}</button>
-          <button type="button" disabled={busy} onClick={() => void act('cancel-inspiration')}>{T.videoFeedback.resume}</button>
-          {stop}
+          <button type="button" className="primary" disabled={busy} onClick={() => void act('capture-inspiration')}><I.Capture size={13} />{v.captureInspiration}</button>
+          <button type="button" disabled={busy} onClick={() => void act('cancel-inspiration')}>{v.resume}</button>
         </div>
       </> : <>
-        <div className="feedback-tools">
-          <button type="button" disabled={!state.click || busy} title={state.tablet ? T.videoFeedback.drawingReady : T.menu.pair} onClick={() => void act('draw')}><I.Tablet size={13} />{T.videoFeedback.drawing}</button>
-          <button type="button" disabled={!state.click || busy} onClick={() => void act('inspiration')}><I.Picture size={13} />{T.editor.inspiration}</button>
-          {stop}
+        <div className="feedback-meta" role="status">{state.voiced ? T.editor.recording : c ? (state.kept ? '' : v.speak) : v.microphone}</div>
+        {c && <div className="feedback-tools">
+          <button type="button" disabled={busy} title={state.tablet ? v.drawingReady : T.menu.pair} onClick={() => void act('draw')}><I.Tablet size={13} />{v.drawing}</button>
+          <button type="button" disabled={busy} onClick={() => void act('inspiration')}><I.Picture size={13} />{T.editor.inspiration}</button>
+        </div>}
+        <div className="feedback-keys">
+          <span><kbd className="point-key">{v.key}</kbd> + <kbd>{v.click}</kbd> → {v.placePoint}</span>
+          <span className="sep">·</span>
+          <span><kbd>{v.click}</kbd> → {v.navigate}</span>
         </div>
-        <div className="feedback-hint">{T.videoFeedback.gestures}</div>
+        <div className="feedback-hint">{v.gestures}</div>
       </>}
       {(state.error || error) && <div className="feedback-error" role="alert">{state.error || error}</div>}
     </div>}
