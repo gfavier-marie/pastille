@@ -31,6 +31,13 @@ export const T = {
   transcriptions: (n: number) => plural(n, 'transcription'),
   reveal: isMac ? 'Afficher dans le Finder' : "Afficher dans l'Explorateur",
 
+  videoFeedback: {
+    microphone: 'Micro ouvert',
+    point: (n: number) => `Point ${n}`,
+    general: 'Remarque générale',
+    speak: 'Parlez pour garder ce point',
+    ready: 'Cliquez puis parlez',
+  },
   menu: {
     label: 'VibeScreener',
     noSession: 'Aucune session ouverte',

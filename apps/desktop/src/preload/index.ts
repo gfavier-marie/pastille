@@ -79,6 +79,7 @@ const api: PastilleApi = {
   onVideoCrop: (cb) => on('video:crop', cb),
   videoCropped: (frameId, image) => ipcRenderer.send('video:cropped', frameId, image),
   videoAudio: (chunk) => ipcRenderer.send('video:audio', chunk),
+  onVideoFeedback: (cb) => on('video:feedback', cb),
 
   onOverlayShow: (cb) => void on('overlay:show', cb),
   onOverlayWindows: (cb) => void on('overlay:windows', cb),

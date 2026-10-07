@@ -27,6 +27,7 @@ export default defineConfig({
           welcome: resolve(import.meta.dirname, 'src/renderer/welcome.html'),
           pairing: resolve(import.meta.dirname, 'src/renderer/pairing.html'),
           video: resolve(import.meta.dirname, 'src/renderer/video.html'),
+          'video-feedback': resolve(import.meta.dirname, 'src/renderer/video-feedback.html'),
         },
       },
     },

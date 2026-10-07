@@ -28,6 +28,14 @@ export type OverlayPick =
 /** Mode vidéo : un écran filmé par la fenêtre cachée (source de desktopCapturer), taille en pixels physiques. */
 export type VideoSource = { displayId: number; sourceId: string; width: number; height: number };
 
+/** Retour à l'écran pendant la vidéo : point provisoire et état réel du micro. */
+export type VideoFeedback = {
+  click?: { displayId: number; x: number; y: number; number: number; at: number };
+  elapsedMs: number;
+  level: number;
+  voiced: boolean;
+} | null;
+
 /** Image figée au clic, recadrée sur la cible : rectangle en 0–1 de l'écran ; null la jette. */
 export type VideoCrop = { frameId: number; rect: { x: number; y: number; width: number; height: number } | null };
 
@@ -194,6 +202,7 @@ export type PastilleApi = {
   onVideoCrop(cb: (c: VideoCrop) => void): () => void;
   videoCropped(frameId: number, image: VideoImage | null): void;
   videoAudio(chunk: Float32Array): void; // micro, blocs de 100 ms à 16 kHz
+  onVideoFeedback(cb: (state: VideoFeedback) => void): () => void;
   // Overlay
   onOverlayShow(cb: (data: OverlayShow) => void): void;
   onOverlayWindows(cb: (windows: OverlayWindow[]) => void): void;

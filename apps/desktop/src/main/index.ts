@@ -41,6 +41,7 @@ import { createTranscriber } from './transcriber.ts';
 import { checkForUpdate, installUpdate, type Update } from './updater.ts';
 import { createVideo } from './video.ts';
 import { createVideoWindow } from './video-window.ts';
+import { createVideoFeedback } from './video-feedback.ts';
 import { downloadFile, MODEL_FILE, MODEL_URL } from './whisper.ts';
 
 const isMac = process.platform === 'darwin';
@@ -81,7 +82,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'pastille', privileges: { standard: true, secure: true, supportFetchAPI: true } },
 ]);
 
-type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing' | 'video';
+type Page = 'editor' | 'poc' | 'overlay' | 'settings' | 'menu' | 'bar' | 'welcome' | 'pairing' | 'video' | 'video-feedback';
 function loadPage(win: BrowserWindow, page: Page, hash = '') {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
   if (devUrl) void win.loadURL(`${devUrl}/${page}.html${hash && `#${hash}`}`);
@@ -266,6 +267,7 @@ function reportCapture(r: CaptureResult) {
 
 const VIDEO_SHORTCUT = isMac ? 'Command+Control+Alt+R' : 'Control+Alt+R';
 const videoWindow = createVideoWindow({ preload, loadPage, onAudio: (chunk) => video.onAudio(chunk) });
+const videoFeedback = createVideoFeedback({ preload, loadPage });
 const logVideo = (entry: Record<string, unknown>) => console.log('VIDEO', JSON.stringify(entry));
 const video = createVideo({
   store,
@@ -279,12 +281,14 @@ const video = createVideo({
     return { rect, app: hit?.owner.name, title: hit?.title };
   },
   log: logVideo,
+  nextNumber: () => store.get()?.captures.reduce((n, c) => n + c.annotations.length, 1) ?? 1,
+  onFeedback: (state) => videoFeedback.update(state),
 });
 const inside = (p: { x: number; y: number }, r: Electron.Rectangle) => p.x >= r.x && p.y >= r.y && p.x < r.x + r.width && p.y < r.y + r.height;
 const clicks = createClicks({
   // Nos fenêtres ne se commentent pas ; la barre ne compte que sous la pilule (le reste laisse passer les clics).
   ignore: (p) =>
-    menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && inside(p, w.getBounds())),
+    menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && !videoFeedback.isWindow(w) && inside(p, w.getBounds())),
   onClick: (p, at) => {
     const d = screen.getDisplayNearestPoint(p);
     video.onClick({
@@ -323,6 +327,7 @@ async function toggleVideo() {
   try {
     editor?.hide(); // on relit son app, pas l'éditeur
     await videoWindow.start();
+    await videoFeedback.start();
     await clicks.start();
     video.start();
     logVideo({ started: true, displays: screen.getAllDisplays().length });
@@ -337,6 +342,7 @@ async function toggleVideo() {
   } catch (err) {
     clicks.stop();
     videoWindow.stop();
+    videoFeedback.stop();
     void dialog.showMessageBox({ type: 'warning', message: err instanceof Error ? err.message : String(err) });
   } finally {
     videoStarting = false;
@@ -348,6 +354,7 @@ async function toggleVideo() {
 async function finishVideo() {
   clearInterval(videoMetrics);
   clicks.stop();
+  videoFeedback.stop();
   const summary = await video.stop();
   videoWindow.stop();
   updateTrayMenu();

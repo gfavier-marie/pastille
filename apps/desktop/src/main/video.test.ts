@@ -2,7 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { VIDEO_THUMB, type VideoImage } from '../ipc.ts';
+import { VIDEO_THUMB, type VideoFeedback, type VideoImage } from '../ipc.ts';
 import { createSessionStore } from './session-store.ts';
 import { createVideo, isVoiced, sameScreen, trimSilence, type VideoClick, type VideoTarget } from './video.ts';
 
@@ -15,13 +15,16 @@ const display = { width: 1000, height: 800, scaleFactor: 2 };
 const click = (x: number, y: number): VideoClick => ({ displayId: 1, display, x, y, at: Date.now() });
 const window: VideoTarget = { rect: { x: 100, y: 100, width: 800, height: 600 }, app: 'Google Chrome', title: 'Commandes' };
 
-async function setup(opts: { thumbs?: number[]; delays?: number[] } = {}) {
+async function setup(opts: { thumbs?: number[]; delays?: number[]; missing?: number[] } = {}) {
   const store = createSessionStore(await mkdtemp(join(tmpdir(), 'pastille-video-')));
   const submitted: { id: string; length: number }[] = [];
   const dropped: number[] = [];
+  const feedback: VideoFeedback[] = [];
   let frames = 0;
   const video = createVideo({
     store,
+    nextNumber: () => store.get()?.captures.reduce((n, c) => n + c.annotations.length, 1) ?? 1,
+    onFeedback: (state) => feedback.push(state),
     submit: async (id, samples) => void submitted.push({ id, length: samples.length }),
     freeze: () => ++frames,
     crop: async (frameId, rect): Promise<VideoImage | null> => {
@@ -30,6 +33,7 @@ async function setup(opts: { thumbs?: number[]; delays?: number[] } = {}) {
         dropped.push(frameId);
         return null;
       }
+      if (opts.missing?.includes(frameId)) return null;
       return { png: new Uint8Array([frameId]), width: 1600, height: 1200, thumb: thumb(opts.thumbs?.[frameId - 1] ?? 0), frozenAt: Date.now(), frameAgeMs: 0 };
     },
     target: async () => window,
@@ -40,10 +44,64 @@ async function setup(opts: { thumbs?: number[]; delays?: number[] } = {}) {
   const wait = (n: number) => {
     for (let i = 0; i < n; i++) video.onAudio(silence());
   };
-  return { store, video, submitted, dropped, say, wait };
+  return { store, video, submitted, dropped, say, wait, feedback };
 }
 
 describe('mode vidéo', () => {
+  it('annonce le micro, le clic immédiatement, puis la parole ; masque le retour dès l’arrêt', async () => {
+    const { video, feedback, say, wait } = await setup();
+    video.start();
+    expect(feedback.at(-1)).toMatchObject({ level: 0, voiced: false });
+    expect(feedback.at(-1)?.click).toBeUndefined();
+    video.onClick(click(500, 400));
+    expect(feedback.at(-1)).toMatchObject({ click: { displayId: 1, x: 500, y: 400, number: 1 }, level: 0, voiced: false });
+    say(2);
+    expect(feedback.at(-1)).toMatchObject({ level: expect.closeTo(0.1), voiced: false });
+    say(1);
+    expect(feedback.at(-1)?.voiced).toBe(true);
+    wait(1);
+    expect(feedback.at(-1)).toMatchObject({ level: 0, voiced: true });
+    const stopped = video.stop();
+    expect(feedback.at(-1)).toBeNull();
+    const count = feedback.length;
+    video.onAudio(voice());
+    video.onClick(click(300, 200));
+    await stopped;
+    expect(feedback).toHaveLength(count);
+  });
+
+  it('ne numérote pas les clics sans parole et garde le numéro pendant les sauvegardes lentes', async () => {
+    const { video, feedback, store, say } = await setup({ delays: [0, 40] });
+    video.start();
+    video.onClick(click(200, 200)); // navigation
+    video.onClick(click(300, 200));
+    expect(feedback.at(-1)?.click?.number).toBe(1);
+    say(4);
+    video.onClick(click(400, 200));
+    expect(feedback.at(-1)?.click?.number).toBe(2);
+    await new Promise((r) => setTimeout(r, 80));
+    expect(feedback.at(-1)?.click?.number).toBe(2);
+    say(4);
+    await video.stop();
+    video.start(); // reprise dans la même session
+    video.onClick(click(500, 200));
+    expect(feedback.at(-1)?.click?.number).toBe(3);
+    expect(store.get()!.captures[0]!.annotations.map((a) => a.number)).toEqual([1, 2]);
+    await video.stop();
+  });
+
+  it('corrige le numéro provisoire si l’image précédente est indisponible', async () => {
+    const { video, feedback, say } = await setup({ missing: [1] });
+    video.start();
+    video.onClick(click(200, 200));
+    say(4);
+    video.onClick(click(300, 200));
+    expect(feedback.at(-1)?.click?.number).toBe(2);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(feedback.at(-1)?.click?.number).toBe(1);
+    await video.stop();
+  });
+
   it('clic suivi de paroles : un point à l’endroit cliqué, sur la fenêtre visée, mis en transcription', async () => {
     const { store, video, submitted, say } = await setup();
     video.start();

@@ -5,7 +5,7 @@
 // Sans import d'electron : testé avec des clics et des images factices.
 
 import type { Geometry } from '@pastille/shared';
-import { VOICE_RMS, type VideoCrop, type VideoImage } from '../ipc.ts';
+import { VOICE_RMS, type VideoCrop, type VideoFeedback, type VideoImage } from '../ipc.ts';
 import type { SessionStore } from './session-store.ts';
 
 type Rect = { x: number; y: number; width: number; height: number };
@@ -32,6 +32,8 @@ export type VideoDeps = {
   crop: (frameId: number, rect: VideoCrop['rect']) => Promise<VideoImage | null>;
   /** Cible du clic, cherchée dès le clic. */
   target: (click: VideoClick) => Promise<VideoTarget>;
+  nextNumber?: () => number;
+  onFeedback?: (state: VideoFeedback) => void;
   log?: (entry: Record<string, unknown>) => void;
 };
 
@@ -81,16 +83,30 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 type Segment = {
   click?: VideoClick & { frameId: number; target: Promise<VideoTarget> };
   chunks: Float32Array[];
+  voicedChunks: number;
 };
 
 export function createVideo(deps: VideoDeps) {
   let recording = false;
   let startedAt = 0;
-  let segment: Segment = { chunks: [] };
+  let segment: Segment = { chunks: [], voicedChunks: 0 };
+  let pendingPoints = 0;
+  let level = 0;
   let chain = Promise.resolve();
   // Dernière capture créée par cet enregistrement : un point suivant peut la rejoindre.
   let last: { captureId: string; displayId: number; rect: Rect; thumb: Uint8Array } | null = null;
   let summary: VideoSummary = { points: 0, notes: 0 };
+
+  function feedback() {
+    if (!recording) return;
+    const c = segment.click;
+    deps.onFeedback?.({
+      click: c ? { displayId: c.displayId, x: c.x, y: c.y, number: (deps.nextNumber?.() ?? summary.points + 1) + pendingPoints, at: c.at } : undefined,
+      elapsedMs: Math.max(0, Date.now() - (c?.at ?? startedAt)),
+      level,
+      voiced: segment.voicedChunks >= MIN_VOICED_CHUNKS,
+    });
+  }
 
   async function finalize(s: Segment) {
     const samples = () => trimSilence(s.chunks);
@@ -128,6 +144,9 @@ export function createVideo(deps: VideoDeps) {
     const point: Geometry = { kind: 'point', x: clamp01((c.x - t.rect.x) / t.rect.width), y: clamp01((c.y - t.rect.y) / t.rect.height) };
     const id = deps.store.addAnnotation(captureId, point);
     summary.points++;
+    // Le point est déjà dans le store : il ne fait plus partie des numéros en attente.
+    pendingPoints--;
+    feedback();
     deps.log?.({
       kept: true,
       sameScreen: reuse,
@@ -142,7 +161,19 @@ export function createVideo(deps: VideoDeps) {
 
   /** Les segments sont finalisés un par un, dans l'ordre des clics. */
   function close(s: Segment) {
-    chain = chain.then(() => finalize(s)).catch((err) => deps.log?.({ error: String(err) }));
+    const point = !!s.click && s.voicedChunks >= MIN_VOICED_CHUNKS;
+    if (point) pendingPoints++;
+    chain = chain.then(async () => {
+      const saved = summary.points;
+      try {
+        await finalize(s);
+      } finally {
+        if (point && summary.points === saved) {
+          pendingPoints--;
+          feedback();
+        }
+      }
+    }).catch((err) => deps.log?.({ error: String(err) }));
   }
 
   return {
@@ -152,13 +183,20 @@ export function createVideo(deps: VideoDeps) {
     start() {
       recording = true;
       startedAt = Date.now();
-      segment = { chunks: [] };
+      segment = { chunks: [], voicedChunks: 0 };
+      pendingPoints = 0;
+      level = 0;
       last = null;
       summary = { points: 0, notes: 0 };
+      feedback();
     },
 
     onAudio(chunk: Float32Array) {
-      if (recording) segment.chunks.push(chunk);
+      if (!recording) return;
+      segment.chunks.push(chunk);
+      level = rms(chunk);
+      if (level > VOICE_RMS) segment.voicedChunks++;
+      feedback();
     },
 
     onClick(click: VideoClick) {
@@ -167,15 +205,18 @@ export function createVideo(deps: VideoDeps) {
       const frameId = deps.freeze(click.displayId);
       const target = deps.target(click);
       close(segment);
-      segment = { click: { ...click, frameId, target }, chunks: [] };
+      segment = { click: { ...click, frameId, target }, chunks: [], voicedChunks: 0 };
+      level = 0;
+      feedback();
     },
 
     /** Clôt le dernier segment et attend que tout soit enregistré. */
     async stop(): Promise<VideoSummary> {
       if (!recording) return summary;
       recording = false;
+      deps.onFeedback?.(null);
       close(segment);
-      segment = { chunks: [] };
+      segment = { chunks: [], voicedChunks: 0 };
       await chain;
       return summary;
     },

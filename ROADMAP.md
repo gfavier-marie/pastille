@@ -244,6 +244,8 @@ Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accor
 
 ### Lot V1 — Le mode vidéo de bout en bout
 
+- [x] Retour visuel pendant la vidéo (7 oct.) : même pastille numérotée que la capture d'écran au clic, bandeau « Micro ouvert » puis « Dictée en cours », onde du micro et durée ; fenêtres transparentes sans focus qui laissent passer les clics, sur l'écran du point ; les clics sans parole ne consomment pas de numéro. Tests des états et de la numérotation, rendu vérifié avec un micro simulé
+- [ ] Essai réel du retour visuel sur Mac et Windows, dont plusieurs écrans et app en plein écran. `setContentProtection(true)` ne garantit pas l'exclusion du retour des images sur les macOS utilisant ScreenCaptureKit (limite Electron : https://www.electronjs.org/docs/latest/api/browser-window#winsetcontentprotectionenable)
 - [ ] ⌃⌥⌘R démarre et arrête (signalé s'il est déjà pris), aussi dans le menu de l'icône ; barre « ● 0:42 · 3 points · Arrêter » affichée pendant l'enregistrement, même barre flottante désactivée
 - [ ] Segments (`video.ts`, sans `electron`, testable) : l'audio d'un clic au suivant ; parole = au moins 3 morceaux de 100 ms au-dessus du seuil de la dictée ; silences de plus d'1 s retirés avant Whisper ; finalisés dans l'ordre
 - [ ] Clic + parole → point (recadré sur la fenêtre cliquée, même logique que la capture) ; clic seul → rien ; paroles avant le 1ᵉʳ clic → remarque générale ; même fenêtre et vignette quasi identique → même écran
