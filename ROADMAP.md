@@ -101,6 +101,7 @@ Maquette : [canvas « Pastille — design »](https://claude.ai/artifact/UDWBtfF
 - [x] Menu en popover sous l'icône ; réglages en onglets ; assistant de premier lancement en 3 étapes ; fenêtre d'appairage ; PWA restylée
 - [x] Hors cahier des charges, validés le 6 oct. 2026 : **barre flottante** (option), **ouverture au démarrage**, **icône d'état dynamique** (dictée, transcriptions, erreur)
 - [x] `pnpm e2e` photographie aussi le menu, la barre, l'overlay, l'assistant, l'appairage et la liste des sessions
+- [x] Menu ≡ dans l'éditeur (demandé le 7 oct. 2026) : toutes les entrées du menu de l'icône, en haut à droite de l'en-tête et de l'éditeur vide ; un seul composant pour le popover et l'éditeur (`renderer/menu/items.tsx`) ; photo `editor-menu.png` dans `pnpm e2e`
 - [x] Overlay en panneau macOS : Échap et premier clic marchent sans que l'app soit au premier plan (macOS 14+)
 - [ ] Validation réelle sur Mac : popover sous l'icône, barre flottante au survol, ouverture au démarrage
 - [x] Raccourci par défaut : sur le Mac de test, ⇧⌘2 (et ⇧⌘0) n'arrivent jamais à Pastille, interceptés par une autre app ; ⌃⌥⌘P marche. L'enregistrement « réussit » quand même, donc rien n'est signalé. Nouveau défaut ⌃⌥⌘P (Windows : Ctrl+Alt+P), l'ancien défaut enregistré est remplacé, un raccourci choisi est gardé

@@ -41,13 +41,51 @@
       .export { position: relative; -webkit-app-region: no-drag; }
       .export .btn.primary { height: 32px; padding: 0 12px; border-radius: 8px; gap: 8px; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18); }
       .export kbd { font-weight: 500; opacity: 0.85; }
-      .export .menu {
+      .export .menu, .app-menu .menu {
         position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; display: grid; min-width: 250px; padding: 5px;
         background: var(--card); border: 1px solid var(--border-3); border-radius: 10px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
       }
       .export .menu button { display: flex; justify-content: space-between; gap: 16px; height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: none; text-align: left; }
       .export .menu button:hover { background: var(--chip); }
       .export .menu kbd { color: var(--faint); }
+
+      /* Menu ≡ : les entrées du menu de l'icône (menu/items.tsx), en sombre. Tout est préfixé
+         .app-menu, sinon .item (liste des points) s'y appliquerait. */
+      .app-menu { position: relative; -webkit-app-region: no-drag; }
+      .app-menu .menu-btn {
+        width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;
+        border: 0; border-radius: 8px; background: var(--chip); color: var(--text-2);
+      }
+      .app-menu .menu-btn:hover, .app-menu .menu-btn[aria-expanded='true'] { background: var(--border-3); color: var(--text); }
+      .app-menu .menu-backdrop { position: fixed; inset: 0; z-index: 9; -webkit-app-region: no-drag; }
+      .app-menu .menu { gap: 2px; min-width: 300px; max-height: calc(100vh - 70px); overflow-y: auto; color: var(--text); font-size: 13px; text-align: left; }
+      .app-menu .capture { padding: 0 0 4px; }
+      .app-menu .capture button {
+        width: 100%; height: 34px; display: flex; align-items: center; gap: 9px; padding: 0 10px; border: 0; border-radius: 7px;
+        background: var(--accent); color: #fff; font-weight: 600; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+      }
+      .app-menu .capture button:hover { background: #c4340a; }
+      .app-menu .capture kbd { font-size: 12px; opacity: 0.85; }
+      .app-menu .item {
+        height: 30px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: 0; border-radius: 6px;
+        background: transparent; text-align: left;
+      }
+      .app-menu .item:hover:not(:disabled) { background: var(--chip); }
+      .app-menu .item svg { color: var(--muted); }
+      .app-menu .item:disabled, .app-menu .item:disabled svg { color: #6b6b72; }
+      .app-menu .item.update, .app-menu .item.update svg { color: var(--accent-text); font-weight: 600; }
+      .app-menu .item span { flex: 1; }
+      .app-menu .item kbd, .app-menu .recent .meta { font-size: 12px; color: var(--faint); }
+      .app-menu hr { height: 1px; border: 0; margin: 5px 6px; background: var(--border-3); }
+      .app-menu .section { font-size: 11px; font-weight: 600; color: var(--faint); padding: 6px 10px 4px; }
+      .app-menu .recent { display: flex; align-items: center; gap: 8px; border-radius: 6px; }
+      .app-menu .recent:hover { background: var(--chip); }
+      .app-menu .recent .open { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 5px 0 5px 10px; border: 0; background: transparent; text-align: left; }
+      .app-menu .recent .title { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .app-menu .recent .meta { font-size: 11px; font-variant-numeric: tabular-nums; }
+      .app-menu .recent .again { width: 28px; height: 28px; margin-right: 4px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+      .app-menu .recent .again:hover { background: var(--card); color: var(--text); }
+      .empty .app-menu { position: absolute; top: 10px; right: 14px; }
 
       main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; min-height: 0; }
 

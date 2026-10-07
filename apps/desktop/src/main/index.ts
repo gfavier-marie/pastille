@@ -1022,6 +1022,12 @@ async function runEditorAutotest() {
   await wait(600);
   await writeFile(join(out, 'sessions.png'), (await editor.webContents.capturePage()).toPNG());
   editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
+  // Menu ≡ de l'en-tête (entrées du menu de l'icône), puis refermé (Échap).
+  await wait(300);
+  await editor.webContents.executeJavaScript(`document.querySelector('.app-menu .menu-btn').click()`);
+  await wait(400);
+  await writeFile(join(out, 'editor-menu.png'), (await editor.webContents.capturePage()).toPNG());
+  editor.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
   // Onglet « Remarques générales » du panneau de droite.
   await wait(300);
   await editor.webContents.executeJavaScript(`document.querySelectorAll('[role="tab"]')[1].click()`);
