@@ -25,7 +25,7 @@ describe('site', () => {
   });
 
   // Textes identiques au français acceptés : noms propres et mots transparents ; les « [À COMPLÉTER …] » restent en français.
-  const SAME = new Set(['Applique la revue VibeScreener', 'FAQ', 'Questions', 'Date', 'Client', 'Points', 'Point', 'Interface', 'Application', 'Site', 'Licence', 'Composant', 'Description',
+  const SAME = new Set(['Applique la revue VibeScreener', 'FAQ', 'Total', 'Point 1', 'Point 2', '· 1 point', '· 2 points', '· 3 points', '30 pages', '{n} point', '{n} points', 'Point {n} · {label}', '● vibescreener · lire_revue — {ecrans} · {demandes}', '✓ #{n} {page} · {texte}', 'Questions', 'Date', 'Client', 'Points', 'Point', 'Interface', 'Application', 'Site', 'Licence', 'Composant', 'Description',
     '17 min', '2 min 35', '{a} min', '{a} min {b}', '{a} s', '{a} h', '{a} h {b}', 'PDF, Markdown, PowerPoint']);
   const flat = (o: unknown, path = ''): [string, string][] =>
     typeof o === 'string' ? [[path, o]] : o && typeof o === 'object' ? Object.entries(o).flatMap(([k, v]) => flat(v, path ? `${path}.${k}` : k)) : [];
