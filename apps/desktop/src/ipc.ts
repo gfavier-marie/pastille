@@ -30,10 +30,15 @@ export type VideoSource = { displayId: number; sourceId: string; width: number; 
 
 /** Retour à l'écran pendant la vidéo : point provisoire et état réel du micro. */
 export type VideoFeedback = {
-  click?: { displayId: number; x: number; y: number; number: number; at: number };
+  click?: { displayId: number; x: number; y: number; number: number; at: number; geometry?: Geometry };
   elapsedMs: number;
   level: number;
   voiced: boolean;
+  kept?: boolean;
+  paused?: boolean;
+  inspiration?: { shortcut: string; number?: number };
+  tablet?: boolean;
+  error?: string;
 } | null;
 
 /** Image figée au clic, recadrée sur la cible : rectangle en 0–1 de l'écran ; null la jette. */
@@ -203,6 +208,8 @@ export type PastilleApi = {
   videoCropped(frameId: number, image: VideoImage | null): void;
   videoAudio(chunk: Float32Array): void; // micro, blocs de 100 ms à 16 kHz
   onVideoFeedback(cb: (state: VideoFeedback) => void): () => void;
+  videoFeedbackHover(inside: boolean): void;
+  videoAction(action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration'): Promise<void>;
   // Overlay
   onOverlayShow(cb: (data: OverlayShow) => void): void;
   onOverlayWindows(cb: (windows: OverlayWindow[]) => void): void;

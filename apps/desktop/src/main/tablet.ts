@@ -34,6 +34,7 @@ export function createTablet(opts: {
   let pairing: Pairing | null = null;
   let link: Link | null = null;
   let focusId: string | null = null;
+  let fallbackToLast = true;
   let lastSeen = 0;
   let connected = false;
   let pingId = 0;
@@ -69,7 +70,7 @@ export function createTablet(opts: {
     const session = opts.store.get();
     const a = session && focusId ? findAnnotation(session, focusId)?.annotation : undefined;
     if (!a) {
-      const last = session ? allAnnotations(session).sort((x, y) => x.createdAt.localeCompare(y.createdAt)).at(-1) : undefined;
+      const last = session && fallbackToLast ? allAnnotations(session).sort((x, y) => x.createdAt.localeCompare(y.createdAt)).at(-1) : undefined;
       return link.send({ type: 'focus_none', lastNumber: last?.number });
     }
     const bg = withBackground ? await background(a.id).catch(() => undefined) : undefined;
@@ -82,7 +83,7 @@ export function createTablet(opts: {
     // Croquis envoyé sans point actif : il rejoint le dernier point créé.
     const target = msg.annotationId
       ? findAnnotation(session, msg.annotationId)?.annotation
-      : allAnnotations(session).sort((x, y) => x.createdAt.localeCompare(y.createdAt)).at(-1);
+      : fallbackToLast ? allAnnotations(session).sort((x, y) => x.createdAt.localeCompare(y.createdAt)).at(-1) : undefined;
     if (!target) return;
     const dir = join(opts.store.dir(session), 'sketches');
     await mkdir(dir, { recursive: true });
@@ -143,9 +144,10 @@ export function createTablet(opts: {
       }
       return `${opts.relayUrl.replace(/\/$/, '')}/#r=${pairing.roomId}&k=${pairing.key}`;
     },
-    setFocus(annotationId: string | null) {
+    setFocus(annotationId: string | null, allowLast = true) {
       const changed = annotationId !== focusId;
       focusId = annotationId;
+      fallbackToLast = allowLast;
       void sendFocus(changed);
     },
     /** La session a changé (texte, numérotation) : le bandeau de la tablette suit. */

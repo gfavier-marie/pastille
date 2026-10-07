@@ -244,6 +244,9 @@ Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accor
 
 ### Lot V1 — Le mode vidéo de bout en bout
 
+- [x] Parité des annotations demandée le 7 oct. : glisser = cadre, ⇧ + glisser = flèche, ⌥/Alt = image recadrée ; aperçu pendant le glissement, bornes de l'écran respectées, fenêtre sous le centre du cadre choisie depuis la liste prise avant le geste
+- [x] Dessin sur la tablette pendant la vidéo : point actif dès que la parole est détectée, bouton pour un dessin sans dictée, pas d'attachement au point précédent pendant la préparation ; même stockage et mêmes exports
+- [x] Inspiration pendant la vidéo : point gardé avant la recherche, clics et voix suspendus pendant la recherche, capture jointe au point initial puis reprise sans ouvrir l'éditeur ; annulation et arrêt referment aussi la capture d'inspiration
 - [x] Retour visuel pendant la vidéo (7 oct.) : même pastille numérotée que la capture d'écran au clic, bandeau « Micro ouvert » puis « Dictée en cours », onde du micro et durée ; fenêtres transparentes sans focus qui laissent passer les clics, sur l'écran du point ; les clics sans parole ne consomment pas de numéro. Tests des états et de la numérotation, rendu vérifié avec un micro simulé
 - [ ] Essai réel du retour visuel sur Mac et Windows, dont plusieurs écrans et app en plein écran. `setContentProtection(true)` ne garantit pas l'exclusion du retour des images sur les macOS utilisant ScreenCaptureKit (limite Electron : https://www.electronjs.org/docs/latest/api/browser-window#winsetcontentprotectionenable)
 - [ ] ⌃⌥⌘R démarre et arrête (signalé s'il est déjà pris), aussi dans le menu de l'icône ; barre « ● 0:42 · 3 points · Arrêter » affichée pendant l'enregistrement, même barre flottante désactivée
@@ -266,4 +269,4 @@ Les deux briques de V1, mesurées (lignes `VIDEO {json}`) sur le Mac, avec accor
 
 **Limites à signaler** : indicateur d'enregistrement d'écran affiché tout du long (macOS 15+ peut redemander l'autorisation d'une capture continue) ; le curseur apparaît dans les images (la pastille le recouvre) ; sous Windows l'icône de la zone de notification ne change pas (la barre est le seul témoin) et AltGr+R est à vérifier en AZERTY.
 
-**Plus tard [C], non prévu** : dessin pendant l'enregistrement, fichier vidéo rejouable, images du parcours sans parole, horodatage dans les exports, raccourci vidéo réglable, croquis de la tablette pendant l'enregistrement.
+**Plus tard [C], non prévu** : dessin à la souris pendant l'enregistrement (le dessin sur tablette est disponible), fichier vidéo rejouable, images du parcours sans parole, horodatage dans les exports, raccourci vidéo réglable.

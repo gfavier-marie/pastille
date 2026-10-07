@@ -54,6 +54,12 @@ Pour montrer à quoi un point doit ressembler : dans la bulle du point, **Inspir
 
 Menu de l'icône > « Appairer une tablette », scanner le QR code avec l'appareil photo de l'iPad, puis Partager > « Sur l'écran d'accueil ». Le croquis dessiné sur l'iPad rejoint le point en cours. Rien à installer d'autre, en Wi-Fi comme en 4G.
 
+## Mode vidéo
+
+**⌃⌥⌘R** (Windows : **Ctrl+Alt+R**) démarre et arrête. Naviguez dans votre app : un clic suivi de paroles garde un point sur l'image d'avant le clic. La pastille et le bandeau de dictée donnent le retour à l'écran. **Glisser** encadre une zone ; **⇧ + glisser** trace une flèche ; **⌥/Alt + glisser** recadre l'image sur le cadre. Sans parole ni pièce jointe, les clics de navigation ne sont pas conservés.
+
+Le point dicté est envoyé à la tablette pendant l'enregistrement. Le bouton **Dessiner sur la tablette** permet aussi de garder un point sans dictée, puis d'y joindre un croquis. **Inspiration** suspend les clics et la dictée pendant la recherche : ouvrez la page modèle, puis utilisez le raccourci de capture ou **Capturer l’inspiration**. La capture rejoint le point d'origine et la vidéo reprend ; **Échap** dans la capture ou **Reprendre la vidéo** annule l'inspiration. À l'arrêt, tout se retrouve dans le même éditeur et les mêmes exports que les captures d'écran.
+
 ## Claude Code
 
 L'installeur ajoute le serveur MCP de VibeScreener à Claude Code. Sinon, une fois (la commande est aussi dans les réglages, onglet « Export PDF ») :

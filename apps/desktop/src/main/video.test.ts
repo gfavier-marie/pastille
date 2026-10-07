@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { VIDEO_THUMB, type VideoFeedback, type VideoImage } from '../ipc.ts';
 import { createSessionStore } from './session-store.ts';
-import { createVideo, isVoiced, sameScreen, trimSilence, type VideoClick, type VideoTarget } from './video.ts';
+import { createVideo, isVoiced, sameScreen, trimSilence, type VideoClick, type VideoPoint, type VideoTarget } from './video.ts';
 
 const CHUNK = 1600; // 100 ms à 16 kHz
 const voice = () => new Float32Array(CHUNK).fill(0.1);
@@ -15,19 +15,23 @@ const display = { width: 1000, height: 800, scaleFactor: 2 };
 const click = (x: number, y: number): VideoClick => ({ displayId: 1, display, x, y, at: Date.now() });
 const window: VideoTarget = { rect: { x: 100, y: 100, width: 800, height: 600 }, app: 'Google Chrome', title: 'Commandes' };
 
-async function setup(opts: { thumbs?: number[]; delays?: number[]; missing?: number[] } = {}) {
+async function setup(opts: { thumbs?: number[]; delays?: number[]; missing?: number[]; target?: VideoTarget } = {}) {
   const store = createSessionStore(await mkdtemp(join(tmpdir(), 'pastille-video-')));
   const submitted: { id: string; length: number }[] = [];
   const dropped: number[] = [];
   const feedback: VideoFeedback[] = [];
+  const focused: (VideoPoint | null)[] = [];
+  const crops: { frameId: number; rect: unknown }[] = [];
   let frames = 0;
   const video = createVideo({
     store,
     nextNumber: () => store.get()?.captures.reduce((n, c) => n + c.annotations.length, 1) ?? 1,
     onFeedback: (state) => feedback.push(state),
+    onPoint: (point) => focused.push(point),
     submit: async (id, samples) => void submitted.push({ id, length: samples.length }),
     freeze: () => ++frames,
     crop: async (frameId, rect): Promise<VideoImage | null> => {
+      crops.push({ frameId, rect });
       await new Promise((r) => setTimeout(r, opts.delays?.[frameId - 1] ?? 0));
       if (!rect) {
         dropped.push(frameId);
@@ -36,7 +40,7 @@ async function setup(opts: { thumbs?: number[]; delays?: number[]; missing?: num
       if (opts.missing?.includes(frameId)) return null;
       return { png: new Uint8Array([frameId]), width: 1600, height: 1200, thumb: thumb(opts.thumbs?.[frameId - 1] ?? 0), frozenAt: Date.now(), frameAgeMs: 0 };
     },
-    target: async () => window,
+    target: async () => opts.target ?? window,
   });
   const say = (n: number) => {
     for (let i = 0; i < n; i++) video.onAudio(voice());
@@ -44,7 +48,7 @@ async function setup(opts: { thumbs?: number[]; delays?: number[]; missing?: num
   const wait = (n: number) => {
     for (let i = 0; i < n; i++) video.onAudio(silence());
   };
-  return { store, video, submitted, dropped, say, wait, feedback };
+  return { store, video, submitted, dropped, say, wait, feedback, focused, crops };
 }
 
 describe('mode vidéo', () => {
@@ -99,6 +103,114 @@ describe('mode vidéo', () => {
     expect(feedback.at(-1)?.click?.number).toBe(2);
     await new Promise((r) => setTimeout(r, 20));
     expect(feedback.at(-1)?.click?.number).toBe(1);
+    await video.stop();
+  });
+
+  it('envoie le point dicté à la tablette avant le clic suivant, sans doublon à l’arrêt', async () => {
+    const { video, focused, say, store, submitted } = await setup();
+    video.start();
+    video.onClick(click(500, 400));
+    say(4);
+    const point = await video.currentPoint();
+    expect(point).not.toBeNull();
+    expect(focused.at(-1)).toEqual(point);
+    expect(store.get()!.captures[0]!.annotations).toHaveLength(1);
+    expect(submitted).toEqual([]); // le micro enregistre encore ce commentaire
+    say(3);
+    expect(await video.currentPoint()).toEqual(point);
+    await video.stop();
+    expect(store.get()!.captures[0]!.annotations).toHaveLength(1);
+    expect(submitted).toEqual([{ id: point!.annotationId, length: 7 * CHUNK }]);
+    expect(focused.at(-1)).toBeNull();
+  });
+
+  it('garde un point sans voix auquel on joint un dessin et une inspiration', async () => {
+    const { video, store, submitted } = await setup();
+    video.start();
+    video.onClick(click(500, 400));
+    const point = await video.currentPoint();
+    store.update((s) => s.captures[0]!.annotations[0]!.sketches.push({ id: 'sketch', png: 'sketches/sketch.png', strokes: 'sketches/sketch.json', createdAt: new Date().toISOString() }));
+    await store.addInspiration(point!.annotationId, new Uint8Array([1, 2, 3]));
+    const summary = await video.stop();
+    const a = store.get()!.captures[0]!.annotations[0]!;
+    expect(a.sketches).toHaveLength(1);
+    expect(a.inspirations).toHaveLength(1);
+    expect(submitted).toEqual([]);
+    expect(summary.points).toBe(1);
+  });
+
+  it('suspend les clics et la voix pendant la recherche d’inspiration, puis reprend le même point', async () => {
+    const { video, store, submitted, say } = await setup();
+    video.start();
+    video.onClick(click(500, 400));
+    say(3);
+    const point = await video.currentPoint();
+    video.pause();
+    say(10); // paroles de navigation : ignorées
+    video.onClick(click(200, 200)); // page modèle : pas un nouveau point
+    expect(await video.currentPoint()).toEqual(point);
+    await store.addInspiration(point!.annotationId, new Uint8Array([1]));
+    video.resume();
+    say(4);
+    await video.stop();
+    expect(store.get()!.captures).toHaveLength(1);
+    expect(store.get()!.captures[0]!.annotations[0]!.inspirations).toHaveLength(1);
+    expect(submitted).toEqual([{ id: point!.annotationId, length: 7 * CHUNK }]);
+  });
+
+  it('un cadre glissé reste une zone sur la fenêtre, avec aperçu avant le relâchement', async () => {
+    const { video, store, say, feedback, crops, focused } = await setup();
+    video.start();
+    video.onClick({ ...click(200, 200), held: true });
+    const geometry = { kind: 'zone', x: 0.2, y: 0.25, w: 0.4, h: 0.375 } as const;
+    video.onGesture(1, geometry, false, false);
+    expect(feedback.at(-1)?.click?.geometry).toEqual(geometry);
+    say(4);
+    await new Promise((r) => setTimeout(r, 5));
+    expect(focused.at(-1)).toBeNull(); // la géométrie n'est pas encore définitive
+    video.onGesture(1, geometry, false, true);
+    await video.stop();
+    expect(crops[0]!.rect).toEqual({ x: 0.1, y: 0.125, width: 0.8, height: 0.75 });
+    const g = store.get()!.captures[0]!.annotations[0]!.geometry;
+    expect(g.kind).toBe('zone');
+    expect(g).toMatchObject({ x: 0.125, y: expect.closeTo(1 / 6), w: expect.closeTo(0.5), h: expect.closeTo(0.5) });
+  });
+
+  it('Alt + cadre recadre l’image sur la zone et conserve une annotation couvrant cette image', async () => {
+    const { video, store, say, crops } = await setup();
+    video.start();
+    video.onClick({ ...click(200, 200), held: true });
+    video.onGesture(1, { kind: 'zone', x: 0.2, y: 0.25, w: 0.4, h: 0.375 }, true, true);
+    say(4);
+    await video.stop();
+    expect(crops[0]!.rect).toEqual({ x: 0.2, y: 0.25, width: 0.4, height: 0.375 });
+    expect(store.get()!.captures[0]!.annotations[0]!.geometry).toEqual({ kind: 'zone', x: 0, y: 0, w: 1, h: 1 });
+  });
+
+  it('le cadre vise la fenêtre sous son centre avec la liste prise avant le glissement', async () => {
+    let center: unknown;
+    const { video, store, say } = await setup({ target: { ...window, at: (p) => { center = p; return { rect: { x: 200, y: 200, width: 400, height: 300 }, app: 'Safari' }; } } });
+    video.start();
+    video.onClick({ ...click(200, 200), held: true });
+    video.onGesture(1, { kind: 'zone', x: 0.2, y: 0.25, w: 0.4, h: 0.375 }, false, true);
+    say(4);
+    await video.stop();
+    expect(center).toEqual({ x: 400, y: 350 });
+    expect(store.get()!.captures[0]!.source?.app).toBe('Safari');
+  });
+
+  it('une sauvegarde tardive ne reprend pas le focus de la tablette sur le point précédent', async () => {
+    const { video, say, focused } = await setup({ delays: [40] });
+    video.start();
+    video.onClick(click(200, 200));
+    say(4);
+    video.onClick(click(600, 400));
+    await new Promise((r) => setTimeout(r, 60));
+    expect(focused.at(-1)).toBeNull();
+    say(4);
+    const point = await video.currentPoint();
+    expect(focused.at(-1)).toEqual(point);
+    expect(point!.number).toBe(2);
     await video.stop();
   });
 

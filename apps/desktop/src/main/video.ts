@@ -17,10 +17,13 @@ export type VideoClick = {
   x: number;
   y: number;
   at: number; // Date.now() du clic
+  geometry?: Geometry; // normalisée à l'écran : cadre ou flèche glissés
+  crop?: boolean; // ⌥ / Alt : recadrer sur le cadre
+  held?: boolean; // le glissement n'est pas encore terminé
 };
 
 /** Ce que vise le clic : la fenêtre sous le curseur, ou l'écran entier ; cadre relatif à l'écran (DIP). */
-export type VideoTarget = { rect: Rect; app?: string; title?: string };
+export type VideoTarget = { rect: Rect; app?: string; title?: string; at?: (point: { x: number; y: number }) => VideoTarget };
 
 export type VideoDeps = {
   store: Pick<SessionStore, 'addCapture' | 'addAnnotation' | 'addNote'>;
@@ -33,9 +36,12 @@ export type VideoDeps = {
   /** Cible du clic, cherchée dès le clic. */
   target: (click: VideoClick) => Promise<VideoTarget>;
   nextNumber?: () => number;
+  onPoint?: (point: VideoPoint | null) => void; // point actif pour la tablette
   onFeedback?: (state: VideoFeedback) => void;
   log?: (entry: Record<string, unknown>) => void;
 };
+
+export type VideoPoint = { annotationId: string; captureId: string; number: number };
 
 /** Résultat d'un enregistrement, pour l'éditeur. */
 export type VideoSummary = { firstCaptureId?: string; points: number; notes: number };
@@ -84,51 +90,58 @@ type Segment = {
   click?: VideoClick & { frameId: number; target: Promise<VideoTarget> };
   chunks: Float32Array[];
   voicedChunks: number;
+  point?: VideoPoint;
+  saving?: Promise<VideoPoint | null>;
 };
 
 export function createVideo(deps: VideoDeps) {
   let recording = false;
   let startedAt = 0;
   let segment: Segment = { chunks: [], voicedChunks: 0 };
-  let pendingPoints = 0;
+  const pending: Segment[] = [];
+  let paused = false;
   let level = 0;
   let chain = Promise.resolve();
   // Dernière capture créée par cet enregistrement : un point suivant peut la rejoindre.
   let last: { captureId: string; displayId: number; rect: Rect; thumb: Uint8Array } | null = null;
   let summary: VideoSummary = { points: 0, notes: 0 };
 
+  function number(s: Segment) {
+    if (s.point) return s.point.number;
+    const index = pending.indexOf(s);
+    return (deps.nextNumber?.() ?? summary.points + 1) + (index < 0 ? pending.length : index);
+  }
+
   function feedback() {
     if (!recording) return;
     const c = segment.click;
     deps.onFeedback?.({
-      click: c ? { displayId: c.displayId, x: c.x, y: c.y, number: (deps.nextNumber?.() ?? summary.points + 1) + pendingPoints, at: c.at } : undefined,
+      click: c ? { displayId: c.displayId, x: c.x, y: c.y, number: number(segment), at: c.at, geometry: c.geometry } : undefined,
       elapsedMs: Math.max(0, Date.now() - (c?.at ?? startedAt)),
       level,
       voiced: segment.voicedChunks >= MIN_VOICED_CHUNKS,
+      kept: !!segment.point,
+      paused,
     });
   }
 
-  async function finalize(s: Segment) {
-    const samples = () => trimSilence(s.chunks);
-    const voiced = isVoiced(s.chunks);
-    const c = s.click;
-    if (!c) {
-      // Avant le premier clic : une remarque générale, si l'on a parlé.
-      if (!voiced) return;
-      const id = await deps.store.addNote();
-      summary.notes++;
-      return deps.submit(id, samples());
-    }
-    if (!voiced) {
-      await deps.crop(c.frameId, null); // clic de navigation : rien n'est gardé
-      return deps.log?.({ kept: false });
-    }
-    const t = await c.target;
+  /** Crée le point dès qu'il sert (parole, dessin ou inspiration), sur l'image d'avant le clic. */
+  async function persist(s: Segment): Promise<VideoPoint | null> {
+    const c = s.click!;
+    let t = await c.target;
     const d = c.display;
-    const image = await deps.crop(c.frameId, { x: t.rect.x / d.width, y: t.rect.y / d.height, width: t.rect.width / d.width, height: t.rect.height / d.height });
-    if (!image) return deps.log?.({ kept: false, error: 'image indisponible' });
+    const g = c.geometry ?? { kind: 'point', x: c.x / d.width, y: c.y / d.height };
+    if (g.kind === 'zone' && !c.crop && t.at) t = t.at({ x: (g.x + g.w / 2) * d.width, y: (g.y + g.h / 2) * d.height });
+    const rect = c.crop && g.kind === 'zone'
+      ? { x: g.x * d.width, y: g.y * d.height, width: g.w * d.width, height: g.h * d.height }
+      : t.rect;
+    const image = await deps.crop(c.frameId, { x: rect.x / d.width, y: rect.y / d.height, width: rect.width / d.width, height: rect.height / d.height });
+    if (!image) {
+      deps.log?.({ kept: false, error: 'image indisponible' });
+      return null;
+    }
 
-    const reuse = !!last && last.displayId === c.displayId && sameRect(last.rect, t.rect) && sameScreen(last.thumb, image.thumb);
+    const reuse = !!last && last.displayId === c.displayId && sameRect(last.rect, rect) && sameScreen(last.thumb, image.thumb);
     let captureId = last?.captureId;
     if (!reuse || !captureId) {
       const capture = await deps.store.addCapture(image.png, {
@@ -138,40 +151,52 @@ export function createVideo(deps: VideoDeps) {
         source: { app: t.app, windowTitle: t.title, displayId: String(c.displayId) },
       });
       captureId = capture.id;
-      last = { captureId, displayId: c.displayId, rect: t.rect, thumb: image.thumb };
+      last = { captureId, displayId: c.displayId, rect, thumb: image.thumb };
       summary.firstCaptureId ??= captureId;
     }
-    const point: Geometry = { kind: 'point', x: clamp01((c.x - t.rect.x) / t.rect.width), y: clamp01((c.y - t.rect.y) / t.rect.height) };
-    const id = deps.store.addAnnotation(captureId, point);
+    const X = (x: number) => clamp01((x * d.width - rect.x) / rect.width);
+    const Y = (y: number) => clamp01((y * d.height - rect.y) / rect.height);
+    const geometry: Geometry = g.kind === 'point' ? { kind: 'point', x: X(g.x), y: Y(g.y) }
+      : g.kind === 'arrow' ? { kind: 'arrow', x1: X(g.x1), y1: Y(g.y1), x2: X(g.x2), y2: Y(g.y2) }
+      : { kind: 'zone', x: X(g.x), y: Y(g.y), w: X(g.x + g.w) - X(g.x), h: Y(g.y + g.h) - Y(g.y) };
+    const n = deps.nextNumber?.() ?? summary.points + 1;
+    const annotationId = deps.store.addAnnotation(captureId, geometry);
     summary.points++;
-    // Le point est déjà dans le store : il ne fait plus partie des numéros en attente.
-    pendingPoints--;
-    feedback();
-    deps.log?.({
-      kept: true,
-      sameScreen: reuse,
-      clickToFrozenMs: image.frozenAt - c.at,
-      frameAgeMs: Math.round(image.frameAgeMs),
-      width: image.width,
-      height: image.height,
-      app: t.app,
-    });
-    return deps.submit(id, samples());
+    deps.log?.({ kept: true, sameScreen: reuse, clickToFrozenMs: image.frozenAt - c.at, frameAgeMs: Math.round(image.frameAgeMs), width: image.width, height: image.height, app: t.app });
+    return { annotationId, captureId, number: n };
   }
 
-  /** Les segments sont finalisés un par un, dans l'ordre des clics. */
+  function savePoint(s: Segment): Promise<VideoPoint | null> {
+    if (s.saving) return s.saving;
+    if (!s.click) return Promise.resolve(null);
+    pending.push(s);
+    s.saving = chain.then(() => persist(s)).then((point) => {
+      if (point) s.point = point;
+      return point;
+    }).finally(() => {
+      pending.splice(pending.indexOf(s), 1);
+      if (recording && segment === s) deps.onPoint?.(s.point ?? null);
+      feedback();
+    });
+    chain = s.saving.then(() => {}, (err) => deps.log?.({ error: String(err) }));
+    return s.saving;
+  }
+
+  /** Images et transcriptions gardent l'ordre des clics. L'audio reste ouvert pendant un dessin. */
   function close(s: Segment) {
-    const point = !!s.click && s.voicedChunks >= MIN_VOICED_CHUNKS;
-    if (point) pendingPoints++;
+    const voiced = isVoiced(s.chunks);
+    if (s.click && voiced) void savePoint(s);
     chain = chain.then(async () => {
-      const saved = summary.points;
-      try {
-        await finalize(s);
-      } finally {
-        if (point && summary.points === saved) {
-          pendingPoints--;
-          feedback();
+      if (s.click) {
+        if (s.point && voiced) await deps.submit(s.point.annotationId, trimSilence(s.chunks));
+        else if (!s.saving) {
+          await deps.crop(s.click.frameId, null);
+          deps.log?.({ kept: false });
         }
+      } else if (voiced) {
+        const id = await deps.store.addNote();
+        summary.notes++;
+        await deps.submit(id, trimSilence(s.chunks));
       }
     }).catch((err) => deps.log?.({ error: String(err) }));
   }
@@ -184,7 +209,9 @@ export function createVideo(deps: VideoDeps) {
       recording = true;
       startedAt = Date.now();
       segment = { chunks: [], voicedChunks: 0 };
-      pendingPoints = 0;
+      pending.length = 0;
+      paused = false;
+      deps.onPoint?.(null);
       level = 0;
       last = null;
       summary = { points: 0, notes: 0 };
@@ -192,28 +219,49 @@ export function createVideo(deps: VideoDeps) {
     },
 
     onAudio(chunk: Float32Array) {
-      if (!recording) return;
+      if (!recording || paused) return;
       segment.chunks.push(chunk);
       level = rms(chunk);
       if (level > VOICE_RMS) segment.voicedChunks++;
+      if (segment.click && !segment.click.held && segment.voicedChunks >= MIN_VOICED_CHUNKS) void savePoint(segment);
       feedback();
     },
 
     onClick(click: VideoClick) {
-      if (!recording) return;
+      if (!recording || paused) return;
       // Image et fenêtre visée tout de suite, avant que l'app cliquée ne change d'état.
       const frameId = deps.freeze(click.displayId);
       const target = deps.target(click);
       close(segment);
       segment = { click: { ...click, frameId, target }, chunks: [], voicedChunks: 0 };
       level = 0;
+      deps.onPoint?.(null);
       feedback();
     },
+
+    onGesture(displayId: number, geometry: Geometry | undefined, crop: boolean, done: boolean) {
+      const c = segment.click;
+      if (!recording || paused || !c || c.displayId !== displayId || !c.held) return;
+      c.geometry = geometry;
+      c.crop = crop;
+      if (done) {
+        c.held = false;
+        if (segment.voicedChunks >= MIN_VOICED_CHUNKS) void savePoint(segment);
+      }
+      feedback();
+    },
+
+    /** Joindre un dessin ou une inspiration garde aussi un point sans dictée. */
+    currentPoint: () => recording ? savePoint(segment) : Promise.resolve(null),
+    pause() { paused = true; level = 0; feedback(); },
+    resume() { paused = false; feedback(); },
 
     /** Clôt le dernier segment et attend que tout soit enregistré. */
     async stop(): Promise<VideoSummary> {
       if (!recording) return summary;
       recording = false;
+      paused = false;
+      deps.onPoint?.(null);
       deps.onFeedback?.(null);
       close(segment);
       segment = { chunks: [], voicedChunks: 0 };

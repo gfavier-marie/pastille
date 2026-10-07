@@ -23,7 +23,7 @@ import {
   systemPreferences,
 } from 'electron';
 import { allAnnotations, findAnnotation, type Geometry, type Session } from '@pastille/shared';
-import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab } from '../ipc.ts';
+import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab, VideoFeedback } from '../ipc.ts';
 import { createCapture, listWindows, windowTarget, type CapturedImage } from './capture.ts';
 import { createClicks } from './clicks.ts';
 import { createDictation } from './dictation.ts';
@@ -39,9 +39,10 @@ import { createLicense, POLAR, SITE_URL, TRIAL_DAYS } from './license.ts';
 import { createSettings, type Settings } from './settings.ts';
 import { createTranscriber } from './transcriber.ts';
 import { checkForUpdate, installUpdate, type Update } from './updater.ts';
-import { createVideo } from './video.ts';
+import { createVideo, type VideoSummary } from './video.ts';
 import { createVideoWindow } from './video-window.ts';
 import { createVideoFeedback } from './video-feedback.ts';
+import { T } from '../renderer/texts.ts';
 import { downloadFile, MODEL_FILE, MODEL_URL } from './whisper.ts';
 
 const isMac = process.platform === 'darwin';
@@ -110,6 +111,7 @@ const tablet = autotest && autotest !== 'tablet'
         pairingWindow?.webContents.send('tablet:status', connected);
         pairingWindow?.setContentSize(720, pairingHeight(connected));
         broadcastSettings();
+        refreshVideoFeedback();
       },
     });
 // Essai puis licence Polar. PASTILLE_TRIAL_DAYS raccourcit l'essai et PASTILLE_POLAR=sandbox vise le bac à sable, pour les essais.
@@ -191,6 +193,7 @@ function createEditor() {
 }
 
 function showEditor(focus?: EditorFocus) {
+  cancelVideoInspiration();
   inspirationFor = null; // revenir à l'éditeur annule l'inspiration en attente
   editor ??= createEditor();
   if (focus) editor.webContents.send('editor:focus', focus);
@@ -213,7 +216,8 @@ function inspirationTarget() {
 }
 
 function startCapture() {
-  if (video.isRecording()) return; // le mode vidéo capture déjà à chaque clic
+  if (videoFinishing) return;
+  if (video.isRecording() && !videoInspiration) return; // une inspiration reste possible pendant la vidéo
   // Essai fini sans licence : l'onglet Licence s'ouvre à la place. Sessions, exports et Claude Code restent libres.
   if (!license.canCapture()) {
     checkLicense(); // licence à revérifier : de nouveau en ligne, peut-être
@@ -228,6 +232,16 @@ function startCapture() {
 async function onCapture(c: CapturedImage) {
   const target = inspirationTarget();
   if (target) {
+    if (videoInspiration) {
+      try {
+        await store.addInspiration(target.annotation.id, c.png, c.target === 'window' ? { app: c.app, windowTitle: c.title } : undefined);
+      } catch (err) {
+        videoActionError = err instanceof Error ? err.message : String(err);
+      } finally {
+        cancelVideoInspiration();
+      }
+      return;
+    }
     // L'éditeur revient sur le point, bulle ouverte, sans relancer la dictée.
     await store.addInspiration(target.annotation.id, c.png, c.target === 'window' ? { app: c.app, windowTitle: c.title } : undefined);
     return showEditor({ captureId: target.capture.id, annotationId: target.annotation.id, openBubble: true });
@@ -268,6 +282,24 @@ function reportCapture(r: CaptureResult) {
 const VIDEO_SHORTCUT = isMac ? 'Command+Control+Alt+R' : 'Control+Alt+R';
 const videoWindow = createVideoWindow({ preload, loadPage, onAudio: (chunk) => video.onAudio(chunk) });
 const videoFeedback = createVideoFeedback({ preload, loadPage });
+let videoFeedbackState: VideoFeedback = null;
+let videoInspiration = false;
+let videoActionBusy = false;
+let videoActionError: string | undefined;
+function refreshVideoFeedback() {
+  videoFeedback.update(videoFeedbackState && {
+    ...videoFeedbackState,
+    tablet: tablet?.isConnected() ?? false,
+    inspiration: videoInspiration ? { shortcut: shortcutLabel(settings.get().shortcut), number: inspirationTarget()?.annotation.number } : undefined,
+    error: videoActionError,
+  });
+}
+function cancelVideoInspiration() {
+  if (!videoInspiration) return;
+  inspirationFor = null;
+  videoInspiration = false;
+  video.resume();
+}
 const logVideo = (entry: Record<string, unknown>) => console.log('VIDEO', JSON.stringify(entry));
 const video = createVideo({
   store,
@@ -277,18 +309,27 @@ const video = createVideo({
   target: async (click) => {
     const windows = listWindows(); // lancée dès le clic
     const d = screen.getAllDisplays().find((x) => x.id === click.displayId) ?? screen.getPrimaryDisplay();
-    const { rect, hit } = windowTarget(await windows, d, { x: d.bounds.x + click.x, y: d.bounds.y + click.y });
-    return { rect, app: hit?.owner.name, title: hit?.title };
+    const list = await windows;
+    const at = (point: { x: number; y: number }) => {
+      const { rect, hit } = windowTarget(list, d, { x: d.bounds.x + point.x, y: d.bounds.y + point.y });
+      return { rect, app: hit?.owner.name, title: hit?.title };
+    };
+    return { ...at(click), at }; // un cadre vise la fenêtre sous son centre, comme une capture
   },
   log: logVideo,
   nextNumber: () => store.get()?.captures.reduce((n, c) => n + c.annotations.length, 1) ?? 1,
-  onFeedback: (state) => videoFeedback.update(state),
+  onFeedback: (state) => {
+    if (state?.click?.at !== videoFeedbackState?.click?.at) videoActionError = undefined;
+    videoFeedbackState = state;
+    refreshVideoFeedback();
+  },
+  onPoint: (point) => tablet?.setFocus(point?.annotationId ?? null, !video.isRecording()),
 });
 const inside = (p: { x: number; y: number }, r: Electron.Rectangle) => p.x >= r.x && p.y >= r.y && p.x < r.x + r.width && p.y < r.y + r.height;
 const clicks = createClicks({
   // Nos fenêtres ne se commentent pas ; la barre ne compte que sous la pilule (le reste laisse passer les clics).
   ignore: (p) =>
-    menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && !videoFeedback.isWindow(w) && inside(p, w.getBounds())),
+    videoInspiration || videoActionBusy || videoFeedback.pointerInControls() || menubar.pointerInBar() || BrowserWindow.getAllWindows().some((w) => w.isVisible() && !menubar.isBar(w) && !videoFeedback.isWindow(w) && inside(p, w.getBounds())),
   onClick: (p, at) => {
     const d = screen.getDisplayNearestPoint(p);
     video.onClick({
@@ -297,13 +338,17 @@ const clicks = createClicks({
       x: p.x - d.bounds.x,
       y: p.y - d.bounds.y,
       at,
+      held: true,
     });
   },
+  onGesture: (displayId, geometry, crop, done) => video.onGesture(displayId, geometry, crop, done),
 });
 let videoStarting = false;
+let videoFinishing: Promise<VideoSummary> | null = null;
 let videoMetrics: ReturnType<typeof setInterval> | undefined;
 
 async function toggleVideo() {
+  if (videoFinishing) return;
   if (video.isRecording()) return stopVideo();
   if (videoStarting || capture.isBusy()) return;
   if (!license.canCapture()) {
@@ -329,6 +374,7 @@ async function toggleVideo() {
     await videoWindow.start();
     await videoFeedback.start();
     await clicks.start();
+    videoActionError = undefined;
     video.start();
     logVideo({ started: true, displays: screen.getAllDisplays().length });
     // Mesures du lot V0 : processeur (% d'un cœur, tous processus) et mémoire de l'app.
@@ -351,14 +397,20 @@ async function toggleVideo() {
 }
 
 /** Arrête l'enregistrement : le dernier segment est enregistré avant de fermer flux et micro. */
-async function finishVideo() {
-  clearInterval(videoMetrics);
-  clicks.stop();
-  videoFeedback.stop();
-  const summary = await video.stop();
-  videoWindow.stop();
-  updateTrayMenu();
-  return summary;
+function finishVideo(): Promise<VideoSummary> {
+  if (videoFinishing) return videoFinishing;
+  videoFinishing = (async () => {
+    clearInterval(videoMetrics);
+    clicks.stop();
+    if (videoInspiration && capture?.isBusy()) capture.cancel();
+    cancelVideoInspiration();
+    videoFeedback.stop();
+    const summary = await video.stop();
+    videoWindow.stop();
+    updateTrayMenu();
+    return summary;
+  })().finally(() => { videoFinishing = null; });
+  return videoFinishing;
 }
 
 async function stopVideo() {
@@ -750,6 +802,39 @@ async function transcribe(wav: Uint8Array) {
 
 // ——— IPC ———
 
+ipcMain.handle('video:action', async (e, action: 'draw' | 'inspiration' | 'capture-inspiration' | 'cancel-inspiration') => {
+  if (!videoFeedback.owns(e.sender.id) || !video.isRecording() || videoActionBusy) return;
+  videoActionError = undefined;
+  if (action === 'cancel-inspiration') {
+    if (!capture.isBusy()) cancelVideoInspiration();
+    return;
+  }
+  if (action === 'capture-inspiration') {
+    if (videoInspiration && !capture.isBusy()) startCapture();
+    return;
+  }
+  if (action !== 'draw' && action !== 'inspiration') return;
+  videoActionBusy = true;
+  if (action === 'inspiration') video.pause();
+  try {
+    const point = await video.currentPoint();
+    if (!point || !video.isRecording()) throw new Error(T.videoFeedback.pointUnavailable);
+    tablet?.setFocus(point.annotationId);
+    if (action === 'draw') {
+      if (!tablet?.isConnected()) showPairing();
+    } else {
+      inspirationFor = point.annotationId;
+      videoInspiration = true;
+    }
+  } catch (err) {
+    videoActionError = err instanceof Error ? err.message : String(err);
+    video.resume();
+  } finally {
+    videoActionBusy = false;
+    refreshVideoFeedback();
+  }
+});
+
 ipcMain.handle('session:get', () => store.get());
 ipcMain.handle('annotation:add', (_e, captureId: string, geometry: Geometry) => store.addAnnotation(captureId, geometry));
 ipcMain.on('annotation:update', (_e, id: string, patch: { text?: string; geometry?: Geometry }) =>
@@ -824,6 +909,10 @@ ipcMain.on('sketch:delete', (_e, annotationId: string, sketchId: string) =>
 ipcMain.on('inspiration:capture', (_e, id: string) => {
   editor?.hide();
   inspirationFor = id;
+  if (video.isRecording()) {
+    videoInspiration = true;
+    video.pause();
+  }
 });
 ipcMain.on('inspiration:import', (_e, id: string, png: Uint8Array) => void store.addInspiration(id, png));
 ipcMain.on('inspiration:delete', (_e, annotationId: string, inspirationId: string) =>
@@ -835,7 +924,9 @@ ipcMain.on('inspiration:delete', (_e, annotationId: string, inspirationId: strin
     { undoable: true },
   ),
 );
-ipcMain.on('editor:selection', (_e, annotationId: string | null) => tablet?.setFocus(annotationId));
+ipcMain.on('editor:selection', (_e, annotationId: string | null) => {
+  if (!video.isRecording()) tablet?.setFocus(annotationId);
+});
 ipcMain.handle('tablet:status', () => tablet?.isConnected() ?? false);
 ipcMain.on('session:undo', () => store.undo());
 ipcMain.on('session:redo', () => store.redo());
@@ -1083,6 +1174,7 @@ void app.whenReady().then(async () => {
     loadPage,
     onCapture,
     onCancel: () => {
+      if (videoInspiration) return cancelVideoInspiration();
       // Échap pendant une inspiration : retour au point, rien n'est joint.
       const target = inspirationTarget();
       if (target) showEditor({ captureId: target.capture.id, annotationId: target.annotation.id, openBubble: true });
@@ -1097,6 +1189,7 @@ void app.whenReady().then(async () => {
       };
     },
     onError: (message) => {
+      cancelVideoInspiration();
       reportCapture({ ok: false, error: message });
       if (!autotest) void dialog.showMessageBox({ type: 'warning', message });
     },

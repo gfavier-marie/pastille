@@ -250,7 +250,9 @@ export function createCapture(opts: CaptureOptions) {
     return true;
   }
 
-  return { start, autoPick, isBusy: () => pending !== null };
+  return { start, autoPick, isBusy: () => pending !== null, cancel: () => {
+    if (pending && overlays[0]) void finish(overlays[0], { kind: 'cancel' });
+  } };
 }
 
 /** Fenêtres des autres applications, de l'avant vers l'arrière ; liste vide si elle n'a pas pu être lue. */
