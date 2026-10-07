@@ -1,7 +1,7 @@
-// Site public (landing, tarifs, pages légales) : fichiers statiques seuls, sans code Worker.
+// Site public (landing, tarifs, pages légales) en cinq langues : fichiers statiques produits par build.ts, sans code Worker.
 {
   "name": "vibescreener-site",
   "compatibility_date": "2026-10-01",
-  "assets": { "directory": "./public" },
+  "assets": { "directory": "./dist" },
   "routes": [{ "pattern": "vibescreener.dev", "custom_domain": true }]
 }

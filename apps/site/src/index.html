@@ -1,21 +1,19 @@
 <!doctype html>
-<html lang="fr">
+<html lang="{{lang}}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VibeScreener : montrez à votre IA ce qu'il faut changer</title>
-<meta name="description" content="Cliquez sur n'importe quel élément de votre app et dites ce que vous voulez : la capture, l'endroit exact et votre phrase partent ensemble à votre IA. Quelques secondes par retour au lieu d'une demi-minute. Mac Apple Silicon, 14 jours d'essai gratuit, sans carte bancaire.">
-<link rel="canonical" href="https://vibescreener.dev/">
+<title>{{meta.vibescreener_montrez_votre_ia}}</title>
+<meta name="description" content="{{meta.cliquez_sur_n_importe}}">
+{{head}}
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://vibescreener.dev/">
 <meta property="og:site_name" content="VibeScreener">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="VibeScreener : montrez à votre IA ce qu'il faut changer">
-<meta property="og:description" content="Pointez, dites-le : chaque demande part avec sa capture vers Claude Code, Cursor, ChatGPT, Gemini ou toute autre IA. Dictée sur le Mac, croquis à l'iPad.">
+<meta property="og:title" content="{{meta.vibescreener_montrez_votre_ia}}">
+<meta property="og:description" content="{{meta.pointez_dites_chaque_demande}}">
 <meta property="og:image" content="https://vibescreener.dev/editeur.png">
 <meta property="og:image:width" content="1600">
 <meta property="og:image:height" content="1025">
-<meta property="og:image:alt" content="L'éditeur de VibeScreener : capture annotée de points numérotés, commentaires dictés et croquis">
+<meta property="og:image:alt" content="{{meta.editeur_vibescreener_capture_annotee}}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0a0a0b">
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -50,13 +48,13 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-b1{0%,19.83%{opacity:0;transform:translateY(1.5cqw)}21.08%,30.83%{opacity:1;transform:translateY(0)}32.33%,100%{opacity:0;transform:translateY(0)}}
 @keyframes vs-b2{0%,34.84%{opacity:0;transform:translateY(1.5cqw)}36.08%,45.33%{opacity:1;transform:translateY(0)}46.83%,100%{opacity:0;transform:translateY(0)}}
 @keyframes vs-b3{0%,49.33%{opacity:0;transform:translateY(1.5cqw)}50.58%,56.83%{opacity:1;transform:translateY(0)}58.33%,100%{opacity:0;transform:translateY(0)}}
-@keyframes vs-t1{0%,21.33%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(46,end)}26.84%,100%{clip-path:inset(0 0 0 0)}}
-@keyframes vs-t2{0%,36.33%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}41.83%,100%{clip-path:inset(0 0 0 0)}}
-@keyframes vs-t3{0%,50.83%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(44,end)}55.83%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t1{0%,21.33%{clip-path:inset(0 100% 0 0);animation-timing-function:steps({{len:demo.ajoute_filtre_7_jours}},end)}26.84%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t2{0%,36.33%{clip-path:inset(0 100% 0 0);animation-timing-function:steps({{len:demo.trie_par_montant_ajoute}},end)}41.83%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-t3{0%,50.83%{clip-path:inset(0 100% 0 0);animation-timing-function:steps({{len:demo.recherche_doit_aussi_trouver}},end)}55.83%,100%{clip-path:inset(0 0 0 0)}}
 @keyframes vs-pill{0%,57.84%{opacity:0;transform:translate(-50%,2cqw)}59.34%,61.33%{opacity:1;transform:translate(-50%,0)}62.84%,100%{opacity:0;transform:translate(-50%,0)}}
 @keyframes vs-dim{0%,61.33%{opacity:0}63%,84%{opacity:1}85.67%,100%{opacity:0}}
 @keyframes vs-term{0%,61.67%{opacity:0;transform:translateY(4cqw) scale(.97)}63.33%,83.66%{opacity:1;transform:none}85.34%,100%{opacity:0;transform:translateY(-2cqw) scale(.98)}}
-@keyframes vs-prompt{0%,64%{clip-path:inset(0 100% 0 0);animation-timing-function:steps(32,end)}68%,100%{clip-path:inset(0 0 0 0)}}
+@keyframes vs-prompt{0%,64%{clip-path:inset(0 100% 0 0);animation-timing-function:steps({{len:demo.applique_revue_vibescreener}},end)}68%,100%{clip-path:inset(0 0 0 0)}}
 @keyframes vs-c1{0%,69.34%{opacity:0;transform:translateY(.6cqw)}70.17%,100%{opacity:1;transform:none}}
 @keyframes vs-c2{0%,70.66%{opacity:0;transform:translateY(.6cqw)}71.5%,100%{opacity:1;transform:none}}
 @keyframes vs-c3{0%,72.34%{opacity:0;transform:translateY(.6cqw)}73.17%,100%{opacity:1;transform:none}}
@@ -120,7 +118,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
 .vs-i-ok{animation:vs-i-in .3s 2.45s cubic-bezier(.2,.7,.2,1) both}
 .vs-i-ok svg{width:1.08em;height:1.08em}
 .vs-i-bulle{position:absolute;right:-40px;top:calc(100% + 6px);width:360px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:18px;background:#1E1E22;border:1px solid #2E2E33;box-shadow:0 24px 48px rgba(0,0,0,.5);font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:500;letter-spacing:0;line-height:1.35;color:#F2F2F3;text-align:left;opacity:0;animation:vs-i-bulle 1.05s 1.65s ease both}
-.vs-i-type{display:inline-block;white-space:nowrap;animation:vs-i-type .55s 1.8s steps(24,end) both}
+.vs-i-type{display:inline-block;white-space:nowrap;animation:vs-i-type .55s 1.8s steps({{len:intro.cette_phrase_orange}},end) both}
 .vs-i-sub{animation:vs-i-fade .6s 2.6s cubic-bezier(.2,.7,.2,1) both}
 .vs-i-cta{animation:vs-i-fade .6s 2.75s cubic-bezier(.2,.7,.2,1) both}
 .vs-i-cue{animation:vs-i-fade .6s 3s ease both}
@@ -188,6 +186,20 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
 @keyframes vs-fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes vs-eclair{from{opacity:.9}to{opacity:0}}
+/* Sélecteur de langue (généré par build.ts) */
+.langs{position:relative;font-size:14px;font-weight:600}
+.langs summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;height:44px;padding:0 12px;border-radius:10px;color:#C7C7CC}
+.langs summary::-webkit-details-marker{display:none}
+.langs summary:hover,.langs[open] summary{color:#FFFFFF;background:#1C1C1F}
+.langs ul{position:absolute;right:0;top:calc(100% + 6px);z-index:10;margin:0;padding:6px;list-style:none;min-width:160px;border-radius:12px;background:#1C1C1F;border:1px solid #2E2E33;box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.langs a{display:block;padding:8px 12px;border-radius:8px;color:#E5E5EA;text-decoration:none;font-weight:500}
+.langs a:hover{background:#2E2E33;color:#FFFFFF}
+.langs a[aria-current]{color:#FF8A66;font-weight:600}
+@media (max-width:520px){.vs-i-head .langs{display:none}}
+.langs-up summary{height:auto;padding:6px 10px;color:#5E5E66}
+.langs-up summary:hover,.langs-up[open] summary{color:#17171A;background:#F5F5F7}
+.langs-up ul{top:auto;bottom:calc(100% + 6px);background:#FFFFFF;border-color:#ECECEF;box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.langs-up a{color:#3A3A40}.langs-up a:hover{background:#F5F5F7;color:#17171A}.langs-up a[aria-current]{color:#B8300A}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -201,12 +213,13 @@ details[open] .vs-plus{transform:rotate(45deg)}
         <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em">VibeScreener</span>
       </a>
       <nav aria-label="Sections" class="vs-i-liens" style="flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 15px">
-        <a href="#comment" class="vs-nav">Comment ça marche</a>
-        <a href="#fonctions" class="vs-nav">Fonctionnalités</a>
-        <a href="#tarifs" class="vs-nav">Tarifs</a>
+        <a href="#comment" class="vs-nav">{{intro.comment_ca_marche}}</a>
+        <a href="#fonctions" class="vs-nav">{{intro.fonctionnalites}}</a>
+        <a href="#tarifs" class="vs-nav">{{intro.tarifs}}</a>
         <a href="#faq" class="vs-nav">FAQ</a>
       </nav>
-      <a href="#installer" class="vs-btn" style="margin-left: auto; height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 10px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px">Essai gratuit</a>
+      <a href="#installer" class="vs-btn" style="margin-left: auto; height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 10px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px">{{intro.essai_gratuit}}</a>
+      {{switcher}}
     </header>
 
     <!-- Arrivée : le viseur de capture se referme, l'éclair, le titre sort du flou, un point #1 se pose et sa demande s'écrit, puis elle est appliquée. -->
@@ -222,33 +235,33 @@ details[open] .vs-plus{transform:rotate(45deg)}
 
     <div style="position: relative; z-index: 2; flex: 1; width: 100%; max-width: 1320px; box-sizing: border-box; margin: 0 auto; padding: clamp(48px, 10vh, 104px) 24px 128px; display: flex; flex-direction: column; align-items: center; gap: 36px; text-align: center">
       <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(48px, 7.6vw, 124px); line-height: 0.96; letter-spacing: -0.05em">
-        <span class="vs-i-l1" style="display: block">Montrez à votre IA</span>
-        <span class="vs-i-l2" style="display: block; color: #FF6A3D">ce qu'il faut <span style="position: relative; display: inline-block">changer.<span aria-hidden="true" class="vs-i-ping"></span><span aria-hidden="true" class="vs-i-pin"><span class="vs-i-num">1</span><span class="vs-i-ok"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></span><span aria-hidden="true" class="vs-i-bulle"><span style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600"><span class="vs-rec"></span>#1<span class="vs-onde"><span style="animation-delay: -0.1s"></span><span style="animation-delay: -0.3s"></span><span style="animation-delay: -0.5s"></span><span style="animation-delay: -0.2s"></span><span style="animation-delay: -0.7s"></span><span style="animation-delay: -0.4s"></span><span style="animation-delay: -0.6s"></span><span style="animation-delay: -0.15s"></span><span style="animation-delay: -0.45s"></span><span style="animation-delay: -0.25s"></span></span><span style="color: #A1A1A8; font-variant-numeric: tabular-nums">0:02</span></span><span style="display: block; padding: 10px 12px; border: 2px solid #D63A0C; border-radius: 10px; background: #141416"><span class="vs-i-type">Cette phrase, en orange.</span></span></span></span></span>
+        <span class="vs-i-l1" style="display: block">{{intro.montrez_votre_ia}}</span>
+        <span class="vs-i-l2" style="display: block; color: #FF6A3D">{{intro.ce_qu_il_faut}} <span style="position: relative; display: inline-block">{{intro.changer}}<span aria-hidden="true" class="vs-i-pin"><span class="vs-i-num">1</span><span class="vs-i-ok"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></span><span aria-hidden="true" class="vs-i-bulle"><span style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600"><span class="vs-rec"></span>#1<span class="vs-onde"><span style="animation-delay: -0.1s"></span><span style="animation-delay: -0.3s"></span><span style="animation-delay: -0.5s"></span><span style="animation-delay: -0.2s"></span><span style="animation-delay: -0.7s"></span><span style="animation-delay: -0.4s"></span><span style="animation-delay: -0.6s"></span><span style="animation-delay: -0.15s"></span><span style="animation-delay: -0.45s"></span><span style="animation-delay: -0.25s"></span></span><span style="color: #A1A1A8; font-variant-numeric: tabular-nums">0:02</span></span><span style="display: block; padding: 10px 12px; border: 2px solid #D63A0C; border-radius: 10px; background: #141416"><span class="vs-i-type">{{intro.cette_phrase_orange}}</span></span></span></span></span>
       </h1>
-      <p class="vs-i-sub" style="margin: 0; max-width: 640px; font-size: 20px; line-height: 1.45; color: #C7C7CC">Cliquez sur n'importe quel élément de votre app et dites ce que vous voulez. La capture, l'endroit exact et votre phrase partent ensemble à votre IA&nbsp;: plus rien à recadrer, coller ni rédiger.</p>
+      <p class="vs-i-sub" style="margin: 0; max-width: 640px; font-size: 20px; line-height: 1.45; color: #C7C7CC">{{intro.cliquez_sur_n_importe}}</p>
       <div id="installer" class="vs-i-cta" style="width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 14px">
         <div style="width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 18px; border-radius: 14px; background: #1C1C1F; border: 1px solid #2E2E33; text-align: left">
           <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
-          <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="Copier la commande d'installation" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 10px; background: #D63A0C; color: #FFFFFF; font-weight: 600; font-size: 14px; cursor: pointer">Copier</button>
+          <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="{{intro.copier_commande_installation}}" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 10px; background: #D63A0C; color: #FFFFFF; font-weight: 600; font-size: 14px; cursor: pointer">{{intro.copier}}</button>
         </div>
         <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 18px; font-size: 14px; color: #A1A1A8">
-          <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>14 jours gratuits, sans carte</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{intro.t_14_jours_gratuits_sans}}</span>
           <span>Mac Apple Silicon</span>
         </div>
       </div>
     </div>
 
     <div class="vs-i-cue" style="position: absolute; left: 0; right: 0; bottom: 30px; z-index: 2; display: flex; justify-content: center; pointer-events: none">
-      <a href="#demo" style="display: inline-flex; flex-direction: column; align-items: center; gap: 6px; color: #A1A1A8; text-decoration: none; font-size: 13px; font-weight: 600; pointer-events: auto">Voir la démo<svg class="vs-i-bob" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"></path></svg></a>
+      <a href="#demo" style="display: inline-flex; flex-direction: column; align-items: center; gap: 6px; color: #A1A1A8; text-decoration: none; font-size: 13px; font-weight: 600; pointer-events: auto">{{intro.voir_demo}}<svg class="vs-i-bob" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"></path></svg></a>
     </div>
-    <button type="button" data-rejouer class="vs-i-cue vs-round" aria-label="Rejouer l'animation d'arrivée" style="position: absolute; right: 24px; bottom: 26px; z-index: 3; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #2E2E33; border-radius: 999px; background: #1C1C1F; color: #E5E5EA; cursor: pointer"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"></path><path d="M2.5 2.5v3h3"></path></svg></button>
+    <button type="button" data-rejouer class="vs-i-cue vs-round" aria-label="{{intro.rejouer_animation_arrivee}}" style="position: absolute; right: 24px; bottom: 26px; z-index: 3; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #2E2E33; border-radius: 999px; background: #1C1C1F; color: #E5E5EA; cursor: pointer"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"></path><path d="M2.5 2.5v3h3"></path></svg></button>
   </section>
 
-  <section id="demo" aria-label="Démonstration" style="padding: 16px 24px 128px; background: #0A0A0B">
+  <section id="demo" aria-label="{{demo.demonstration}}" style="padding: 16px 24px 128px; background: #0A0A0B">
     <!-- Démo et frise tiennent dans la hauteur de l'écran. -->
     <div style="max-width: min(1120px, calc((100svh - 170px) * 16 / 11)); margin: 0 auto">
       <div class="vs-zoom">
-        <div role="img" aria-label="Démonstration en quatre étapes sur une app de ventes. Un : le raccourci Contrôle Option Commande P (⌃⌥⌘P) capture l'écran. Deux : trois clics posent trois points directement sur la capture, chacun avec sa demande dictée (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail). Trois : Claude Code lit la revue par le serveur MCP de VibeScreener. Quatre : les trois demandes sont appliquées dans l'app." style="position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 60px 120px -40px rgba(0,0,0,0.9)">
+        <div role="img" aria-label="{{demo.demonstration_quatre_etapes_sur}}" style="position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 60px 120px -40px rgba(0,0,0,0.9)">
           <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
   <div style="position: relative; width: 100cqw; aspect-ratio: 16 / 11; overflow: hidden; background: #FFFFFF">
 
@@ -258,7 +271,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
       <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #28C840"></span>
       <span style="margin-left: 2cqw; flex: 0 1 44cqw; height: 3.5cqw; box-sizing: border-box; border-radius: 0.9cqw; background: #FFFFFF; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; font-size: 1.6cqw; color: #6B7280; white-space: nowrap; overflow: hidden">
         <svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>
-        localhost:5173/ventes
+        {{page.adresse_maquette}}
       </span>
     </div>
 
@@ -268,19 +281,19 @@ details[open] .vs-plus{transform:rotate(45deg)}
         <span style="font-size: 2cqw; font-weight: 700; letter-spacing: -0.02em">Comptoir</span>
       </div>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>Accueil
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>{{demo.accueil}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; background: #E2F1EC; color: #0B5E4E; font-weight: 600">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>Ventes
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>{{demo.ventes}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>Produits
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>{{demo.produits}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>Clients
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>{{demo.clients}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>Réglages
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>{{demo.reglages}}
       </span>
       <div style="margin-top: auto; display: flex; align-items: center; gap: 1cqw; padding: 0 0.6cqw">
         <span style="width: 2.8cqw; height: 2.8cqw; border-radius: 999px; background: #FCD9BD; color: #7C2D12; font-size: 1.15cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>
@@ -288,36 +301,36 @@ details[open] .vs-plus{transform:rotate(45deg)}
       </div>
     </div>
 
-    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">Ventes</div>
-    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">Octobre 2026 · 1 284 commandes</div>
+    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.ventes}}</div>
+    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">{{demo.octobre_2026_1_284}}</div>
 
     <div style="position: absolute; left: 58cqw; top: 9.4cqw; width: 20cqw; height: 4.4cqw; box-sizing: border-box; border: 1px solid #E5E7EB; border-radius: 1cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.2cqw; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; overflow: hidden">
       <svg viewBox="0 0 16 16" style="width: 1.7cqw; height: 1.7cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
-      <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis">N° de commande…</span>
+      <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis">{{demo.n_commande}}</span>
     </div>
     <div style="position: absolute; left: 79.5cqw; top: 9.4cqw; width: 17.5cqw; height: 4.4cqw; border-radius: 1cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.5cqw; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.6cqw; white-space: nowrap">
-      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>Nouvelle vente
+      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>{{demo.nouvelle_vente}}
     </div>
 
     <div style="position: absolute; left: 20cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 1.4cqw; color: #6B7280">Chiffre d'affaires</span>
-      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">48 320 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+12 %</span></span>
+      <span style="font-size: 1.4cqw; color: #6B7280">{{demo.chiffre_affaires}}</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.montant_ca}}</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.evolution_ca}}</span></span>
     </div>
     <div style="position: absolute; left: 46.2cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 1.4cqw; color: #6B7280">Commandes</span>
-      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">1 284</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+8 %</span></span>
+      <span style="font-size: 1.4cqw; color: #6B7280">{{demo.commandes}}</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.nombre_commandes}}</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.evolution_commandes}}</span></span>
     </div>
     <div style="position: absolute; left: 72.4cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 1.4cqw; color: #6B7280">Panier moyen</span>
-      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">37,60 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">−2 %</span></span>
+      <span style="font-size: 1.4cqw; color: #6B7280">{{demo.panier_moyen}}</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.montant_panier}}</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">{{demo.evolution_panier}}</span></span>
     </div>
 
     <div style="position: absolute; left: 20cqw; top: 29.5cqw; width: 77cqw; height: 18.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw 1.2cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; gap: 0.8cqw">
       <div style="height: 2.4cqw; display: flex; align-items: center; gap: 1cqw">
-        <span style="font-size: 1.7cqw; font-weight: 600">Ventes par jour</span>
+        <span style="font-size: 1.7cqw; font-weight: 600">{{demo.ventes_par_jour}}</span>
         <span style="flex: 1"></span>
         <span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span>
-        <span style="font-size: 1.3cqw; color: #6B7280">Chiffre d'affaires</span>
+        <span style="font-size: 1.3cqw; color: #6B7280">{{demo.chiffre_affaires}}</span>
       </div>
       <div style="position: relative; flex: 1">
         <svg viewBox="0 0 400 80" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
@@ -327,35 +340,35 @@ details[open] .vs-plus{transform:rotate(45deg)}
         </svg>
       </div>
       <div style="display: flex; justify-content: space-between; font-size: 1.2cqw; color: #9CA3AF">
-        <span>23 sept.</span><span>27 sept.</span><span>1 oct.</span><span>6 oct.</span>
+        <span>{{demo.t_23_sept}}</span><span>{{demo.t_27_sept}}</span><span>{{demo.t_1_oct}}</span><span>{{demo.t_6_oct}}</span>
       </div>
     </div>
 
     <div style="position: absolute; left: 20cqw; top: 49.5cqw; width: 77cqw; height: 17.9cqw; box-sizing: border-box; padding: 1.4cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column">
       <div style="height: 3cqw; display: flex; align-items: center">
-        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">Dernières commandes</span>
-        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">Tout voir</span>
+        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">{{demo.dernieres_commandes}}</span>
+        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">{{demo.tout_voir}}</span>
       </div>
       <div style="height: 2.8cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F0F1F3; font-size: 1.2cqw; font-weight: 600; color: #6B7280">
-        <span>Client</span><span>Date</span><span>Statut</span><span style="text-align: right">Montant</span>
+        <span>{{demo.client}}</span><span>{{demo.date}}</span><span>{{demo.statut}}</span><span style="text-align: right">{{demo.montant}}</span>
       </div>
       <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
         <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #E0E7FF; color: #3730A3; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">AN</span>Atelier Nord</span>
-        <span style="color: #6B7280">6 oct.</span>
-        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
-        <span style="text-align: right; font-weight: 600">1 240,00 €</span>
+        <span style="color: #6B7280">{{demo.t_6_oct}}</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.payee}}</span></span>
+        <span style="text-align: right; font-weight: 600">{{demo.montant_commande_1}}</span>
       </div>
       <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
         <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">BC</span>Brindille &amp; Co</span>
-        <span style="color: #6B7280">6 oct.</span>
-        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">En attente</span></span>
-        <span style="text-align: right; font-weight: 600">389,90 €</span>
+        <span style="color: #6B7280">{{demo.t_6_oct}}</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">{{demo.attente}}</span></span>
+        <span style="text-align: right; font-weight: 600">{{demo.montant_commande_2}}</span>
       </div>
       <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; font-size: 1.45cqw">
         <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FCE7F3; color: #9D174D; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>Maison Lumen</span>
-        <span style="color: #6B7280">5 oct.</span>
-        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
-        <span style="text-align: right; font-weight: 600">2 105,50 €</span>
+        <span style="color: #6B7280">{{demo.t_5_oct}}</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.payee}}</span></span>
+        <span style="text-align: right; font-weight: 600">{{demo.montant_commande_3}}</span>
       </div>
     </div>
   </div>
@@ -364,7 +377,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(23,23,26,0.12); opacity: 0; animation: vs-frame 30s ease-out infinite"><span style="position: absolute; inset: 0.8cqw; border: 0.5cqw solid #D63A0C; border-radius: 1.2cqw; background: rgba(214,58,12,0.06)"></span></span>
           <span aria-hidden="true" style="position: absolute; left: 67cqw; top: 44cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-rc 30s ease-out infinite"></span>
           <span aria-hidden="true" style="position: absolute; inset: 0; background: #FFFFFF; pointer-events: none; opacity: 0; animation: vs-flash 30s linear infinite"></span>
-          <span aria-hidden="true" style="position: absolute; left: 50%; top: 8cqw; display: flex; align-items: center; gap: 1cqw; padding: 1cqw 1.8cqw; border-radius: 999px; background: rgba(23,23,26,0.88); color: #FFFFFF; font-size: 1.7cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 1cqw 3cqw rgba(0,0,0,0.25); opacity: 0; animation: vs-chip 30s ease-out infinite"><span style="width: 1.2cqw; height: 1.2cqw; border-radius: 999px; background: #D63A0C"></span>Écran capturé · cliquez où vous voulez</span>
+          <span aria-hidden="true" style="position: absolute; left: 50%; top: 8cqw; display: flex; align-items: center; gap: 1cqw; padding: 1cqw 1.8cqw; border-radius: 999px; background: rgba(23,23,26,0.88); color: #FFFFFF; font-size: 1.7cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 1cqw 3cqw rgba(0,0,0,0.25); opacity: 0; animation: vs-chip 30s ease-out infinite">{{demo.ecran_capture_cliquez_ou}}</span>
 
           <span aria-hidden="true" style="position: absolute; left: 34cqw; top: 29.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r1 30s ease-out infinite"></span>
           <span aria-hidden="true" style="position: absolute; left: 88.5cqw; top: 52.3cqw; width: 6cqw; height: 6cqw; box-sizing: border-box; border-radius: 999px; border: 0.4cqw solid #D63A0C; opacity: 0; animation: vs-r2 30s ease-out infinite"></span>
@@ -401,7 +414,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
               </span>
               <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:04</span>
             </div>
-            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t1 30s linear infinite">Ajoute un filtre : 7 jours, 30 jours, 12 mois.</span></div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t1 30s linear infinite">{{demo.ajoute_filtre_7_jours}}</span></div>
           </div>
 
           <div aria-hidden="true" style="position: absolute; left: 38cqw; top: 36.5cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b2 30s ease-out infinite">
@@ -431,7 +444,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
               </span>
               <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:05</span>
             </div>
-            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t2 30s linear infinite">Trie par montant, et ajoute un export CSV.</span></div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t2 30s linear infinite">{{demo.trie_par_montant_ajoute}}</span></div>
           </div>
 
           <div aria-hidden="true" style="position: absolute; left: 40cqw; top: 16cqw; width: 56cqw; box-sizing: border-box; padding: 1.6cqw; border-radius: 1.8cqw; background: #232327; color: #F2F2F3; display: flex; flex-direction: column; gap: 1.2cqw; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.35); opacity: 0; animation: vs-b3 30s ease-out infinite">
@@ -461,7 +474,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
               </span>
               <span style="font-family: 'JetBrains Mono', monospace; font-weight: 400; color: #A1A1A8">0:04</span>
             </div>
-            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t3 30s linear infinite">La recherche doit aussi trouver les e-mails.</span></div>
+            <div style="padding: 1.1cqw 1.4cqw; border-radius: 1cqw; border: 0.25cqw solid #D63A0C; background: #1A1A1D; font-size: 1.9cqw; white-space: nowrap; overflow: hidden"><span style="display: inline-block; animation: vs-t3 30s linear infinite">{{demo.recherche_doit_aussi_trouver}}</span></div>
           </div>
 
           <span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 1.4cqw; opacity: 0; animation: vs-keys 30s ease-out infinite">
@@ -474,7 +487,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.6cqw 1.2cqw 1.2cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-pill 30s ease-out infinite">
             <span style="padding: 0.3cqw 0.9cqw; border-radius: 0.7cqw; background: #2E2E33; font-weight: 500">⌘E</span>
             <svg viewBox="0 0 16 16" style="width: 2.4cqw; height: 2.4cqw" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#30D158"></circle><path d="M4.8 8.2 7 10.4l4.2-4.6" fill="none" stroke="#0B2E16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            3 demandes prêtes pour l'IA
+            {{demo.t_3_demandes_pretes_pour}}
           </span>
 
           <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(14,14,16,0.45); opacity: 0; animation: vs-dim 30s ease-out infinite"></span>
@@ -487,40 +500,40 @@ details[open] .vs-plus{transform:rotate(45deg)}
               <span style="flex: 1; text-align: center; margin-right: 6cqw; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 1.45cqw; color: #8E8E96">claude — ~/comptoir</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 1cqw; padding: 2.2cqw 2.6cqw 2.6cqw; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 1.65cqw; line-height: 1.45; white-space: pre">
-              <div style="display: flex; align-items: center; gap: 1.2cqw; margin-bottom: 0.6cqw; font-family: 'Instrument Sans', sans-serif; font-size: 1.9cqw; font-weight: 700; white-space: nowrap"><svg viewBox="0 0 24 24" style="width: 2.6cqw; height: 2.6cqw"><use href="#logo-claude"></use></svg>Claude Code<span style="font-weight: 500; color: #8E8E96">· MCP vibescreener branché</span></div>
-              <div style="padding: 0.9cqw 1.4cqw; border-radius: 0.9cqw; background: #2A2925; overflow: hidden"><span style="display: inline-block; animation: vs-prompt 30s linear infinite"><span style="color: #8E8E96">&gt; </span>Applique la revue VibeScreener</span></div>
+              <div style="display: flex; align-items: center; gap: 1.2cqw; margin-bottom: 0.6cqw; font-family: 'Instrument Sans', sans-serif; font-size: 1.9cqw; font-weight: 700; white-space: nowrap"><svg viewBox="0 0 24 24" style="width: 2.6cqw; height: 2.6cqw"><use href="#logo-claude"></use></svg>{{demo.claude_code_mcp_vibescreener}}</div>
+              <div style="padding: 0.9cqw 1.4cqw; border-radius: 0.9cqw; background: #2A2925; overflow: hidden"><span style="display: inline-block; animation: vs-prompt 30s linear infinite">{{demo.applique_revue_vibescreener}}</span></div>
               <div style="opacity: 0; animation: vs-c1 30s ease-out infinite"><span style="color: #4EBA65">⏺</span> vibescreener - lire_revue<span style="color: #8E8E96"> (MCP)</span></div>
-              <div style="opacity: 0; animation: vs-c2 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">1 écran · 3 demandes</span></div>
+              <div style="opacity: 0; animation: vs-c2 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">{{demo.t_1_ecran_3_demandes}}</span></div>
               <div style="opacity: 0; animation: vs-c3 30s ease-out infinite"><span style="color: #4EBA65">⏺</span> vibescreener - voir_ecran<span style="color: #8E8E96"> (MCP)(ecran: 1)</span></div>
-              <div style="opacity: 0; animation: vs-c4 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">capture annotée et 3 zooms</span></div>
+              <div style="opacity: 0; animation: vs-c4 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #8E8E96">{{demo.capture_annotee_3_zooms}}</span></div>
               <div style="opacity: 0; animation: vs-c5 30s ease-out infinite"><span style="color: #4EBA65">⏺</span> Update<span style="color: #8E8E96">(src/pages/Ventes.tsx)</span></div>
-              <div style="opacity: 0; animation: vs-c6 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #1 Filtre 7 j · 30 j · 12 mois</div>
-              <div style="opacity: 0; animation: vs-c7 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #2 Tri par montant, export CSV</div>
-              <div style="opacity: 0; animation: vs-c8 30s ease-out infinite"><span style="color: #8E8E96">  ⎿  </span><span style="color: #4EBA65">✓</span> #3 Recherche par e-mail</div>
-              <div style="opacity: 0; animation: vs-c9 30s ease-out infinite; margin-top: 0.6cqw"><span style="color: #D97757">✻</span> Les 3 demandes sont appliquées.</div>
+              <div style="opacity: 0; animation: vs-c6 30s ease-out infinite">{{demo.t_1_filtre_7_j}}</div>
+              <div style="opacity: 0; animation: vs-c7 30s ease-out infinite">{{demo.t_2_tri_par_montant}}</div>
+              <div style="opacity: 0; animation: vs-c8 30s ease-out infinite">{{demo.t_3_recherche_par_e}}</div>
+              <div style="opacity: 0; animation: vs-c9 30s ease-out infinite; margin-top: 0.6cqw">{{demo.t_3_demandes_sont_appliquees}}</div>
             </div>
           </div>
 
-          <span aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; opacity: 0; animation: vs-after 30s ease-out infinite">Commande ou e-mail…</span>
-          <span aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; opacity: 0; animation: vs-after 30s ease-out infinite"><span style="padding: 0.4cqw 1.1cqw">7 j</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">30 j</span><span style="padding: 0.4cqw 1.1cqw">12 mois</span></span>
-          <span aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; opacity: 0; animation: vs-after 30s ease-out infinite"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">↓ Exporter CSV</span></span>
+          <span aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; opacity: 0; animation: vs-after 30s ease-out infinite">{{demo.commande_ou_e_mail}}</span>
+          <span aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; opacity: 0; animation: vs-after 30s ease-out infinite"><span style="padding: 0.4cqw 1.1cqw">{{demo.j7}}</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">{{demo.j30}}</span><span style="padding: 0.4cqw 1.1cqw">{{demo.t_12_mois}}</span></span>
+          <span aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; opacity: 0; animation: vs-after 30s ease-out infinite"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">{{demo.exporter_csv}}</span></span>
           <span aria-hidden="true" style="position: absolute; left: 87.6cqw; top: 54.4cqw; font-size: 1.3cqw; font-weight: 700; color: #0E7C66; opacity: 0; animation: vs-after 30s ease-out infinite">↓</span>
           <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 55.6cqw; top: 29.4cqw; animation: vs-k1 30s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 94.2cqw; top: 49.6cqw; animation: vs-k2 30s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <span aria-hidden="true" style="position: absolute; width: 2.8cqw; height: 2.8cqw; box-sizing: border-box; border-radius: 999px; background: #1F9D55; border: 0.3cqw solid #FFFFFF; box-shadow: 0 0.3cqw 0.8cqw rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; opacity: 0; left: 76.6cqw; top: 8.2cqw; animation: vs-k3 30s ease-out infinite"><svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw"><path d="M3.5 8.5 6.5 11.5 12.5 5" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <span aria-hidden="true" style="position: absolute; left: 50%; bottom: 4cqw; transform: translate(-50%, 0); display: flex; align-items: center; gap: 1.2cqw; padding: 1.2cqw 1.8cqw 1.2cqw 1.4cqw; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 1.9cqw; font-weight: 600; white-space: nowrap; box-shadow: 0 2cqw 4cqw rgba(0,0,0,0.3); opacity: 0; animation: vs-done 30s ease-out infinite">
             <svg viewBox="0 0 24 24" style="width: 2.4cqw; height: 2.4cqw"><use href="#logo-claude"></use></svg>
-            Claude Code a appliqué les 3 demandes
+            {{demo.claude_code_applique_3}}
           </span>
 
           <svg aria-hidden="true" viewBox="0 0 24 24" style="position: absolute; left: 37cqw; top: 32.3cqw; width: 3.6cqw; height: 3.6cqw; filter: drop-shadow(0 0.3cqw 0.4cqw rgba(0,0,0,0.3)); animation: vs-cursor 30s ease-in-out infinite"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="#17171A" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"></path></svg>
         </div>
       </div>
-      <ol class="vs-prog" aria-label="Les quatre étapes de la démonstration">
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s1 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n1 30s linear infinite"><b>01</b>Capture d'écran</span></li>
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s2 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n2 30s linear infinite"><b>02</b>Commentaires sur la capture</span></li>
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s3 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n3 30s linear infinite"><b>03</b>L'IA lit la revue</span></li>
-        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s4 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n4 30s linear infinite"><b>04</b>Résultat</span></li>
+      <ol class="vs-prog" aria-label="{{demo.quatre_etapes_demonstration}}">
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s1 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n1 30s linear infinite">{{demo.t_01capture_ecran}}</span></li>
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s2 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n2 30s linear infinite">{{demo.t_02commentaires_sur_capture}}</span></li>
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s3 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n3 30s linear infinite">{{demo.t_03l_ia_lit_revue}}</span></li>
+        <li><span class="vs-trk"><span class="vs-fill" style="animation: vs-s4 30s linear infinite"></span></span><span class="vs-lab" style="animation: vs-n4 30s linear infinite">{{demo.t_04resultat}}</span></li>
       </ol>
     </div>
   </section>
@@ -531,7 +544,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
       <svg width="0" height="0" style="position: absolute" aria-hidden="true">
         <symbol id="logo-claude" viewBox="0 0 24 24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"></path></symbol>
       </svg>
-      <span>Fonctionne avec</span>
+      <span>{{page.fonctionne_avec}}</span>
       <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><use href="#logo-claude"></use></svg>Claude Code</span>
       <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"></path></svg>Cursor</span>
       <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"></path></svg>ChatGPT</span>
@@ -539,91 +552,91 @@ details[open] .vs-plus{transform:rotate(45deg)}
       <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"></path></svg>GitHub Copilot</span>
       <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M23.55 5.067c-1.2038-.002-2.1806.973-2.1806 2.1765v4.8676c0 .972-.8035 1.7594-1.7597 1.7594-.568 0-1.1352-.286-1.4718-.7659l-4.9713-7.1003c-.4125-.5896-1.0837-.941-1.8103-.941-1.1334 0-2.1533.9635-2.1533 2.153v4.8957c0 .972-.7969 1.7594-1.7596 1.7594-.57 0-1.1363-.286-1.4728-.7658L.4076 5.1598C.2822 4.9798 0 5.0688 0 5.2882v4.2452c0 .2147.0656.4228.1884.599l5.4748 7.8183c.3234.462.8006.8052 1.3509.9298 1.3771.313 2.6446-.747 2.6446-2.0977v-4.893c0-.972.7875-1.7593 1.7596-1.7593h.003a1.798 1.798 0 0 1 1.4718.7658l4.9723 7.0994c.4135.5905 1.05.941 1.8093.941 1.1587 0 2.1515-.9645 2.1515-2.153v-4.8948c0-.972.7875-1.7594 1.7596-1.7594h.194a.22.22 0 0 0 .2204-.2202v-4.622a.22.22 0 0 0-.2203-.2203Z"></path></svg>Windsurf</span>
       <span style="display: inline-flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; color: #17171A; letter-spacing: -0.02em; white-space: nowrap"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#17171A" d="M17.143 3.429v3.428h-3.429v3.429h-3.428V6.857H6.857V3.43H3.43v13.714H0v3.428h10.286v-3.428H6.857v-3.429h3.429v3.429h3.429v-3.429h3.428v3.429h-3.428v3.428H24v-3.428h-3.43V3.429z"></path></svg>Mistral</span>
-      <span>et toutes les autres IA</span>
+      <span>{{page.toutes_autres_ia}}</span>
     </div>
   </div>
 
   <section id="gain" style="padding: 104px 0; background: #F5F5F7">
     <div style="max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Combien de temps vous gagnez&nbsp;?</h2>
-        <p style="margin: 0; font-size: 18px; color: #3A3A40">Réglez selon vos revues&nbsp;: le calcul se fait en direct.</p>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{gain.combien_temps_vous_gagnez}}</h2>
+        <p style="margin: 0; font-size: 18px; color: #3A3A40">{{gain.reglez_selon_vos_revues}}</p>
       </div>
       <div class="vs-reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: stretch">
 
         <div style="display: flex; flex-direction: column; gap: 28px; padding: 28px; border-radius: 20px; background: #FFFFFF">
           <div style="display: flex; flex-direction: column; gap: 10px">
-            <label for="gain-ecrans" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>Écrans par revue</span><output for="gain-ecrans" data-out="gain-ecrans" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">10</output></label>
+            <label for="gain-ecrans" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>{{gain.ecrans_par_revue}}</span><output for="gain-ecrans" data-out="gain-ecrans" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">10</output></label>
             <input id="gain-ecrans" type="range" min="1" max="30" value="10" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
-            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>30 écrans</span></span>
+            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_30_ecrans}}</span></span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px">
-            <label for="gain-retours" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>Retours par écran</span><output for="gain-retours" data-out="gain-retours" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">3</output></label>
+            <label for="gain-retours" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>{{gain.retours_par_ecran}}</span><output for="gain-retours" data-out="gain-retours" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">3</output></label>
             <input id="gain-retours" type="range" min="1" max="10" value="3" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
-            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>10 retours</span></span>
+            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_10_retours}}</span></span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px">
-            <label for="gain-revues" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>Revues par semaine</span><output for="gain-revues" data-out="gain-revues" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">5</output></label>
+            <label for="gain-revues" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600"><span>{{gain.revues_par_semaine}}</span><output for="gain-revues" data-out="gain-revues" style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 700; color: #17171A; font-variant-numeric: tabular-nums">5</output></label>
             <input id="gain-revues" type="range" min="1" max="20" value="5" style="width: 100%; margin: 0; accent-color: #D63A0C; cursor: pointer">
-            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>20 revues</span></span>
+            <span style="display: flex; justify-content: space-between; font-size: 13px; color: #8E8E96"><span>1</span><span>{{gain.t_20_revues}}</span></span>
           </div>
         </div>
 
         <div aria-live="polite" style="display: flex; flex-direction: column; gap: 24px; padding: 28px; border-radius: 20px; background: #17171A; color: #FFFFFF">
           <div style="display: flex; flex-direction: column; gap: 4px">
-            <span style="font-size: 15px; color: #C7C7CC">Temps gagné par mois</span>
+            <span style="font-size: 15px; color: #C7C7CC">{{gain.temps_gagne_par_mois}}</span>
             <span data-out="mois" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(56px, 7vw, 88px); line-height: 1; letter-spacing: -0.04em; color: #FF6A3D; font-variant-numeric: tabular-nums">5 h 12</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 10px">
-            <span style="font-size: 15px; color: #C7C7CC">Par revue de <span data-out="total">30</span> retours</span>
+            <span style="font-size: 15px; color: #C7C7CC">{{gain.par_revue_30_retours}}</span>
             <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; font-size: 15px">
-              <span style="color: #C7C7CC">À la main</span>
-              <span data-out="main" style="font-weight: 600; font-variant-numeric: tabular-nums">17 min</span>
+              <span style="color: #C7C7CC">{{gain.main}}</span>
+              <span data-out="main" style="font-weight: 600; font-variant-numeric: tabular-nums">{{gain.t_17_min}}</span>
               <span style="grid-column: 1 / -1; height: 10px; margin-bottom: 8px; border-radius: 999px; background: #5E5E66"></span>
-              <span style="font-weight: 600">Avec VibeScreener</span>
-              <span data-out="vs" style="font-weight: 600; font-variant-numeric: tabular-nums; color: #FF6A3D">2 min 35</span>
+              <span style="font-weight: 600">{{gain.avec_vibescreener}}</span>
+              <span data-out="vs" style="font-weight: 600; font-variant-numeric: tabular-nums; color: #FF6A3D">{{gain.t_2_min_35}}</span>
               <span style="grid-column: 1 / -1"><span data-out="barre" style="display: block; width: 15.2%; height: 10px; border-radius: 999px; background: #FF6A3D; transition: width .2s ease"></span></span>
             </div>
           </div>
-          <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 13px; line-height: 1.5; color: #A1A1A8">Hypothèses&nbsp;: à la main, 30 s par retour (capture, recadrage, collage dans un document, commentaire tapé) et 2 min pour assembler la revue. Avec VibeScreener, 5 s par retour (un clic, une phrase dite) et 5 s pour l'export.</p>
+          <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 13px; line-height: 1.5; color: #A1A1A8">{{gain.hypotheses_main_30_s}}</p>
         </div>
       </div>
       <div class="vs-reveal" style="margin-top: 40px; display: flex; flex-direction: column; gap: 28px">
         <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 48px">
-          <h3 style="margin: 0; max-width: 560px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 48px); line-height: 1; letter-spacing: -0.04em">Et des retours plus complets.</h3>
-          <p style="margin: 0; max-width: 470px; font-size: 17px; color: #3A3A40">Taper chaque retour est pénible, alors on écrit le minimum et l'IA devine le reste. À l'oral, on dit sans effort ce qui ne va pas, pourquoi, et ce qu'on attend.</p>
+          <h3 style="margin: 0; max-width: 560px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 48px); line-height: 1; letter-spacing: -0.04em">{{gain.retours_plus_complets}}</h3>
+          <p style="margin: 0; max-width: 470px; font-size: 17px; color: #3A3A40">{{gain.taper_chaque_retour_est}}</p>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 20px; align-items: stretch">
           <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #FFFFFF">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="16" height="10" rx="2"></rect><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M6.5 11.8h7"></path></svg>Tapé</span>
-              <span style="font-size: 14px; color: #6E6E76">3 mots</span>
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="16" height="10" rx="2"></rect><path d="M5.5 8.5h1M9.5 8.5h1M13.5 8.5h1M6.5 11.8h7"></path></svg>{{gain.tape}}</span>
+              <span style="font-size: 14px; color: #6E6E76">{{gain.t_3_mots}}</span>
             </div>
             <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
-              <span style="align-self: flex-end; max-width: 85%; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #EDEDF0; color: #17171A">bouton trop petit</span>
+              <span style="align-self: flex-end; max-width: 85%; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #EDEDF0; color: #17171A">{{gain.bouton_trop_petit}}</span>
               <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
                 <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #EDEDF0; color: #5E5E66; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
-                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #E4E4E8; color: #3A3A40">J'agrandis le texte du bouton, de 14 à 16&nbsp;px.</span>
+                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #E4E4E8; color: #3A3A40">{{gain.j_agrandis_texte_bouton}}</span>
               </span>
             </div>
-            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #ECECEF; font-size: 15px; font-weight: 600; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#EDEDF0"></circle><path d="M7 7l6 6M13 7l-6 6" stroke="#5E5E66" stroke-width="1.8" stroke-linecap="round"></path></svg>L'IA devine, et vise à côté.</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #ECECEF; font-size: 15px; font-weight: 600; color: #5E5E66"><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#EDEDF0"></circle><path d="M7 7l6 6M13 7l-6 6" stroke="#5E5E66" stroke-width="1.8" stroke-linecap="round"></path></svg>{{gain.ia_devine_vise_cote}}</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 22px; padding: 28px; border-radius: 24px; background: #17171A; color: #FFFFFF; box-shadow: 0 30px 60px -30px rgba(23,23,26,0.5)">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>Dicté</span>
-              <span style="font-size: 14px; color: #A1A1A8">21 mots</span>
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"></rect><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5V15"></path></svg>{{gain.dicte}}</span>
+              <span style="font-size: 14px; color: #A1A1A8">{{gain.t_21_mots}}</span>
             </div>
             <div style="flex: 1; display: flex; flex-direction: column; gap: 14px">
               <span style="align-self: flex-end; max-width: 90%; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-radius: 18px 18px 6px 18px; background: #2B1A13; box-shadow: inset 0 0 0 1px #5C2A17; color: #FFFFFF">
                 <span aria-hidden="true" class="vs-onde" style="flex: none; width: 120px; height: 14px"><span style="background: #FF8A66; animation-delay: -0.1s"></span><span style="background: #FF8A66; animation-delay: -0.3s"></span><span style="background: #FF8A66; animation-delay: -0.5s"></span><span style="background: #FF8A66; animation-delay: -0.2s"></span><span style="background: #FF8A66; animation-delay: -0.7s"></span><span style="background: #FF8A66; animation-delay: -0.4s"></span><span style="background: #FF8A66; animation-delay: -0.6s"></span><span style="background: #FF8A66; animation-delay: -0.15s"></span><span style="background: #FF8A66; animation-delay: -0.45s"></span><span style="background: #FF8A66; animation-delay: -0.25s"></span><span style="background: #FF8A66; animation-delay: -0.55s"></span><span style="background: #FF8A66; animation-delay: -0.35s"></span></span>
-                <span>Ce bouton est trop petit sur mobile, on le rate avec le pouce. Mets-le en pleine largeur, comme celui du panier.</span>
+                <span>{{gain.ce_bouton_est_trop}}</span>
               </span>
               <span style="align-self: flex-start; max-width: 88%; display: flex; align-items: flex-start; gap: 10px">
                 <span aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; background: #2E2E33; color: #C7C7CC; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">IA</span>
-                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #3A3A40; color: #E5E5EA">Sur mobile, le bouton passe en pleine largeur, avec le même style que «&nbsp;Ajouter au panier&nbsp;».</span>
+                <span style="padding: 12px 16px; border-radius: 18px 18px 18px 6px; border: 1px solid #3A3A40; color: #E5E5EA">{{gain.sur_mobile_bouton_passe}}</span>
               </span>
             </div>
-            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 15px; font-weight: 600; color: #4ADE80"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Juste du premier coup.</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; padding-top: 18px; border-top: 1px solid #2E2E33; font-size: 15px; font-weight: 600; color: #4ADE80"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{gain.juste_premier_coup}}</span>
           </div>
         </div>
       </div>
@@ -633,9 +646,9 @@ details[open] .vs-plus{transform:rotate(45deg)}
   <section id="comment" style="padding: 104px 0; background: #FFFFFF">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 10px">
-        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Comment ça marche</div>
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Trois gestes de votre côté, l'IA s'occupe du code.</h2>
-        <p style="margin: 6px 0 0; max-width: 720px; font-size: 18px; color: #3A3A40">Vous relisez votre app comme avec quelqu'un assis à côté de vous&nbsp;: vous montrez ce qui ne va pas et vous le dites. L'IA reçoit chaque demande avec la capture et l'endroit exact.</p>
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">{{intro.comment_ca_marche}}</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{comment.trois_gestes_votre_cote}}</h2>
+        <p style="margin: 6px 0 0; max-width: 720px; font-size: 18px; color: #3A3A40">{{comment.vous_relisez_votre_app}}</p>
       </div>
       <ol class="vs-etapes">
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
@@ -645,8 +658,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
             <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px">⌘</span>
             <span style="width: 48px; height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 1px solid #D9D9DE; border-bottom-width: 4px; border-radius: 11px; background: #FFFFFF; font-size: 21px; font-weight: 600">P</span>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">1.</span> Capture d'écran</h3>
-          <p style="margin: 0; color: #5E5E66">Sur votre app, le raccourci capture l'écran. Un clic sur la fenêtre et elle est capturée.</p>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em">{{comment.t_1_capture_ecran}}</h3>
+          <p style="margin: 0; color: #5E5E66">{{comment.sur_votre_app_raccourci}}</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
           <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; align-items: center; justify-content: center">
@@ -662,8 +675,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
               <span style="position: absolute; left: 132px; top: 98px; display: flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 999px; background: #17171A; color: #FFFFFF; font-size: 11px; font-weight: 600; white-space: nowrap; box-shadow: 0 6px 14px rgba(0,0,0,0.25)"><span class="vs-rec" style="width: 7px; height: 7px"></span>#3<span class="vs-onde" style="flex: none; width: 36px; height: 10px; gap: 2px"><span style="animation-delay: -0.1s"></span><span style="animation-delay: -0.4s"></span><span style="animation-delay: -0.2s"></span><span style="animation-delay: -0.6s"></span><span style="animation-delay: -0.3s"></span><span style="animation-delay: -0.5s"></span></span></span>
             </span>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">2.</span> Commentez directement sur la capture</h3>
-          <p style="margin: 0; color: #5E5E66">Un clic par demande, puis vous parlez&nbsp;: le micro s'ouvre tout seul.</p>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em">{{comment.t_2_commentez_directement_sur}}</h3>
+          <p style="margin: 0; color: #5E5E66">{{comment.clic_par_demande_puis}}</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
           <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #17171A; display: flex; align-items: center; justify-content: center; gap: 14px">
@@ -671,8 +684,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
             <svg width="28" height="16" viewBox="0 0 28 16" fill="none" stroke="#FF6A3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h22M18 2l6 6-6 6"></path></svg>
             <svg width="40" height="40" viewBox="0 0 24 24"><use href="#logo-claude"></use></svg>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">3.</span> Passez la main</h3>
-          <p style="margin: 0; color: #5E5E66">Claude Code lit la revue par le serveur MCP de VibeScreener. Pour une autre IA, exportez en PDF ou en Markdown.</p>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em">{{comment.t_3_passez_main}}</h3>
+          <p style="margin: 0; color: #5E5E66">{{comment.claude_code_lit_revue}}</p>
         </li>
         <li class="vs-reveal" style="display: flex; flex-direction: column; gap: 16px">
           <div aria-hidden="true" style="height: 150px; border-radius: 18px; background: #F5F5F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px">
@@ -680,8 +693,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
             <span style="display: flex; align-items: center; gap: 10px"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="width: 92px; height: 10px; border-radius: 999px; background: #D9D9DE"></span></span>
             <span style="display: flex; align-items: center; gap: 10px"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1F9D55"></circle><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="width: 106px; height: 10px; border-radius: 999px; background: #D9D9DE"></span></span>
           </div>
-          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em"><span style="color: #D63A0C">4.</span> Modifs effectuées automatiquement</h3>
-          <p style="margin: 0; color: #5E5E66">L'IA reprend les points un par un et modifie le code. Vous vérifiez le résultat.</p>
+          <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.02em">{{comment.t_4_modifs_effectuees_automatiquement}}</h3>
+          <p style="margin: 0; color: #5E5E66">{{comment.ia_reprend_points_par}}</p>
         </li>
       </ol>
     </div>
@@ -690,8 +703,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
   <section id="fonctions" style="padding: 104px 0; background: #F5F5F7">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; gap: 48px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; gap: 10px">
-        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Fonctionnalités</div>
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Tout ce qu'une revue demande.</h2>
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">{{intro.fonctionnalites}}</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{fonctions.tout_ce_qu_revue}}</h2>
       </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
 
@@ -749,21 +762,21 @@ details[open] .vs-plus{transform:rotate(45deg)}
                     <span style="width: 5px; height: 28px; border-radius: 3px; background: #D63A0C; animation: vs-wave 1.1s ease-in-out infinite; animation-delay: -0.99s"></span>
               
                 </span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #5E5E66">5 s de parole · transcrites en 0,6 s</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #5E5E66">{{fonctions.t_5_s_parole_transcrites}}</span>
               </div>
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Dictée sur votre Mac</h3>
-              <p style="margin: 0; padding-right: 52px; color: #5E5E66">Hors ligne. Vous enchaînez sans rien valider.</p>
-              <button type="button" class="vs-round" aria-expanded="false" aria-label="Détail : dictée sur votre Mac" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.dictee_sur_votre_mac}}</h3>
+              <p style="margin: 0; padding-right: 52px; color: #5E5E66">{{fonctions.hors_ligne_vous_enchainez}}</p>
+              <button type="button" class="vs-round" aria-expanded="false" aria-label="{{fonctions.detail_dictee_sur_votre}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
             </div>
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Dictée sur votre Mac</h3>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.dictee_sur_votre_mac}}</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>La transcription tourne sur votre Mac : 5 s de parole écrites en 0,6 s, sans abonnement ni connexion.</li>
-                <li>Elle s'arrête toute seule quand vous cliquez le point suivant ou que vous vous taisez.</li>
-                <li>Un glossaire retient vos mots : noms de composants, jargon du projet.</li>
-                <li>Pas envie de parler ? Tapez au clavier.</li>
+                <li>{{fonctions.transcription_tourne_sur_votre}}</li>
+                <li>{{fonctions.elle_s_arrete_toute}}</li>
+                <li>{{fonctions.glossaire_retient_vos_mots}}</li>
+                <li>{{fonctions.pas_envie_parler_tapez}}</li>
               </ul>
-              <button type="button" class="vs-round" aria-label="Fermer le détail" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
+              <button type="button" class="vs-round" aria-label="{{fonctions.fermer_detail}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
             </div>
           </div>
         </div>
@@ -784,19 +797,19 @@ details[open] .vs-plus{transform:rotate(45deg)}
                   </svg>
                 </div>
               </div>
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Un croquis à l'iPad</h3>
-              <p style="margin: 0; padding-right: 52px; color: #5E5E66">Dessinez la fonction voulue : elle rejoint le point.</p>
-              <button type="button" class="vs-round" aria-expanded="false" aria-label="Détail : un croquis à l'iPad" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.croquis_ipad}}</h3>
+              <p style="margin: 0; padding-right: 52px; color: #5E5E66">{{fonctions.dessinez_fonction_voulue_elle}}</p>
+              <button type="button" class="vs-round" aria-expanded="false" aria-label="{{fonctions.detail_croquis_ipad}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
             </div>
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Un croquis à l'iPad</h3>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.croquis_ipad}}</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>Scannez un QR code avec l'iPad : rien à installer.</li>
-                <li>Dessinez à l'Apple Pencil, touchez Envoyer : le croquis rejoint le point sélectionné sur le Mac.</li>
-                <li>Fond blanc, quadrillé, ou la capture elle-même pour dessiner par-dessus.</li>
-                <li>L'IA reçoit le croquis avec la demande.</li>
+                <li>{{fonctions.scannez_qr_code_avec}}</li>
+                <li>{{fonctions.dessinez_apple_pencil_touchez}}</li>
+                <li>{{fonctions.fond_blanc_quadrille_ou}}</li>
+                <li>{{fonctions.ia_recoit_croquis_avec}}</li>
               </ul>
-              <button type="button" class="vs-round" aria-label="Fermer le détail" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
+              <button type="button" class="vs-round" aria-label="{{fonctions.fermer_detail}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
             </div>
           </div>
         </div>
@@ -812,7 +825,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
                     <span style="width: 50%; height: 6px; border-radius: 3px; background: #E5E7EB"></span>
                     <span style="position: absolute; left: 62px; top: -8px; width: 20px; height: 20px; box-sizing: border-box; border-radius: 10px 10px 10px 3px; background: #D63A0C; border: 2px solid #FFFFFF; color: #FFFFFF; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span>
                   </div>
-                  <span style="font-size: 12px; color: #5E5E66">votre app</span>
+                  <span style="font-size: 12px; color: #5E5E66">{{fonctions.votre_app}}</span>
                 </div>
                 <svg width="44" height="20" viewBox="0 0 44 20" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" style="margin-bottom: 20px" aria-hidden="true"><path d="M40 10H4" stroke-dasharray="4 4" style="animation: vs-march 0.8s linear infinite"></path><path d="M10 4 4 10l6 6" stroke-linejoin="round"></path></svg>
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
@@ -821,22 +834,22 @@ details[open] .vs-plus{transform:rotate(45deg)}
                     <span style="display: flex; gap: 4px"><span style="width: 24px; height: 12px; border-radius: 6px; background: #FF6A3D"></span><span style="width: 20px; height: 12px; border-radius: 6px; background: #3A3A40"></span><span style="width: 28px; height: 12px; border-radius: 6px; background: #3A3A40"></span></span>
                     <span style="width: 60%; height: 6px; border-radius: 3px; background: #3A3A40"></span>
                   </div>
-                  <span style="font-size: 12px; color: #5E5E66">un site modèle</span>
+                  <span style="font-size: 12px; color: #5E5E66">{{fonctions.site_modele}}</span>
                 </div>
               </div>
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Une inspiration en exemple</h3>
-              <p style="margin: 0; padding-right: 52px; color: #5E5E66">Capturez un autre site : l'IA s'en inspire.</p>
-              <button type="button" class="vs-round" aria-expanded="false" aria-label="Détail : une inspiration en exemple" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.inspiration_exemple}}</h3>
+              <p style="margin: 0; padding-right: 52px; color: #5E5E66">{{fonctions.capturez_autre_site_ia}}</p>
+              <button type="button" class="vs-round" aria-expanded="false" aria-label="{{fonctions.detail_inspiration_exemple}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
             </div>
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Une inspiration en exemple</h3>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.inspiration_exemple}}</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>Dans la bulle d'un point, touchez Inspiration, ouvrez le site modèle, puis ⌃⌥⌘P et un clic.</li>
-                <li>La capture rejoint le point, sans créer de nouvel écran.</li>
-                <li>L'IA la reçoit comme le modèle à suivre, pas comme l'écran à modifier.</li>
-                <li>Une image se colle aussi avec ⌘V.</li>
+                <li>{{fonctions.dans_bulle_point_touchez}}</li>
+                <li>{{fonctions.capture_rejoint_point_sans}}</li>
+                <li>{{fonctions.ia_recoit_comme_modele}}</li>
+                <li>{{fonctions.image_se_colle_aussi}}</li>
               </ul>
-              <button type="button" class="vs-round" aria-label="Fermer le détail" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
+              <button type="button" class="vs-round" aria-label="{{fonctions.fermer_detail}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
             </div>
           </div>
         </div>
@@ -866,19 +879,19 @@ details[open] .vs-plus{transform:rotate(45deg)}
                   <text x="13" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#FFFFFF" font-family="Instrument Sans, sans-serif">4</text>
                 </svg>
               </div>
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Points, zones, flèches</h3>
-              <p style="margin: 0; padding-right: 52px; color: #5E5E66">« Mets ce bloc ici » se dessine d'un glisser.</p>
-              <button type="button" class="vs-round" aria-expanded="false" aria-label="Détail : points, zones, flèches" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.points_zones_fleches}}</h3>
+              <p style="margin: 0; padding-right: 52px; color: #5E5E66">{{fonctions.mets_ce_bloc_ici}}</p>
+              <button type="button" class="vs-round" aria-expanded="false" aria-label="{{fonctions.detail_points_zones_fleches}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
             </div>
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Points, zones, flèches</h3>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.points_zones_fleches}}</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>Point : un élément précis, posé d'un clic.</li>
-                <li>Zone : toute une section, tracée en glissant.</li>
-                <li>Flèche : un déplacement, avec ⇧ et un glisser.</li>
-                <li>Tout est numéroté de #1 à #N sur la revue, se déplace, et ⌘Z annule.</li>
+                <li>{{fonctions.point_element_precis_pose}}</li>
+                <li>{{fonctions.zone_toute_section_tracee}}</li>
+                <li>{{fonctions.fleche_deplacement_avec_glisser}}</li>
+                <li>{{fonctions.tout_est_numerote_1}}</li>
               </ul>
-              <button type="button" class="vs-round" aria-label="Fermer le détail" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
+              <button type="button" class="vs-round" aria-label="{{fonctions.fermer_detail}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
             </div>
           </div>
         </div>
@@ -891,19 +904,19 @@ details[open] .vs-plus{transform:rotate(45deg)}
                 <span style="--r: 0deg; width: 66px; height: 86px; box-sizing: border-box; padding: 10px 8px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 8px 18px rgba(23,23,26,0.14); display: flex; flex-direction: column; justify-content: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #17171A; animation: vs-float 3.2s ease-in-out infinite; animation-delay: -1.1s">.md</span>
                 <span style="--r: 6deg; width: 66px; height: 86px; box-sizing: border-box; padding: 10px 8px; border-radius: 8px; background: #FFFFFF; box-shadow: 0 8px 18px rgba(23,23,26,0.14); display: flex; flex-direction: column; justify-content: flex-end; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: #17171A; animation: vs-float 3.2s ease-in-out infinite; animation-delay: -2.2s">.pptx</span>
               </div>
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">PDF, Markdown, PowerPoint</h3>
-              <p style="margin: 0; padding-right: 52px; color: #5E5E66">Un zoom par demande : l'IA vise le bon endroit.</p>
-              <button type="button" class="vs-round" aria-expanded="false" aria-label="Détail : PDF, Markdown, PowerPoint" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.pdf_markdown_powerpoint}}</h3>
+              <p style="margin: 0; padding-right: 52px; color: #5E5E66">{{fonctions.zoom_par_demande_ia}}</p>
+              <button type="button" class="vs-round" aria-expanded="false" aria-label="{{fonctions.detail_pdf_markdown_powerpoint}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
             </div>
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">PDF, Markdown, PowerPoint</h3>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.pdf_markdown_powerpoint}}</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>PDF : à glisser dans Claude ou ChatGPT. Vos instructions, la liste des demandes, puis un zoom autour de chaque point.</li>
-                <li>Markdown et images : pour Cursor ou tout outil qui lit vos fichiers.</li>
-                <li>PowerPoint : pour une réunion avec des humains.</li>
-                <li>Le PDF est copié dans le presse-papiers : il n'y a plus qu'à coller.</li>
+                <li>{{fonctions.pdf_glisser_dans_claude}}</li>
+                <li>{{fonctions.markdown_images_pour_cursor}}</li>
+                <li>{{fonctions.powerpoint_pour_reunion_avec}}</li>
+                <li>{{fonctions.pdf_est_copie_dans}}</li>
               </ul>
-              <button type="button" class="vs-round" aria-label="Fermer le détail" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
+              <button type="button" class="vs-round" aria-label="{{fonctions.fermer_detail}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
             </div>
           </div>
         </div>
@@ -912,32 +925,32 @@ details[open] .vs-plus{transform:rotate(45deg)}
           <div class="vs-carte">
             <div class="vs-face" style="display: flex; flex-direction: column; gap: 14px; padding: 20px 20px 24px; border-radius: 22px; background: #FFFFFF">
               <div aria-hidden="true" style="height: 170px; box-sizing: border-box; padding: 20px; border-radius: 14px; background: #17171A; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #D1D1D6; white-space: nowrap; overflow: hidden">
-                <span style="color: #FFFFFF; animation: vs-l1 6s ease-out infinite"><span style="color: #FF6A3D">&gt;</span> applique la revue VibeScreener</span>
-                <span style="animation: vs-l2 6s ease-out infinite"><span style="color: #FF6A3D">●</span> lire_revue <span style="color: #8E8E96">· 12 demandes</span></span>
-                <span style="animation: vs-l3 6s ease-out infinite"><span style="color: #FF6A3D">●</span> voir_ecran <span style="color: #8E8E96">· Ventes, 4 zooms</span></span>
+                <span style="color: #FFFFFF; animation: vs-l1 6s ease-out infinite">{{fonctions.applique_revue_vibescreener}}</span>
+                <span style="animation: vs-l2 6s ease-out infinite">{{fonctions.lire_revue_12_demandes}}</span>
+                <span style="animation: vs-l3 6s ease-out infinite">{{fonctions.voir_ecran_ventes_4}}</span>
               </div>
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Claude Code lit la revue</h3>
-              <p style="margin: 0; padding-right: 52px; color: #5E5E66">Branché à l'installation. Il suffit de demander.</p>
-              <button type="button" class="vs-round" aria-expanded="false" aria-label="Détail : Claude Code lit la revue" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.claude_code_lit_revue}}</h3>
+              <p style="margin: 0; padding-right: 52px; color: #5E5E66">{{fonctions.branche_installation_il_suffit}}</p>
+              <button type="button" class="vs-round" aria-expanded="false" aria-label="{{fonctions.detail_claude_code_lit}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #17171A; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>
             </div>
             <div class="vs-face" inert style="transform: rotateY(180deg); display: flex; flex-direction: column; gap: 14px; padding: 28px 26px 72px; border-radius: 22px; background: #17171A; color: #FFFFFF">
-              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">Claude Code lit la revue</h3>
+              <h3 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.02em">{{fonctions.claude_code_lit_revue}}</h3>
               <ul style="margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; color: #E5E5EA">
-                <li>L'installation relie VibeScreener à Claude Code, par un petit serveur qui tourne sur votre Mac.</li>
-                <li>Dans votre projet, dites « applique la revue VibeScreener ».</li>
-                <li>Claude Code lit chaque demande, regarde chaque capture et modifie le code.</li>
-                <li>Il ne fait que lire : vos revues restent intactes.</li>
+                <li>{{fonctions.installation_relie_vibescreener_claude}}</li>
+                <li>{{fonctions.dans_votre_projet_dites}}</li>
+                <li>{{fonctions.claude_code_lit_chaque}}</li>
+                <li>{{fonctions.il_ne_fait_que}}</li>
               </ul>
-              <button type="button" class="vs-round" aria-label="Fermer le détail" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
+              <button type="button" class="vs-round" aria-label="{{fonctions.fermer_detail}}" style="position: absolute; right: 16px; bottom: 16px; width: 44px; height: 44px; border: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF; color: #17171A"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"></path></svg></button>
             </div>
           </div>
         </div>
       </div>
 
       <div class="vs-reveal" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; font-size: 15px; font-weight: 600; color: #3A3A40">
-        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>Vos captures restent sur votre Mac</span>
-        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"></rect><path d="M3.5 7.5a4.5 4.5 0 0 0 9 0M8 12v2.5"></path></svg>Dictée hors ligne</span>
-        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 14c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path><path d="M2 2l12 12"></path></svg>Pas de compte à créer</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>{{fonctions.vos_captures_restent_sur}}</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="6" y="1.5" width="4" height="8" rx="2"></rect><path d="M3.5 7.5a4.5 4.5 0 0 0 9 0M8 12v2.5"></path></svg>{{fonctions.dictee_hors_ligne}}</span>
+        <span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="#17171A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5"></circle><path d="M3 14c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"></path><path d="M2 2l12 12"></path></svg>{{fonctions.pas_compte_creer}}</span>
       </div>
     </div>
   </section>
@@ -945,20 +958,20 @@ details[open] .vs-plus{transform:rotate(45deg)}
   <section id="essayer" style="padding: 104px 0 120px; background: #141416; color: #FFFFFF; overflow: hidden">
     <div style="max-width: 1240px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 48px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; max-width: 760px">
-        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66">À vous d'essayer</div>
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Cliquez dans l'app, pour voir.</h2>
-        <p style="margin: 0; font-size: 18px; color: #C7C7CC">Capturez l'écran, puis cliquez où vous voulez sur la capture&nbsp;: la demande s'écrit toute seule, comme si vous la disiez. Exportez, et regardez Claude Code modifier l'app.</p>
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FF8A66">{{essayer.vous_essayer}}</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{essayer.cliquez_dans_app_pour}}</h2>
+        <p style="margin: 0; font-size: 18px; color: #C7C7CC">{{essayer.capturez_ecran_puis_cliquez}}</p>
       </div>
 
       <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px">
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 18px">
-          <ol class="vs-dp" aria-label="Étapes de la démo">
-            <li data-etape="1" aria-current="step"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>1</b>Capturez</span></li>
-            <li data-etape="2"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>2</b>Commentez</span></li>
-            <li data-etape="3"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>3</b>Exportez</span></li>
-            <li data-etape="4"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab"><b>4</b>Le résultat</span></li>
+          <ol class="vs-dp" aria-label="{{essayer.etapes_demo}}">
+            <li data-etape="1" aria-current="step"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab">{{essayer.t_1capturez}}</span></li>
+            <li data-etape="2"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab">{{essayer.t_2commentez}}</span></li>
+            <li data-etape="3"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab">{{essayer.t_3exportez}}</span></li>
+            <li data-etape="4"><span class="vs-dp-trk"><span class="vs-dp-fill"></span></span><span class="vs-dp-lab">{{essayer.t_4le_resultat}}</span></li>
           </ol>
-          <p style="margin: 0; min-height: 26px; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #E5E5EA; text-align: center"><span aria-hidden="true" style="flex: none; width: 9px; height: 9px; border-radius: 999px; background: #FF6A3D; animation: vs-pulse 1.2s ease-in-out infinite"></span><span data-demo="indice" aria-live="polite">Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.</span></p>
+          <p style="margin: 0; min-height: 26px; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #E5E5EA; text-align: center"><span aria-hidden="true" style="flex: none; width: 9px; height: 9px; border-radius: 999px; background: #FF6A3D; animation: vs-pulse 1.2s ease-in-out infinite"></span><span data-demo="indice" aria-live="polite">{{essayer.capturez_ecran_p_ou}}</span></p>
         </div>
 
         <div class="vs-reveal" style="width: 100%; max-width: 1100px; container-type: inline-size">
@@ -968,38 +981,38 @@ details[open] .vs-plus{transform:rotate(45deg)}
 
             <div class="vs-bureau" aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(70% 80% at 12% 8%, #5A3428 0%, rgba(90,52,40,0) 70%), radial-gradient(70% 80% at 92% 95%, #26304A 0%, rgba(38,48,74,0) 70%), #18181C">
               <div style="height: 2.8cqw; display: flex; align-items: center; gap: 2cqw; padding: 0 2cqw; background: rgba(10,10,12,0.5); font-size: 1.15cqw; color: #E5E5EA; white-space: nowrap">
-                <span style="font-weight: 700">Chrome</span><span>Fichier</span><span>Édition</span><span>Affichage</span><span>Fenêtre</span>
+                <span style="font-weight: 700">Chrome</span><span>{{essayer.fichier}}</span><span>{{essayer.edition}}</span><span>{{essayer.affichage}}</span><span>{{essayer.fenetre}}</span>
                 <span style="flex: 1"></span>
                 <svg viewBox="0 0 28 28" style="width: 1.5cqw; height: 1.5cqw"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#FF6A3D"></path><circle cx="14" cy="14" r="4.2" fill="#18181C"></circle></svg>
-                <span>lun. 6 oct. 10:42</span>
+                <span>{{essayer.lun_6_oct_10}}</span>
               </div>
             </div>
 
             <div class="vs-editeur" style="position: absolute; left: 0; top: 0; right: 0; height: var(--barre); box-sizing: border-box; display: flex; align-items: center; gap: 1.2cqw; padding: 0 1.2cqw 0 1.6cqw; background: #1C1C1F; border-bottom: 1px solid #2A2A2E; font-size: max(1.2cqw, 11px)">
               <span aria-hidden="true" style="display: flex; gap: 0.75cqw; margin-right: 0.8cqw"><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FF5F57"></span><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FEBC2E"></span><span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #28C840"></span></span>
-              <span class="vs-si-large" style="font-weight: 600">Revue Comptoir · 6 oct.</span>
-              <span class="vs-si-large" data-demo="nombre" style="color: #A1A1A8">0 demande</span>
+              <span class="vs-si-large" style="font-weight: 600">{{essayer.revue_comptoir_6_oct}}</span>
+              <span class="vs-si-large" data-demo="nombre" style="color: #A1A1A8">{{essayer.t_0_demande}}</span>
               <span style="flex: 1"></span>
-              <button type="button" data-demo="recommencer" style="height: max(2.8cqw, 22px); padding: 0 max(1.1cqw, 8px); border: 0; border-radius: 0.7cqw; background: #26262A; color: #D1D1D6; font-size: max(1.1cqw, 11px); cursor: pointer">Recommencer</button>
-              <button type="button" data-demo="exporter" class="vs-exporter" aria-disabled="true" style="height: max(2.8cqw, 22px); display: flex; align-items: center; gap: 0.7cqw; padding: 0 max(1.2cqw, 8px); border: 0; border-radius: 0.7cqw; font-size: max(1.15cqw, 11px); font-weight: 600; cursor: pointer">Exporter <span class="vs-si-large" style="font-weight: 500; opacity: 0.85">⌘E</span></button>
+              <button type="button" data-demo="recommencer" style="height: max(2.8cqw, 22px); padding: 0 max(1.1cqw, 8px); border: 0; border-radius: 0.7cqw; background: #26262A; color: #D1D1D6; font-size: max(1.1cqw, 11px); cursor: pointer">{{essayer.recommencer}}</button>
+              <button type="button" data-demo="exporter" class="vs-exporter" aria-disabled="true" style="height: max(2.8cqw, 22px); display: flex; align-items: center; gap: 0.7cqw; padding: 0 max(1.2cqw, 8px); border: 0; border-radius: 0.7cqw; font-size: max(1.15cqw, 11px); font-weight: 600; cursor: pointer">{{essayer.exporter_e}}</button>
             </div>
 
             <div class="vs-editeur" style="position: absolute; left: 0; top: var(--barre); width: 69cqw; bottom: 0; background: #0E0E10">
               <div aria-hidden="true" style="position: absolute; left: 50%; bottom: 1.4cqw; transform: translateX(-50%); display: flex; align-items: center; gap: 1.4cqw; padding: 0.7cqw 1.4cqw; border-radius: 0.9cqw; background: #1C1C1F; border: 1px solid #2E2E33; color: #A1A1A8; font-size: 1.05cqw; white-space: nowrap">
-                <span><span style="color: #F2F2F3">Clic</span> poser un point</span>
-                <span>la demande s’écrit seule</span>
-                <span><span style="color: #F2F2F3">Exporter</span> quand c’est prêt</span>
+                <span>{{essayer.clic_poser_point}}</span>
+                <span>{{essayer.demande_s_ecrit_seule}}</span>
+                <span>{{essayer.exporter_quand_c_est}}</span>
               </div>
             </div>
 
             <div class="vs-editeur" style="position: absolute; left: 69cqw; top: var(--barre); right: 0; bottom: 0; box-sizing: border-box; padding: 1.2cqw; background: #1C1C1F; border-left: 1px solid #2A2A2E; display: flex; flex-direction: column; gap: 0.6cqw; font-size: 1.12cqw; line-height: 1.45; overflow: hidden">
               <div style="padding: 0.4cqw 0.5cqw 1cqw; display: flex; flex-direction: column; gap: 0.2cqw">
-                <span style="font-size: 1.25cqw; font-weight: 600">Ventes · <span data-demo="nombre">0 demande</span></span>
-                <span style="font-size: 1cqw; color: #A1A1A8">Chrome — localhost:5173/ventes</span>
+                <span style="font-size: 1.25cqw; font-weight: 600">{{essayer.ventes_0_demande}}</span>
+                <span style="font-size: 1cqw; color: #A1A1A8">{{essayer.chrome_localhost_5173_ventes}}</span>
               </div>
               <div data-demo="vide" style="margin: 4cqw 1cqw 0; display: flex; flex-direction: column; align-items: center; gap: 1cqw; text-align: center; color: #A1A1A8">
                 <svg viewBox="0 0 24 24" style="width: 3cqw; height: 3cqw" aria-hidden="true"><path d="M3 2l15 9-6.5 1.5L8 19z" fill="none" stroke="#A1A1A8" stroke-width="1.6" stroke-linejoin="round"></path></svg>
-                <span>Aucune demande pour l’instant. Cliquez sur la capture, à gauche.</span>
+                <span>{{essayer.aucune_demande_pour_instant}}</span>
               </div>
               <div data-demo="liste" style="display: flex; flex-direction: column; gap: 0.6cqw"></div>
             </div>
@@ -1014,7 +1027,7 @@ details[open] .vs-plus{transform:rotate(45deg)}
       <span style="width: 1.4cqw; height: 1.4cqw; border-radius: 999px; background: #28C840"></span>
       <span style="margin-left: 2cqw; flex: 0 1 44cqw; height: 3.5cqw; box-sizing: border-box; border-radius: 0.9cqw; background: #FFFFFF; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; font-size: 1.6cqw; color: #6B7280; white-space: nowrap; overflow: hidden">
         <svg viewBox="0 0 16 16" style="width: 1.5cqw; height: 1.5cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="7" rx="1.5"></rect><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"></path></svg>
-        localhost:5173/ventes
+        {{page.adresse_maquette}}
       </span>
     </div>
 
@@ -1024,19 +1037,19 @@ details[open] .vs-plus{transform:rotate(45deg)}
         <span style="font-size: 2cqw; font-weight: 700; letter-spacing: -0.02em">Comptoir</span>
       </div>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>Accueil
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>{{demo.accueil}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; background: #E2F1EC; color: #0B5E4E; font-weight: 600">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>Ventes
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 13.5h12M4 11V8M8 11V4M12 11V6.5"></path></svg>{{demo.ventes}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>Produits
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z"></path><path d="M2.5 5 8 7.5 13.5 5M8 7.5v6"></path></svg>{{demo.produits}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>Clients
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.5"></circle><path d="M1.5 13.5c.5-2.3 2.3-3.5 4.5-3.5s4 1.2 4.5 3.5M11 3.2a2.4 2.4 0 0 1 0 4.6M12.5 10.2c1.2.5 1.8 1.6 2 3.3"></path></svg>{{demo.clients}}
       </span>
       <span style="height: 3.6cqw; display: flex; align-items: center; gap: 1.1cqw; padding: 0 1cqw; border-radius: 0.8cqw; font-size: 1.55cqw; color: #4B5563">
-        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>Réglages
+        <svg viewBox="0 0 16 16" style="width: 1.8cqw; height: 1.8cqw" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"></path><circle cx="10.5" cy="4.5" r="1.5"></circle><circle cx="5.5" cy="11.5" r="1.5"></circle></svg>{{demo.reglages}}
       </span>
       <div style="margin-top: auto; display: flex; align-items: center; gap: 1cqw; padding: 0 0.6cqw">
         <span style="width: 2.8cqw; height: 2.8cqw; border-radius: 999px; background: #FCD9BD; color: #7C2D12; font-size: 1.15cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>
@@ -1044,36 +1057,36 @@ details[open] .vs-plus{transform:rotate(45deg)}
       </div>
     </div>
 
-    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">Ventes</div>
-    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">Octobre 2026 · 1 284 commandes</div>
+    <div style="position: absolute; left: 20cqw; top: 8.8cqw; font-size: 3cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.ventes}}</div>
+    <div style="position: absolute; left: 20cqw; top: 13cqw; font-size: 1.45cqw; color: #6B7280; white-space: nowrap">{{demo.octobre_2026_1_284}}</div>
 
     <div style="position: absolute; left: 58cqw; top: 9.4cqw; width: 20cqw; height: 4.4cqw; box-sizing: border-box; border: 1px solid #E5E7EB; border-radius: 1cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.2cqw; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; overflow: hidden">
       <svg viewBox="0 0 16 16" style="width: 1.7cqw; height: 1.7cqw; flex: none" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
-      <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis">N° de commande…</span>
+      <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis">{{demo.n_commande}}</span>
     </div>
     <div style="position: absolute; left: 79.5cqw; top: 9.4cqw; width: 17.5cqw; height: 4.4cqw; border-radius: 1cqw; background: #0E7C66; color: #FFFFFF; font-size: 1.5cqw; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.6cqw; white-space: nowrap">
-      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>Nouvelle vente
+      <svg viewBox="0 0 16 16" style="width: 1.6cqw; height: 1.6cqw" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>{{demo.nouvelle_vente}}
     </div>
 
     <div style="position: absolute; left: 20cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 1.4cqw; color: #6B7280">Chiffre d'affaires</span>
-      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">48 320 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+12 %</span></span>
+      <span style="font-size: 1.4cqw; color: #6B7280">{{demo.chiffre_affaires}}</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.montant_ca}}</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.evolution_ca}}</span></span>
     </div>
     <div style="position: absolute; left: 46.2cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 1.4cqw; color: #6B7280">Commandes</span>
-      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">1 284</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">+8 %</span></span>
+      <span style="font-size: 1.4cqw; color: #6B7280">{{demo.commandes}}</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.nombre_commandes}}</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.evolution_commandes}}</span></span>
     </div>
     <div style="position: absolute; left: 72.4cqw; top: 17cqw; width: 24.6cqw; height: 10.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; justify-content: space-between">
-      <span style="font-size: 1.4cqw; color: #6B7280">Panier moyen</span>
-      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">37,60 €</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">−2 %</span></span>
+      <span style="font-size: 1.4cqw; color: #6B7280">{{demo.panier_moyen}}</span>
+      <span style="display: flex; align-items: center; gap: 1cqw"><span style="font-size: 2.8cqw; font-weight: 700; letter-spacing: -0.02em">{{demo.montant_panier}}</span><span style="padding: 0.3cqw 0.8cqw; border-radius: 999px; background: #FEE2E2; color: #991B1B; font-size: 1.2cqw; font-weight: 600">{{demo.evolution_panier}}</span></span>
     </div>
 
     <div style="position: absolute; left: 20cqw; top: 29.5cqw; width: 77cqw; height: 18.5cqw; box-sizing: border-box; padding: 1.6cqw 1.8cqw 1.2cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column; gap: 0.8cqw">
       <div style="height: 2.4cqw; display: flex; align-items: center; gap: 1cqw">
-        <span style="font-size: 1.7cqw; font-weight: 600">Ventes par jour</span>
+        <span style="font-size: 1.7cqw; font-weight: 600">{{demo.ventes_par_jour}}</span>
         <span style="flex: 1"></span>
         <span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span>
-        <span style="font-size: 1.3cqw; color: #6B7280">Chiffre d'affaires</span>
+        <span style="font-size: 1.3cqw; color: #6B7280">{{demo.chiffre_affaires}}</span>
       </div>
       <div style="position: relative; flex: 1">
         <svg viewBox="0 0 400 80" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
@@ -1083,51 +1096,50 @@ details[open] .vs-plus{transform:rotate(45deg)}
         </svg>
       </div>
       <div style="display: flex; justify-content: space-between; font-size: 1.2cqw; color: #9CA3AF">
-        <span>23 sept.</span><span>27 sept.</span><span>1 oct.</span><span>6 oct.</span>
+        <span>{{demo.t_23_sept}}</span><span>{{demo.t_27_sept}}</span><span>{{demo.t_1_oct}}</span><span>{{demo.t_6_oct}}</span>
       </div>
     </div>
 
     <div style="position: absolute; left: 20cqw; top: 49.5cqw; width: 77cqw; height: 17.9cqw; box-sizing: border-box; padding: 1.4cqw 1.8cqw; border: 1px solid #E5E7EB; border-radius: 1.4cqw; display: flex; flex-direction: column">
       <div style="height: 3cqw; display: flex; align-items: center">
-        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">Dernières commandes</span>
-        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">Tout voir</span>
+        <span style="flex: 1; font-size: 1.7cqw; font-weight: 600">{{demo.dernieres_commandes}}</span>
+        <span style="font-size: 1.3cqw; font-weight: 600; color: #0E7C66">{{demo.tout_voir}}</span>
       </div>
       <div style="height: 2.8cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F0F1F3; font-size: 1.2cqw; font-weight: 600; color: #6B7280">
-        <span>Client</span><span>Date</span><span>Statut</span><span style="text-align: right">Montant</span>
+        <span>{{demo.client}}</span><span>{{demo.date}}</span><span>{{demo.statut}}</span><span style="text-align: right">{{demo.montant}}</span>
       </div>
       <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
         <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #E0E7FF; color: #3730A3; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">AN</span>Atelier Nord</span>
-        <span style="color: #6B7280">6 oct.</span>
-        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
-        <span style="text-align: right; font-weight: 600">1 240,00 €</span>
+        <span style="color: #6B7280">{{demo.t_6_oct}}</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.payee}}</span></span>
+        <span style="text-align: right; font-weight: 600">{{demo.montant_commande_1}}</span>
       </div>
       <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; border-bottom: 1px solid #F5F6F7; font-size: 1.45cqw">
         <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">BC</span>Brindille &amp; Co</span>
-        <span style="color: #6B7280">6 oct.</span>
-        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">En attente</span></span>
-        <span style="text-align: right; font-weight: 600">389,90 €</span>
+        <span style="color: #6B7280">{{demo.t_6_oct}}</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #FEF3C7; color: #92400E; font-size: 1.2cqw; font-weight: 600">{{demo.attente}}</span></span>
+        <span style="text-align: right; font-weight: 600">{{demo.montant_commande_2}}</span>
       </div>
       <div style="height: 3.1cqw; display: grid; grid-template-columns: 30cqw 14cqw 15cqw minmax(0, 1fr); align-items: center; font-size: 1.45cqw">
         <span style="display: flex; align-items: center; gap: 1cqw"><span style="width: 2.2cqw; height: 2.2cqw; border-radius: 999px; background: #FCE7F3; color: #9D174D; font-size: 0.95cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">ML</span>Maison Lumen</span>
-        <span style="color: #6B7280">5 oct.</span>
-        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">Payée</span></span>
-        <span style="text-align: right; font-weight: 600">2 105,50 €</span>
+        <span style="color: #6B7280">{{demo.t_5_oct}}</span>
+        <span><span style="padding: 0.3cqw 0.9cqw; border-radius: 999px; background: #DCFCE7; color: #166534; font-size: 1.2cqw; font-weight: 600">{{demo.payee}}</span></span>
+        <span style="text-align: right; font-weight: 600">{{demo.montant_commande_3}}</span>
       </div>
     </div>
   </div>
 </div></div>
             </div>
 
-            <button type="button" data-demo="capturer" class="vs-bureau vs-appel" aria-label="Capturer l'écran, raccourci Contrôle Option Commande P" style="position: absolute; left: 50%; bottom: 1.6cqw; transform: translateX(-50%); height: max(4.4cqw, 30px); display: flex; align-items: center; gap: max(0.9cqw, 6px); padding: 0 max(1.8cqw, 12px) 0 max(1.4cqw, 10px); border: 0; border-radius: 999px; background: #D63A0C; color: #FFFFFF; font-size: max(1.4cqw, 12px); font-weight: 600; white-space: nowrap; cursor: pointer">
+            <button type="button" data-demo="capturer" class="vs-bureau vs-appel" aria-label="{{essayer.capturer_ecran_raccourci_controle}}" style="position: absolute; left: 50%; bottom: 1.6cqw; transform: translateX(-50%); height: max(4.4cqw, 30px); display: flex; align-items: center; gap: max(0.9cqw, 6px); padding: 0 max(1.8cqw, 12px) 0 max(1.4cqw, 10px); border: 0; border-radius: 999px; background: #D63A0C; color: #FFFFFF; font-size: max(1.4cqw, 12px); font-weight: 600; white-space: nowrap; cursor: pointer">
               <svg viewBox="0 0 28 28" style="width: max(1.8cqw, 14px); height: max(1.8cqw, 14px)" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#FFFFFF"></path><circle cx="14" cy="14" r="4.2" fill="#D63A0C"></circle></svg>
-              Capturer l'écran
-              <span aria-hidden="true" style="padding: 0.2em 0.5em; border-radius: 0.4em; background: rgba(0,0,0,0.22); font-weight: 500">⌃⌥⌘P</span>
+              {{essayer.capturer_ecran_p}}
             </button>
 
             <span data-demo="cadre" hidden aria-hidden="true" style="position: absolute; left: 14.4cqw; top: 5.4cqw; width: 71.2cqw; height: 49.33cqw; box-sizing: border-box; border: 0.35cqw solid #D63A0C; border-radius: 1.2cqw; box-shadow: 0 0 0 100cqw rgba(8,8,10,0.5); pointer-events: none; animation: vs-fadein .2s ease-out both"></span>
 
             <div data-demo="claude" hidden style="position: absolute; inset: 0; background: rgba(8,8,10,0.6); display: flex; align-items: center; justify-content: center; animation: vs-fadein .25s ease-out both">
-              <div role="dialog" tabindex="-1" aria-label="Claude Code applique la revue" style="width: 62cqw; border-radius: 1.4cqw; overflow: hidden; background: #141416; color: #D1D1D6; box-shadow: 0 3cqw 6cqw rgba(0,0,0,0.5); font-family: 'JetBrains Mono', monospace; font-size: 1.3cqw; line-height: 1.65; outline: none">
+              <div role="dialog" tabindex="-1" aria-label="{{essayer.claude_code_applique_revue}}" style="width: 62cqw; border-radius: 1.4cqw; overflow: hidden; background: #141416; color: #D1D1D6; box-shadow: 0 3cqw 6cqw rgba(0,0,0,0.5); font-family: 'JetBrains Mono', monospace; font-size: 1.3cqw; line-height: 1.65; outline: none">
                 <div style="height: 3.4cqw; display: flex; align-items: center; gap: 0.8cqw; padding: 0 1.4cqw; background: #1E1E21; border-bottom: 1px solid #2A2A2E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 1.15cqw; color: #8E8E96">
                   <span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FF5F57"></span>
                   <span style="width: 1.1cqw; height: 1.1cqw; border-radius: 999px; background: #FEBC2E"></span>
@@ -1135,9 +1147,9 @@ details[open] .vs-plus{transform:rotate(45deg)}
                   <span style="margin-left: 1cqw; flex: 1">claude — ~/comptoir</span>
                 </div>
                 <div style="padding: 1.8cqw 2cqw 2.2cqw; display: flex; flex-direction: column; gap: 0.4cqw">
-                  <span style="color: #FFFFFF; animation: vs-fadein .3s .2s ease-out both"><span style="color: #FF6A3D">&gt;</span> Applique la revue VibeScreener</span>
-                  <span style="animation: vs-fadein .3s .6s ease-out both"><span style="color: #30D158">⏺</span> lire_revue <span style="color: #8E8E96">⎿ 1 écran · <span data-demo="nombre">0 demande</span></span></span>
-                  <span style="animation: vs-fadein .3s .9s ease-out both"><span style="color: #30D158">⏺</span> voir_ecran <span style="color: #8E8E96">⎿ capture annotée et zooms</span></span>
+                  <span style="color: #FFFFFF; animation: vs-fadein .3s .2s ease-out both">{{essayer.applique_revue_vibescreener}}</span>
+                  <span style="animation: vs-fadein .3s .6s ease-out both">{{essayer.lire_revue_1_ecran}}</span>
+                  <span style="animation: vs-fadein .3s .9s ease-out both">{{essayer.voir_ecran_capture_annotee}}</span>
                   <span style="animation: vs-fadein .3s 1.2s ease-out both"><span style="color: #30D158">⏺</span> Update <span style="color: #8E8E96">(src/pages/Ventes.tsx)</span></span>
                   <span data-demo="appliquees" style="display: flex; flex-direction: column; gap: 0.4cqw"></span>
                   <span data-demo="fin" style="color: #FF8A66; animation: vs-fadein .3s ease-out both"></span>
@@ -1159,46 +1171,46 @@ details[open] .vs-plus{transform:rotate(45deg)}
   <section id="tarifs" style="padding: 104px 0; background: #FFFFFF">
     <div style="max-width: 1000px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 40px">
       <div class="vs-reveal" style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
-        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">Tarifs</div>
-        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">14 jours gratuits.<br>Sans carte bancaire.</h2>
-        <p style="margin: 0; font-size: 18px; color: #3A3A40">Toutes les fonctions pendant l'essai. Ensuite, au choix :</p>
+        <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #B8300A">{{intro.tarifs}}</div>
+        <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{tarifs.t_14_jours_gratuits_sans}}</h2>
+        <p style="margin: 0; font-size: 18px; color: #3A3A40">{{tarifs.toutes_fonctions_pendant_essai}}</p>
       </div>
 
       <div style="width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px">
         <!-- Offre « Licence à vie » : supprimer ce bloc pour la retirer. -->
           <div class="vs-reveal" style="flex: 1 1 320px; max-width: 420px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; padding: 32px; border-radius: 24px; background: #17171A; color: #FFFFFF">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-              <span style="font-size: 17px; font-weight: 600">Licence à vie</span>
-              <span style="padding: 4px 10px; border-radius: 999px; background: #D63A0C; font-size: 12.5px; font-weight: 700">Une fois pour toutes</span>
+              <span style="font-size: 17px; font-weight: 600">{{tarifs.licence_vie}}</span>
+              <span style="padding: 4px 10px; border-radius: 999px; background: #D63A0C; font-size: 12.5px; font-weight: 700">{{tarifs.fois_pour_toutes}}</span>
             </div>
             <div style="display: flex; align-items: baseline; gap: 10px">
-              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.04em">19,99 €</span>
-              <span style="color: #C7C7CC">une fois, TTC</span>
+              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.04em">{{tarifs.prix_licence}}</span>
+              <span style="color: #C7C7CC">{{tarifs.fois_ttc}}</span>
             </div>
             <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: #E5E5EA">
-              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Toutes les fonctions</li>
-              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Jusqu'à 3 Mac</li>
-              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Aucun abonnement</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{tarifs.toutes_fonctions}}</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{tarifs.jusqu_3_mac}}</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#FF8A66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{tarifs.aucun_abonnement}}</li>
             </ul>
             <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
-            <a href="#tarifs" class="vs-btn" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 16px">Acheter la licence</a>
+            <a href="#tarifs" class="vs-btn" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 16px">{{tarifs.acheter_licence}}</a>
           </div>
         <!-- Offre « Abonnement » : supprimer ce bloc pour la retirer. -->
           <div class="vs-reveal" style="flex: 1 1 320px; max-width: 420px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; padding: 32px; border-radius: 24px; background: #FFFFFF; box-shadow: inset 0 0 0 1.5px #DCDCE1">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
-              <span style="font-size: 17px; font-weight: 600">Abonnement</span>
+              <span style="font-size: 17px; font-weight: 600">{{tarifs.abonnement}}</span>
             </div>
             <div style="display: flex; align-items: baseline; gap: 10px">
-              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.04em">1,99 €</span>
-              <span style="color: #5E5E66">par mois, TTC</span>
+              <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.04em">{{tarifs.prix_abonnement}}</span>
+              <span style="color: #5E5E66">{{tarifs.par_mois_ttc}}</span>
             </div>
             <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: #3A3A40">
-              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Toutes les fonctions</li>
-              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Jusqu'à 3 Mac</li>
-              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>Résiliable à tout moment</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{tarifs.toutes_fonctions}}</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{tarifs.jusqu_3_mac}}</li>
+              <li style="display: flex; align-items: center; gap: 10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#D63A0C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"></path></svg>{{tarifs.resiliable_tout_moment}}</li>
             </ul>
             <!-- À COMPLÉTER : lien de paiement Polar de production (M4) -->
-            <a href="#tarifs" class="vs-btn" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #FFFFFF; color: #17171A; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: inset 0 0 0 1.5px #17171A">S'abonner</a>
+            <a href="#tarifs" class="vs-btn" style="margin-top: auto; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #FFFFFF; color: #17171A; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: inset 0 0 0 1.5px #17171A">{{tarifs.s_abonner}}</a>
           </div>
       </div>
 
@@ -1207,49 +1219,49 @@ details[open] .vs-plus{transform:rotate(45deg)}
 
   <section id="faq" style="padding: 104px 0; background: #F5F5F7">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 32px 64px; align-items: flex-start">
-      <h2 class="vs-reveal" style="flex: 1 1 280px; margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">Questions</h2>
+      <h2 class="vs-reveal" style="flex: 1 1 280px; margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.04em">{{faq.questions}}</h2>
       <div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; border-top: 1px solid #DCDCE1">
         <details open="" style="border-bottom: 1px solid #DCDCE1">
           <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
-            <span style="flex: 1">Et à la fin de l'essai ?</span>
+            <span style="flex: 1">{{faq.fin_essai}}</span>
             <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
           </summary>
-          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Sans licence, les nouvelles captures s'arrêtent. Vos sessions, vos exports et Claude Code restent accessibles.</p>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">{{faq.sans_licence_nouvelles_captures}}</p>
         </details>
         <details style="border-bottom: 1px solid #DCDCE1">
           <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
-            <span style="flex: 1">Quel Mac faut-il ?</span>
+            <span style="flex: 1">{{faq.quel_mac_faut_il}}</span>
             <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
           </summary>
-          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Un Mac Apple Silicon (M1 ou plus récent) sous macOS 13 ou plus. Windows est prévu.</p>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">{{faq.mac_apple_silicon_m1}}</p>
         </details>
         <details style="border-bottom: 1px solid #DCDCE1">
           <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
-            <span style="flex: 1">Faut-il une connexion Internet ?</span>
+            <span style="flex: 1">{{faq.faut_il_connexion_internet}}</span>
             <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
           </summary>
-          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Pas pour capturer ni dicter. Internet sert à la tablette, aux mises à jour et à vérifier la licence.</p>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">{{faq.pas_pour_capturer_ni}}</p>
         </details>
         <details style="border-bottom: 1px solid #DCDCE1">
           <summary style="min-height: 64px; display: flex; align-items: center; gap: 16px; cursor: pointer; font-size: 18px; font-weight: 600">
-            <span style="flex: 1">Puis-je être remboursé ou résilier ?</span>
+            <span style="flex: 1">{{faq.puis_je_etre_rembourse}}</span>
             <span class="vs-plus" aria-hidden="true" style="font-size: 26px; font-weight: 400; color: #5E5E66; transition: transform 0.2s">+</span>
           </summary>
-          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">Oui : remboursé dans les 14 jours suivant l'achat, sans justification. L'abonnement se résilie à tout moment depuis votre espace Polar.</p>
+          <p style="margin: 0; padding: 0 40px 22px 0; color: #3A3A40">{{faq.oui_rembourse_dans_14}}</p>
         </details>
       </div>
     </div>
   </section>
 
-  <section aria-label="Installer VibeScreener" style="padding: 104px 0; background: #D63A0C; color: #FFFFFF">
+  <section aria-label="{{installer.installer_vibescreener}}" style="padding: 104px 0; background: #D63A0C; color: #FFFFFF">
     <div class="vs-reveal" style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center">
-      <h2 style="margin: 0; max-width: 860px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 80px); line-height: 0.98; letter-spacing: -0.045em">Votre prochaine version commence par un clic.</h2>
+      <h2 style="margin: 0; max-width: 860px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 80px); line-height: 0.98; letter-spacing: -0.045em">{{installer.votre_prochaine_version_commence}}</h2>
       <div style="width: 100%; max-width: 560px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 16px; border-radius: 12px; background: #17171A; text-align: left">
         <code style="flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; padding: 12px 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 14px; color: #F2F2F3"><span style="color: #8E8E96">$ </span>curl -fsSL https://vibescreener.dev/install.sh | sh</code>
-        <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="Copier la commande d'installation" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 9px; background: #FFFFFF; color: #17171A; font-weight: 700; font-size: 14px; cursor: pointer">Copier</button>
+        <button type="button" data-copy="curl -fsSL https://vibescreener.dev/install.sh | sh" aria-label="{{intro.copier_commande_installation}}" style="flex: none; height: 44px; min-width: 88px; padding: 0 14px; border: 0; border-radius: 9px; background: #FFFFFF; color: #17171A; font-weight: 700; font-size: 14px; cursor: pointer">{{intro.copier}}</button>
       </div>
       <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; font-size: 15px">
-        <span>14 jours gratuits, sans carte</span>
+        <span>{{intro.t_14_jours_gratuits_sans}}</span>
         <span>Mac Apple Silicon</span>
       </div>
     </div>
@@ -1262,27 +1274,33 @@ details[open] .vs-plus{transform:rotate(45deg)}
         VibeScreener
       </span>
       <span style="flex: 1"></span>
-      <a href="/mentions-legales">Mentions légales</a>
-      <a href="/licence">Licence d'utilisation</a>
-      <a href="/confidentialite">Confidentialité</a>
-      <a href="/licences-tierces">Licences tierces</a>
-      <span>Contact : [À COMPLÉTER : e-mail]</span>
+      <a href="{{root}}/mentions-legales">{{footer.mentions_legales}}</a>
+      <a href="{{root}}/licence">{{footer.licence_utilisation}}</a>
+      <a href="{{root}}/confidentialite">{{footer.confidentialite}}</a>
+      <a href="{{root}}/licences-tierces">{{footer.licences_tierces}}</a>
+      <span>{{footer.contact_completer_e_mail}}</span>
+      {{switcher:up}}
     </div>
   </footer>
 </div>
 
 <script>
+// Textes du script dans la langue de la page (dictionnaire « script », src/i18n).
+const L = {{json:script}};
+const pluriel = new Intl.PluralRules(document.documentElement.lang);
+const nombre = (n, formes) => formes[pluriel.select(n) === 'one' ? 0 : 1].replace('{n}', n);
 // Copie de la commande d'installation ; sans accès au presse-papiers, elle est sélectionnée
 // pour ⌘C (sans le « $ » qui la précède).
 // Calculateur de temps gagné : mêmes hypothèses que le texte affiché sous le résultat.
 const MAIN_RETOUR = 30, MAIN_REVUE = 120, VS_RETOUR = 5, VS_REVUE = 5; // secondes
 const out = (name) => document.querySelector(`[data-out="${name}"]`);
 function duree(s) {
+  const f = (modele, a, b) => modele.replace('{a}', a).replace('{b}', String(b).padStart(2, '0'));
   s = Math.round(s);
-  if (s < 60) return `${s} s`;
-  if (s < 3600) return s % 60 ? `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')}` : `${s / 60} min`;
+  if (s < 60) return f(L.secondes, s);
+  if (s < 3600) return s % 60 ? f(L.minutesSecondes, Math.floor(s / 60), s % 60) : f(L.minutes, s / 60);
   const m = Math.round(s / 60);
-  return m % 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}` : `${m / 60} h`;
+  return m % 60 ? f(L.heuresMinutes, Math.floor(m / 60), m % 60) : f(L.heures, m / 60);
 }
 function calcul() {
   const [ecrans, retours, revues] = ['gain-ecrans', 'gain-retours', 'gain-revues'].map((id) => {
@@ -1314,8 +1332,8 @@ for (const button of document.querySelectorAll('[data-copy]')) {
       getSelection().addRange(range);
       return;
     }
-    button.textContent = 'Copié';
-    setTimeout(() => (button.textContent = 'Copier'), 2000);
+    button.textContent = L.copie;
+    setTimeout(() => (button.textContent = L.copier), 2000);
   });
 }
 
@@ -1367,20 +1385,20 @@ for (const carte of cartes) {
 { // bloc : les noms de la démo ne débordent pas sur le reste de la page
   const MAX_POINTS = 6;
   const DEMANDES = [
-    { nom: 'Graphique', zone: [20, 29.5, 77, 18.5], pin: [37, 32.3], texte: 'Ajoute un filtre : 7 jours, 30 jours, 12 mois.',
-      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1.1cqw">7 j</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">30 j</span><span style="padding: 0.4cqw 1.1cqw">12 mois</span></span>' },
-    { nom: 'Tableau', zone: [20, 49.5, 77, 17.9], pin: [91.5, 55.3], texte: 'Trie par montant et ajoute un export CSV.',
-      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">↓ Exporter CSV</span></span>'
+    { nom: L.graphiqueNom, zone: [20, 29.5, 77, 18.5], pin: [37, 32.3], texte: L.graphiqueTexte,
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 38.5cqw; top: 30.8cqw; display: flex; padding: 0.3cqw; gap: 0.3cqw; border-radius: 0.9cqw; background: #F3F4F6; font-size: 1.25cqw; font-weight: 600; color: #6B7280; white-space: nowrap; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1.1cqw">' + L.j7 + '</span><span style="padding: 0.4cqw 1.1cqw; border-radius: 0.6cqw; background: #FFFFFF; color: #0B5E4E; box-shadow: 0 0.1cqw 0.3cqw rgba(0,0,0,0.12)">' + L.j30 + '</span><span style="padding: 0.4cqw 1.1cqw">' + L.mois12 + '</span></span>' },
+    { nom: L.tableauNom, zone: [20, 49.5, 77, 17.9], pin: [91.5, 55.3], texte: L.tableauTexte,
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 82.5cqw; top: 50.9cqw; width: 12.7cqw; height: 3cqw; display: flex; align-items: center; justify-content: flex-end; background: #FFFFFF; animation: vs-fadein .4s ease-out both"><span style="padding: 0.4cqw 1cqw; border-radius: 0.7cqw; border: 1px solid #0E7C66; color: #0E7C66; font-size: 1.2cqw; font-weight: 600; white-space: nowrap">' + L.exporterCsv + '</span></span>'
         + '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 87.6cqw; top: 54.4cqw; font-size: 1.3cqw; font-weight: 700; color: #0E7C66; animation: vs-fadein .4s ease-out both">↓</span>' },
-    { nom: 'Recherche', zone: [58, 9.4, 20, 4.4], pin: [61, 11.6], texte: 'La recherche doit aussi trouver les e-mails.',
-      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; animation: vs-fadein .4s ease-out both">Commande ou e-mail…</span>' },
-    { nom: 'Chiffres clés', zone: [20, 17, 77, 10.5], pin: [33, 21], texte: 'Sur mobile, mets ces cartes en carrousel.',
+    { nom: L.rechercheNom, zone: [58, 9.4, 20, 4.4], pin: [61, 11.6], texte: L.rechercheTexte,
+      apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 61.6cqw; top: 9.9cqw; width: 15.9cqw; height: 3.4cqw; display: flex; align-items: center; background: #FFFFFF; font-size: 1.4cqw; color: #9CA3AF; white-space: nowrap; animation: vs-fadein .4s ease-out both">' + L.rechercheChamp + '</span>' },
+    { nom: L.chiffresNom, zone: [20, 17, 77, 10.5], pin: [33, 21], texte: L.chiffresTexte,
       apres: '<span class="vs-pose" aria-hidden="true" style="position: absolute; left: 56.4cqw; top: 27.9cqw; display: flex; gap: 0.6cqw; animation: vs-fadein .4s ease-out both"><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #0E7C66"></span><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #D1D5DB"></span><span style="width: 1cqw; height: 1cqw; border-radius: 999px; background: #D1D5DB"></span></span>' },
-    { nom: 'Bouton Nouvelle vente', zone: [79.5, 9.4, 17.5, 4.4], pin: [88, 11], texte: 'Ouvre la nouvelle vente dans une fenêtre.' },
-    { nom: 'Menu Clients', zone: [1.6, 25.9, 13.8, 3.6], pin: [12, 27.7], texte: 'Ajoute une page Clients avec l’historique.' },
+    { nom: L.nouvelleVenteNom, zone: [79.5, 9.4, 17.5, 4.4], pin: [88, 11], texte: L.nouvelleVenteTexte },
+    { nom: L.clientsNom, zone: [1.6, 25.9, 13.8, 3.6], pin: [12, 27.7], texte: L.clientsTexte },
   ];
   // Hors des éléments connus, ou sur un élément déjà commenté.
-  const GENERIQUES = ['Aère cette zone : plus d’espace entre les blocs.', 'Mets ce bloc plus en avant, il passe inaperçu.'];
+  const GENERIQUES = [L.generique1, L.generique2];
   const essai = document.getElementById('essayer');
   const piece = (name) => essai.querySelector(`[data-demo="${name}"]`);
   const ecran = piece('ecran'), capture = piece('capture'), liste = piece('liste'), claude = piece('claude');
@@ -1395,7 +1413,7 @@ for (const carte of cartes) {
   // Compteurs, indice, frise d'étapes et bouton Exporter suivent l'état.
   function etat() {
     const etape = ecran.dataset.etape, n = poses.length;
-    for (const e of essai.querySelectorAll('[data-demo="nombre"]')) e.textContent = n + (n > 1 ? ' demandes' : ' demande');
+    for (const e of essai.querySelectorAll('[data-demo="nombre"]')) e.textContent = nombre(n, L.demandes);
     piece('vide').hidden = n > 0 || !!enCours;
     const pret = etape === 'revue' && n > 0 && !enCours;
     exporter.setAttribute('aria-disabled', !pret);
@@ -1409,13 +1427,13 @@ for (const carte of cartes) {
       li.querySelector('b').textContent = k < numero ? '✓' : k;
     }
     let indice;
-    if (etape === 'capture') indice = 'Capturez l’écran : ⌃⌥⌘P, ou le bouton sous la fenêtre.';
-    else if (etape === 'claude') indice = 'Claude Code lit votre revue et modifie l’app…';
-    else if (etape === 'fait') indice = 'C’est fait : l’app est modifiée, chaque point est coché. « Recommencer », en haut, pour rejouer.';
-    else if (enCours) indice = 'La demande s’écrit, comme si vous la disiez…';
-    else if (!n) indice = 'Cliquez où vous voulez sur la capture : la demande s’écrit toute seule.';
-    else if (n >= MAX_POINTS) indice = `${MAX_POINTS} points, c’est le maximum ici. Cliquez sur Exporter, en haut à droite.`;
-    else indice = 'Un autre point ? Cliquez ailleurs sur la capture. Sinon, Exporter, en haut à droite.';
+    if (etape === 'capture') indice = L.indiceCapture;
+    else if (etape === 'claude') indice = L.indiceClaude;
+    else if (etape === 'fait') indice = L.indiceFait;
+    else if (enCours) indice = L.indiceEcrit;
+    else if (!n) indice = L.indiceVide;
+    else if (n >= MAX_POINTS) indice = L.indiceMax.replace('{n}', MAX_POINTS);
+    else indice = L.indiceAutre;
     const zone = piece('indice');
     if (zone.textContent !== indice) zone.textContent = indice;
   }
@@ -1425,7 +1443,7 @@ for (const carte of cartes) {
     capture.tabIndex = revue ? 0 : -1;
     if (revue) {
       capture.setAttribute('role', 'button');
-      capture.setAttribute('aria-label', 'Capture de l’app : cliquez où vous voulez pour poser un point, ou Entrée pour en poser un sur l’élément suivant. La demande s’écrit toute seule.');
+      capture.setAttribute('aria-label', L.captureAria);
     } else {
       capture.removeAttribute('role');
       capture.removeAttribute('aria-label');
@@ -1461,7 +1479,7 @@ for (const carte of cartes) {
     const texte = d ? d.texte : GENERIQUES[(n - 1) % GENERIQUES.length];
     capture.insertAdjacentHTML('beforeend', `<span class="vs-pose vs-pin" aria-hidden="true" style="left: ${x.toFixed(2)}cqw; top: ${y.toFixed(2)}cqw">${n}</span>`);
     claude.insertAdjacentHTML('beforebegin', `<div class="vs-pose vs-bulle" aria-hidden="true">
-    <div class="vs-tete"><span class="vs-rec"></span>#${n}<span class="vs-onde">${ONDE}</span><span style="font-weight: 500; color: #A1A1A8">${d ? d.nom : 'Cette zone'}</span></div>
+    <div class="vs-tete"><span class="vs-rec"></span>#${n}<span class="vs-onde">${ONDE}</span><span style="font-weight: 500; color: #A1A1A8">${d ? d.nom : L.cetteZone}</span></div>
     <span class="vs-champ"><span></span><span class="vs-caret"></span></span>
   </div>`);
     const bulle = claude.previousElementSibling;
@@ -1496,7 +1514,7 @@ for (const carte of cartes) {
     liste.querySelector('.vs-derniere')?.classList.remove('vs-derniere');
     liste.insertAdjacentHTML('beforeend', `<div class="vs-derniere" style="display: flex; gap: 0.9cqw; padding: 0.9cqw; border-radius: 0.9cqw; animation: vs-fadein .3s ease-out both">
     <span class="vs-num" style="width: 2cqw; height: 2cqw; flex: none; border-radius: 1cqw 1cqw 1cqw 0.25cqw; background: #D63A0C; font-size: 1cqw; font-weight: 700; display: flex; align-items: center; justify-content: center">${p.n}</span>
-    <div style="display: flex; flex-direction: column; gap: 0.3cqw; min-width: 0"><span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere">${echappe(p.texte)}</span><span class="vs-meta" style="font-size: 0.95cqw; color: #8E8E96">${p.d ? p.d.nom : 'Cette zone'}</span></div>
+    <div style="display: flex; flex-direction: column; gap: 0.3cqw; min-width: 0"><span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere">${echappe(p.texte)}</span><span class="vs-meta" style="font-size: 0.95cqw; color: #8E8E96">${p.d ? p.d.nom : L.cetteZone}</span></div>
   </div>`);
     p.ligne = liste.lastElementChild;
     poses.push(p);
@@ -1526,7 +1544,7 @@ for (const carte of cartes) {
       .map((p, i) => `<span style="padding-left: 2cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: vs-fadein .3s ease-out both; animation-delay: ${(1.5 + i * 0.35).toFixed(2)}s"><span style="color: #30D158">✓</span> #${p.n} ${echappe(p.texte)}</span>`)
       .join('');
     const fin = piece('fin'), derniere = 1.6 + n * 0.35;
-    fin.textContent = '✻ ' + (n > 1 ? `Les ${n} demandes sont appliquées.` : 'La demande est appliquée.');
+    fin.textContent = '✻ ' + nombre(n, L.appliquees);
     fin.style.animationDelay = `${derniere.toFixed(2)}s`;
     claude.hidden = false;
     allerA('claude');
@@ -1541,7 +1559,7 @@ for (const carte of cartes) {
       p.pin.remove();
       capture.insertAdjacentHTML('beforeend', `<span class="vs-pose vs-coche" aria-hidden="true" style="left: ${p.x.toFixed(2)}cqw; top: ${p.y.toFixed(2)}cqw; animation-delay: ${(0.2 + i * 0.2).toFixed(2)}s">${COCHE}</span>`);
       p.ligne.querySelector('.vs-num').style.background = '#1F9D55';
-      p.ligne.querySelector('.vs-meta').insertAdjacentHTML('beforeend', ' · <span style="color: #30D158; font-weight: 600">✓ Fait</span>');
+      p.ligne.querySelector('.vs-meta').insertAdjacentHTML('beforeend', ' · <span style="color: #30D158; font-weight: 600">' + L.fait + '</span>');
     });
     liste.querySelector('.vs-derniere')?.classList.remove('vs-derniere');
     recommencer.focus({ preventScroll: true });

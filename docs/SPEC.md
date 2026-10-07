@@ -138,7 +138,7 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 
 ### 4.8 Réglages
 
-- **[M]** Raccourci global, mode de commentaire, délai de silence, langue de dictée (français par défaut), dossier d'export.
+- **[M]** Raccourci global, mode de commentaire, délai de silence, langue de dictée (celle de l'interface par défaut), dossier d'export. Langue de l'interface (automatique : celle du système).
 - **[S]** Moteur de transcription (Whisper local par défaut, API avec clé en secours), glossaire de vocabulaire, modèle du texte d'instructions du PDF, appareils appairés (révocation).
 
 ### 4.9 Premier lancement
@@ -345,7 +345,7 @@ L'outil doit paraître instantané, ne jamais perdre une note et ne rien envoyer
 - **Écrans** : HiDPI, plusieurs moniteurs à échelles différentes, thèmes clair et sombre.
 - **Fiabilité** : aucune perte de données en cas de crash ou de coupure ; sauvegarde continue.
 - **Confidentialité** : transcription locale par défaut ; le relais ne voit que des messages chiffrés ; aucune télémétrie.
-- **Langue** : interface en français, textes externalisés pour une traduction future.
+- **Langue** : app, exports, MCP, PWA et site en français, anglais, espagnol, allemand et italien ; textes externalisés dans un dictionnaire par langue.
 - **Distribution** : `.dmg` pour Mac (signé et notarisé si un compte Apple Developer est disponible), installeur `.exe` pour Windows. **[C]** Mise à jour automatique.
 
 ## 10. Lots, POC et critères d'acceptation

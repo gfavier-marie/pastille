@@ -18,7 +18,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `pnpm dev` : lance l'app desktop.
 - `pnpm bench:dictee` : mesure de transcription sur `apps/desktop/fixtures/dictee-fr.wav`.
 - `pnpm relay` (relais + PWA en local, port 8787) et `pnpm bench:synchro [url]` (QR d'appairage + aller-retour). L'app desktop vise `PASTILLE_RELAY`, sinon `http://localhost:8787` en développement et le relais partagé `https://relay.vibescreener.dev` une fois installée (`pnpm relay:deploy` le met à jour ; le même Worker répond aussi sur `https://pastille.vibescreener.workers.dev`, à garder pour les apps et tablettes appairées avant).
-- `pnpm site` / `pnpm site:deploy` : site public statique (`apps/site`, landing, tarifs, pages légales).
+- `pnpm site` / `pnpm site:deploy` : site public statique (`apps/site`, landing, tarifs, pages légales) en cinq langues : modèles `src/*.html` aux textes `{{groupe.clé}}` tirés de `src/i18n/`, produits dans `dist/` par `build.ts` (français à la racine, `/en/`, `/es/`, `/de/`, `/it/`).
 - Licence (`src/main/license.ts`) : essai de `TRIAL_DAYS` jours, puis clé Polar activée et vérifiée par l'API publique de Polar ; seules les nouvelles captures sont bloquées sans licence. Essais : `PASTILLE_TRIAL_DAYS=0`, `PASTILLE_POLAR=sandbox`. Domaine provisoire `vibescreener.dev` (à remplacer partout une fois acheté).
 - `pnpm test`, `pnpm typecheck`, `pnpm e2e` (session factice → photo de l'éditeur + exports, dans `e2e-output/`).
 - Fenêtre de mesures du lot 0 : `PASTILLE_POC=1 pnpm dev`.
@@ -28,7 +28,7 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 
 ## Conventions
 
-- Interface et commentaires en français ; textes d'interface regroupés pour une traduction future.
+- Interface en cinq langues (fr, en, es, de, it ; anglais si la langue du système n'est pas traduite) : textes de l'app dans `apps/desktop/src/texts/` (fenêtres, processus principal, exports, MCP ; `T` lu au moment de l'appel), de la PWA dans `apps/pwa/src/texts.ts`, du site dans `apps/site/src/i18n/`. Toute nouvelle chaîne s'ajoute dans les cinq langues (le typecheck vérifie les clés, un test repère les textes restés en français). `PASTILLE_LANG=xx` force la langue de l'app. Commentaires du code en français.
 - Imports relatifs avec extension `.ts` ; syntaxe TS effaçable uniquement (pas d'enum, pas de propriétés de paramètre).
 - Fenêtres de l'app : `setContentProtection(true)` et masquées pendant une capture.
 - Signaler toute limite de plateforme (capture, autorisations, raccourci pris) au lieu de la contourner en silence.

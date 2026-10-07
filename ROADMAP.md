@@ -217,3 +217,13 @@ Sur main, cette branche. Les remarques vont de la plus gênante à la plus lourd
 - [ ] `pnpm e2e` sur le code final : par la CI, plus sur le Mac de l'utilisateur (les fenêtres de test passaient devant tout)
 - [ ] Essai réel sur Mac : Échap puis ⌘Z, Dock et menu de l'app, zone avec et sans ⌥, retour de l'éditeur au premier plan après une capture ; Windows (Alt + glisser, éditeur réduit) par la CI puis sur un PC
 - [ ] Version suivante et Release (tag `v*`) sur ton feu vert.
+
+### Multilingue (7 oct.)
+
+App, PWA tablette, scripts d'installation et site en cinq langues : français, anglais, espagnol, allemand, italien.
+
+- [x] App : dictionnaires `apps/desktop/src/texts/` partagés par les fenêtres et le processus principal (dialogues, menu Mac, info-bulle, exports, MCP aux noms d'outils inchangés) ; réglage « Langue de l'interface » (automatique = langue du système, anglais sinon ; installations existantes gardées en français) ; glossaire Whisper et instructions par défaut qui suivent la langue ; demande d'accès au micro traduite sur macOS
+- [x] PWA selon la langue de la tablette ; `install.sh` / `install.ps1` selon la langue du système (servis en UTF-8)
+- [x] Site : modèles + dictionnaires + `build.ts` ; français à la racine, `/en/`, `/es/`, `/de/`, `/it/` ; hreflang, sélecteur de langue, redirection à la première visite selon la langue du navigateur (robots exclus) ; pages légales traduites (« la version française fait foi »)
+- [ ] Relecture des traductions par des locuteurs natifs, surtout les pages légales
+- [ ] Photos des fenêtres dans chaque langue (`PASTILLE_LANG=de pnpm e2e`), pour les textes trop longs
