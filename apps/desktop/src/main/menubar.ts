@@ -145,7 +145,7 @@ export function createMenubar(opts: MenubarOptions) {
       webPreferences: { preload: opts.preload },
     });
     win.setAlwaysOnTop(true, 'floating');
-    win.setVisibleOnAllWorkspaces(true);
+    win.setVisibleOnAllWorkspaces(true, { skipTransformProcessType: true }); // sinon Electron fait clignoter le Dock
     win.setContentProtection(true);
     // Les zones transparentes laissent passer les clics ; la pilule les reprend au survol.
     win.setIgnoreMouseEvents(true, { forward: true });

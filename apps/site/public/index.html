@@ -90,8 +90,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @media (max-width:640px){.vs-prog{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @keyframes vs-zoom{from{transform:scale(.86);opacity:.5}to{transform:none;opacity:1}}
 @supports (animation-timeline: view()){.vs-zoom{animation:vs-zoom linear both;animation-timeline:view();animation-range:entry 0% cover 40%}}
-/* Intro plein écran : le viseur se referme (0,25 s), l'éclair, le titre sort du flou, le point #1 se pose (2,95 s),
-   sa demande s'écrit, puis elle est appliquée (4,35 s) : la ligne passe en orange et le point en coche verte. */
+/* Intro plein écran : le viseur se referme (0,1 s), l'éclair, le titre sort du flou, le point #1 se pose (1,6 s),
+   sa demande s'écrit, puis elle est appliquée (2,4 s) : la ligne passe en orange et le point en coche verte. */
 @keyframes vs-i-vf{0%{opacity:0;transform:scale(1.16)}35%{opacity:1;transform:scale(1)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.97)}}
 @keyframes vs-i-flash{0%{opacity:0}12%{opacity:.85}100%{opacity:0}}
 @keyframes vs-i-rise{from{opacity:0;transform:translateY(56px) scale(1.04);filter:blur(16px)}to{opacity:1;transform:none;filter:none}}
@@ -106,23 +106,25 @@ details[open] .vs-plus{transform:rotate(45deg)}
 @keyframes vs-i-fade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes vs-i-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 .vs-nav{color:#C7C7CC;text-decoration:none}.vs-nav:hover{color:#FFFFFF}
-.vs-i-head{animation:vs-i-fade .8s .2s ease both}
-.vs-i-vf{opacity:0;animation:vs-i-vf 1.5s .25s cubic-bezier(.2,.7,.2,1) both}
-.vs-i-flash{opacity:0;animation:vs-i-flash .55s 1.15s ease-out both}
-.vs-i-l1{animation:vs-i-rise 1.1s 1.4s cubic-bezier(.2,.7,.2,1) both}
-.vs-i-l2{animation:vs-i-rise 1.1s 1.7s cubic-bezier(.2,.7,.2,1) both,vs-i-orange .7s 4.35s ease both}
-.vs-i-ping{position:absolute;left:100%;top:.24em;width:.48em;height:.48em;margin:-.24em 0 0 -.24em;box-sizing:border-box;border-radius:999px;border:4px solid #FF6A3D;opacity:0;animation:vs-i-ping 1.2s 2.95s ease-out both}
-.vs-i-pin{position:absolute;left:100%;top:-1em;width:2.33em;height:2.33em;box-sizing:border-box;border:max(2px,.16em) solid #FFFFFF;border-radius:1.17em 1.17em 1.17em .33em;background:#1F9D55;box-shadow:0 10px 24px rgba(0,0,0,.45);transform-origin:0 100%;font-family:'Instrument Sans',sans-serif;font-size:.194em;font-weight:700;letter-spacing:0;color:#FFFFFF;animation:vs-i-pop .45s 2.95s cubic-bezier(.2,.7,.2,1) both,vs-i-green .5s 4.35s ease both}
+/* Smartphone : logo et « Essai gratuit » sur une seule ligne, sans les liens des sections. */
+@media (max-width:860px){.vs-i-liens{display:none!important}}
+.vs-i-head{animation:vs-i-fade .6s .1s ease both}
+.vs-i-vf{opacity:0;animation:vs-i-vf .9s .1s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-flash{opacity:0;animation:vs-i-flash .4s .65s ease-out both}
+.vs-i-l1{animation:vs-i-rise .75s .75s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-l2{animation:vs-i-rise .75s .9s cubic-bezier(.2,.7,.2,1) both,vs-i-orange .5s 2.4s ease both}
+.vs-i-ping{position:absolute;left:100%;top:.24em;width:.48em;height:.48em;margin:-.24em 0 0 -.24em;box-sizing:border-box;border-radius:999px;border:4px solid #FF6A3D;opacity:0;animation:vs-i-ping 1s 1.6s ease-out both}
+.vs-i-pin{position:absolute;left:100%;top:-1em;width:2.33em;height:2.33em;box-sizing:border-box;border:max(2px,.16em) solid #FFFFFF;border-radius:1.17em 1.17em 1.17em .33em;background:#1F9D55;box-shadow:0 10px 24px rgba(0,0,0,.45);transform-origin:0 100%;font-family:'Instrument Sans',sans-serif;font-size:.194em;font-weight:700;letter-spacing:0;color:#FFFFFF;animation:vs-i-pop .4s 1.6s cubic-bezier(.2,.7,.2,1) both,vs-i-green .4s 2.4s ease both}
 .vs-i-num,.vs-i-ok{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.vs-i-num{opacity:0;animation:vs-i-out .25s 4.3s ease both}
-.vs-i-ok{animation:vs-i-in .35s 4.45s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-num{opacity:0;animation:vs-i-out .2s 2.35s ease both}
+.vs-i-ok{animation:vs-i-in .3s 2.45s cubic-bezier(.2,.7,.2,1) both}
 .vs-i-ok svg{width:1.08em;height:1.08em}
-.vs-i-bulle{position:absolute;right:-40px;top:calc(100% + 6px);width:360px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:18px;background:#1E1E22;border:1px solid #2E2E33;box-shadow:0 24px 48px rgba(0,0,0,.5);font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:500;letter-spacing:0;line-height:1.35;color:#F2F2F3;text-align:left;opacity:0;animation:vs-i-bulle 1.5s 3.05s ease both}
-.vs-i-type{display:inline-block;white-space:nowrap;animation:vs-i-type .95s 3.3s steps(24,end) both}
-.vs-i-sub{animation:vs-i-fade .8s 4.7s cubic-bezier(.2,.7,.2,1) both}
-.vs-i-cta{animation:vs-i-fade .8s 4.85s cubic-bezier(.2,.7,.2,1) both}
-.vs-i-cue{animation:vs-i-fade .8s 5.3s ease both}
-.vs-i-bob{animation:vs-i-bob 1.6s 6s ease-in-out infinite}
+.vs-i-bulle{position:absolute;right:-40px;top:calc(100% + 6px);width:360px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:18px;background:#1E1E22;border:1px solid #2E2E33;box-shadow:0 24px 48px rgba(0,0,0,.5);font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:500;letter-spacing:0;line-height:1.35;color:#F2F2F3;text-align:left;opacity:0;animation:vs-i-bulle 1.05s 1.65s ease both}
+.vs-i-type{display:inline-block;white-space:nowrap;animation:vs-i-type .55s 1.8s steps(24,end) both}
+.vs-i-sub{animation:vs-i-fade .6s 2.6s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-cta{animation:vs-i-fade .6s 2.75s cubic-bezier(.2,.7,.2,1) both}
+.vs-i-cue{animation:vs-i-fade .6s 3s ease both}
+.vs-i-bob{animation:vs-i-bob 1.6s 3.5s ease-in-out infinite}
 @media (max-width:640px){.vs-i-bulle{right:-8px;width:260px;font-size:15px}}
 @keyframes vs-draw{0%{stroke-dashoffset:1;opacity:1}40%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
 @keyframes vs-draw2{0%,30%{stroke-dashoffset:1;opacity:1}58%,88%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
@@ -198,13 +200,13 @@ details[open] .vs-plus{transform:rotate(45deg)}
         <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="#D63A0C"></path><circle cx="14" cy="14" r="4.2" fill="#0A0A0B"></circle></svg>
         <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em">VibeScreener</span>
       </a>
-      <nav aria-label="Sections" style="flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 15px">
+      <nav aria-label="Sections" class="vs-i-liens" style="flex: 1 1 auto; display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 15px">
         <a href="#comment" class="vs-nav">Comment ça marche</a>
         <a href="#fonctions" class="vs-nav">Fonctionnalités</a>
         <a href="#tarifs" class="vs-nav">Tarifs</a>
         <a href="#faq" class="vs-nav">FAQ</a>
       </nav>
-      <a href="#installer" class="vs-btn" style="height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 10px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px">Essai gratuit</a>
+      <a href="#installer" class="vs-btn" style="margin-left: auto; height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 10px; background: #D63A0C; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 15px">Essai gratuit</a>
     </header>
 
     <!-- Arrivée : le viseur de capture se referme, l'éclair, le titre sort du flou, un point #1 se pose et sa demande s'écrit, puis elle est appliquée. -->
@@ -243,7 +245,8 @@ details[open] .vs-plus{transform:rotate(45deg)}
   </section>
 
   <section id="demo" aria-label="Démonstration" style="padding: 16px 24px 128px; background: #0A0A0B">
-    <div style="max-width: 1120px; margin: 0 auto">
+    <!-- Démo et frise tiennent dans la hauteur de l'écran. -->
+    <div style="max-width: min(1120px, calc((100svh - 170px) * 16 / 11)); margin: 0 auto">
       <div class="vs-zoom">
         <div role="img" aria-label="Démonstration en quatre étapes sur une app de ventes. Un : le raccourci Contrôle Option Commande P (⌃⌥⌘P) capture l'écran. Deux : trois clics posent trois points directement sur la capture, chacun avec sa demande dictée (un filtre de période sur le graphique, le tri et l'export du tableau, la recherche par e-mail). Trois : Claude Code lit la revue par le serveur MCP de VibeScreener. Quatre : les trois demandes sont appliquées dans l'app." style="position: relative; container-type: inline-size; border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 60px 120px -40px rgba(0,0,0,0.9)">
           <div aria-hidden="true" style="width: 100%"><div style="container-type: inline-size; width: 100%; font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: #111827; line-height: 1.2">
@@ -1316,14 +1319,24 @@ for (const button of document.querySelectorAll('[data-copy]')) {
   });
 }
 
-// Intro plein écran : « Rejouer » relance toutes ses animations depuis le début.
-const intro = document.getElementById('haut');
-document.querySelector('[data-rejouer]').addEventListener('click', () => {
-  for (const a of intro.getAnimations({ subtree: true })) {
+// Relance toutes les animations d'un bloc depuis le début.
+function rejouer(bloc) {
+  for (const a of bloc.getAnimations({ subtree: true })) {
     a.cancel();
     a.play();
   }
-});
+}
+// Intro plein écran : « Rejouer ».
+document.querySelector('[data-rejouer]').addEventListener('click', () => rejouer(document.getElementById('haut')));
+// Démo du hero : elle repart de la capture à chaque arrivée dans la zone (pas le zoom lié au défilement, autour).
+const demo = document.querySelector('#demo [role="img"]');
+if ('IntersectionObserver' in window) {
+  let vue = true; // déjà jouée au chargement
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && !vue) rejouer(demo);
+    vue = e.isIntersecting;
+  }, { threshold: 0.3 }).observe(demo);
+}
 
 // Cartes des fonctionnalités : « + » retourne la carte sur son détail, une seule ouverte à la fois.
 // La face cachée est inerte (ni Tab ni lecteur d'écran) ; le focus suit la face visible.
