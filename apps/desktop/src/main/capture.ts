@@ -13,6 +13,7 @@ import {
 } from 'electron';
 import { openWindows, type Result as WindowInfo } from 'get-windows';
 import type { OverlayPick, OverlayShow, OverlayWindow } from '../ipc.ts';
+import { T } from '../texts/index.ts';
 
 type Overlay = { display: Display; win: BrowserWindow; ready?: () => void };
 
@@ -146,11 +147,7 @@ export function createCapture(opts: CaptureOptions) {
     });
     if (frozen.size < overlays.length) {
       for (const w of hidden) if (!w.isDestroyed()) w.showInactive();
-      opts.onError(
-        process.platform === 'darwin'
-          ? "Capture impossible : autorise l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relance VibeScreener."
-          : "Capture impossible : l'écran n'a pas pu être lu.",
-      );
+      opts.onError(process.platform === 'darwin' ? T.main.captureDenied : T.main.captureFailed);
       return;
     }
 

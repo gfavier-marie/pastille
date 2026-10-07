@@ -9,9 +9,9 @@ export function defaultSessionName(d: Date): string {
   return `Revue ${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}h${pad(d.getMinutes())}`;
 }
 
-export function newSession(now: Date, context?: string): Session {
+export function newSession(now: Date, context?: string, name = defaultSessionName(now)): Session {
   const iso = now.toISOString();
-  return { id: crypto.randomUUID(), name: defaultSessionName(now), context, createdAt: iso, updatedAt: iso, captures: [] };
+  return { id: crypto.randomUUID(), name, context, createdAt: iso, updatedAt: iso, captures: [] };
 }
 
 /** Toutes les annotations dans l'ordre de lecture : captures, puis ordre de création. */

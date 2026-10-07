@@ -2,7 +2,8 @@
 // récapitulatif complet avant les images, un point jamais coupé entre deux pages.
 
 import { PIN_COLOR } from '@pastille/shared';
-import { INSPIRATION_NOTE, type ExportDoc, type ExportScreen } from './build.ts';
+import { T } from '../../texts/index.ts';
+import type { ExportDoc, ExportScreen } from './build.ts';
 
 /** Partie d'un PDF découpé : le récapitulatif reste complet, seuls les écrans changent. */
 export type PdfPart = { index: number; total: number; screens: ExportScreen[] };
@@ -10,8 +11,6 @@ export type PdfPart = { index: number; total: number; screens: ExportScreen[] };
 const esc = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const multiline = (text: string) => esc(text).replace(/\n/g, '<br>');
-const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
-const yesNo = (list: unknown[]) => (list.length ? 'oui' : 'non');
 
 /** Logo de l'app (le même que dans l'interface) : pastille pleine, pointe en bas à gauche. */
 const LOGO = `<svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2a12 12 0 1 1 0 24H2V14A12 12 0 0 1 14 2z" fill="${PIN_COLOR}"/><circle cx="14" cy="14" r="4.2" fill="#fff"/></svg>`;
@@ -67,6 +66,8 @@ tr { break-inside: avoid; }
 `;
 
 export function toPdfHtml(doc: ExportDoc, part?: PdfPart): string {
+  const E = T.exports, C = E.columns;
+  const yesNo = (list: unknown[]) => (list.length ? E.yes : E.no);
   const summary = doc.points
     .map(
       (p) =>
@@ -85,22 +86,22 @@ export function toPdfHtml(doc: ExportDoc, part?: PdfPart): string {
       (p) => `
   <div class="point">
     <div class="images">
-      <img src="${p.crop}" alt="Zoom sur #${p.number}">
-      ${p.sketches.map((k, i) => `<img src="${k}" alt="Croquis ${i + 1} de #${p.number}">`).join('')}
+      <img src="${p.crop}" alt="${esc(E.zoomOn(p.number))}">
+      ${p.sketches.map((k, i) => `<img src="${k}" alt="${esc(E.sketchOf(i + 1, p.number))}">`).join('')}
     </div>
     <div class="text">
       ${pin(p.number)}
-      <div class="comment">${multiline(p.text) || '<em>(sans commentaire)</em>'}</div>
-      <div class="pos">Position : ${esc(p.position)}</div>
+      <div class="comment">${multiline(p.text) || `<em>${esc(E.noComment)}</em>`}</div>
+      <div class="pos">${esc(E.position + E.colon + p.position)}</div>
     </div>
     ${
       p.inspirations.length
         ? `<div class="inspirations">
-      <div class="note"><b>Inspiration</b> : ${INSPIRATION_NOTE}.</div>
+      <div class="note"><b>${esc(E.inspiration)}</b>${esc(E.colon + E.inspirationNote)}.</div>
       ${p.inspirations
         .map(
           (k, i) =>
-            `<figure><img src="${k.image}" alt="Inspiration ${i + 1} de #${p.number}">${k.source ? `<figcaption>${esc(k.source)}</figcaption>` : ''}</figure>`,
+            `<figure><img src="${k.image}" alt="${esc(E.inspirationOf(i + 1, p.number))}">${k.source ? `<figcaption>${esc(k.source)}</figcaption>` : ''}</figure>`,
         )
         .join('')}
     </div>`
@@ -114,19 +115,19 @@ export function toPdfHtml(doc: ExportDoc, part?: PdfPart): string {
     .join('');
 
   return `<!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><title>${esc(doc.name)}</title><style>${CSS}</style></head>
+<html lang="${T.lang}"><head><meta charset="utf-8"><title>${esc(doc.name)}</title><style>${CSS}</style></head>
 <body>
 <header class="brand">${LOGO}<span class="name">VibeScreener</span><span class="date">${esc(doc.date)}</span></header>
-<h1>${esc(doc.name)}${part ? ` — partie ${part.index}/${part.total}` : ''}</h1>
-<p class="meta">${plural(doc.screens.length, 'écran')} · ${plural(doc.points.length, 'point')}${
-    part ? ` · cette partie : écrans ${part.screens[0]!.index} à ${part.screens.at(-1)!.index}` : ''
+<h1>${esc(doc.name)}${part ? ` — ${E.part(part.index, part.total)}` : ''}</h1>
+<p class="meta">${T.screens(doc.screens.length)} · ${T.points(doc.points.length)}${
+    part ? ` · ${E.partScreens(part.screens[0]!.index, part.screens.at(-1)!.index)}` : ''
   }</p>
-${doc.context ? `<p class="context"><b>Contexte</b> ${multiline(doc.context)}</p>` : ''}
-<h2>Instructions</h2>
+${doc.context ? `<p class="context"><b>${E.context}</b> ${multiline(doc.context)}</p>` : ''}
+<h2>${E.instructions}</h2>
 <div class="instructions">${esc(doc.instructions)}</div>
-${doc.notes.length ? `<h2>Remarques générales</h2>\n<ol class="notes">${doc.notes.map((n) => `<li>${multiline(n)}</li>`).join('')}</ol>` : ''}
-<h2>Récapitulatif</h2>
-<table><thead><tr><th>#</th><th class="s">Écran</th><th>Commentaire</th><th class="s">Croquis</th><th class="i">Inspiration</th></tr></thead><tbody>${summary}</tbody></table>
+${doc.notes.length ? `<h2>${E.notes}</h2>\n<ol class="notes">${doc.notes.map((n) => `<li>${multiline(n)}</li>`).join('')}</ol>` : ''}
+<h2>${E.summary}</h2>
+<table><thead><tr><th>#</th><th class="s">${C.screen}</th><th>${C.comment}</th><th class="s">${C.sketch}</th><th class="i">${C.inspiration}</th></tr></thead><tbody>${summary}</tbody></table>
 ${screens}
 </body></html>`;
 }

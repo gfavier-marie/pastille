@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { findAnnotation, newSession, renumber, upgradeSession, type Capture, type Inspiration, type Session } from '@pastille/shared';
+import { T } from '../texts/index.ts';
 import { renameRetry } from './rename.ts';
 
 const SAVE_DELAY_MS = 300;
@@ -84,7 +85,8 @@ export function createSessionStore(root: string, onChange: (s: Session | null) =
   /** La session ouverte, créée à la première capture si besoin. */
   async function ensure(): Promise<Session> {
     if (session) return session;
-    const s = newSession(new Date(), context() || undefined);
+    const now = new Date();
+    const s = newSession(now, context() || undefined, T.sessionName(now));
     await mkdir(join(dirOf(s.id), 'captures'), { recursive: true });
     session = s;
     state.currentSessionId = s.id;

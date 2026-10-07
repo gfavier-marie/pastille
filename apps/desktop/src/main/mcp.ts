@@ -9,62 +9,45 @@ import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
 import { allAnnotations, upgradeSession, type Session } from '@pastille/shared';
-import { cropJpeg, DEFAULT_INSTRUCTIONS, INSPIRATION_NOTE, inspirationJpeg, position, screenJpeg, screenTitle, sourceLabel } from './export/build.ts';
+import { T } from '../texts/index.ts';
+import { cropJpeg, inspirationJpeg, position, screenJpeg, screenTitle, sourceLabel } from './export/build.ts';
 import type { SessionStore } from './session-store.ts';
 
 export const MCP_PORT = Number(process.env.PASTILLE_MCP_PORT) || 3917;
 const PROTOCOL_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
 const MAX_BODY = 1024 * 1024;
 
-const SERVER_INSTRUCTIONS = `VibeScreener enregistre des revues d'interface : des captures d'écran où chaque retour est un point numéroté (#1 à #N) avec un commentaire, souvent dicté, et parfois un croquis ou une inspiration (capture d'un autre site qui montre le résultat souhaité, pas l'écran à modifier).
-Pour appliquer une revue au code : sans précision de l'utilisateur, prendre la session ouverte dans VibeScreener (choix par défaut), sinon la choisir avec lister_sessions. lire_revue donne tous les retours ; voir_ecran montre, écran par écran, la capture annotée, un zoom autour de chaque point, les croquis et les inspirations. Regarder chaque écran avant de modifier le code. Si un retour est ambigu, poser une question plutôt que deviner.`;
-
 type Json = Record<string, unknown>;
 type Content = { type: 'text'; text: string } | { type: 'image'; data: string; mimeType: string };
 type ToolResult = { content: Content[]; isError?: boolean };
 type Message = { id?: string | number | null; method?: string; params?: Json };
 
-const SESSION_PARAM = {
-  type: 'string',
-  description: 'Id de la session (voir lister_sessions). Par défaut : la session ouverte dans VibeScreener, sinon la plus récente.',
-};
-
 // Pas d'outputSchema : avec un résultat structuré, Claude Code ne montre plus les images comme des images.
-const TOOLS = [
-  {
-    name: 'lister_sessions',
-    description: 'Liste les sessions de revue récentes (nom, date, nombre de points, id), la plus récente d’abord.',
-    inputSchema: { type: 'object', properties: {} },
-  },
-  {
-    name: 'lire_revue',
-    description:
-      "Tous les retours d'une session, en texte : contexte, instructions, puis chaque point (numéro, écran, commentaire, position, croquis, inspirations). Les images s'obtiennent avec voir_ecran.",
-    inputSchema: { type: 'object', properties: { session: SESSION_PARAM } },
-  },
-  {
-    name: 'voir_ecran',
-    description:
-      "Un écran d'une session : la capture avec ses points numérotés, puis pour chaque point son commentaire, un zoom autour de l'élément visé, ses croquis et ses inspirations (captures d'autres sites, modèles du résultat souhaité).",
-    inputSchema: {
-      type: 'object',
-      properties: {
-        session: SESSION_PARAM,
-        ecran: { type: 'integer', minimum: 1, description: "Numéro de l'écran, de 1 au nombre d'écrans donné par lire_revue." },
+// Noms d'outils et de paramètres fixes (Claude Code et les habitudes des utilisateurs en dépendent), descriptions traduites.
+function tools() {
+  const M = T.mcp;
+  const session = { type: 'string', description: M.sessionParam };
+  return [
+    { name: 'lister_sessions', description: M.listTool, inputSchema: { type: 'object', properties: {} } },
+    { name: 'lire_revue', description: M.reviewTool, inputSchema: { type: 'object', properties: { session } } },
+    {
+      name: 'voir_ecran',
+      description: M.screenTool,
+      inputSchema: {
+        type: 'object',
+        properties: { session, ecran: { type: 'integer', minimum: 1, description: M.screenParam } },
+        required: ['ecran'],
       },
-      required: ['ecran'],
     },
-  },
-];
+  ];
+}
 
 /** Erreur à montrer telle quelle à l'IA (session introuvable, écran hors limites). */
 class ToolError extends Error {}
 
 const text = (t: string): Content => ({ type: 'text', text: t });
 const image = (data: Uint8Array, mimeType: string): Content => ({ type: 'image', data: Buffer.from(data).toString('base64'), mimeType });
-const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
-const dateFr = (iso: string) => new Date(iso).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
-const comment = (t: string) => t.trim().replace(/\s*\n\s*/g, ' ') || '(sans commentaire)';
+const comment = (t: string) => t.trim().replace(/\s*\n\s*/g, ' ') || T.exports.noComment;
 
 export function createMcp(deps: { store: SessionStore; instructions?: () => string; onClient?: () => void }) {
   const { store } = deps;
@@ -77,73 +60,67 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     if (id === undefined || id === '') {
       if (open) return { session: open, dir: store.dir(open) };
       const [latest] = await store.recent(1);
-      if (!latest) throw new ToolError('Aucune session : faire d’abord une capture avec VibeScreener.');
+      if (!latest) throw new ToolError(T.mcp.noSession);
       id = latest.id;
     }
     // Un id ne contient ni « / » ni « .. » : on ne sort pas du dossier des sessions.
-    if (typeof id !== 'string' || !/^[\w-]+$/.test(id)) throw new ToolError(`Session « ${String(id)} » introuvable.`);
+    if (typeof id !== 'string' || !/^[\w-]+$/.test(id)) throw new ToolError(T.mcp.notFound(String(id)));
     if (open?.id === id) return { session: open, dir: store.dir(open) };
     const dir = join(store.sessionsDir, id);
     try {
       return { session: upgradeSession(JSON.parse(await readFile(join(dir, 'session.json'), 'utf8')) as Session), dir };
     } catch {
-      throw new ToolError(`Session « ${id} » introuvable : voir lister_sessions.`);
+      throw new ToolError(T.mcp.notFoundList(id));
     }
   }
 
   async function listSessions(): Promise<string> {
     const list = await store.recent(20);
-    if (!list.length) return 'Aucune session pour l’instant.';
+    if (!list.length) return T.mcp.noSessions;
     const openId = store.get()?.id;
-    return [
-      'Sessions, la plus récente d’abord :',
-      ...list.map(
-        (s) =>
-          `- ${s.name} · modifiée le ${dateFr(s.updatedAt)} · ${plural(s.points, 'point')} · id : ${s.id}${s.id === openId ? ' (ouverte dans VibeScreener)' : ''}`,
-      ),
-    ].join('\n');
+    return [T.mcp.sessions, ...list.map((s) => T.mcp.sessionLine(s.name, T.exports.date(s.updatedAt), s.points, s.id, s.id === openId))].join('\n');
   }
 
   function review(session: Session): string {
+    const M = T.mcp, E = T.exports;
     const total = allAnnotations(session).length;
-    const lines = [`# ${session.name}`, '', `${dateFr(session.createdAt)} · ${plural(session.captures.length, 'écran')} · ${plural(total, 'point')}`];
-    if (session.context?.trim()) lines.push('', `Contexte : ${session.context.trim()}`);
-    lines.push('', '## Instructions', '', (deps.instructions?.() ?? DEFAULT_INSTRUCTIONS).replaceAll('{N}', String(total)));
+    const lines = [`# ${session.name}`, '', `${E.date(session.createdAt)} · ${T.screens(session.captures.length)} · ${T.points(total)}`];
+    if (session.context?.trim()) lines.push('', E.context + E.colon + session.context.trim());
+    lines.push('', `## ${E.instructions}`, '', (deps.instructions?.() ?? T.instructions).replaceAll('{N}', String(total)));
     const untranscribed = allAnnotations(session).filter((a) => ['recording', 'pending', 'error'].includes(a.transcription));
-    if (untranscribed.length)
-      lines.push('', `Attention : dictée pas encore transcrite pour ${untranscribed.map((a) => `#${a.number}`).join(', ')} ; le commentaire peut être incomplet.`);
+    if (untranscribed.length) lines.push('', M.untranscribed(untranscribed.map((a) => `#${a.number}`).join(', ')));
     const notes = (session.notes ?? []).filter((n) => n.text.trim());
-    if (notes.length) lines.push('', '## Remarques générales', '', ...notes.map((n) => `- ${comment(n.text)}`));
+    if (notes.length) lines.push('', `## ${E.notes}`, '', ...notes.map((n) => `- ${comment(n.text)}`));
     for (const [i, c] of session.captures.entries()) {
       lines.push('', `## ${screenTitle(i + 1, c)}`, '');
-      if (!c.annotations.length) lines.push('(aucun point)');
+      if (!c.annotations.length) lines.push(M.noPoints);
       for (const a of c.annotations) {
-        const sketches = a.sketches.length ? ` · ${a.sketches.length} croquis` : '';
-        const inspirations = a.inspirations?.length ? ` · ${plural(a.inspirations.length, 'inspiration')}` : '';
+        const sketches = a.sketches.length ? ` · ${M.sketches(a.sketches.length)}` : '';
+        const inspirations = a.inspirations?.length ? ` · ${M.inspirations(a.inspirations.length)}` : '';
         lines.push(`- #${a.number} · ${comment(a.text)} · ${position(a, c)}${sketches}${inspirations}`);
       }
     }
-    if (session.captures.length)
-      lines.push('', `Pour voir la capture annotée, le zoom de chaque point, les croquis et les inspirations : voir_ecran avec ecran de 1 à ${session.captures.length}.`);
+    if (session.captures.length) lines.push('', M.seeScreens(session.captures.length));
     return lines.join('\n');
   }
 
   async function screen({ session, dir }: { session: Session; dir: string }, ecran: unknown): Promise<Content[]> {
     const n = Number(ecran);
     const capture = Number.isInteger(n) ? session.captures[n - 1] : undefined;
-    if (!capture) throw new ToolError(`Écran ${String(ecran)} inexistant : la session « ${session.name} » a ${plural(session.captures.length, 'écran')}.`);
+    if (!capture) throw new ToolError(T.mcp.noScreen(String(ecran), session.name, session.captures.length));
+    const E = T.exports;
     const img = await loadImage(join(dir, capture.image));
-    const content = [text(`## ${screenTitle(n, capture)} · ${plural(capture.annotations.length, 'point')}`), image(await screenJpeg(img, capture), 'image/jpeg')];
+    const content = [text(`## ${screenTitle(n, capture)} · ${T.points(capture.annotations.length)}`), image(await screenJpeg(img, capture), 'image/jpeg')];
     for (const a of capture.annotations) {
-      content.push(text(`### #${a.number}\n${a.text.trim() || '(sans commentaire)'}\nPosition : ${position(a, capture)}\nZoom sur l'élément visé :`));
+      content.push(text(`### #${a.number}\n${a.text.trim() || E.noComment}\n${E.position}${E.colon}${position(a, capture)}\n${T.mcp.zoom}`));
       content.push(image(await cropJpeg(img, capture, a), 'image/jpeg'));
       for (const [k, sketch] of a.sketches.entries()) {
-        content.push(text(`Croquis ${k + 1} de #${a.number} :`));
+        content.push(text(`${E.sketchOf(k + 1, a.number)}${E.colon.trimEnd()}`));
         content.push(image(await readFile(join(dir, sketch.png)), 'image/png'));
       }
       for (const [k, inspiration] of (a.inspirations ?? []).entries()) {
         const source = sourceLabel(inspiration.source);
-        content.push(text(`Inspiration ${k + 1} de #${a.number}${source ? ` (${source})` : ''} : ${INSPIRATION_NOTE}.`));
+        content.push(text(`${E.inspirationOf(k + 1, a.number)}${source ? ` (${source})` : ''}${E.colon}${E.inspirationNote}.`));
         content.push(image(await inspirationJpeg(await loadImage(join(dir, inspiration.image))), 'image/jpeg'));
       }
     }
@@ -156,7 +133,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
       if (name === 'lire_revue') return { content: [text(review((await loadSession(args.session)).session))] };
       return { content: await screen(await loadSession(args.session), args.ecran) };
     } catch (err) {
-      return { content: [text(err instanceof ToolError ? err.message : `Erreur de VibeScreener : ${String(err)}`)], isError: true };
+      return { content: [text(err instanceof ToolError ? err.message : T.mcp.error(String(err)))], isError: true };
     }
   }
 
@@ -173,16 +150,16 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
           protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
           capabilities: { tools: {} },
           serverInfo: { name: 'vibescreener', version: '1.0.0' },
-          instructions: SERVER_INSTRUCTIONS,
+          instructions: T.mcp.instructions,
         });
       }
       case 'ping':
         return reply({});
       case 'tools/list':
-        return reply({ tools: TOOLS });
+        return reply({ tools: tools() });
       case 'tools/call': {
         const name = String(msg.params?.name);
-        if (!TOOLS.some((t) => t.name === name)) return fail(-32602, `Outil inconnu : ${name}`);
+        if (!tools().some((t) => t.name === name)) return fail(-32602, `Outil inconnu : ${name}`);
         return reply(await callTool(name, (msg.params?.arguments ?? {}) as Json));
       }
       default:

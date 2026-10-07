@@ -53,7 +53,7 @@ describe('licence', () => {
     const license = make();
     const r = await license.activate('VIBE-1');
     expect(r.ok).toBe(false);
-    expect(!r.ok && r.error).toMatch(/nombre maximal de Mac/);
+    expect(!r.ok && r.error).toMatch(/nombre maximal/);
     expect(license.view().state).toBe('trial');
   });
 

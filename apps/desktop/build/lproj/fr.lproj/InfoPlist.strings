@@ -1,0 +1,2 @@
+/* Demande d’accès au micro (macOS) */
+"NSMicrophoneUsageDescription" = "VibeScreener utilise le micro pour dicter les commentaires.";

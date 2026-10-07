@@ -4,6 +4,7 @@
 import { join } from 'node:path';
 import { app, BrowserWindow, ipcMain, nativeImage, screen, Tray, type NativeImage } from 'electron';
 import type { ExportNotice, MenuAction, MenuState } from '../ipc.ts';
+import { T } from '../texts/index.ts';
 
 const isMac = process.platform === 'darwin';
 const POPOVER_WIDTH = 330;
@@ -55,11 +56,11 @@ export function createMenubar(opts: MenubarOptions) {
     if (isMac) tray.setTitle(s.session ? String(s.session.points) : '');
     tray.setToolTip(
       [
-        s.session ? `VibeScreener — ${s.session.name} (${s.session.points} points)` : 'VibeScreener',
-        opts.recording() ? 'dictée en cours' : '',
-        s.pending ? `${s.pending} transcription(s) en cours` : '',
-        s.errors ? `${s.errors} transcription(s) en erreur` : '',
-        s.tablet ? 'tablette connectée' : '',
+        s.session ? T.main.tray.session(s.session.name, s.session.points) : 'VibeScreener',
+        opts.recording() ? T.main.tray.recording : '',
+        s.pending ? T.main.tray.pending(s.pending) : '',
+        s.errors ? T.main.tray.errors(s.errors) : '',
+        s.tablet ? T.main.tray.tablet : '',
       ]
         .filter(Boolean)
         .join(' · '),
