@@ -23,12 +23,14 @@ import {
   shell,
   systemPreferences,
 } from 'electron';
-import { allAnnotations, findAnnotation, findComment, isLang, pickLang, type Geometry, type Session } from '@pastille/shared';
+import { allAnnotations, findAnnotation, findComment, isDocumentSession, isLang, isSkippedPage, pickLang, type Geometry, type Session } from '@pastille/shared';
 import type { CaptureResult, EditorFocus, ExportFormat, ExportResult, MenuAction, MenuState, PairingState, SettingsState, SettingsTab, VideoFeedback } from '../ipc.ts';
 import { createCapture, listWindows, windowTarget, type CapturedImage } from './capture.ts';
 import { createClicks } from './clicks.ts';
 import { createDictation } from './dictation.ts';
 import { createDock } from './dock.ts';
+import { createDocuments, DOCUMENT_FORMATS, DocumentError, MAX_PAGES } from './document/open.ts';
+import { openPdf } from './document/pdf.ts';
 import { createMenubar } from './menubar.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
@@ -132,7 +134,7 @@ const modelDir = join(app.getPath('userData'), 'models');
 // Serveur MCP pour Claude Code : son adresse, ou l'erreur affichée dans les réglages.
 const mcp = createMcp({
   store,
-  instructions: () => settings.get().instructions,
+  instructions: (s) => instructionsFor(s),
   onClient: () => {
     settings.update({ mcpSeenAt: new Date().toISOString() });
     broadcastSettings();
@@ -480,6 +482,48 @@ async function stopVideo() {
   }
 }
 
+// ——— Documents ———
+// « Commenter un document » : le PDF choisi ou déposé sur l'éditeur devient une session dont chaque page est
+// une capture (voir document/open.ts). Pas de fenêtre en plus : pdf.js rend les pages ici même.
+
+const documents = createDocuments({
+  store,
+  open: (bytes) => openPdf(bytes),
+  onProgress: (p) => editor?.webContents.send('editor:document-progress', p),
+});
+
+async function openDocument(path?: string) {
+  if (documents.isBusy()) return void dialog.showMessageBox({ type: 'info', message: T.main.document.busy });
+  if (capture?.isBusy()) return;
+  // Essai fini sans licence : comme une capture, un nouveau document n'est pas ouvert.
+  if (!license.canCapture()) {
+    checkLicense();
+    return showSettings('license');
+  }
+  await finishVideo();
+  if (!path) {
+    showEditor();
+    const r = await dialog.showOpenDialog(editor!, {
+      properties: ['openFile'],
+      filters: [{ name: T.main.document.filter, extensions: DOCUMENT_FORMATS }],
+    });
+    path = r.filePaths[0];
+    if (r.canceled || !path) return;
+  }
+  try {
+    const r = await documents.importDocument(path, (captureId) => showEditor({ captureId }));
+    if (r.truncated) void dialog.showMessageBox({ type: 'info', message: T.main.document.truncated(MAX_PAGES) });
+  } catch (err) {
+    void dialog.showMessageBox({ type: 'warning', message: err instanceof DocumentError ? err.message : T.main.document.unreadable(String(err)) });
+  }
+}
+
+/** Instructions à l'IA : le réglage, ou celles d'un document quand le réglage est resté au défaut. */
+function instructionsFor(session: Session) {
+  const instructions = settings.get().instructions;
+  return isDocumentSession(session) && instructions === T.instructions ? T.instructionsDocument : instructions;
+}
+
 // ——— Export ———
 
 async function printHtml(htmlFile: string): Promise<Uint8Array> {
@@ -495,6 +539,7 @@ async function printHtml(htmlFile: string): Promise<Uint8Array> {
 async function runExport(format: ExportFormat): Promise<ExportResult> {
   const session = store.get();
   if (!session || session.captures.length === 0) return { ok: false, error: T.main.nothingToExport };
+  if (session.captures.every(isSkippedPage)) return { ok: false, error: T.main.nothingToExportDocument };
   const { pending, error } = dictation.unfinished();
   if (!autotest && (pending.length || error.length)) {
     const list = (labels: string[]) => labels.join(', ');
@@ -518,7 +563,7 @@ async function runExport(format: ExportFormat): Promise<ExportResult> {
       outDir: exportDir(),
       format,
       printHtml,
-      instructions: settings.get().instructions,
+      instructions: instructionsFor(session),
     });
     const copied = !autotest && format === 'pdf' && settings.get().copyPdf;
     if (copied) copyFileToClipboard(path);
@@ -647,6 +692,8 @@ function onMenuAction(a: MenuAction) {
       return startCapture();
     case 'video':
       return void toggleVideo();
+    case 'open-document':
+      return void openDocument();
     case 'editor':
       return openApp();
     case 'sessions':
@@ -1136,6 +1183,7 @@ ipcMain.on('dictation:recording', (_e, on: boolean) => {
   updateTrayMenu();
 });
 ipcMain.handle('session:export', (_e, format: ExportFormat) => runExport(format));
+ipcMain.on('document:open', (_e, path?: string) => void openDocument(path));
 ipcMain.handle('shortcut:status', () => ({ accelerator: settings.get().shortcut, registered: shortcutRegistered }));
 ipcMain.handle('whisper:status', () => transcriber.status());
 ipcMain.handle('dictee:transcribe', (_e, samples: Float32Array) => transcribe(encodeWav(samples)));

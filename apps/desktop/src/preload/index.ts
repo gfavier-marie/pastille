@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import type { PastilleApi } from '../ipc.ts';
 
 /** Abonnement à un message du processus principal ; renvoie la fonction de désabonnement. */
@@ -26,6 +26,9 @@ const api: PastilleApi = {
   updateNote: (id, text) => ipcRenderer.send('note:update', id, text),
   deleteNote: (id) => ipcRenderer.send('note:delete', id),
   exportSession: (format) => ipcRenderer.invoke('session:export', format),
+  // Le chemin d'un fichier déposé ne se lit qu'ici : le processus principal relit le fichier lui-même.
+  openDocument: (file) => ipcRenderer.send('document:open', file ? webUtils.getPathForFile(file) : undefined),
+  onDocumentProgress: (cb) => on('editor:document-progress', cb),
   undo: () => ipcRenderer.send('session:undo'),
   redo: () => ipcRenderer.send('session:redo'),
   dictationAvailable: () => ipcRenderer.invoke('dictation:available'),

@@ -355,3 +355,68 @@ Aujourd'hui : un échec de vérification efface la mise à jour connue (contrôl
 - [x] Version **0.13.0** (avec le champ de commentaire du bandeau vidéo)
 - [ ] Essai réel : bouton « Mettre à jour » sur Mac et PC ; commentaire écrit et cadre fixe au défilement pendant la vidéo
 - [x] Logo E3 sur le site (en-têtes et pieds de page, landing et pages légales) : « vibe » en Fraunces italique, « screener » dans des coins de viseur aérés ; Fraunces hébergée ici, réduite aux lettres de « vibe » (3 Ko), créditée dans les licences tierces
+
+## Commenter des documents (demandé le 8 oct. 2026)
+
+On ouvre un PDF, un Word, un Excel ou un PowerPoint dans l'app et on le commente comme une capture : points numérotés, dictée, croquis, exports pour l'IA, MCP. En plus, une **copie commentée** du document reçoit les commentaires au format du document (notes PDF, commentaires Word et PowerPoint, notes Excel). L'original n'est jamais modifié.
+
+Choix validés le 8 oct. :
+- comme la vidéo, **le document devient une session ordinaire** : chaque page est une capture, l'éditeur sert de visionneuse ;
+- pdf.js pour les PDF, `@silurus/ooxml` (visionneuse intégrée, rien à installer) pour Word, Excel et PowerPoint ;
+- réécriture dans les quatre formats ;
+- pastilles « comme le format le permet » : la note PDF a l'apparence de la pastille, les commentaires Office sont préfixés « #3 — ».
+
+Une seule nouveauté dans le modèle : `Capture.source.document` (document, page, nombre de pages). L'original est copié dans `documents/<id>.<ext>` et la carte du texte de chaque page est écrite à côté de son image (`captures/<id>.json`), pour citer le texte visé sans relancer de rendu.
+
+Dépendances : `pdfjs-dist` et `pdf-lib`. Le rendu se fait dans le processus principal, avec `@napi-rs/canvas` (celui des exports) : pas de fenêtre cachée.
+
+### Lot DOC1 — PDF de bout en bout
+
+- [x] « Commenter un document… » dans le menu de l'icône et le menu ≡, bouton dans l'éditeur vide et au bout des vignettes, PDF déposé sur l'éditeur (`webUtils.getPathForFile`)
+- [x] Ouverture (`document/open.ts`) : nouvelle session nommée d'après le fichier, sauf si la session ouverte est vide ; licence comme la capture ; vidéo arrêtée d'abord ; rien n'est créé si le fichier est illisible
+- [x] Refus avec message : PDF protégé par mot de passe, .doc/.xls/.ppt, Word/Excel/PowerPoint (« exportez en PDF » en attendant le lot DOC2)
+- [x] Plafond de 200 pages, avec un message
+- [x] Rendu (`document/pdf.ts`) : 144 ppp (A4 = 1190 × 1684), polices standard, CMaps et décodeurs de pdf.js lus sur le disque, carte du texte ; la page 1 s'affiche tout de suite, la progression est dans l'en-tête. Mesuré sur un vrai PDF de 310 pages : 100 à 150 ms par page
+- [x] Éditeur : « Page 3 · 2 points » et nom du document ; page ajustée à la largeur ; la molette fait défiler, ⌘ / Ctrl + molette zoome
+- [x] Exports et MCP : pages sans point sautées (numéros d'écran inchangés) ; titre « Page 3 / 12 — rapport.pdf » ; « texte visé : « … » » devant la position ; `voir_ecran` donne la liste des pages commentées ; instructions par défaut propres aux documents (`instructionsDocument`), si le réglage n'a pas été modifié
+- [x] Copie commentée (export « Copie commentée du document », `document/commented-pdf.ts`) :
+  - les points deviennent des notes `/Text` à l'apparence de la pastille, les zones des `/Square`, les flèches des `/Line` ;
+  - commentaire « #3 — texte (1 croquis dans l'export VibeScreener) » ;
+  - écrite dans le dossier d'export sous le nom « rapport (commenté).pdf », puis « (commenté 2) » : un fichier existant n'est jamais remplacé ;
+  - rotations de page prises en compte (vérifiées contre pdf.js).
+- [x] Tests `document/document.test.ts` (6) ; textes dans les cinq langues ; éditeur construit vérifié dans un navigateur avec un faux preload (page, défilement, menu d'export, éditeur vide en allemand)
+- [ ] Essai réel sur Mac, avec ton accord :
+  - un PDF déposé, 10 points dictés ;
+  - copie commentée ouverte dans Aperçu et Acrobat (Aperçu peut dessiner sa propre icône de note au lieu de la pastille) ;
+  - export Markdown donné à Claude.
+- [ ] App empaquetée : pdf.js chargé depuis l'asar (worker de pdf.js dans le même fil), fichiers exclus dans `electron-builder.yml`
+
+*Critère : un PDF de 20 pages ouvert par glisser-déposer, 10 points dictés sur 4 pages en < 3 min ; l'export PDF pour l'IA ne contient que les 4 pages et cite le texte visé ; la copie commentée montre les 10 pastilles et leurs notes dans Aperçu et Acrobat.*
+
+### Lot DOC0 — Risques Office (avant DOC2, sur tes fichiers)
+
+- [ ] Fidélité de `@silurus/ooxml` sur 3 de tes fichiers (.docx, .xlsx, .pptx), comparée à Word, Excel et PowerPoint. À regarder : polices Office absentes du Mac, tableaux, graphiques, SmartArt
+- [ ] Mode Node (`@silurus/ooxml/node` avec `@napi-rs/canvas`) : pages Word et diapositives rendues dans le processus principal comme les PDF, et position du texte (`onTextRun`). Excel n'a pas de rendu Node : rendu de la grille à faire, ou fenêtre cachée
+- [ ] PowerPoint 365 : commentaires modernes (`p188:cm` + `pos`) ou classiques (`p:cm`) ? Un fichier n'en montre qu'un type
+- [ ] Une copie commentée de chaque format ouverte sans réparation dans Word, Excel et PowerPoint (Mac et web)
+
+*Repli si la fidélité ne tient pas : LibreOffice s'il est installé, sinon « exportez en PDF ».*
+
+### Lot DOC2 — Word, Excel, PowerPoint à l'affichage
+
+- [ ] Pages Word, diapositives, feuilles Excel en morceaux (≈ 50 lignes × 15 colonnes, grille des cellules dans la carte)
+- [ ] Titres « Diapositive 4 / 20 », « Feuille Ventes (A1:O50) » ; ancre « cellule B12 » ou « plage B12:D20 »
+
+### Lot DOC3 — Copie commentée Office
+
+- [ ] Word : `comments.xml` et commentaire autour du paragraphe visé (retrouvé par le texte de l'ancre)
+- [ ] PowerPoint : commentaire à la position du point
+- [ ] Excel : note sur la cellule (`commentsN.xml` + VML)
+
+### Lot DOC4 — CI, docs, version
+
+- [ ] `PASTILLE_AUTOTEST=editor` : session document dans `pnpm e2e` (photo d'une page, export `document`)
+- [ ] `docs/SPEC.md` (§ Documents), README, `CLAUDE.md`
+- [ ] Version suivante et tag `v*` sur ton feu vert
+
+**Plus tard [C], non prévu** : défilement continu d'une page à l'autre, « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.

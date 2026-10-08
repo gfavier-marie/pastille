@@ -22,6 +22,8 @@ const Badge = ({ a }: { a: Annotation }) => (
   <span className={`badge ${a.geometry.kind === 'point' ? 'point' : ''} ${a.number > 99 ? 'wide' : ''}`}>{a.number}</span>
 );
 const isTyping = (t: EventTarget | null) => t instanceof HTMLTextAreaElement || t instanceof HTMLInputElement;
+/** Document déposé (PDF ou Office) : ouvert comme une session ; le processus principal refuse ce qu'il ne lit pas. */
+const isDocumentFile = (f: File) => /\.(pdf|docx?|xlsx?|pptx?)$/i.test(f.name);
 
 /** Image collée ou déposée (PNG, JPEG, WebP…) convertie en PNG ; null si illisible. */
 async function toPng(file: File): Promise<Uint8Array | null> {
@@ -152,6 +154,7 @@ function App() {
   const [videoShortcut, setVideoShortcut] = useState(isMac ? '⌃⌥⌘R' : 'Ctrl+Alt+R');
   const [tablet, setTablet] = useState(false);
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis ou inspiration agrandi
+  const [opening, setOpening] = useState<{ name: string; done: number; total: number } | null>(null); // document en cours d'ouverture
   const [newNoteId, setNewNoteId] = useState<string | null>(null); // remarque juste ajoutée, à mettre au focus
   const activeNote = useRef<string | null>(null); // remarque en cours de saisie
   const [commentMode, setCommentMode] = useState<SettingsState['commentMode']>('auto');
@@ -208,6 +211,7 @@ function App() {
     const offSettings = api.onSettingsChanged(applyPrefs);
     const offTablet = api.onTabletStatus(setTablet);
     const offSessions = api.onShowSessions(() => setSessionsOpen(true));
+    const offOpening = api.onDocumentProgress(setOpening);
     // Micro préparé au raccourci : la capture masque l'éditeur, mais le micro reste ouvert pour la dictée qui suit.
     let preparing = false;
     const offMic = api.onPrepareMic(() => {
@@ -227,6 +231,7 @@ function App() {
       offTablet();
       offSettings();
       offSessions();
+      offOpening();
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
@@ -438,7 +443,7 @@ function App() {
     return () => window.removeEventListener('keydown', onKey);
   });
 
-  // Image collée (⌘V) ou déposée : elle devient une inspiration du point sélectionné.
+  // Image collée (⌘V) ou déposée : elle devient une inspiration du point sélectionné. Un document déposé s'ouvre.
   useEffect(() => {
     const flash = (text: string) => {
       setToast({ text, error: true });
@@ -463,7 +468,9 @@ function App() {
     const onDragOver = (e: DragEvent) => e.preventDefault();
     const onDrop = (e: DragEvent) => {
       e.preventDefault();
-      attach(e.dataTransfer?.files);
+      const doc = [...(e.dataTransfer?.files ?? [])].find(isDocumentFile);
+      if (doc) api.openDocument(doc);
+      else attach(e.dataTransfer?.files);
     };
     window.addEventListener('paste', onPaste);
     window.addEventListener('dragover', onDragOver);
@@ -475,7 +482,7 @@ function App() {
     };
   });
 
-  // « Nouvelle capture » et « Enregistrer une vidéo » : au bout des vignettes, et dans l'éditeur vide.
+  // « Nouvelle capture », « Enregistrer une vidéo » et « Commenter un document » : au bout des vignettes, et dans l'éditeur vide.
   const newCapture = (
     <button type="button" className="btn primary new-capture" onClick={() => api.startCapture()}>
       <I.Plus size={14} />
@@ -490,6 +497,12 @@ function App() {
       <kbd>{videoShortcut}</kbd>
     </button>
   );
+  const newDocument = (
+    <button type="button" className="btn new-capture" onClick={() => api.openDocument()}>
+      <I.Doc size={14} />
+      {T.editor.openDocument}
+    </button>
+  );
 
   if (!session || !capture) {
     return (
@@ -500,10 +513,13 @@ function App() {
           {T.editor.emptyBefore} <kbd>{shortcut}</kbd> {T.editor.emptyAfter}
           <br />
           {T.editor.emptyVideoBefore} <kbd>{videoShortcut}</kbd> {T.editor.emptyVideoAfter}
+          <br />
+          {T.editor.emptyDocument}
         </p>
         <div className="actions">
           {newCapture}
           {newVideo}
+          {newDocument}
           <button type="button" className="btn" onClick={() => setSessionsOpen(true)}>
             <I.Folder size={14} />
             {T.editor.allSessions}
@@ -623,6 +639,7 @@ function App() {
 
   const notes = session.notes ?? [];
   const index = captures.indexOf(capture);
+  const doc = capture.source?.document; // page d'un document ouvert dans l'app
   const pending = ordered.filter((a) => a.transcription === 'pending').length;
   const goTo = (i: number) => {
     const next = captures[i];
@@ -693,6 +710,12 @@ function App() {
             {T.transcriptions(pending)}
           </span>
         )}
+        {opening && (
+          <span className="chip">
+            <I.Spinner size={11} />
+            {T.editor.opening(opening.name, opening.done, opening.total)}
+          </span>
+        )}
         <div className="export">
           <button type="button" className="btn primary" aria-haspopup="menu" aria-expanded={exportMenu} onClick={() => setExportMenu((v) => !v)}>
             <I.Export size={15} />
@@ -701,7 +724,7 @@ function App() {
           </button>
           {exportMenu && (
             <div className="menu" role="menu">
-              {(['pdf', 'markdown', 'pptx'] as const).map((f) => (
+              {(['pdf', 'markdown', 'pptx', ...(captures.some((c) => c.source?.document) ? ['document' as const] : [])] as const).map((f) => (
                 <button type="button" role="menuitem" key={f} onClick={() => void runExport(f)}>
                   {T.editor.formats[f]}
                   {f === 'pdf' && <kbd>{MOD}E</kbd>}
@@ -716,6 +739,7 @@ function App() {
       <main>
         <Stage
           capture={capture}
+          document={!!doc}
           imageUrl={imageUrl(session, capture.image)}
           selectedId={selectedId}
           nextNumber={captures.slice(0, index + 1).reduce((n, c) => n + c.annotations.length, 0) + 1}
@@ -810,9 +834,13 @@ function App() {
             <>
               <div className="aside-head">
                 <div className="titles">
-                  <div className="title">{T.editor.screenTitle(index + 1, capture.annotations.length)}</div>
-                  {capture.source?.app && (
-                    <div className="sub">{[capture.source.app, capture.source.windowTitle].filter(Boolean).join(' — ')}</div>
+                  <div className="title">
+                    {doc ? T.editor.pageTitle(doc.page, capture.annotations.length) : T.editor.screenTitle(index + 1, capture.annotations.length)}
+                  </div>
+                  {doc ? (
+                    <div className="sub">{doc.name}</div>
+                  ) : (
+                    capture.source?.app && <div className="sub">{[capture.source.app, capture.source.windowTitle].filter(Boolean).join(' — ')}</div>
                   )}
                 </div>
                 <button type="button" className="nav-btn" aria-label={T.editor.previous} disabled={index === 0} onClick={() => goTo(index - 1)}>
@@ -973,14 +1001,22 @@ function App() {
             <button
               type="button"
               className="thumb"
-              aria-label={T.editor.thumbLabel(i + 1, c.annotations.length, c.id === capture.id)}
+              aria-label={
+                c.source?.document
+                  ? T.editor.pageThumbLabel(c.source.document.page, c.annotations.length, c.id === capture.id)
+                  : T.editor.thumbLabel(i + 1, c.annotations.length, c.id === capture.id)
+              }
               aria-current={c.id === capture.id || undefined}
               onClick={() => goTo(i)}
             >
               <span className="img">
                 <img src={imageUrl(session, c.image)} alt="" />
               </span>
-              <span className="cap">{T.editor.thumb(i + 1, c.annotations[0]?.number, c.annotations.at(-1)?.number)}</span>
+              <span className="cap">
+                {c.source?.document
+                  ? T.editor.pageThumb(c.source.document.page, c.annotations[0]?.number, c.annotations.at(-1)?.number)
+                  : T.editor.thumb(i + 1, c.annotations[0]?.number, c.annotations.at(-1)?.number)}
+              </span>
             </button>
             <button type="button" className="remove" aria-label={T.editor.deleteScreen(i + 1)} title={T.editor.deleteScreen(i + 1)} onClick={() => deleteCapture(i)}>
               <I.Close size={9} />
@@ -989,6 +1025,7 @@ function App() {
         ))}
         {newCapture}
         {newVideo}
+        {newDocument}
       </nav>
 
       {exportMenu && <div style={{ position: 'fixed', inset: 0, zIndex: 9 }} onMouseDown={() => setExportMenu(false)} />}

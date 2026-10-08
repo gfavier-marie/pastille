@@ -8,8 +8,9 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { loadImage } from '@napi-rs/canvas';
-import { allAnnotations, upgradeSession, type Session } from '@pastille/shared';
+import { allAnnotations, isSkippedPage, upgradeSession, type Session } from '@pastille/shared';
 import { T } from '../texts/index.ts';
+import { loadTextMap } from './document/anchor.ts';
 import { cropJpeg, inspirationJpeg, position, screenJpeg, screenTitle, sourceLabel } from './export/build.ts';
 import type { SessionStore } from './session-store.ts';
 
@@ -49,7 +50,8 @@ const text = (t: string): Content => ({ type: 'text', text: t });
 const image = (data: Uint8Array, mimeType: string): Content => ({ type: 'image', data: Buffer.from(data).toString('base64'), mimeType });
 const comment = (t: string) => t.trim().replace(/\s*\n\s*/g, ' ') || T.exports.noComment;
 
-export function createMcp(deps: { store: SessionStore; instructions?: () => string; onClient?: () => void }) {
+/** `instructions` : texte d'instructions à l'IA pour une session (réglage, ou défaut adapté aux documents). */
+export function createMcp(deps: { store: SessionStore; instructions?: (s: Session) => string; onClient?: () => void }) {
   const { store } = deps;
   let server: Server | null = null;
   let hosts: string[] = [];
@@ -81,26 +83,31 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     return [T.mcp.sessions, ...list.map((s) => T.mcp.sessionLine(s.name, T.exports.date(s.updatedAt), s.points, s.id, s.id === openId))].join('\n');
   }
 
-  function review(session: Session): string {
+  async function review({ session, dir }: { session: Session; dir: string }): Promise<string> {
     const M = T.mcp, E = T.exports;
     const total = allAnnotations(session).length;
-    const lines = [`# ${session.name}`, '', `${E.date(session.createdAt)} · ${T.screens(session.captures.length)} · ${T.points(total)}`];
+    // Pages de document sans point sautées, comme dans les exports ; les numéros d'écran ne changent pas.
+    const shown = [...session.captures.entries()].filter(([, c]) => !isSkippedPage(c));
+    const lines = [`# ${session.name}`, '', `${E.date(session.createdAt)} · ${T.screens(shown.length)} · ${T.points(total)}`];
     if (session.context?.trim()) lines.push('', E.context + E.colon + session.context.trim());
-    lines.push('', `## ${E.instructions}`, '', (deps.instructions?.() ?? T.instructions).replaceAll('{N}', String(total)));
+    lines.push('', `## ${E.instructions}`, '', (deps.instructions?.(session) ?? T.instructions).replaceAll('{N}', String(total)));
     const untranscribed = allAnnotations(session).filter((a) => ['recording', 'pending', 'error'].includes(a.transcription));
     if (untranscribed.length) lines.push('', M.untranscribed(untranscribed.map((a) => `#${a.number}`).join(', ')));
     const notes = (session.notes ?? []).filter((n) => n.text.trim());
     if (notes.length) lines.push('', `## ${E.notes}`, '', ...notes.map((n) => `- ${comment(n.text)}`));
-    for (const [i, c] of session.captures.entries()) {
+    for (const [i, c] of shown) {
       lines.push('', `## ${screenTitle(i + 1, c)}`, '');
       if (!c.annotations.length) lines.push(M.noPoints);
+      const map = await loadTextMap(dir, c);
       for (const a of c.annotations) {
         const sketches = a.sketches.length ? ` · ${M.sketches(a.sketches.length)}` : '';
         const inspirations = a.inspirations?.length ? ` · ${M.inspirations(a.inspirations.length)}` : '';
-        lines.push(`- #${a.number} · ${comment(a.text)} · ${position(a, c)}${sketches}${inspirations}`);
+        lines.push(`- #${a.number} · ${comment(a.text)} · ${position(a, c, map)}${sketches}${inspirations}`);
       }
     }
-    if (session.captures.length) lines.push('', M.seeScreens(session.captures.length));
+    if (shown.length === session.captures.length) {
+      if (shown.length) lines.push('', M.seeScreens(shown.length));
+    } else if (shown.length) lines.push('', M.seeScreensList(shown.map(([i]) => i + 1).join(', ')));
     return lines.join('\n');
   }
 
@@ -110,9 +117,10 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
     if (!capture) throw new ToolError(T.mcp.noScreen(String(ecran), session.name, session.captures.length));
     const E = T.exports;
     const img = await loadImage(join(dir, capture.image));
+    const map = await loadTextMap(dir, capture);
     const content = [text(`## ${screenTitle(n, capture)} · ${T.points(capture.annotations.length)}`), image(await screenJpeg(img, capture), 'image/jpeg')];
     for (const a of capture.annotations) {
-      content.push(text(`### #${a.number}\n${a.text.trim() || E.noComment}\n${E.position}${E.colon}${position(a, capture)}\n${T.mcp.zoom}`));
+      content.push(text(`### #${a.number}\n${a.text.trim() || E.noComment}\n${E.position}${E.colon}${position(a, capture, map)}\n${T.mcp.zoom}`));
       content.push(image(await cropJpeg(img, capture, a), 'image/jpeg'));
       for (const [k, sketch] of a.sketches.entries()) {
         content.push(text(`${E.sketchOf(k + 1, a.number)}${E.colon.trimEnd()}`));
@@ -130,7 +138,7 @@ export function createMcp(deps: { store: SessionStore; instructions?: () => stri
   async function callTool(name: string, args: Json): Promise<ToolResult> {
     try {
       if (name === 'lister_sessions') return { content: [text(await listSessions())] };
-      if (name === 'lire_revue') return { content: [text(review((await loadSession(args.session)).session))] };
+      if (name === 'lire_revue') return { content: [text(await review(await loadSession(args.session)))] };
       return { content: await screen(await loadSession(args.session), args.ecran) };
     } catch (err) {
       return { content: [text(err instanceof ToolError ? err.message : T.mcp.error(String(err)))], isError: true };

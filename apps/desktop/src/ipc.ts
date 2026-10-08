@@ -89,7 +89,7 @@ export type WhisperStatus =
 
 export type TranscribeResult = { text: string; whisperMs: number; audioMs: number };
 
-export type ExportFormat = 'pdf' | 'markdown' | 'pptx';
+export type ExportFormat = 'pdf' | 'markdown' | 'pptx' | 'document';
 
 /** État affiché par la fenêtre de réglages et l'assistant de premier lancement. */
 export type SettingsState = SettingsView & {
@@ -129,7 +129,7 @@ export type MenuState = {
 };
 
 export type MenuAction =
-  | { type: 'capture' | 'video' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'claude-code' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' | 'license' }
+  | { type: 'capture' | 'video' | 'open-document' | 'editor' | 'sessions' | 'export' | 'new-session' | 'pair' | 'claude-code' | 'settings' | 'quit' | 'close' | 'hide-bar' | 'reveal' | 'update' | 'license' }
   | { type: 'open-recent' | 'export-recent'; id: string };
 
 /** Message de la barre flottante après un export. */
@@ -157,6 +157,8 @@ export type PastilleApi = {
   updateNote(id: string, text: string): void;
   deleteNote(id: string): void;
   exportSession(format: ExportFormat): Promise<ExportResult>;
+  openDocument(file?: File): void; // fichier déposé, ou choisi dans un dialogue
+  onDocumentProgress(cb: (p: { name: string; done: number; total: number } | null) => void): () => void;
   undo(): void;
   redo(): void;
   dictationAvailable(): Promise<boolean>;

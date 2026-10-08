@@ -1,6 +1,6 @@
 // Règles du modèle partagées : création de session, numérotation continue.
 
-import type { Annotation, Note, Session } from './model.ts';
+import type { Annotation, Capture, Note, Session } from './model.ts';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -22,6 +22,16 @@ export function allAnnotations(session: Session): Annotation[] {
 /** Numérotation continue #1 à #N sur toute la session ; les identifiants ne changent pas. */
 export function renumber(session: Session): void {
   allAnnotations(session).forEach((a, i) => (a.number = i + 1));
+}
+
+/** Page de document sans point : sautée par les exports et la revue MCP (un document de 40 pages pour 3 retours). */
+export function isSkippedPage(capture: Capture): boolean {
+  return !!capture.source?.document && capture.annotations.length === 0;
+}
+
+/** Session faite uniquement de pages de document : les instructions par défaut parlent alors d'un document. */
+export function isDocumentSession(session: Session): boolean {
+  return session.captures.length > 0 && session.captures.every((c) => c.source?.document);
 }
 
 export function findAnnotation(session: Session, id: string) {

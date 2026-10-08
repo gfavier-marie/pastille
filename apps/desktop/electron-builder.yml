@@ -12,6 +12,11 @@ files:
   - resources/**
   - fixtures/**
   - package.json
+  # Documents : seules les parties lues par le processus principal (pdf.js pour Node, pdf-lib en CommonJS).
+  - '!**/node_modules/pdfjs-dist/{build,web,types,image_decoders}/**'
+  - '!**/node_modules/pdfjs-dist/legacy/{web,image_decoders}/**'
+  - '!**/node_modules/pdf-lib/{dist,es,src,ts3.4}/**'
+  - '!**/node_modules/{pdfjs-dist,pdf-lib}/**/*.map'
 extraResources:
   - from: ../../vendor/whisper
     to: whisper

@@ -5,8 +5,9 @@
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createCanvas, loadImage, type Image, type SKRSContext2D } from '@napi-rs/canvas';
-import { allAnnotations, bounds, drawAnnotations, type Annotation, type Capture, type Ctx2D, type Inspiration, type Session } from '@pastille/shared';
+import { allAnnotations, bounds, drawAnnotations, isSkippedPage, type Annotation, type Capture, type Ctx2D, type Inspiration, type Session } from '@pastille/shared';
 import { T } from '../../texts/index.ts';
+import { anchorText, loadTextMap, type TextMap } from '../document/anchor.ts';
 
 const MAX_SCREEN_WIDTH = 2000;
 const CROP_W = 600;
@@ -38,6 +39,8 @@ export type ExportDoc = {
 };
 
 export function screenTitle(index: number, capture: Capture): string {
+  const doc = capture.source?.document;
+  if (doc) return T.exports.page(doc.page, doc.pages, doc.name);
   return [T.exports.screen(index), capture.source?.app, capture.source?.windowTitle].filter(Boolean).join(' — ');
 }
 
@@ -46,14 +49,22 @@ export function sourceLabel(source: Inspiration['source']): string | undefined {
   return [source?.app, source?.windowTitle].filter(Boolean).join(' — ') || undefined;
 }
 
-/** Position lisible en pixels de la capture (« x 120, y 340 sur 1600 × 1000 »). */
-export function position(a: Annotation, c: Capture): string {
+/**
+ * Position lisible en pixels de la capture (« x 120, y 340 sur 1600 × 1000 »), précédée du texte
+ * visé pour une page de document (`map` : sa carte du texte).
+ */
+export function position(a: Annotation, c: Capture, map?: TextMap): string {
   const X = (v: number) => Math.round(v * c.width), Y = (v: number) => Math.round(v * c.height);
   const E = T.exports, size = E.on(c.width, c.height);
   const g = a.geometry;
-  if (g.kind === 'point') return E.point(X(g.x), Y(g.y), size);
-  if (g.kind === 'zone') return E.zone(X(g.x), Y(g.y), X(g.w), Y(g.h), size);
-  return E.arrow(X(g.x1), Y(g.y1), X(g.x2), Y(g.y2), size);
+  const pixels =
+    g.kind === 'point'
+      ? E.point(X(g.x), Y(g.y), size)
+      : g.kind === 'zone'
+        ? E.zone(X(g.x), Y(g.y), X(g.w), Y(g.h), size)
+        : E.arrow(X(g.x1), Y(g.y1), X(g.x2), Y(g.y2), size);
+  const anchor = anchorText(g, map);
+  return anchor ? `${E.anchor(anchor)} · ${pixels}` : pixels;
 }
 
 /** Région source (pixels) du zoom : 600 × 400 autour du point, ou la boîte de l'annotation + marge, au ratio 3:2. */
@@ -128,8 +139,11 @@ export async function buildExport(
   const screens: ExportScreen[] = [];
 
   for (const [i, capture] of session.captures.entries()) {
+    // Les pages de document sans point sont sautées ; les numéros restent ceux de la session (voir_ecran).
+    if (isSkippedPage(capture)) continue;
     const index = i + 1;
     const img = await loadImage(join(sessionDir, capture.image));
+    const map = await loadTextMap(sessionDir, capture);
     const scale = Math.min(1, MAX_SCREEN_WIDTH / capture.width);
     const W = capture.width * scale, H = capture.height * scale;
     const image = `images/ecran-${index}.jpg`;
@@ -160,7 +174,7 @@ export async function buildExport(
         crop,
         sketches,
         inspirations,
-        position: position(a, capture),
+        position: position(a, capture, map),
       });
     }
     screens.push({ index, title: screenTitle(index, capture), image, width: Math.round(W), height: Math.round(H), points });

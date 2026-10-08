@@ -1,16 +1,18 @@
-// Export d'une session : PDF (pour l'IA en chat) ou dossier Markdown (pour l'IA qui lit des fichiers).
+// Export d'une session : PDF (pour l'IA en chat), dossier Markdown (pour l'IA qui lit des fichiers),
+// PowerPoint (pour des humains) ou copie commentée des documents ouverts dans l'app.
 
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { slugify, stamp, type Session } from '@pastille/shared';
 import { T } from '../../texts/index.ts';
+import { writeCommented } from '../document/commented.ts';
 import { buildExport } from './build.ts';
 import { toMarkdown } from './markdown.ts';
 import { toPdfHtml } from './pdf-html.ts';
 import { toPptx } from './pptx.ts';
 
-export type ExportFormat = 'pdf' | 'markdown' | 'pptx';
+export type ExportFormat = 'pdf' | 'markdown' | 'pptx' | 'document';
 
 // Plusieurs assistants IA plafonnent les PDF acceptés : au-delà, le PDF est découpé en parties (§6.3).
 export const MAX_PDF_PAGES = 100;
@@ -25,7 +27,7 @@ export function exportBaseName(session: Session, now = new Date()): string {
   return `vibescreener-${slugify(session.name)}-${stamp(now)}`;
 }
 
-/** Renvoie le chemin du fichier PDF (le premier s'il est découpé) ou PowerPoint, ou du dossier Markdown créé. */
+/** Renvoie le chemin du fichier PDF (le premier s'il est découpé), PowerPoint ou commenté, ou du dossier Markdown créé. */
 export async function exportSession(opts: {
   session: Session;
   sessionDir: string;
@@ -35,6 +37,7 @@ export async function exportSession(opts: {
   instructions?: string; // modèle du texte d'instructions, {N} = nombre de retours
 }): Promise<string> {
   const { session, sessionDir, outDir, format } = opts;
+  if (format === 'document') return writeCommented({ session, sessionDir: opts.sessionDir, outDir });
   const base = exportBaseName(session);
   await mkdir(outDir, { recursive: true });
 

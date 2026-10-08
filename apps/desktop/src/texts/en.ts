@@ -68,6 +68,7 @@ export const en: Texts = {
     capture: 'New capture',
     video: 'Record a video',
     stopVideo: 'Stop recording',
+    openDocument: 'Comment on a document…',
     editor: 'Open editor',
     exportPdf: 'Export PDF',
     newSession: 'New session',
@@ -94,7 +95,7 @@ export const en: Texts = {
     exportPdf: 'Export PDF',
     hide: 'Hide bar',
     tablet: 'Tablet',
-    exported: { pdf: 'PDF exported', markdown: 'Markdown folder exported', pptx: 'PowerPoint exported' },
+    exported: { pdf: 'PDF exported', markdown: 'Markdown folder exported', pptx: 'PowerPoint exported', document: 'Commented copy exported' },
     copied: 'PDF copied to clipboard',
   },
 
@@ -310,8 +311,8 @@ export const en: Texts = {
     close: 'Close',
     tablet: 'Tablet connected',
     export: 'Export',
-    formats: { pdf: 'PDF for the AI', markdown: 'Markdown folder + images', pptx: 'PowerPoint (slides)' },
-    exporting: { pdf: 'Exporting PDF…', markdown: 'Exporting Markdown…', pptx: 'Exporting PowerPoint…' },
+    formats: { pdf: 'PDF for the AI', markdown: 'Markdown folder + images', pptx: 'PowerPoint (slides)', document: 'Commented copy of the document' },
+    exporting: { pdf: 'Exporting PDF…', markdown: 'Exporting Markdown…', pptx: 'Exporting PowerPoint…', document: 'Writing the commented copy…' },
     exported: (path: string) => `Exported: ${path}`,
     stageHints: [
       ['Click', 'point'],
@@ -321,6 +322,7 @@ export const en: Texts = {
     zoomOut: 'Zoom out',
     zoomIn: 'Zoom in',
     screenTitle: (index: number, points: number) => `Screen ${index} · ${plural(points, 'point', 'points')}`,
+    pageTitle: (page: number, points: number) => `Page ${page} · ${plural(points, 'point', 'points')}`,
     previous: 'Previous capture',
     next: 'Next capture',
     noPoints: 'Click the capture to drop a point.',
@@ -372,6 +374,10 @@ export const en: Texts = {
       `Screen ${index} · ${first === undefined ? 'no points' : first === last ? `#${first}` : `#${first}–${last}`}`,
     thumbLabel: (index: number, points: number, current: boolean) =>
       `Screen ${index}, ${plural(points, 'point', 'points')}${current ? ', shown' : ''}`,
+    pageThumb: (page: number, first?: number, last?: number) =>
+      `Page ${page} · ${first === undefined ? 'no points' : first === last ? `#${first}` : `#${first}–${last}`}`,
+    pageThumbLabel: (page: number, points: number, current: boolean) =>
+      `Page ${page}, ${plural(points, 'point', 'points')}${current ? ', shown' : ''}`,
     captures: 'Session captures',
     deleteScreen: (index: number) => `Delete screen ${index} and its points`,
     screenDeleted: (index: number, mod: string) => `Screen ${index} deleted · ${mod}Z to undo`,
@@ -381,6 +387,9 @@ export const en: Texts = {
     emptyAfter: 'then click the element to fix.',
     emptyVideoBefore: 'For a video, press',
     emptyVideoAfter: `then browse: ${isMac ? '⌘' : 'Ctrl'}-click an element and speak to make it a point.`,
+    openDocument: 'Comment on a document',
+    emptyDocument: 'To comment on a PDF, drop it into this window.',
+    opening: (name: string, done: number, total: number) => `${name}: page ${done} / ${total}`,
     micError: (err: unknown) => `Microphone unavailable: ${err}`,
     zoomedImage: 'Enlarged image',
   },
@@ -391,6 +400,7 @@ export const en: Texts = {
     newReview: 'New review',
     cancel: 'Cancel',
     nothingToExport: 'Nothing to export: no captures.',
+    nothingToExportDocument: 'Nothing to export: no points on the document.',
     untranscribed: 'Some dictations haven’t been transcribed yet.',
     untranscribedPending: (list: string) => `In progress: ${list}`,
     untranscribedError: (list: string) => `Failed: ${list}`,
@@ -419,6 +429,19 @@ export const en: Texts = {
     captureDenied:
       'Can’t capture: allow screen recording (System Settings > Privacy & Security), then relaunch VibeScreener.',
     captureFailed: 'Can’t capture: the screen couldn’t be read.',
+    // Documents opened in the app
+    document: {
+      filter: 'Documents',
+      legacy: (name: string) => `${name} uses an old Office format: save it as a PDF to comment on it.`,
+      unsupported: (name: string) =>
+        `${name}: format not supported. VibeScreener opens PDFs; for Word, Excel or PowerPoint, export to PDF first.`,
+      busy: 'A document is already opening.',
+      encrypted: 'This PDF is password-protected: save an unprotected copy to comment on it.',
+      unreadable: (err: string) => `Can’t read the document: ${err}`,
+      truncated: (max: number) => `Long document: only the first ${max} pages are open.`,
+      protectedPdf: (name: string) => `${name} is protected against changes: no commented copy. Exports for the AI still work.`,
+      nothingToWrite: 'No points on a document: nothing to write into a commented copy.',
+    },
     video: {
       clicks: 'Video mode needs to see your clicks.',
       clicksDetail: (shortcut: string) =>
@@ -490,6 +513,12 @@ export const en: Texts = {
     zone: (x: number, y: number, w: number, h: number, size: string) => `area x ${x}, y ${y}, ${w} × ${h} ${size}`,
     arrow: (x1: number, y1: number, x2: number, y2: number, size: string) => `arrow from (${x1}, ${y1}) to (${x2}, ${y2}) ${size}`,
     on: (w: number, h: number) => `on ${w} × ${h}`,
+    page: (page: number, pages: number, name: string) => `Page ${page} / ${pages} — ${name}`,
+    anchor: (text: string) => `target text: “${text}”`,
+    commented: (i: number) => (i > 1 ? `commented ${i}` : 'commented'),
+    sketchCount: (n: number) => plural(n, 'sketch', 'sketches'),
+    inspirationCount: (n: number) => plural(n, 'inspiration', 'inspirations'),
+    seeExport: (list: string) => `${list} in the VibeScreener export`,
     yes: 'yes',
     no: 'no',
     context: 'Context',
@@ -529,6 +558,8 @@ To apply a review to the code: unless the user says otherwise, use the session o
     inspirations: (n: number) => plural(n, 'inspiration', 'inspirations'),
     seeScreens: (n: number) =>
       `To see the annotated screenshot, the zoom of each point, the sketches and the inspirations: use voir_ecran with ecran from 1 to ${n}.`,
+    seeScreensList: (list: string) =>
+      `Pages without points are left out. To see each commented page (annotated capture, zoom of each point, sketches, inspirations): use voir_ecran with ecran = ${list}.`,
     noScreen: (screen: string, name: string, screens: number) =>
       `Screen ${screen} doesn’t exist: session “${name}” has ${plural(screens, 'screen', 'screens')}.`,
     zoom: 'Zoom on the targeted element:',
@@ -544,6 +575,13 @@ Each item points to an element on a screenshot: the numbered badge and the
 crop show the targeted element, a rectangle marks an area, an arrow a move.
 Apply each item in the code. If an item is ambiguous, ask a question rather
 than guess. At the end, list the numbers you handled and those you didn't.`,
+
+  /** Default instructions for a session made of document pages. */
+  instructionsDocument: `This review lists {N} feedback items on a document, numbered #1 to #{N}.
+Each item points to a spot on a page: the numbered badge and the crop show the
+targeted passage, quoted when possible ("target text"), a rectangle marks an area,
+an arrow a move. Apply each item to the document. If an item is ambiguous, ask a
+question rather than guess. At the end, list the numbers you handled and those you didn't.`,
 
   sessionName: (d: Date) => `Review ${isoDay(d)} ${hhmm(d, ':')}`,
 };

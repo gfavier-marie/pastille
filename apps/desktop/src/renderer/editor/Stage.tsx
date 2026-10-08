@@ -1,7 +1,8 @@
 // Zone centrale : la capture et ses annotations, dessinées par la fonction de rendu partagée.
 // Clic = nouveau point ; glisser = zone ; ⇧ + glisser = flèche ; clic sur une pastille = sélection + bulle ;
 // glisser une pastille = déplacement.
-// Molette = zoom, Espace maintenu + glisser = déplacement de la vue.
+// Molette = zoom, Espace maintenu + glisser = déplacement de la vue. Page de document : ajustée à la
+// largeur, la molette fait défiler et ⌘ / Ctrl + molette (ou le pincement) zoome, comme dans un lecteur.
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { drawAnnotations, pinPosition, type Annotation, type Capture, type Ctx2D, type Geometry } from '@pastille/shared';
@@ -39,6 +40,7 @@ function translate(g: Geometry, dx: number, dy: number): Geometry {
 
 export function Stage(props: {
   capture: Capture;
+  document?: boolean; // page d'un document : lue de haut en bas
   imageUrl: string;
   nextNumber: number; // numéro affiché pendant le tracé d'une zone ou d'une flèche
   selectedId: string | null;
@@ -58,6 +60,9 @@ export function Stage(props: {
   const [draft, setDraft] = useState<Geometry | null>(null);
   const gesture = useRef<Gesture | null>(null);
   const space = useRef(false);
+  // Lus par l'écouteur de la molette, posé une seule fois.
+  const reader = useRef({ on: false, height: 0 });
+  reader.current = { on: !!props.document, height: capture.height };
 
   // Chargement de l'image de la capture.
   useEffect(() => {
@@ -75,12 +80,13 @@ export function Stage(props: {
     return () => ro.disconnect();
   }, []);
 
-  // Image ajustée à la fenêtre à chaque changement de capture.
+  // Image ajustée à la fenêtre à chaque changement de capture ; une page de document, à la largeur, vue par le haut.
   useEffect(() => {
     if (!size.w || !size.h) return;
     const w = size.w - 2 * PAD.side, h = size.h - PAD.top - PAD.bottom;
-    const scale = Math.min(w / capture.width, h / capture.height);
-    setView({ scale, ox: PAD.side + (w - capture.width * scale) / 2, oy: PAD.top + (h - capture.height * scale) / 2 });
+    const scale = props.document ? w / capture.width : Math.min(w / capture.width, h / capture.height);
+    const oy = capture.height * scale > h ? PAD.top : PAD.top + (h - capture.height * scale) / 2;
+    setView({ scale, ox: PAD.side + (w - capture.width * scale) / 2, oy });
   }, [capture.id, capture.width, capture.height, size.w > 0, size.h > 0]);
 
   const annotations: Annotation[] = capture.annotations.map((a) =>
@@ -136,12 +142,18 @@ export function Stage(props: {
   }
 
   // Zoom à la molette, centré sur le curseur (écouteur non passif pour bloquer le défilement).
+  // Page de document : la molette fait défiler, sans sortir la page de la vue ; ⌘ / Ctrl (et le pincement) zoome.
   useEffect(() => {
     const el = canvasRef.current!;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
-      zoomAt(Math.exp(-e.deltaY * 0.002), e.clientX - rect.left, e.clientY - rect.top);
+      if (!reader.current.on || e.ctrlKey || e.metaKey) return zoomAt(Math.exp(-e.deltaY * 0.002), e.clientX - rect.left, e.clientY - rect.top);
+      setView((v) => {
+        const height = reader.current.height * v.scale, room = rect.height - PAD.top - PAD.bottom;
+        const oy = height <= room ? v.oy : Math.min(PAD.top, Math.max(rect.height - PAD.bottom - height, v.oy - e.deltaY));
+        return { ...v, ox: v.ox - e.deltaX, oy };
+      });
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);

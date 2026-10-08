@@ -71,6 +71,7 @@ export const fr = {
     capture: 'Nouvelle capture',
     video: 'Enregistrer une vidéo',
     stopVideo: "Arrêter l'enregistrement",
+    openDocument: 'Commenter un document…',
     editor: "Ouvrir l'éditeur",
     exportPdf: 'Exporter le PDF',
     newSession: 'Nouvelle session',
@@ -97,7 +98,7 @@ export const fr = {
     exportPdf: 'Exporter le PDF',
     hide: 'Masquer la barre',
     tablet: 'Tablette',
-    exported: { pdf: 'PDF exporté', markdown: 'Dossier Markdown exporté', pptx: 'PowerPoint exporté' },
+    exported: { pdf: 'PDF exporté', markdown: 'Dossier Markdown exporté', pptx: 'PowerPoint exporté', document: 'Copie commentée exportée' },
     copied: 'PDF copié dans le presse-papiers',
   },
 
@@ -313,8 +314,8 @@ export const fr = {
     close: 'Fermer',
     tablet: 'Tablette connectée',
     export: 'Exporter',
-    formats: { pdf: "PDF pour l'IA", markdown: 'Dossier Markdown + images', pptx: 'PowerPoint (présentation)' },
-    exporting: { pdf: 'Export du PDF…', markdown: 'Export Markdown…', pptx: 'Export PowerPoint…' },
+    formats: { pdf: "PDF pour l'IA", markdown: 'Dossier Markdown + images', pptx: 'PowerPoint (présentation)', document: 'Copie commentée du document' },
+    exporting: { pdf: 'Export du PDF…', markdown: 'Export Markdown…', pptx: 'Export PowerPoint…', document: 'Écriture de la copie commentée…' },
     exported: (path: string) => `Exporté : ${path}`,
     stageHints: [
       ['Clic', 'point'],
@@ -324,6 +325,7 @@ export const fr = {
     zoomOut: 'Zoom arrière',
     zoomIn: 'Zoom avant',
     screenTitle: (index: number, points: number) => `Écran ${index} · ${plural(points, 'point')}`,
+    pageTitle: (page: number, points: number) => `Page ${page} · ${plural(points, 'point')}`,
     previous: 'Capture précédente',
     next: 'Capture suivante',
     noPoints: 'Cliquez sur la capture pour poser un point.',
@@ -375,6 +377,10 @@ export const fr = {
       `Écran ${index} · ${first === undefined ? 'aucun point' : first === last ? `#${first}` : `#${first}–${last}`}`,
     thumbLabel: (index: number, points: number, current: boolean) =>
       `Écran ${index}, ${plural(points, 'point')}${current ? ', affiché' : ''}`,
+    pageThumb: (page: number, first?: number, last?: number) =>
+      `Page ${page} · ${first === undefined ? 'aucun point' : first === last ? `#${first}` : `#${first}–${last}`}`,
+    pageThumbLabel: (page: number, points: number, current: boolean) =>
+      `Page ${page}, ${plural(points, 'point')}${current ? ', affichée' : ''}`,
     captures: 'Captures de la session',
     deleteScreen: (index: number) => `Supprimer l'écran ${index} et ses points`,
     screenDeleted: (index: number, mod: string) => `Écran ${index} supprimé · ${mod}Z pour annuler`,
@@ -384,6 +390,9 @@ export const fr = {
     emptyAfter: "puis cliquez sur l'élément à corriger.",
     emptyVideoBefore: 'Pour une vidéo, appuyez sur',
     emptyVideoAfter: `puis naviguez : ${isMac ? '⌘' : 'Ctrl'} + clic sur un élément suivi de paroles devient un point.`,
+    openDocument: 'Commenter un document',
+    emptyDocument: 'Pour commenter un PDF, déposez-le dans cette fenêtre.',
+    opening: (name: string, done: number, total: number) => `${name} : page ${done} / ${total}`,
     micError: (err: unknown) => `Micro indisponible : ${err}`,
     zoomedImage: 'Image agrandie',
   },
@@ -394,6 +403,7 @@ export const fr = {
     newReview: 'Nouvelle revue',
     cancel: 'Annuler',
     nothingToExport: 'Rien à exporter : aucune capture.',
+    nothingToExportDocument: 'Rien à exporter : aucun point sur le document.',
     untranscribed: 'Certaines dictées ne sont pas encore transcrites.',
     untranscribedPending: (list: string) => `En cours : ${list}`,
     untranscribedError: (list: string) => `En erreur : ${list}`,
@@ -422,6 +432,19 @@ export const fr = {
     captureDenied:
       "Capture impossible : autorisez l'enregistrement de l'écran (Réglages Système > Confidentialité et sécurité), puis relancez VibeScreener.",
     captureFailed: "Capture impossible : l'écran n'a pas pu être lu.",
+    // Documents ouverts dans l'app
+    document: {
+      filter: 'Documents',
+      legacy: (name: string) => `${name} est dans un ancien format Office : enregistrez-le en PDF pour le commenter.`,
+      unsupported: (name: string) =>
+        `${name} : format non pris en charge. VibeScreener ouvre les PDF ; pour Word, Excel ou PowerPoint, exportez d'abord en PDF.`,
+      busy: "Un document est déjà en cours d'ouverture.",
+      encrypted: 'Ce PDF est protégé par un mot de passe : enregistrez-en une copie sans protection pour le commenter.',
+      unreadable: (err: string) => `Document illisible : ${err}`,
+      truncated: (max: number) => `Document long : seules les ${max} premières pages sont ouvertes.`,
+      protectedPdf: (name: string) => `${name} est protégé contre la modification : copie commentée impossible. Les exports pour l'IA restent possibles.`,
+      nothingToWrite: 'Aucun point sur un document : rien à écrire dans une copie commentée.',
+    },
     // Mode vidéo (⌃⌥⌘R)
     video: {
       clicks: 'Le mode vidéo a besoin de voir vos clics.',
@@ -496,6 +519,12 @@ export const fr = {
     zone: (x: number, y: number, w: number, h: number, size: string) => `zone x ${x}, y ${y}, ${w} × ${h} ${size}`,
     arrow: (x1: number, y1: number, x2: number, y2: number, size: string) => `flèche de (${x1}, ${y1}) à (${x2}, ${y2}) ${size}`,
     on: (w: number, h: number) => `sur ${w} × ${h}`,
+    page: (page: number, pages: number, name: string) => `Page ${page} / ${pages} — ${name}`,
+    anchor: (text: string) => `texte visé : « ${text} »`,
+    commented: (i: number) => (i > 1 ? `commenté ${i}` : 'commenté'),
+    sketchCount: (n: number) => plural(n, 'croquis', 'croquis'),
+    inspirationCount: (n: number) => plural(n, 'inspiration'),
+    seeExport: (list: string) => `${list} dans l'export VibeScreener`,
     yes: 'oui',
     no: 'non',
     context: 'Contexte',
@@ -536,6 +565,8 @@ Pour appliquer une revue au code : sans précision de l'utilisateur, prendre la 
     inspirations: (n: number) => plural(n, 'inspiration'),
     seeScreens: (n: number) =>
       `Pour voir la capture annotée, le zoom de chaque point, les croquis et les inspirations : voir_ecran avec ecran de 1 à ${n}.`,
+    seeScreensList: (list: string) =>
+      `Pages sans point omises. Pour voir chaque page commentée (capture annotée, zoom de chaque point, croquis, inspirations) : voir_ecran avec ecran = ${list}.`,
     noScreen: (screen: string, name: string, screens: number) =>
       `Écran ${screen} inexistant : la session « ${name} » a ${plural(screens, 'écran')}.`,
     zoom: "Zoom sur l'élément visé :",
@@ -553,6 +584,14 @@ Chaque retour indique un élément sur une capture d'écran : la pastille numér
 recadrage montrent l'élément visé, un rectangle désigne une zone, une flèche un déplacement.
 Applique chaque retour dans le code. Si un retour est ambigu, pose une question plutôt
 que de deviner. À la fin, liste les numéros traités et ceux qui ne l'ont pas été.`,
+
+  /** Instructions par défaut d'une session faite de pages de document. */
+  instructionsDocument: `Cette revue liste {N} retours sur un document, numérotés de #1 à #{N}.
+Chaque retour indique un endroit d'une page : la pastille numérotée et le recadrage montrent
+le passage visé, cité quand c'est possible (« texte visé »), un rectangle désigne une zone,
+une flèche un déplacement. Applique chaque retour au document. Si un retour est ambigu,
+pose une question plutôt que de deviner. À la fin, liste les numéros traités et ceux qui
+ne l'ont pas été.`,
 
   /** Nom d'une nouvelle session (cahier des charges §4.1). */
   sessionName: (d: Date) => defaultSessionName(d),

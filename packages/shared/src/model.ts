@@ -17,8 +17,19 @@ export type Capture = {
   width: number; // pixels physiques
   height: number;
   scaleFactor: number;
-  source?: { app?: string; windowTitle?: string; displayId?: string };
+  source?: { app?: string; windowTitle?: string; displayId?: string; document?: DocumentPage };
   annotations: Annotation[];
+};
+
+export type DocumentFormat = 'pdf' | 'docx' | 'xlsx' | 'pptx';
+
+/** Page d'un document ouvert dans l'app : la capture en est le rendu, l'original est copié dans documents/<id>.<ext>. */
+export type DocumentPage = {
+  id: string;
+  name: string; // « rapport.pdf »
+  format: DocumentFormat;
+  page: number; // à partir de 1
+  pages: number; // pages ouvertes
 };
 
 // Coordonnées normalisées 0–1, relatives à l'image
