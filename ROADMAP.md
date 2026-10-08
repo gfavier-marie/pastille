@@ -473,3 +473,8 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 - [ ] Prochaine version : à construire et publier (la CI Windows est indisponible, quota GitHub atteint)
 
 **Plus tard [C], non prévu** : « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
+
+### Site : section Documents (demandée le 8 oct.)
+
+- [x] Section « Et aussi · Documents » entre le calculateur et les tarifs, reprise du canevas Claude Design « VibeScreener — landing, section Documents » : encart gris, deux sorties (pour l'IA, pour les relecteurs), formats, illustration d'un Word commenté dans l'éditeur ; identique dans les deux modes, absente de la navigation. Question « Quels documents peut-on ouvrir ? » dans la FAQ, « Documents » dans la ligne du bandeau final ; cinq langues ; vérifiée en local à 375 px et au bureau
+- [ ] Déploiement (`pnpm site:deploy`) sur ton feu vert
