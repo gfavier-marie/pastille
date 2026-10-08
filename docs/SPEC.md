@@ -61,7 +61,7 @@ La boucle centrale ne coûte qu'un clic par commentaire ; le raccourci ne sert q
 
 ## 4. Application desktop (macOS et Windows)
 
-L'application vit dans la barre de menus (Mac, icône du Dock tant qu'une fenêtre est ouverte) ou la zone de notification (Windows, l'éditeur fermé reste réduit dans la barre des tâches) et se résume à trois écrans : l'overlay de capture, l'éditeur et les réglages.
+L'application vit dans la barre de menus (Mac, icône du Dock tant qu'une fenêtre est ouverte) ou la zone de notification (Windows : l'éditeur s'ouvre au lancement, sauf à l'ouverture de session, et fermé, il reste réduit dans la barre des tâches) et se résume à trois écrans : l'overlay de capture, l'éditeur et les réglages.
 
 Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus tard.
 

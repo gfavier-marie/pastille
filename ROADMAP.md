@@ -86,6 +86,7 @@ Un seul moteur : `buildExport()` produit une fois les images (captures annotées
 - [x] Nom de l’app : VibeScreener (identifiants internes inchangés : `@pastille/*`, `PASTILLE_*`, `pastille://`, appId) ; PDF avec logo
 - [x] Installeur .dmg (arm64, non signé, 147 Mo) avec whisper-server autonome ; testé empaqueté (`PASTILLE_AUTOTEST=editor`)
 - [x] Windows publié (demandé) : `VibeScreener-Setup.exe` dans la Release, installation en une commande PowerShell (`install.ps1`, sans SmartScreen ni droits administrateur), runtime Visual C++ embarqué pour whisper-server, mise à jour depuis le menu de l'icône ; la CI installe l'app sur un Windows et la teste (e2e + 5 captures réelles)
+- [x] Micro autorisé pendant que l'app tourne (retour d'essai) : Windows le laisse muet pour elle jusqu'au prochain lancement, l'app se relance donc d'elle-même dès qu'elle le voit autorisé (une fois au plus, `--relaunched`)
 - [ ] Essai sur un vrai PC (ou une VM Windows 11 sur le Mac) : installation, raccourci Ctrl+Alt+P (vérifier qu'AltGr+P ne le déclenche pas en AZERTY), overlay, dictée au micro, menu de la zone de notification, mise à jour
 - [ ] Mac Intel (x86_64), signature et notarisation : si un compte Apple Developer est disponible
 - [x] Dépôt public : installation en une commande (`install.sh`, branche aussi Claude Code), installeur signé ad hoc, relais partagé visé par l'app installée, Release publiée par tag, licence MIT
@@ -207,7 +208,7 @@ Sur main, cette branche. Les remarques vont de la plus gênante à la plus lourd
   - Variante sombre du contrôle `.segmented` de `theme.css`.
 - [x] **B5 Dock et barre des tâches** :
   - **Mac** : icône dans le Dock en plus de l'icône de la barre des menus. On retire `LSUIElement` (`electron-builder.yml`) et `app.dock.hide()`, et un clic sur le Dock ouvre l'éditeur (`app.on('activate')`). Menu d'app minimal (VibeScreener, Édition, Fenêtre).
-  - **Windows** : l'icône reste dans la zone de notification. Fermer l'éditeur le réduit au lieu de le masquer, pour qu'il reste dans la barre des tâches.
+  - **Windows** : l'icône reste dans la zone de notification. Fermer l'éditeur le réduit au lieu de le masquer, pour qu'il reste dans la barre des tâches. Lancée par l'utilisateur, l'app ouvre l'éditeur (retour d'essai : sinon on ne la voyait pas dans la barre des tâches) ; à l'ouverture de session (`--login`), elle reste dans la zone de notification.
   - **Limite à signaler** : Windows n'affiche rien dans la barre des tâches sans fenêtre ouverte. L'épinglage reste possible via le menu Démarrer.
   - Textes « barre des menus seulement » à revoir dans `texts.ts`, `README.md` et `docs/SPEC.md`.
 - [x] **B6 Zone montrée, ⌥ pour recadrer** : glisser dans l'overlay capture la fenêtre qui contient le centre de la zone, ou l'écran s'il n'y en a pas (même repérage que le clic).

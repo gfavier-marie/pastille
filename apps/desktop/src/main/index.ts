@@ -878,11 +878,25 @@ function openApp() {
 function permissions() {
   const status = (kind: 'screen' | 'microphone') =>
     isMac || process.platform === 'win32' ? systemPreferences.getMediaAccessStatus(kind) : 'granted';
+  const microphone = status('microphone');
+  relaunchIfMicGranted(microphone);
   return {
     screen: isMac ? status('screen') : 'granted',
-    microphone: status('microphone'),
+    microphone,
     accessibility: clicks.allowed() ? 'granted' : 'denied',
   };
+}
+
+// Windows : un micro autorisé pendant que l'app tourne reste muet pour elle jusqu'à son prochain
+// lancement. Elle se relance donc d'elle-même dès qu'elle le voit autorisé (l'assistant revient
+// s'il n'est pas fini), une fois au plus : --relaunched évite une boucle si Windows hésitait.
+let micAtStart: string | undefined;
+function relaunchIfMicGranted(microphone: string) {
+  micAtStart ??= microphone;
+  if (process.platform !== 'win32' || autotest || quitting || process.argv.includes('--relaunched')) return;
+  if (micAtStart === 'granted' || microphone !== 'granted') return;
+  app.relaunch({ args: [...process.argv.slice(1), '--relaunched'] });
+  app.quit();
 }
 
 /** L'assistant s'ouvre au premier lancement, puis tant qu'une autorisation nécessaire manque
@@ -930,7 +944,7 @@ ipcMain.handle('settings:update', async (_e, patch: Partial<Settings>) => {
   if (settings.uiLang() !== T.lang) applyLang();
   // Contexte du projet : il s'applique aussi à la session ouverte (historique compris, ⌘Z ne le défait pas).
   if (after.context !== before.context) store.update((s) => (s.context = after.context || undefined), { patchHistory: true });
-  if (patch.openAtLogin !== undefined && !autotest) app.setLoginItemSettings({ openAtLogin: patch.openAtLogin });
+  if (patch.openAtLogin !== undefined && !autotest) app.setLoginItemSettings({ ...LOGIN_ITEM, openAtLogin: patch.openAtLogin });
   if (after.language !== before.language || after.glossary !== before.glossary) void transcriber.restart().then(broadcastSettings);
   broadcastSettings();
   return { ok: true };
@@ -1422,6 +1436,8 @@ let quitting = false;
 // cette copie s'arrête aussi au lieu de démarrer pendant l'installation.
 if ((!autotest && !app.requestSingleInstanceLock()) || process.argv.includes('--quit')) app.quit();
 app.on('second-instance', (_e, argv) => (argv.includes('--quit') ? app.quit() : openApp()));
+// Lancement à l'ouverture de session : --login le distingue sous Windows, l'app reste alors dans la zone de notification.
+const LOGIN_ITEM = { args: ['--login'] };
 app.on('window-all-closed', () => {
   // L'app reste active sans fenêtre : icône de la barre de menus (zone de notification sous Windows).
 });
@@ -1442,8 +1458,13 @@ app.on('will-quit', () => {
 });
 
 void app.whenReady().then(async () => {
-  // Windows : sans cet identifiant (celui de l'installeur), les notifications ne s'affichent pas.
-  if (process.platform === 'win32') app.setAppUserModelId('fr.pastille.desktop');
+  if (process.platform === 'win32') {
+    // Sans cet identifiant (celui de l'installeur), les notifications ne s'affichent pas.
+    app.setAppUserModelId('fr.pastille.desktop');
+    // Ouverture de session enregistrée sans --login jusqu'à la 0.14.1 : réécrite une fois.
+    if (!autotest && settings.get().openAtLogin && !app.getLoginItemSettings(LOGIN_ITEM).openAtLogin)
+      app.setLoginItemSettings({ ...LOGIN_ITEM, openAtLogin: true });
+  }
   if (isMac) {
     Menu.setApplicationMenu(appMenu());
     if (!app.isPackaged) app.dock?.setIcon(join(app.getAppPath(), 'build', 'icon.png')); // l'app installée a la sienne
@@ -1561,7 +1582,10 @@ void app.whenReady().then(async () => {
   app.on('activate', () => openApp()); // macOS : clic sur l'icône du Dock, ou app relancée depuis le Finder
   // Assistant de premier lancement (§4.9), rouvert tant qu'il n'est pas fini ou qu'une autorisation manque ;
   // ouvert sans attendre le chargement de Whisper. Sans assistant, un modèle manquant ouvre les réglages.
-  if (setupNeeded()) showWelcome();
+  // Windows : lancée par l'utilisateur, l'app ouvre aussi l'éditeur ; sinon elle n'est que dans la zone de
+  // notification, absente de la barre des tâches, et semble ne pas s'être lancée.
+  if (process.platform === 'win32' && !process.argv.includes('--login')) openApp();
+  else if (setupNeeded()) showWelcome();
   void transcriber.restart().then(() => {
     broadcastSettings();
     if (!welcomeWindow && settings.get().engine === 'local' && transcriber.status().state === 'missing') showSettings('transcription');
