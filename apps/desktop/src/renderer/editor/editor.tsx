@@ -741,18 +741,19 @@ function App() {
       <main>
         <Stage
           capture={capture}
-          document={!!doc}
-          imageUrl={imageUrl(session, capture.image)}
+          pages={doc ? captures.filter((c) => c.source?.document?.id === doc.id) : undefined}
+          imageUrl={(c) => imageUrl(session, c.image)}
           selectedId={selectedId}
-          nextNumber={captures.slice(0, index + 1).reduce((n, c) => n + c.annotations.length, 0) + 1}
+          nextNumber={(pageId) => captures.slice(0, captures.findIndex((c) => c.id === pageId) + 1).reduce((n, c) => n + c.annotations.length, 0) + 1}
+          onPage={setCaptureId}
           onSelect={(id, open) => {
             recorder.stop(true);
             setSelectedId(id);
             setBubbleOpen(open);
             if (id) setTab('points');
           }}
-          onAdd={async (geometry) => {
-            const id = await api.addAnnotation(capture.id, geometry);
+          onAdd={async (geometry, pageId) => {
+            const id = await api.addAnnotation(pageId, geometry);
             setSelectedId(id);
             setBubbleOpen(true);
             setTab('points');

@@ -459,4 +459,16 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
   - Corrigé, et l'erreur d'ouverture d'un document est maintenant écrite dans le journal du test de bout en bout.
 - [x] Version **0.14.1** publiée le 8 oct. : app installée testée sous Windows (les quatre formats, PDF compris), installeurs et `latest.json` sur dl.vibescreener.dev, site redéployé
 
-**Plus tard [C], non prévu** : défilement continu d'une page à l'autre, « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
+### Défilement continu (demandé le 8 oct.)
+
+- [x] Les pages d'un document se suivent dans une seule vue, comme dans Word ou un lecteur PDF (morceaux d'une feuille Excel compris) :
+  - la molette fait défiler d'une page à l'autre, ⌘ / Ctrl + molette zoome ;
+  - la page au milieu de l'écran devient la page en cours (panneau des points, vignette en surbrillance) ;
+  - un clic sur une vignette, Page préc./suiv. ou un point de la liste y saute, au même zoom ;
+  - un point se pose sur la page cliquée ;
+  - seules les images des pages proches de l'écran sont chargées (200 pages possibles).
+
+  Vérifié dans l'éditeur construit (navigateur, faux preload), sur un PDF de 6 pages et un Excel.
+- [ ] Prochaine version : à construire et publier (la CI Windows est indisponible, quota GitHub atteint)
+
+**Plus tard [C], non prévu** : « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
