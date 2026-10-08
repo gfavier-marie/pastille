@@ -18,6 +18,7 @@ type Cell = Sheet['rows'][number]['cells'][number];
 const SCALE = 2;
 const HEAD_W = 40, HEAD_H = 20; // en-têtes de lignes et de colonnes (pixels à 1×)
 const MAX_W = 1200, MAX_H = 1000; // taille d'un morceau de feuille (pixels à 1×)
+const MIN_W = 640; // largeur minimale des colonnes d'une feuille (dix colonnes par défaut)
 const PAD = 3;
 const round = (v: number) => Math.round(v * 10000) / 10000;
 
@@ -49,7 +50,10 @@ export function tilesOf(ws: Sheet, limit = Infinity): Tile[] {
   const filled: [number, number][] = [];
   for (const row of ws.rows) for (const c of row.cells) if (hasValue(c)) filled.push([c.row, c.col]);
   if (!filled.length) return [];
-  const maxRow = Math.max(...filled.map(([r]) => r)), maxCol = Math.max(...filled.map(([, c]) => c));
+  const maxRow = Math.max(...filled.map(([r]) => r));
+  // Une feuille étroite garde une dizaine de colonnes : le texte y déborde sur les cellules vides, comme dans Excel.
+  let maxCol = Math.max(...filled.map(([, c]) => c));
+  for (let width = Array.from({ length: maxCol }, (_, i) => colPx(ws, i + 1)).reduce((a, b) => a + b, 0); width < MIN_W && maxCol < 16384; ) width += colPx(ws, ++maxCol);
   const rows = new Map(ws.rows.map((r) => [r.index, r]));
   const cut = (last: number, size: (i: number) => number, max: number) => {
     const spans: [number, number][] = [];

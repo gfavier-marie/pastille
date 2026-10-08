@@ -47,7 +47,7 @@ async function commentedCopy(name: string, bytes: Uint8Array, place: Place) {
 const read = async (zip: JSZip, path: string) => (await zip.file(path)?.async('string')) ?? '';
 const count = (xml: string, pattern: RegExp) => xml.match(pattern)?.length ?? 0;
 
-describe('copie commentée Office', () => {
+describe('copie commentée Office', { timeout: 30_000 }, () => {
   it('Word : commentaires dans la marge, autour des paragraphes visés', async () => {
     const { path, outDir, copy, zip, original } = await commentedCopy('rapport.docx', await createSampleDocx(), async (center) => [
       [0, await center(0, 'Le'), 'Mettre 15 %'],

@@ -84,7 +84,8 @@ export function Stage(props: {
   useEffect(() => {
     if (!size.w || !size.h) return;
     const w = size.w - 2 * PAD.side, h = size.h - PAD.top - PAD.bottom;
-    const scale = props.document ? w / capture.width : Math.min(w / capture.width, h / capture.height);
+    // Une petite page (morceau de feuille de quelques cellules) n'est pas agrandie au-delà de son image.
+    const scale = props.document ? Math.min(1, w / capture.width) : Math.min(w / capture.width, h / capture.height);
     const oy = capture.height * scale > h ? PAD.top : PAD.top + (h - capture.height * scale) / 2;
     setView({ scale, ox: PAD.side + (w - capture.width * scale) / 2, oy });
   }, [capture.id, capture.width, capture.height, size.w > 0, size.h > 0]);

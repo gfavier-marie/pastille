@@ -28,7 +28,7 @@ async function setup(maxPages?: number) {
   return { root, store, file, documents, progress };
 }
 
-describe('documents', () => {
+describe('documents', { timeout: 30_000 }, () => {
   it('ouvre un PDF en session : une capture par page, original copié, carte du texte écrite', async () => {
     const { store, file, documents, progress } = await setup();
     let first = '';

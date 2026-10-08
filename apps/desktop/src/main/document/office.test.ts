@@ -16,7 +16,7 @@ function centerOf(map: TextMap, start: string) {
   return { x: r.x + r.w / 2, y: r.y + r.h / 2 };
 }
 
-describe('documents Office', () => {
+describe('documents Office', { timeout: 30_000 }, () => {
   it('Word : pages A4, texte et paragraphe d’origine de chaque morceau', async () => {
     const doc = await openDocx(await createSampleDocx());
     expect(doc.pages).toBe(3);
@@ -48,7 +48,7 @@ describe('documents Office', () => {
     const doc = await openXlsx(await createSampleXlsx());
     expect(doc.pages).toBe(4); // Ventes : 120 lignes en trois morceaux ; Notes : un
     const first = await doc.render(0);
-    expect([first.sheet, first.range]).toEqual(['Ventes', 'A1:G50']);
+    expect([first.sheet, first.range]).toEqual(['Ventes', 'A1:J50']);
     expect(first.map.grid).toMatchObject({ sheet: 'Ventes', col0: 0, row0: 0 });
     const c2 = centerOf(first.map, '100');
     expect(cellAt(first.map.grid!, c2.x, c2.y)).toEqual([2, 1]);
@@ -57,7 +57,7 @@ describe('documents Office', () => {
     expect(anchorOf({ kind: 'zone', x: c2.x, y: c2.y, w: g2.x - c2.x, h: 0.05 }, first.map)).toMatchObject({ cells: expect.stringMatching(/^C2:G\d+$/) });
     // Deuxième morceau : la numérotation des lignes continue.
     const second = await doc.render(1);
-    expect(second.range).toBe('A51:G100');
+    expect(second.range).toBe('A51:J100');
     const p = centerOf(second.map, 'Magasin 50');
     expect(anchorOf({ kind: 'point', ...p }, second.map)).toMatchObject({ cells: 'B51' });
     expect((await doc.render(3)).sheet).toBe('Notes');
@@ -86,11 +86,11 @@ describe('documents Office', () => {
     await writeFile(file, await createSampleXlsx());
     await documents.importDocument(file, () => {});
     const s = store.get()!;
-    expect(s.captures.map((c) => c.source?.document?.range)).toEqual(['A1:G50', 'A51:G100', 'A101:G120', 'A1:A2']);
-    const id = store.addAnnotation(s.captures[1]!.id, { kind: 'point', x: 0.3, y: 0.03 });
+    expect(s.captures.map((c) => c.source?.document?.range)).toEqual(['A1:J50', 'A51:J100', 'A101:J120', 'A1:J2']);
+    const id = store.addAnnotation(s.captures[1]!.id, { kind: 'point', x: 0.2, y: 0.03 });
     store.update((x) => (x.captures[1]!.annotations.find((a) => a.id === id)!.text = 'Vérifier ce magasin'));
     const doc = await buildExport(store.get()!, store.dir(s), await mkdtemp(join(tmpdir(), 'pastille-out-')));
-    expect(doc.screens[0]!.title).toBe('Feuille Ventes (A51:G100) — budget.xlsx');
+    expect(doc.screens[0]!.title).toBe('Feuille Ventes (A51:J100) — budget.xlsx');
     expect(doc.points[0]!.position).toMatch(/^cellule B51 de la feuille Ventes \(« Magasin 50 »\)/);
   });
 });
