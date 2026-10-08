@@ -134,7 +134,7 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 
 ### 4.7 Icône et menu
 
-- **[M]** Menu : Nouvelle session, Ouvrir l'éditeur, Exporter le PDF, Appairer une tablette (QR), Réglages, Quitter.
+- **[M]** Menu : Nouvelle session, Ouvrir l'éditeur, Exporter le PDF, Appairer une tablette (QR), Réglages, Quitter. Plus « Commenter un document… » (§4.10).
 - **[S]** L'icône signale l'état : session active, nombre de points, tablette connectée, transcriptions en cours.
 - Les mêmes entrées sont reprises dans le menu ≡ en haut à droite de l'éditeur (demandé le 7 oct. 2026).
 
@@ -146,6 +146,43 @@ Priorités : **[M]** indispensable en V1, **[S]** souhaité en V1, **[C]** plus 
 ### 4.9 Premier lancement
 
 - **[M]** Assistant d'autorisations : enregistrement d'écran (macOS), micro, puis téléchargement unique du modèle Whisper large-v3-turbo quantifié q5_0 (547 Mo) avec barre de progression.
+
+### 4.10 Documents (demandé le 8 oct. 2026)
+
+Un PDF, un Word, un Excel ou un PowerPoint s'ouvre dans l'app et se commente comme une capture.
+
+- Ouverture :
+  - par « Commenter un document… » (menu de l'icône et menu ≡) ;
+  - par un bouton de l'éditeur (éditeur vide et bout des vignettes) ;
+  - en déposant le fichier sur l'éditeur.
+- Formats : .pdf, .docx/.docm/.dotx, .xlsx/.xlsm/.xltx, .pptx/.pptm/.potx. Les anciens formats (.doc, .xls, .ppt) et les fichiers protégés par mot de passe sont refusés avec un message.
+- Le document devient une session nommée d'après le fichier, sauf si la session ouverte est vide. Comme pour la capture, un essai terminé bloque l'ouverture d'un nouveau document.
+- Chaque page devient une capture :
+  - une page de PDF ou de Word ;
+  - une diapositive ;
+  - un morceau de feuille Excel d'environ 50 lignes, avec ses en-têtes A, B, C et 1, 2, 3.
+
+  Au-delà de 200 pages, seules les premières sont ouvertes.
+- L'éditeur sert de visionneuse. La page est ajustée à la largeur, la molette la fait défiler et ⌘ / Ctrl + molette zoome. Points, zones, flèches, dictée, croquis et inspirations marchent comme sur une capture.
+- Exports pour l'IA et MCP :
+  - les pages sans point sont sautées ;
+  - les titres sont du type « Page 3 / 12 — rapport.pdf », « Diapositive 4 / 20 — deck.pptx », « Feuille Ventes (A51:G100) — budget.xlsx » ;
+  - chaque point cite ce qu'il vise : texte sous le point ou dans la zone, ou « cellule B51 de la feuille Ventes (« Magasin 50 ») » ;
+  - instructions par défaut propres aux documents.
+- **Copie commentée** (export « Copie commentée du document ») :
+  - une copie de l'original reçoit les points au format du document : notes PDF à l'apparence de la pastille numérotée, commentaires Word autour des paragraphes visés, commentaires PowerPoint modernes à l'endroit du point, notes Excel sur les cellules ;
+  - le texte est « #3 — commentaire », avec la mention des croquis et inspirations restés dans l'export VibeScreener ;
+  - nom : « rapport (commenté).pdf » dans le dossier d'export. Aucun fichier n'est remplacé et l'original n'est jamais modifié.
+- Rendu dans le processus principal, sans fenêtre :
+  - PDF par pdf.js ;
+  - Word et PowerPoint par `@silurus/ooxml` en mode Node ;
+  - Excel par une grille dessinée par l'app à partir du classeur lu par cette bibliothèque.
+
+  Polices Office : celles de Word quand il est installé, sinon des polices proches.
+- Limites :
+  - graphiques et images posés sur les feuilles Excel non dessinés ;
+  - mise en page Word recalculée par la bibliothèque, donc parfois différente de Word ;
+  - signature numérique d'un PDF invalidée dans la copie commentée.
 
 ## 5. PWA de croquis
 
@@ -262,6 +299,8 @@ Tout est stocké en local, en fichiers lisibles, un dossier par session ; seuls 
 <dossier données de l'app>/sessions/<sessionId>/
   session.json                 état complet de la session
   captures/<captureId>.png     captures en pleine résolution
+  captures/<captureId>.json    page de document : carte du texte (morceaux, paragraphes Word, cellules Excel)
+  documents/<documentId>.<ext> document ouvert dans l'app : copie intacte de l'original
   audio/<annotationId>.wav     dictées (PCM 16 kHz mono)
   sketches/<sketchId>.png      croquis
   sketches/<sketchId>.json     traits vectoriels
@@ -285,8 +324,16 @@ type Capture = {
   image: string;                 // chemin relatif au dossier de session
   width: number; height: number; // pixels physiques
   scaleFactor: number;
-  source?: { app?: string; windowTitle?: string; displayId?: string };
+  source?: { app?: string; windowTitle?: string; displayId?: string; document?: DocumentPage };
   annotations: Annotation[];
+};
+
+// Page d'un document ouvert dans l'app (§4.10)
+type DocumentPage = {
+  id: string; name: string;      // documents/<id>.<ext>, « rapport.docx »
+  format: 'pdf' | 'docx' | 'xlsx' | 'pptx';
+  page: number; pages: number;   // page, diapositive ou morceau de feuille
+  sheet?: string; range?: string; // Excel : « Ventes », « A1:G50 »
 };
 
 // Coordonnées normalisées 0–1, relatives à l'image

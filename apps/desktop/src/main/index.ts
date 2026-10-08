@@ -36,6 +36,7 @@ import { openXlsx } from './document/xlsx.ts';
 import { createMenubar } from './menubar.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
+import { createSampleDocx, createSamplePdf, createSamplePptx, createSampleXlsx } from './document/fixture.ts';
 import { createMcp, MCP_PORT } from './mcp.ts';
 import { createSessionStore } from './session-store.ts';
 import { createTablet } from './tablet.ts';
@@ -1273,7 +1274,34 @@ async function runEditorAutotest() {
   await wait(400);
   await writeFile(join(out, 'settings-license.png'), (await settingsWindow!.webContents.capturePage()).toPNG());
   await photographScreens(out);
-  console.log('AUTOTEST', JSON.stringify({ out, ...results }));
+
+  // Documents : un PDF, un Word, un PowerPoint et un Excel ouverts comme sessions (rendu dans l'app installée),
+  // un point chacun, export PDF pour l'IA et copie commentée ; photo de l'éditeur sur chaque document.
+  const documentResults: Record<string, { pages: number; pdf: boolean; copy: string | false }> = {};
+  for (const [name, make] of [
+    ['rapport.pdf', createSamplePdf],
+    ['rapport.docx', createSampleDocx],
+    ['deck.pptx', createSamplePptx],
+    ['budget.xlsx', createSampleXlsx],
+  ] as const) {
+    const file = join(out, name);
+    await writeFile(file, await make());
+    await openDocument(file);
+    const s = store.get();
+    const page = s?.captures[0];
+    if (!s || !page?.source?.document) {
+      documentResults[name] = { pages: 0, pdf: false, copy: false };
+      continue;
+    }
+    const id = store.addAnnotation(page.id, { kind: 'point', x: 0.3, y: 0.1 });
+    store.update((x) => (findAnnotation(x, id)!.annotation.text = 'Retour de test'));
+    const copy = await runExport('document');
+    documentResults[name] = { pages: s.captures.length, pdf: (await runExport('pdf')).ok, copy: copy.ok && basename(copy.path) };
+    showEditor({ captureId: page.id });
+    await wait(800);
+    await writeFile(join(out, `editor-${name.split('.').pop()}.png`), (await editor.webContents.capturePage()).toPNG());
+  }
+  console.log('AUTOTEST', JSON.stringify({ out, ...results, documents: documentResults }));
 }
 
 /** Photos des autres fenêtres, dans des fenêtres de test (rien n'est cliqué). */

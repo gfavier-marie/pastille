@@ -10,6 +10,10 @@ Outil de revue d'interface : raccourci → capture → points numérotés dicté
 - `apps/relay` : Worker Cloudflare + Durable Object (une room par appairage), sert aussi la PWA (`apps/pwa/dist`).
 - `apps/desktop` : Electron + electron-vite + React. Toute la logique dans le processus principal (`src/main`), les fenêtres affichent et parlent par IPC typé (`src/ipc.ts`, exposé par `src/preload`).
 - `packages/shared` : types, protocole, chiffrement, rendu des annotations (`drawAnnotations`, Canvas 2D, seule fonction de rendu).
+- Documents (`src/main/document/`) : un PDF, Word, Excel ou PowerPoint ouvert devient une session ordinaire, une page par capture.
+  - Rendu dans le processus principal avec `@napi-rs/canvas` : pdf.js pour les PDF, `@silurus/ooxml/node` pour Word et PowerPoint, grille maison pour Excel (`xlsx.ts`).
+  - Carte du texte de chaque page dans `captures/<id>.json` (`anchor.ts`).
+  - Copie commentée au format du document : `commented-*.ts`, pdf-lib pour le PDF, jszip + @xmldom/xmldom pour Office.
 - Transcription : `whisper-server` (whisper.cpp) en processus enfant, modèle `models/ggml-large-v3-turbo-q5_0.bin`.
 
 ## Commandes

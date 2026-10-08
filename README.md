@@ -60,6 +60,20 @@ Menu de l'icône > « Appairer une tablette », scanner le QR code avec l'appare
 
 Le point dicté est envoyé à la tablette pendant l'enregistrement. Le bouton **Dessiner sur la tablette** permet aussi de garder un point sans dictée, puis d'y joindre un croquis. **Inspiration** suspend les clics et la dictée pendant la recherche : ouvrez la page modèle, puis utilisez le raccourci de capture ou **Capturer l’inspiration**. La capture rejoint le point d'origine et la vidéo reprend ; **Échap** dans la capture ou **Reprendre la vidéo** annule l'inspiration. À l'arrêt, tout se retrouve dans le même éditeur et les mêmes exports que les captures d'écran.
 
+## Documents
+
+Un PDF, un Word, un Excel ou un PowerPoint se commente comme une capture. Pour l'ouvrir : menu de l'icône > « Commenter un document… », le bouton de l'éditeur, ou un glisser-déposer sur l'éditeur. Chaque page (diapositive, morceau de feuille Excel) devient un écran : on pose des points, on dicte, et les exports pour l'IA citent le passage ou la cellule visés.
+
+**Exporter > Copie commentée du document** écrit « rapport (commenté).docx » dans le dossier d'export, avec les commentaires au format du document :
+- notes PDF avec la pastille numérotée ;
+- commentaires Word sur les paragraphes ;
+- commentaires PowerPoint à l'endroit du point ;
+- notes Excel sur les cellules.
+
+L'original n'est jamais modifié. Une copie du document est gardée dans la session (dossier des données de l'app).
+
+Limites : anciens formats (.doc, .xls, .ppt) et fichiers protégés par mot de passe refusés ; graphiques des feuilles Excel non affichés ; mise en page Word parfois différente de Word (polices remplacées sans Office installé).
+
 ## Claude Code
 
 L'installeur ajoute le serveur MCP de VibeScreener à Claude Code. Sinon, une fois (la commande est aussi dans les réglages, onglet « Export PDF ») :
