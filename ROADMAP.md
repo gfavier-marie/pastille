@@ -419,9 +419,16 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 
 ### Lot DOC3 — Copie commentée Office
 
-- [ ] Word : `comments.xml` et commentaire autour du paragraphe visé (retrouvé par le texte de l'ancre)
-- [ ] PowerPoint : commentaire à la position du point
-- [ ] Excel : note sur la cellule (`commentsN.xml` + VML)
+Écrite dans une copie avec jszip et @xmldom/xmldom (`document/ooxml.ts`) : on ajoute des parties, des relations et des types de contenu sans toucher au reste du fichier. Les commentaires déjà présents sont gardés.
+
+- [x] **Word** (`commented-docx.ts`) : commentaire dans la marge, de « VibeScreener » ;
+  - il entoure les paragraphes visés : ceux du texte sous le point ou dans la zone, sinon le plus proche sur la page ;
+  - les paragraphes sont retrouvés par leur chemin dans le corps (tableaux compris) ;
+  - à défaut, le commentaire va sur le premier paragraphe du document, avec la page rappelée.
+- [x] **PowerPoint** (`commented-pptx.ts`) : commentaire **moderne** (`p188:cm`, celui de PowerPoint 365 et du web), posé à l'endroit du point (`pos` en EMU), auteur « VibeScreener ».
+- [x] **Excel** (`commented-xlsx.ts`) : note sur la cellule visée (`commentsN.xml` + dessin VML + `legacyDrawing` à sa place dans la feuille). Une zone ou une flèche est notée sur sa première cellule, avec la plage ; une note existante reçoit le texte à la suite.
+- [x] Tests `document/commented-office.test.ts` : structure de chaque copie, ancrage (phrase, cellule de tableau, page sans texte, diapositive, feuille), copie relue par la bibliothèque, original intact. Copies ouvertes par Quick Look sans erreur.
+- [ ] Essai réel : copies ouvertes dans Word, PowerPoint et Excel (Mac et web), sans message de réparation. Limite : un fichier PowerPoint qui a déjà des commentaires classiques ne montre pas les commentaires modernes dans les anciennes versions
 
 ### Lot DOC4 — CI, docs, version
 

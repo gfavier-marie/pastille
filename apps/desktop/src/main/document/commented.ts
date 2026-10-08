@@ -1,12 +1,17 @@
-// Export « copie commentée » : pour chaque document de la session, une copie de l'original
-// où les points sont écrits au format du document. L'original copié dans la session n'est jamais modifié.
+// Export « copie commentée » : pour chaque document de la session, une copie de l'original où les
+// points sont écrits au format du document (notes PDF, commentaires Word et PowerPoint, notes Excel).
+// L'original copié dans la session n'est jamais modifié.
 
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
-import type { Annotation, DocumentPage, Session } from '@pastille/shared';
+import type { Annotation, Capture, DocumentPage, Geometry, Session } from '@pastille/shared';
 import { T } from '../../texts/index.ts';
+import { anchorOf, cellAt, cellRef, loadTextMap, targetRuns, type TextMap, type TextRun } from './anchor.ts';
+import { writeCommentedDocx } from './commented-docx.ts';
 import { writeCommentedPdf } from './commented-pdf.ts';
+import { writeCommentedPptx } from './commented-pptx.ts';
+import { writeCommentedXlsx } from './commented-xlsx.ts';
 
 /** « #3 — texte », avec la mention des croquis et inspirations qui ne peuvent pas entrer dans le document. */
 export function commentText(a: Annotation): string {
@@ -25,15 +30,71 @@ function freeName(dir: string, name: string) {
   }
 }
 
+/** Point de départ d'une annotation : le point, le coin d'une zone, le départ d'une flèche. */
+const origin = (g: Geometry) => (g.kind === 'point' ? { x: g.x, y: g.y } : g.kind === 'zone' ? { x: g.x, y: g.y } : { x: g.x1, y: g.y1 });
+
+/** Paragraphes Word visés (premier et dernier) : ceux du texte visé, sinon le plus proche sur la page. */
+function paragraphsOf(g: Geometry, map: TextMap | undefined): string[] {
+  if (!map) return [];
+  const withPath = (runs: TextRun[]) => runs.filter((r) => r.p).map((r) => r.p!);
+  let paths = withPath(targetRuns(g, map));
+  if (!paths.length) {
+    const { x, y } = origin(g);
+    const nearest = map.runs.filter((r) => r.p).sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
+    paths = nearest ? [nearest.p!] : [];
+  }
+  return paths.length ? [paths[0]!, paths.at(-1)!] : [];
+}
+
+type Point = { capture: Capture; doc: DocumentPage; annotation: Annotation; map?: TextMap };
+
+/** Copie commentée d'un document, au format de l'original. */
+async function writeCopy(format: DocumentPage['format'], original: Uint8Array, points: Point[], now?: Date): Promise<Uint8Array> {
+  const text = (p: Point) => commentText(p.annotation);
+  if (format === 'pdf')
+    return writeCommentedPdf(
+      original,
+      points.map((p) => ({ page: p.doc.page, number: p.annotation.number, geometry: p.annotation.geometry, text: text(p) })),
+      now,
+    );
+  if (format === 'docx')
+    return writeCommentedDocx(
+      original,
+      points.map((p) => ({
+        number: p.annotation.number,
+        // Sans paragraphe repéré, le commentaire va sur le premier du document : la page est rappelée.
+        text: paragraphsOf(p.annotation.geometry, p.map).length ? text(p) : `${text(p)} (${T.editor.docLabel('docx', p.doc.page)})`,
+        paragraphs: paragraphsOf(p.annotation.geometry, p.map),
+      })),
+      now,
+    );
+  if (format === 'pptx')
+    return writeCommentedPptx(original, points.map((p) => ({ slide: p.doc.page, number: p.annotation.number, text: text(p), ...origin(p.annotation.geometry) })), now);
+  return writeCommentedXlsx(
+    original,
+    points.flatMap((p) => {
+      const grid = p.map?.grid;
+      if (!grid) return [];
+      const { x, y } = origin(p.annotation.geometry);
+      const anchor = anchorOf(p.annotation.geometry, p.map);
+      const cells = anchor && 'cells' in anchor ? anchor.cells : '';
+      const cell = cellRef(cellAt(grid, x, y));
+      // Une zone ou une flèche est notée sur sa première cellule, avec la plage visée.
+      return [{ sheet: grid.sheet, cell, number: p.annotation.number, text: cells && cells !== cell ? `${text(p)} (${cells})` : text(p) }];
+    }),
+  );
+}
+
 /** Écrit les copies commentées dans `outDir` ; renvoie le chemin de la première. */
 export async function writeCommented(opts: { session: Session; sessionDir: string; outDir: string; now?: Date }): Promise<string> {
-  const docs = new Map<string, { doc: DocumentPage; points: { page: number; annotation: Annotation }[] }>();
-  for (const c of opts.session.captures) {
-    const doc = c.source?.document;
+  const docs = new Map<string, { doc: DocumentPage; points: Point[] }>();
+  for (const capture of opts.session.captures) {
+    const doc = capture.source?.document;
     if (!doc) continue;
     const entry = docs.get(doc.id) ?? { doc, points: [] };
     docs.set(doc.id, entry);
-    for (const a of c.annotations) entry.points.push({ page: doc.page, annotation: a });
+    const map = capture.annotations.length && doc.format !== 'pdf' ? await loadTextMap(opts.sessionDir, capture) : undefined;
+    for (const annotation of capture.annotations) entry.points.push({ capture, doc, annotation, map });
   }
   const written: string[] = [];
   await mkdir(opts.outDir, { recursive: true });
@@ -41,18 +102,12 @@ export async function writeCommented(opts: { session: Session; sessionDir: strin
     if (!points.length) continue;
     const original = new Uint8Array(await readFile(join(opts.sessionDir, 'documents', `${doc.id}.${doc.format}`)));
     let copy: Uint8Array;
-    if (doc.format === 'pdf') {
-      try {
-        copy = await writeCommentedPdf(
-          original,
-          points.map((p) => ({ page: p.page, number: p.annotation.number, geometry: p.annotation.geometry, text: commentText(p.annotation) })),
-          opts.now,
-        );
-      } catch (err) {
-        if ((err as Error)?.name === 'EncryptedPDFError') throw new Error(T.main.document.protectedPdf(doc.name));
-        throw err;
-      }
-    } else continue; // Word, Excel et PowerPoint : lot suivant
+    try {
+      copy = await writeCopy(doc.format, original, points, opts.now);
+    } catch (err) {
+      if ((err as Error)?.name === 'EncryptedPDFError') throw new Error(T.main.document.protectedPdf(doc.name));
+      throw err;
+    }
     const file = freeName(opts.outDir, doc.name);
     await writeFile(file, copy);
     written.push(file);
