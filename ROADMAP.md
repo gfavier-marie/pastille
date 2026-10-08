@@ -454,6 +454,6 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 - [x] `pnpm e2e` (`PASTILLE_AUTOTEST=editor`, CI Windows sur l'app installée) : un PDF, un Word, un PowerPoint et un Excel ouverts, un point chacun, export PDF et copie commentée vérifiés ; photos `editor-pdf.png`, `-docx`, `-pptx`, `-xlsx`. C'est aussi l'essai du chargement de pdf.js et de `@silurus/ooxml` depuis l'app empaquetée
 - [x] `docs/SPEC.md` (§4.10 Documents, stockage, modèle), README (« Documents »), `CLAUDE.md`
 - [x] Version **0.14.0** préparée (`apps/desktop/package.json`)
-- [ ] Fusion dans main et tag `v0.14.0` sur ton feu vert (la CI construit, teste sur Windows et publie)
+- [x] Publiée le 8 oct. : `main` et tag `v0.14.0` (la CI construit le .dmg et le .exe, teste l'app installée sur Windows, puis publie sur R2)
 
 **Plus tard [C], non prévu** : défilement continu d'une page à l'autre, « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
