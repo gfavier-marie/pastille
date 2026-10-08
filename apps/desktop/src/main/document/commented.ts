@@ -8,7 +8,7 @@ import { extname, join } from 'node:path';
 import type { Annotation, Capture, DocumentPage, Geometry, Session } from '@pastille/shared';
 import { T } from '../../texts/index.ts';
 import { anchorOf, cellAt, cellRef, loadTextMap, targetRuns, type TextMap, type TextRun } from './anchor.ts';
-import { writeCommentedDocx } from './commented-docx.ts';
+import { writeCommentedDocx, type ParagraphRef } from './commented-docx.ts';
 import { writeCommentedPdf } from './commented-pdf.ts';
 import { writeCommentedPptx } from './commented-pptx.ts';
 import { writeCommentedXlsx } from './commented-xlsx.ts';
@@ -34,16 +34,21 @@ function freeName(dir: string, name: string) {
 const origin = (g: Geometry) => (g.kind === 'point' ? { x: g.x, y: g.y } : g.kind === 'zone' ? { x: g.x, y: g.y } : { x: g.x1, y: g.y1 });
 
 /** Paragraphes Word visés (premier et dernier) : ceux du texte visé, sinon le plus proche sur la page. */
-function paragraphsOf(g: Geometry, map: TextMap | undefined): string[] {
+function paragraphsOf(g: Geometry, map: TextMap | undefined): ParagraphRef[] {
   if (!map) return [];
-  const withPath = (runs: TextRun[]) => runs.filter((r) => r.p).map((r) => r.p!);
-  let paths = withPath(targetRuns(g, map));
-  if (!paths.length) {
+  let runs = targetRuns(g, map).filter((r) => r.p);
+  if (!runs.length) {
     const { x, y } = origin(g);
     const nearest = map.runs.filter((r) => r.p).sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
-    paths = nearest ? [nearest.p!] : [];
+    runs = nearest ? [nearest] : [];
   }
-  return paths.length ? [paths[0]!, paths.at(-1)!] : [];
+  // Texte de chaque paragraphe sur la page : il sert à retrouver le paragraphe dans le fichier.
+  const ref = (run: TextRun): ParagraphRef => ({
+    id: run.pid,
+    path: run.p,
+    text: map.runs.filter((r) => r.p === run.p).map((r) => r.t).join(''),
+  });
+  return runs.length ? [ref(runs[0]!), ref(runs.at(-1)!)] : [];
 }
 
 type Point = { capture: Capture; doc: DocumentPage; annotation: Annotation; map?: TextMap };
@@ -62,9 +67,9 @@ async function writeCopy(format: DocumentPage['format'], original: Uint8Array, p
       original,
       points.map((p) => ({
         number: p.annotation.number,
-        // Sans paragraphe repéré, le commentaire va sur le premier du document : la page est rappelée.
-        text: paragraphsOf(p.annotation.geometry, p.map).length ? text(p) : `${text(p)} (${T.editor.docLabel('docx', p.doc.page)})`,
-        paragraphs: paragraphsOf(p.annotation.geometry, p.map),
+        text: text(p),
+        refs: paragraphsOf(p.annotation.geometry, p.map),
+        where: T.editor.docLabel('docx', p.doc.page), // rappelé si le paragraphe n'est pas retrouvé
       })),
       now,
     );

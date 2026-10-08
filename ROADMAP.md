@@ -430,6 +430,25 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 - [x] Tests `document/commented-office.test.ts` : structure de chaque copie, ancrage (phrase, cellule de tableau, page sans texte, diapositive, feuille), copie relue par la bibliothèque, original intact. Copies ouvertes par Quick Look sans erreur.
 - [ ] Essai réel : copies ouvertes dans Word, PowerPoint et Excel (Mac et web), sans message de réparation. Limite : un fichier PowerPoint qui a déjà des commentaires classiques ne montre pas les commentaires modernes dans les anciennes versions
 
+### Revue de code du 8 oct. (agent), corrigée
+
+- [x] **Word** : les chemins de paragraphe de la bibliothèque comptent aussi les sauts de section et de page, et se décalaient. Un paragraphe est maintenant retrouvé :
+  - par son identifiant Word (`w14:paraId`) ;
+  - sinon par son chemin, si le texte concorde ;
+  - sinon par le texte de la page.
+
+  La plage est remise dans l'ordre du document, et la page est rappelée si rien n'est trouvé. Test sur un Word à saut de section et saut de page.
+- [x] **Excel** : la zone utilisée ne compte que les cellules qui ont une valeur, et les morceaux vides sont sautés. Une fusion sur toute une ligne donnait des centaines de pages blanches. Les morceaux sont limités au plafond dès leur calcul.
+- [x] **PowerPoint** : un seul identifiant de création par diapositive, écrit dans la diapositive s'il manque. Chaque commentaire en recevait un au hasard.
+- [x] **Excel** : bloc d'identifiants VML pris après le plus grand déjà utilisé.
+- [x] **Import** :
+  - un document sans page (feuilles toutes masquées) est refusé avec un message ;
+  - la carte du texte est écrite dans la session du document, même si une autre est ouverte pendant l'import.
+- [x] **PDF** : pastilles droites sur les pages tournées (matrice de l'apparence), vérifié par un rendu pdf.js.
+- [x] **Éditeur** :
+  - défilement horizontal borné ;
+  - seul le haut de l'éditeur vide déplace la fenêtre : une zone de déplacement ne reçoit pas les fichiers déposés sous Windows.
+
 ### Lot DOC4 — CI, docs, version
 
 - [x] `pnpm e2e` (`PASTILLE_AUTOTEST=editor`, CI Windows sur l'app installée) : un PDF, un Word, un PowerPoint et un Excel ouverts, un point chacun, export PDF et copie commentée vérifiés ; photos `editor-pdf.png`, `-docx`, `-pptx`, `-xlsx`. C'est aussi l'essai du chargement de pdf.js et de `@silurus/ooxml` depuis l'app empaquetée

@@ -8,7 +8,7 @@ import type { Geometry } from '@pastille/shared';
 import { exportSession } from '../export/index.ts';
 import { createSessionStore } from '../session-store.ts';
 import { loadTextMap, type TextRun } from './anchor.ts';
-import { createSampleDocx, createSamplePptx, createSampleXlsx } from './fixture.ts';
+import { createSampleDocx, createSamplePptx, createSampleXlsx, createSectionsDocx } from './fixture.ts';
 import { openDocx, openPptx } from './office.ts';
 import { createDocuments, type OpenedDocument } from './open.ts';
 import { openXlsx } from './xlsx.ts';
@@ -70,6 +70,34 @@ describe('copie commentée Office', () => {
     // La copie se relit ; l'original n'a pas bougé.
     expect((await openDocx(copy)).pages).toBe(3);
     expect(await read(await JSZip.loadAsync(original), 'word/document.xml')).not.toContain('commentRangeStart');
+  });
+
+  it('Word : paragraphes retrouvés malgré les sauts de section et de page', async () => {
+    const { zip } = await commentedCopy('sections.docx', await createSectionsDocx(), async (center) => {
+      // Le paragraphe cible est sur la page 2 ; « texte après le saut » et le dernier paragraphe, sur la page 3.
+      const pageOf = async (start: string) => {
+        for (let page = 0; page < 3; page++) {
+          try {
+            return [page, await center(page, start)] as const;
+          } catch {}
+        }
+        throw new Error(start);
+      };
+      const [p1, g1] = await pageOf('Paragraphe');
+      const [p2, g2] = await pageOf('texte');
+      const [p3, g3] = await pageOf('Dernier');
+      return [
+        [p1, g1, 'Cible'],
+        [p2, g2, 'Après le saut'],
+        [p3, g3, 'Fin'],
+      ];
+    });
+    const body = await read(zip, 'word/document.xml');
+    const paragraphWith = (id: string) => /<w:p[ >](?:(?!<\/w:p>).)*<\/w:p>/gs[Symbol.match](body)!.find((p) => p.includes(`commentRangeStart w:id="${id}"`)) ?? '';
+    expect(paragraphWith('0')).toContain('Paragraphe cible');
+    expect(paragraphWith('1')).toContain('texte après le saut');
+    expect(paragraphWith('2')).toContain('Dernier paragraphe');
+    expect(await read(zip, 'word/comments.xml')).not.toContain('(Page');
   });
 
   it('PowerPoint : commentaires modernes à l’endroit du point', async () => {

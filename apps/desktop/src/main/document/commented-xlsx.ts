@@ -45,9 +45,10 @@ async function sheetPaths(pkg: Package) {
 export async function writeCommentedXlsx(original: Uint8Array, comments: XlsxComment[]): Promise<Uint8Array> {
   const pkg = await openPackage(original);
   const paths = await sheetPaths(pkg);
-  // Blocs d'identifiants VML déjà pris par les dessins du classeur.
-  const vmlFiles = Object.keys(pkg.zip.files).filter((f) => f.endsWith('.vml'));
-  let nextBlock = vmlFiles.length + 1;
+  // Blocs d'identifiants VML (o:idmap data) déjà pris par les dessins du classeur : un nouveau dessin prend le suivant.
+  let nextBlock = 1;
+  for (const f of Object.keys(pkg.zip.files).filter((f) => f.toLowerCase().endsWith('.vml')))
+    for (const m of (await pkg.zip.file(f)!.async('string')).matchAll(/data="([\d,\s]+)"/g)) for (const n of m[1]!.split(',')) nextBlock = Math.max(nextBlock, Number(n) + 1);
 
   const bySheet = new Map<string, XlsxComment[]>();
   for (const c of comments) bySheet.set(c.sheet, [...(bySheet.get(c.sheet) ?? []), c]);

@@ -4,7 +4,7 @@
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
-import type { DocumentFormat, DocumentPage } from '@pastille/shared';
+import type { DocumentFormat, DocumentPage, Session } from '@pastille/shared';
 import { T } from '../../texts/index.ts';
 import type { SessionStore } from '../session-store.ts';
 import { textMapPath, type TextMap } from './anchor.ts';
@@ -60,8 +60,12 @@ export function createDocuments(deps: {
       // Le fichier est lu et ouvert avant de toucher à la session : un échec ne laisse rien derrière lui.
       const doc = await deps.open(bytes, format);
       const total = Math.min(doc.pages, maxPages);
+      if (!total) {
+        await doc.close();
+        throw new DocumentError(T.main.document.empty(name));
+      }
       const id = crypto.randomUUID();
-      let sessionId: string | undefined;
+      let session: Session | undefined; // celle du document, même si l'utilisateur en ouvre une autre pendant l'import
       try {
         for (let i = 0; i < total; i++) {
           const page = await doc.render(i);
@@ -69,14 +73,14 @@ export function createDocuments(deps: {
             const open = store.get();
             if (open && (open.captures.length || open.notes?.some((n) => n.text.trim()))) await store.close();
             const s = await store.ensure();
-            sessionId = s.id;
+            session = s;
             store.update((x) => (x.name = basename(path, extname(path))), { patchHistory: true });
             await mkdir(join(store.dir(s), 'documents'), { recursive: true });
             await writeFile(join(store.dir(s), 'documents', `${id}.${format}`), bytes);
-          } else if (store.get()?.id !== sessionId) break; // autre session ouverte entre-temps : l'import s'arrête
+          } else if (store.get()?.id !== session?.id) break; // autre session ouverte entre-temps : l'import s'arrête
           const document: DocumentPage = { id, name, format, page: i + 1, pages: total, ...(page.sheet ? { sheet: page.sheet, range: page.range } : {}) };
           const capture = await store.addCapture(page.png, { width: page.width, height: page.height, scaleFactor: 2, source: { document } });
-          await writeFile(join(store.dir(store.get()!), textMapPath(capture)), JSON.stringify(page.map));
+          await writeFile(join(store.dir(session!), textMapPath(capture)), JSON.stringify(page.map));
           if (i === 0) onFirstPage(capture.id);
           deps.onProgress?.({ name, done: i + 1, total });
           await new Promise((r) => setImmediate(r)); // le processus principal respire entre deux pages

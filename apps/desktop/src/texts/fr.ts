@@ -440,6 +440,7 @@ export const fr = {
       legacy: (name: string) => `${name} est dans un ancien format Office : enregistrez-le au format .docx, .xlsx ou .pptx, ou en PDF.`,
       unsupported: (name: string) =>
         `${name} : format non pris en charge. VibeScreener ouvre les PDF, Word (.docx), Excel (.xlsx) et PowerPoint (.pptx).`,
+      empty: (name: string) => `${name} n'a aucune page à afficher (feuilles masquées ou vides).`,
       busy: "Un document est déjà en cours d'ouverture.",
       encrypted: 'Ce document est protégé par un mot de passe : enregistrez-en une copie sans protection pour le commenter.',
       unreadable: (err: string) => `Document illisible : ${err}`,

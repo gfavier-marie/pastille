@@ -66,6 +66,7 @@ export async function openDocx(bytes: Uint8Array): Promise<OpenedDocument> {
           w: round(r.w / W),
           h: round(r.h / H),
           ...(r.source?.story === 'body' ? { p: r.source.path.join('.') } : {}),
+          ...(r.source?.story === 'body' && r.paragraphId ? { pid: r.paragraphId } : {}),
         }));
       return { png: await encode(canvas), width: W, height: H, map: { runs } };
     },

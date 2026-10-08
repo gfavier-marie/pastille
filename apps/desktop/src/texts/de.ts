@@ -436,6 +436,7 @@ export const de: Texts = {
       legacy: (name: string) => `${name} hat ein altes Office-Format: Speichere es als .docx, .xlsx oder .pptx oder als PDF.`,
       unsupported: (name: string) =>
         `${name}: Format nicht unterstützt. VibeScreener öffnet PDF, Word (.docx), Excel (.xlsx) und PowerPoint (.pptx).`,
+      empty: (name: string) => `${name} hat keine Seite zum Anzeigen (ausgeblendete oder leere Blätter).`,
       busy: 'Es wird bereits ein Dokument geöffnet.',
       encrypted: 'Dieses Dokument ist passwortgeschützt: Speichere eine ungeschützte Kopie, um es zu kommentieren.',
       unreadable: (err: string) => `Dokument nicht lesbar: ${err}`,

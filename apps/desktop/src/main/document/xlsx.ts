@@ -8,7 +8,7 @@ import { materializeXlsxWorkbook } from '@silurus/ooxml/node';
 import { T } from '../../texts/index.ts';
 import { colName, type CellGrid, type TextRun } from './anchor.ts';
 import { officeError, prepareFonts } from './office.ts';
-import type { OpenedDocument } from './open.ts';
+import { MAX_PAGES, type OpenedDocument } from './open.ts';
 
 type Workbook = Awaited<ReturnType<typeof materializeXlsxWorkbook>>;
 type Sheet = Workbook['worksheets'][number];
@@ -41,20 +41,15 @@ function rowPx(ws: Sheet, r: number, row?: Sheet['rows'][number]) {
 
 const hasValue = (c: Cell) => c.value.type !== 'empty';
 
-/** Morceaux d'une feuille : sa zone utilisée découpée en blocs d'au plus MAX_W × MAX_H pixels. */
-export function tilesOf(ws: Sheet): Tile[] {
-  let maxRow = 0, maxCol = 0;
-  for (const row of ws.rows)
-    for (const c of row.cells)
-      if (hasValue(c)) {
-        maxRow = Math.max(maxRow, c.row);
-        maxCol = Math.max(maxCol, c.col);
-      }
-  for (const m of ws.mergeCells) {
-    maxRow = Math.max(maxRow, m.bottom);
-    maxCol = Math.max(maxCol, m.right);
-  }
-  if (!maxRow) return [];
+/**
+ * Morceaux d'une feuille : sa zone utilisée (cellules qui ont une valeur) découpée en blocs d'au plus
+ * MAX_W × MAX_H pixels ; seuls les blocs qui contiennent une valeur sont gardés, au plus `limit`.
+ */
+export function tilesOf(ws: Sheet, limit = Infinity): Tile[] {
+  const filled: [number, number][] = [];
+  for (const row of ws.rows) for (const c of row.cells) if (hasValue(c)) filled.push([c.row, c.col]);
+  if (!filled.length) return [];
+  const maxRow = Math.max(...filled.map(([r]) => r)), maxCol = Math.max(...filled.map(([, c]) => c));
   const rows = new Map(ws.rows.map((r) => [r.index, r]));
   const cut = (last: number, size: (i: number) => number, max: number) => {
     const spans: [number, number][] = [];
@@ -68,7 +63,21 @@ export function tilesOf(ws: Sheet): Tile[] {
   };
   const rowSpans = cut(maxRow, (r) => rowPx(ws, r, rows.get(r)), MAX_H);
   const colSpans = cut(maxCol, (c) => colPx(ws, c), MAX_W);
-  return rowSpans.flatMap(([r0, r1]) => colSpans.map(([c0, c1]) => ({ ws, r0, r1, c0, c1 })));
+  /** Bloc qui contient l'index (recherche dichotomique). */
+  const spanOf = (spans: [number, number][], v: number) => {
+    let lo = 0, hi = spans.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (spans[mid]![1] < v) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  };
+  const keys = [...new Set(filled.map(([r, c]) => spanOf(rowSpans, r) * colSpans.length + spanOf(colSpans, c)))].sort((a, b) => a - b);
+  return keys.slice(0, limit).map((k) => {
+    const [r0, r1] = rowSpans[Math.floor(k / colSpans.length)]!, [c0, c1] = colSpans[k % colSpans.length]!;
+    return { ws, r0, r1, c0, c1 };
+  });
 }
 
 // ——— Valeurs affichées ———
@@ -287,7 +296,9 @@ export async function openXlsx(bytes: Uint8Array): Promise<OpenedDocument> {
   const wb = await materializeXlsxWorkbook(bytes).catch((err) => Promise.reject(officeError(err)));
   // Feuilles visibles et non vides ; un classeur vide garde sa première feuille.
   const sheets = wb.worksheets.filter((ws, i) => !wb.workbookIndex.workbook.sheets[i]?.visibility && !ws.isChartSheet && !ws.isDialogSheet);
-  let tiles = sheets.flatMap(tilesOf);
+  // Au plus une page de plus que le plafond : l'import sait ainsi que le classeur a été tronqué.
+  let tiles: Tile[] = [];
+  for (const ws of sheets) if (tiles.length <= MAX_PAGES) tiles = tiles.concat(tilesOf(ws, MAX_PAGES + 1 - tiles.length));
   if (!tiles.length && sheets[0]) tiles = [{ ws: sheets[0], r0: 1, r1: 20, c0: 1, c1: 8 }];
   return {
     pages: tiles.length,

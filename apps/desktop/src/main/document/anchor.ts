@@ -7,10 +7,11 @@ import type { Capture, Geometry } from '@pastille/shared';
 
 /**
  * Morceau de texte et sa boîte, en coordonnées normalisées 0–1 de l'image de la page.
- * `p` : paragraphe Word d'origine (chemin dans le corps, « 42.2.2.0 » pour une cellule de tableau) ;
+ * `p` : paragraphe Word d'origine (chemin dans le modèle de la bibliothèque, « 42.2.2.0 » pour une cellule de tableau),
+ * `pid` : son identifiant Word (w14:paraId), quand le fichier en a ;
  * `block` : texte d'une forme ou d'une cellule, jamais réuni à ses voisins en une ligne.
  */
-export type TextRun = { t: string; x: number; y: number; w: number; h: number; p?: string; block?: true };
+export type TextRun = { t: string; x: number; y: number; w: number; h: number; p?: string; pid?: string; block?: true };
 
 /** Grille d'un morceau de feuille Excel : bords des colonnes et des lignes (0–1), première colonne et ligne (0 = A, 1). */
 export type CellGrid = { sheet: string; col0: number; row0: number; xs: number[]; ys: number[]; merges?: [number, number, number, number][] };

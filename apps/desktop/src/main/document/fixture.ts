@@ -66,6 +66,34 @@ export async function createSampleDocx(): Promise<Uint8Array> {
   return zip.generateAsync({ type: 'uint8array' });
 }
 
+/**
+ * Word à pièges : saut de section après le 2ᵉ paragraphe, paragraphe cible avec un identifiant Word
+ * (w14:paraId), saut de page au milieu d'un paragraphe. La bibliothèque compte ces sauts comme des blocs.
+ */
+export async function createSectionsDocx(): Promise<Uint8Array> {
+  const W14 = 'http://schemas.microsoft.com/office/word/2010/wordml';
+  const sect = '<w:sectPr><w:type w:val="nextPage"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>';
+  const run = (t: string) => `<w:r><w:t xml:space="preserve">${esc(t)}</w:t></w:r>`;
+  const body = [
+    `<w:p>${run('Introduction du rapport')}</w:p>`,
+    `<w:p><w:pPr>${sect}</w:pPr>${run('Fin de la première section')}</w:p>`,
+    `<w:p w14:paraId="22222222">${run('Paragraphe cible sur la deuxième page')}</w:p>`,
+    `<w:p>${run('Texte avant le saut')}<w:r><w:br w:type="page"/></w:r>${run('texte après le saut')}</w:p>`,
+    `<w:p>${run('Dernier paragraphe du document')}</w:p>`,
+  ].join('');
+  const zip = new JSZip();
+  zip.file(
+    '[Content_Types].xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`,
+  );
+  zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${REL}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="word/document.xml"/></Relationships>`);
+  zip.file(
+    'word/document.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="${W}" xmlns:r="${R}" xmlns:w14="${W14}"><w:body>${body}${sect.replace('<w:type w:val="nextPage"/>', '')}</w:body></w:document>`,
+  );
+  return zip.generateAsync({ type: 'uint8array' });
+}
+
 /** PowerPoint : deux diapositives 16:9, titre, texte, forme et graphique. */
 export async function createSamplePptx(): Promise<Uint8Array> {
   const p = new PptxGenJS();

@@ -8,6 +8,7 @@ const P = 'http://schemas.openxmlformats.org/presentationml/2006/main';
 const A = 'http://schemas.openxmlformats.org/drawingml/2006/main';
 const P188 = 'http://schemas.microsoft.com/office/powerpoint/2018/8/main';
 const PC = 'http://schemas.microsoft.com/office/powerpoint/2013/main/command';
+const P14 = 'http://schemas.microsoft.com/office/powerpoint/2010/main';
 const AUTHORS_TYPE = 'http://schemas.microsoft.com/office/2018/10/relationships/authors';
 const COMMENTS_TYPE = 'http://schemas.microsoft.com/office/2018/10/relationships/comments';
 const AUTHORS_CT = 'application/vnd.ms-powerpoint.authors+xml';
@@ -20,6 +21,22 @@ const AUTHOR = 'VibeScreener';
 export type PptxComment = { slide: number; number: number; text: string; x: number; y: number };
 
 const guid = () => `{${randomUUID().toUpperCase()}}`;
+
+/**
+ * Identifiant de création d'une diapositive (extension p14:creationId), que les commentaires reprennent.
+ * Une diapositive qui n'en a pas (fichiers produits par d'autres logiciels) en reçoit un, une seule fois.
+ */
+function creationId(doc: Document): string {
+  const sld = doc.documentElement!;
+  let extLst = child(sld, 'extLst');
+  const ext = extLst && children(extLst, 'ext').find((e) => e.getAttribute('uri') === CREATION_EXT);
+  const val = ext && child(ext, 'creationId')?.getAttribute('val');
+  if (val) return val;
+  const id = String(100000000 + Math.floor(Math.random() * 899999999));
+  if (!extLst) extLst = sld.appendChild(element(doc, P, 'p:extLst'));
+  extLst.appendChild(element(doc, P, 'p:ext', { uri: CREATION_EXT }, element(doc, P14, 'p14:creationId', { val: id })));
+  return id;
+}
 
 export async function writeCommentedPptx(original: Uint8Array, comments: PptxComment[], now = new Date()): Promise<Uint8Array> {
   const pkg = await openPackage(original);
@@ -69,9 +86,7 @@ export async function writeCommentedPptx(original: Uint8Array, comments: PptxCom
       extLst.appendChild(element(doc, P, 'p:ext', { uri: COMMENT_EXT }, rel));
     }
     const list = (await pkg.read(listPath))!;
-    // Identifiant de création de la diapositive (extension p14:creationId), sinon un nombre quelconque.
-    const creation = children(child(sld, 'extLst') ?? sld, 'ext').find((e) => e.getAttribute('uri') === CREATION_EXT);
-    const cId = (creation && child(creation, 'creationId')?.getAttribute('val')) || String(100000000 + Math.floor(Math.random() * 899999999));
+    const cId = creationId(doc);
 
     const monikers = element(list, PC, 'pc:sldMkLst', {}, element(list, PC, 'pc:docMk'), element(list, PC, 'pc:sldMk', { cId, sldId: slide.id }));
     const body = element(list, P188, 'p188:txBody', {}, element(list, A, 'a:bodyPr'), element(list, A, 'a:lstStyle'));

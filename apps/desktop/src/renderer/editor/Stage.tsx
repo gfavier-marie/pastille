@@ -61,8 +61,8 @@ export function Stage(props: {
   const gesture = useRef<Gesture | null>(null);
   const space = useRef(false);
   // Lus par l'écouteur de la molette, posé une seule fois.
-  const reader = useRef({ on: false, height: 0 });
-  reader.current = { on: !!props.document, height: capture.height };
+  const reader = useRef({ on: false, width: 0, height: 0 });
+  reader.current = { on: !!props.document, width: capture.width, height: capture.height };
 
   // Chargement de l'image de la capture.
   useEffect(() => {
@@ -149,11 +149,14 @@ export function Stage(props: {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       if (!reader.current.on || e.ctrlKey || e.metaKey) return zoomAt(Math.exp(-e.deltaY * 0.002), e.clientX - rect.left, e.clientY - rect.top);
-      setView((v) => {
-        const height = reader.current.height * v.scale, room = rect.height - PAD.top - PAD.bottom;
-        const oy = height <= room ? v.oy : Math.min(PAD.top, Math.max(rect.height - PAD.bottom - height, v.oy - e.deltaY));
-        return { ...v, ox: v.ox - e.deltaX, oy };
-      });
+      // La page ne défile que si elle dépasse, et jamais au-delà de ses bords.
+      const scroll = (offset: number, delta: number, size: number, view: number, before: number, after: number) =>
+        size <= view - before - after ? offset : Math.min(before, Math.max(view - after - size, offset - delta));
+      setView((v) => ({
+        ...v,
+        ox: scroll(v.ox, e.deltaX, reader.current.width * v.scale, rect.width, PAD.side, PAD.side),
+        oy: scroll(v.oy, e.deltaY, reader.current.height * v.scale, rect.height, PAD.top, PAD.bottom),
+      }));
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
