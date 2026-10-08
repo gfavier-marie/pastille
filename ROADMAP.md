@@ -457,6 +457,6 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 - [x] Tag `v0.14.0` poussé le 8 oct. : la CI a cassé sur le PDF dans l'app installée sous Windows. Word, PowerPoint et Excel passaient. Rien n'a été publié.
   - Cause : pdf.js exige un « / » final pour le dossier de ses polices, et le code mettait « \\ » sous Windows.
   - Corrigé, et l'erreur d'ouverture d'un document est maintenant écrite dans le journal du test de bout en bout.
-- [ ] Version **0.14.1** : `main` et tag `v0.14.1` (la CI construit le .dmg et le .exe, teste l'app installée sur Windows, puis publie sur R2)
+- [x] Version **0.14.1** publiée le 8 oct. : app installée testée sous Windows (les quatre formats, PDF compris), installeurs et `latest.json` sur dl.vibescreener.dev, site redéployé
 
 **Plus tard [C], non prévu** : défilement continu d'une page à l'autre, « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
