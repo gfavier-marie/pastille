@@ -100,7 +100,8 @@
       .stage-bar b { color: var(--text); font-weight: 400; }
       .stage-bar i { width: 1px; height: 16px; background: var(--border-2); }
       .stage-bar button { width: 26px; height: 26px; border: 0; border-radius: 6px; background: transparent; font-size: 14px; }
-      .stage-bar button:hover { background: var(--chip); }
+      .stage-bar button:hover, .stage-bar button[aria-pressed='true'] { background: var(--chip); }
+      .stage-bar button svg { display: block; margin: auto; }
       .stage-bar .zoom { color: var(--text); font-variant-numeric: tabular-nums; min-width: 38px; text-align: center; }
 
       /* Bulle de commentaire du point sélectionné. */
@@ -212,6 +213,7 @@
 
       /* Vignettes des écrans de la session. */
       nav { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg); border-top: 1px solid var(--border); overflow-x: auto; }
+      nav[hidden] { display: none; }
       .shot { position: relative; flex: none; }
       .shot .remove {
         position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; padding: 0; display: none; align-items: center; justify-content: center;

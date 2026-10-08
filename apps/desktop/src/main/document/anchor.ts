@@ -13,7 +13,7 @@ import type { Capture, Geometry } from '@pastille/shared';
  */
 export type TextRun = { t: string; x: number; y: number; w: number; h: number; p?: string; pid?: string; block?: true };
 
-/** Grille d'un morceau de feuille Excel : bords des colonnes et des lignes (0–1), première colonne et ligne (0 = A, 1). */
+/** Grille d'une page de feuille Excel : bords des colonnes et des lignes (0–1), première colonne et ligne (0 = A, 1). */
 export type CellGrid = { sheet: string; col0: number; row0: number; xs: number[]; ys: number[]; merges?: [number, number, number, number][] };
 
 export type TextMap = { runs: TextRun[]; grid?: CellGrid };

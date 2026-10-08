@@ -2,8 +2,9 @@
 // Clic = nouveau point ; glisser = zone ; ⇧ + glisser = flèche ; clic sur une pastille = sélection + bulle ;
 // glisser une pastille = déplacement.
 // Molette = zoom, Espace maintenu + glisser = déplacement de la vue. Document : toutes ses pages les unes
-// sous les autres, ajustées à la largeur ; la molette fait défiler d'une page à l'autre comme dans un lecteur,
-// ⌘ / Ctrl + molette (ou le pincement) zoome. La page au milieu de l'écran devient la page en cours.
+// sous les autres, ajustées à la largeur ; la molette fait défiler d'une page à l'autre comme dans un lecteur
+// (⇧ + molette : de côté, pour une feuille Excel zoomée), ⌘ / Ctrl + molette (ou le pincement) zoome.
+// La page au milieu de l'écran devient la page en cours.
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { drawAnnotations, pinPosition, type Annotation, type Capture, type Ctx2D, type Geometry } from '@pastille/shared';
@@ -14,6 +15,7 @@ const CARD_RADIUS = 10;
 // Marges autour de la capture ajustée : la barre d'aide occupe le bas.
 const PAD = { side: 28, top: 28, bottom: 72 };
 const GAP = 0.025; // espace entre deux pages, en fraction de la largeur de la plus large
+const MOD = navigator.userAgent.includes('Mac') ? '⌘' : 'Ctrl';
 
 const emptyAnnotation: Annotation = {
   id: '',
@@ -66,6 +68,7 @@ export function Stage(props: {
   onPage?: (pageId: string) => void; // le défilement a amené une autre page au milieu de l'écran
   // Bulle du point sélectionné : centre de sa pastille et taille de la scène, pour la placer.
   bubble: (pin: { x: number; y: number; r: number }, stage: { w: number; h: number }) => ReactNode;
+  tools?: ReactNode; // boutons ajoutés au bout de la barre d'aide
 }) {
   const { capture } = props;
   const pages = props.pages?.length ? props.pages : [capture];
@@ -222,13 +225,14 @@ export function Stage(props: {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       if (!reader.current.on || e.ctrlKey || e.metaKey) return zoomAt(Math.exp(-e.deltaY * 0.002), e.clientX - rect.left, e.clientY - rect.top);
-      // Ne défile que ce qui dépasse, et jamais au-delà des bords.
+      // Ne défile que ce qui dépasse, et jamais au-delà des bords. ⇧ + molette d'une souris (Windows) défile de côté.
       const scroll = (offset: number, delta: number, size: number, view: number, before: number, after: number) =>
         size <= view - before - after ? offset : Math.min(before, Math.max(view - after - size, offset - delta));
+      const sideways = e.shiftKey && !e.deltaX;
       setView((v) => ({
         ...v,
-        ox: scroll(v.ox, e.deltaX, reader.current.width * v.scale, rect.width, PAD.side, PAD.side),
-        oy: scroll(v.oy, e.deltaY, reader.current.height * v.scale, rect.height, PAD.top, PAD.bottom),
+        ox: scroll(v.ox, sideways ? e.deltaY : e.deltaX, reader.current.width * v.scale, rect.width, PAD.side, PAD.side),
+        oy: scroll(v.oy, sideways ? 0 : e.deltaY, reader.current.height * v.scale, rect.height, PAD.top, PAD.bottom),
       }));
     };
     el.addEventListener('wheel', onWheel, { passive: false });
@@ -365,7 +369,7 @@ export function Stage(props: {
       />
       {pin && props.bubble({ x: pin[0], y: pin[1], r: PIN_RADIUS }, size)}
       <div className="stage-bar">
-        {T.editor.stageHints.map(([key, text]) => (
+        {[...T.editor.stageHints, ...(reading ? [T.editor.wheelZoom(MOD)] : [])].map(([key, text]) => (
           <span key={key}>
             <b>{key}</b> {text}
           </span>
@@ -378,6 +382,7 @@ export function Stage(props: {
         <button type="button" aria-label={T.editor.zoomIn} onClick={() => zoomAt(1.25, size.w / 2, size.h / 2)}>
           +
         </button>
+        {props.tools}
       </div>
     </div>
   );

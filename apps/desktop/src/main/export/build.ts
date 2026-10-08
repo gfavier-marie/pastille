@@ -10,6 +10,9 @@ import { T } from '../../texts/index.ts';
 import { anchorOf, loadTextMap, type TextMap } from '../document/anchor.ts';
 
 const MAX_SCREEN_WIDTH = 2000;
+const MAX_SCREEN_HEIGHT = 8000; // images refusées au-delà par l'API de Claude (MCP) ; atteint par une longue feuille Excel
+/** Réduction d'une capture ou d'une inspiration pour les exports et le MCP. */
+const screenScale = (width: number, height: number) => Math.min(1, MAX_SCREEN_WIDTH / width, MAX_SCREEN_HEIGHT / height);
 const CROP_W = 600;
 const CROP_H = 400;
 const CROP_MARGIN = 60; // pixels source autour d'une zone ou d'une flèche
@@ -109,9 +112,9 @@ export function cropJpeg(img: Image, capture: Capture, a: Annotation, quality = 
   );
 }
 
-/** Capture entière avec toutes ses annotations, limitée à 2000 px de large (exports et MCP). */
+/** Capture entière avec toutes ses annotations, limitée à 2000 px de large et 8000 px de haut (exports et MCP). */
 export function screenJpeg(img: Image, capture: Capture): Promise<Buffer> {
-  const scale = Math.min(1, MAX_SCREEN_WIDTH / capture.width);
+  const scale = screenScale(capture.width, capture.height);
   const W = capture.width * scale, H = capture.height * scale;
   return renderJpeg(W, H, (ctx) => {
     ctx.drawImage(img, 0, 0, W, H);
@@ -119,9 +122,9 @@ export function screenJpeg(img: Image, capture: Capture): Promise<Buffer> {
   });
 }
 
-/** Inspiration entière, limitée à 2000 px de large comme les captures (exports et MCP). */
+/** Inspiration entière, limitée comme les captures (exports et MCP). */
 export function inspirationJpeg(img: Image): Promise<Buffer> {
-  const scale = Math.min(1, MAX_SCREEN_WIDTH / img.width);
+  const scale = screenScale(img.width, img.height);
   const W = img.width * scale, H = img.height * scale;
   return renderJpeg(W, H, (ctx) => ctx.drawImage(img, 0, 0, W, H));
 }
@@ -146,7 +149,7 @@ export async function buildExport(
     const index = i + 1;
     const img = await loadImage(join(sessionDir, capture.image));
     const map = await loadTextMap(sessionDir, capture);
-    const scale = Math.min(1, MAX_SCREEN_WIDTH / capture.width);
+    const scale = screenScale(capture.width, capture.height);
     const W = capture.width * scale, H = capture.height * scale;
     const image = `images/ecran-${index}.jpg`;
     await writeFile(join(outDir, image), await screenJpeg(img, capture));

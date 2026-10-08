@@ -1,7 +1,8 @@
 // Rendu d'un classeur Excel en grille, à partir du classeur lu par @silurus/ooxml en mode Node (la
-// bibliothèque ne dessine les feuilles que dans un navigateur). Chaque feuille est découpée en
-// morceaux qui deviennent des pages : valeurs affichées, styles simples, fusions, en-têtes A, B, C… et
-// 1, 2, 3… Les graphiques et images posés sur les feuilles ne sont pas dessinés.
+// bibliothèque ne dessine les feuilles que dans un navigateur). Chaque feuille devient une page entière
+// (sa zone utilisée), découpée seulement si l'image dépasse ce qu'un écran affiche : valeurs affichées,
+// styles simples, fusions, en-têtes A, B, C… et 1, 2, 3… Les graphiques et images posés sur les
+// feuilles ne sont pas dessinés.
 
 import { createCanvas, type SKRSContext2D } from '@napi-rs/canvas';
 import { materializeXlsxWorkbook } from '@silurus/ooxml/node';
@@ -15,15 +16,18 @@ type Sheet = Workbook['worksheets'][number];
 type Styles = Workbook['workbookIndex']['styles'];
 type Cell = Sheet['rows'][number]['cells'][number];
 
-const SCALE = 2;
 const HEAD_W = 40, HEAD_H = 20; // en-têtes de lignes et de colonnes (pixels à 1×)
-const MAX_W = 1200, MAX_H = 1000; // taille d'un morceau de feuille (pixels à 1×)
+// Image d'une page : 2× pour un texte net une fois zoomé, réduite jusqu'à 1× pour qu'une grande feuille
+// tienne en une page ; au-delà, la feuille est coupée en bandes de lignes (et de colonnes, très rare).
+// Bornes de l'image : côté maximal des textures du navigateur, et mémoire de l'image décodée.
+export const MAX_SIDE = 16_000;
+export const MAX_AREA = 40_000_000;
 const MIN_W = 640; // largeur minimale des colonnes d'une feuille (dix colonnes par défaut)
 const PAD = 3;
 const round = (v: number) => Math.round(v * 10000) / 10000;
 
-/** Morceau de feuille : lignes et colonnes de r0 à r1 et de c0 à c1 (à partir de 1, comme dans Excel). */
-export type Tile = { ws: Sheet; r0: number; r1: number; c0: number; c1: number };
+/** Page d'une feuille : lignes et colonnes de r0 à r1 et de c0 à c1 (à partir de 1, comme dans Excel), dessinées à `scale`. */
+export type Tile = { ws: Sheet; r0: number; r1: number; c0: number; c1: number; scale: number };
 export const tileRange = (t: Tile) => `${colName(t.c0 - 1)}${t.r0}:${colName(t.c1 - 1)}${t.r1}`;
 
 // ——— Tailles ———
@@ -43,18 +47,30 @@ function rowPx(ws: Sheet, r: number, row?: Sheet['rows'][number]) {
 const hasValue = (c: Cell) => c.value.type !== 'empty';
 
 /**
- * Morceaux d'une feuille : sa zone utilisée (cellules qui ont une valeur) découpée en blocs d'au plus
- * MAX_W × MAX_H pixels ; seuls les blocs qui contiennent une valeur sont gardés, au plus `limit`.
+ * Pages d'une feuille : sa zone utilisée (cellules qui ont une valeur) en une seule page si elle tient
+ * dans MAX_SIDE et MAX_AREA à 1× au moins, sinon en bandes ; seules les bandes qui contiennent une
+ * valeur sont gardées, au plus `limit`.
  */
 export function tilesOf(ws: Sheet, limit = Infinity): Tile[] {
-  const filled: [number, number][] = [];
-  for (const row of ws.rows) for (const c of row.cells) if (hasValue(c)) filled.push([c.row, c.col]);
-  if (!filled.length) return [];
-  const maxRow = Math.max(...filled.map(([r]) => r));
-  // Une feuille étroite garde une dizaine de colonnes : le texte y déborde sur les cellules vides, comme dans Excel.
-  let maxCol = Math.max(...filled.map(([, c]) => c));
-  for (let width = Array.from({ length: maxCol }, (_, i) => colPx(ws, i + 1)).reduce((a, b) => a + b, 0); width < MIN_W && maxCol < 16384; ) width += colPx(ws, ++maxCol);
+  let maxRow = 0, maxCol = 0;
+  for (const row of ws.rows) {
+    for (const c of row.cells) {
+      if (!hasValue(c)) continue;
+      maxRow = Math.max(maxRow, c.row);
+      maxCol = Math.max(maxCol, c.col);
+    }
+  }
+  if (!maxRow) return [];
   const rows = new Map(ws.rows.map((r) => [r.index, r]));
+  // Une feuille étroite garde une dizaine de colonnes : le texte y déborde sur les cellules vides, comme dans Excel.
+  let width = 0;
+  for (let c = 1; c <= maxCol; c++) width += colPx(ws, c);
+  while (width < MIN_W && maxCol < 16384) width += colPx(ws, ++maxCol);
+  let height = 0;
+  for (let r = 1; r <= maxRow; r++) height += rowPx(ws, r, rows.get(r));
+  const W = HEAD_W + width, H = HEAD_H + height;
+  // Arrondi par défaut : une feuille qui tient à cette échelle n'est pas coupée pour une erreur d'arrondi.
+  const scale = Math.max(1, Math.floor(Math.min(2, MAX_SIDE / W, MAX_SIDE / H, Math.sqrt(MAX_AREA / (W * H))) * 100) / 100);
   const cut = (last: number, size: (i: number) => number, max: number) => {
     const spans: [number, number][] = [];
     for (let start = 1; start <= last; ) {
@@ -65,9 +81,10 @@ export function tilesOf(ws: Sheet, limit = Infinity): Tile[] {
     }
     return spans;
   };
-  const rowSpans = cut(maxRow, (r) => rowPx(ws, r, rows.get(r)), MAX_H);
-  const colSpans = cut(maxCol, (c) => colPx(ws, c), MAX_W);
-  /** Bloc qui contient l'index (recherche dichotomique). */
+  const colSpans = cut(maxCol, (c) => colPx(ws, c), MAX_SIDE / scale - HEAD_W);
+  const bandW = Math.min(W, MAX_SIDE / scale);
+  const rowSpans = cut(maxRow, (r) => rowPx(ws, r, rows.get(r)), Math.min(MAX_SIDE / scale, MAX_AREA / scale ** 2 / bandW) - HEAD_H);
+  /** Bande qui contient l'index (recherche dichotomique). */
   const spanOf = (spans: [number, number][], v: number) => {
     let lo = 0, hi = spans.length - 1;
     while (lo < hi) {
@@ -77,11 +94,15 @@ export function tilesOf(ws: Sheet, limit = Infinity): Tile[] {
     }
     return lo;
   };
-  const keys = [...new Set(filled.map(([r, c]) => spanOf(rowSpans, r) * colSpans.length + spanOf(colSpans, c)))].sort((a, b) => a - b);
-  return keys.slice(0, limit).map((k) => {
-    const [r0, r1] = rowSpans[Math.floor(k / colSpans.length)]!, [c0, c1] = colSpans[k % colSpans.length]!;
-    return { ws, r0, r1, c0, c1 };
-  });
+  const keys = new Set<number>();
+  for (const row of ws.rows) for (const c of row.cells) if (hasValue(c)) keys.add(spanOf(rowSpans, c.row) * colSpans.length + spanOf(colSpans, c.col));
+  return [...keys]
+    .sort((a, b) => a - b)
+    .slice(0, limit)
+    .map((k) => {
+      const [r0, r1] = rowSpans[Math.floor(k / colSpans.length)]!, [c0, c1] = colSpans[k % colSpans.length]!;
+      return { ws, r0, r1, c0, c1, scale };
+    });
 }
 
 // ——— Valeurs affichées ———
@@ -168,9 +189,9 @@ function wrap(ctx: SKRSContext2D, text: string, width: number): string[] {
   return lines;
 }
 
-/** Image d'un morceau de feuille et sa carte : cellules (grille) et texte de chaque cellule. */
+/** Image d'une page de feuille et sa carte : cellules (grille) et texte de chaque cellule. */
 export async function renderTile(tile: Tile, wb: Workbook) {
-  const { ws, r0, r1, c0, c1 } = tile;
+  const { ws, r0, r1, c0, c1, scale } = tile;
   const styles = wb.workbookIndex.styles;
   const strings = wb.workbookIndex.sharedStrings ?? [];
   const date1904 = !!(wb.workbookIndex.workbook as { date1904?: boolean }).date1904;
@@ -179,9 +200,9 @@ export async function renderTile(tile: Tile, wb: Workbook) {
   for (let c = c0; c <= c1; c++) xs.push(xs.at(-1)! + colPx(ws, c));
   for (let r = r0; r <= r1; r++) ys.push(ys.at(-1)! + rowPx(ws, r, rows.get(r)));
   const W = xs.at(-1)!, H = ys.at(-1)!;
-  const canvas = createCanvas(W * SCALE, H * SCALE);
+  const canvas = createCanvas(Math.round(W * scale), Math.round(H * scale));
   const ctx = canvas.getContext('2d');
-  ctx.scale(SCALE, SCALE);
+  ctx.scale(scale, scale);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
 
@@ -196,7 +217,7 @@ export async function renderTile(tile: Tile, wb: Workbook) {
   // Quadrillage, sous les fonds de cellule comme dans Excel.
   if (ws.showGridlines !== false) {
     ctx.strokeStyle = '#E1E4E8';
-    ctx.lineWidth = 1 / SCALE;
+    ctx.lineWidth = 1 / scale;
     ctx.beginPath();
     for (const x of xs) ctx.moveTo(x, HEAD_H), ctx.lineTo(x, H);
     for (const y of ys) ctx.moveTo(HEAD_W, y), ctx.lineTo(W, y);
@@ -204,10 +225,12 @@ export async function renderTile(tile: Tile, wb: Workbook) {
   }
 
   const runs: TextRun[] = [];
+  let lastFont = '';
   for (let r = r0; r <= r1; r++) {
+    if ((r - r0) % 40 === 39) await new Promise((next) => setImmediate(next)); // le processus principal respire pendant une grande feuille
     for (let c = c0; c <= c1; c++) {
       const merge = mergeOf(r, c);
-      // Une cellule fusionnée est dessinée une fois, depuis son coin haut gauche (ou le bord du morceau).
+      // Une cellule fusionnée est dessinée une fois, depuis son coin haut gauche (ou le bord de la page).
       if (merge && (r !== Math.max(merge.top, r0) || c !== Math.max(merge.left, c0))) continue;
       const cell = merge ? cellAt(merge.top, merge.left) : cellAt(r, c);
       const xf = xfOf(cell, c);
@@ -243,7 +266,8 @@ export async function renderTile(tile: Tile, wb: Workbook) {
       if (!text) continue;
       const font = xf && styles.fonts[xf.fontId];
       const size = ((font?.size ?? ws.defaultFontSize ?? 11) * 4) / 3;
-      ctx.font = `${font?.italic ? 'italic ' : ''}${font?.bold ? 'bold ' : ''}${size}px "${font?.name ?? ws.defaultFontFamily ?? 'Calibri'}", Arial, sans-serif`;
+      const css = `${font?.italic ? 'italic ' : ''}${font?.bold ? 'bold ' : ''}${size}px "${font?.name ?? ws.defaultFontFamily ?? 'Calibri'}", Arial, sans-serif`;
+      if (css !== lastFont) ctx.font = lastFont = css; // lire une police coûte cher : seulement quand elle change
       ctx.fillStyle = font?.color ?? '#000000';
       const numeric = cell.value.type === 'number';
       const align = xf?.alignH && xf.alignH !== 'general' ? xf.alignH : numeric ? 'right' : cell.value.type === 'text' || cell.value.type === 'shared' ? 'left' : 'center';
@@ -271,7 +295,7 @@ export async function renderTile(tile: Tile, wb: Workbook) {
   ctx.fillRect(0, 0, W, HEAD_H);
   ctx.fillRect(0, 0, HEAD_W, H);
   ctx.strokeStyle = '#D1D5DB';
-  ctx.lineWidth = 1 / SCALE;
+  ctx.lineWidth = 1 / scale;
   ctx.beginPath();
   ctx.moveTo(0, HEAD_H), ctx.lineTo(W, HEAD_H), ctx.moveTo(HEAD_W, 0), ctx.lineTo(HEAD_W, H);
   for (const x of xs) ctx.moveTo(x, 0), ctx.lineTo(x, HEAD_H);
@@ -292,7 +316,7 @@ export async function renderTile(tile: Tile, wb: Workbook) {
     ys: ys.map((y) => round(y / H)),
     ...(merges.length ? { merges: merges.map((m) => [m.left - 1, m.top - 1, m.right - 1, m.bottom - 1] as [number, number, number, number]) } : {}),
   };
-  return { png: await canvas.encode('png'), width: W * SCALE, height: H * SCALE, map: { runs, grid } };
+  return { png: await canvas.encode('png'), width: canvas.width, height: canvas.height, map: { runs, grid } };
 }
 
 export async function openXlsx(bytes: Uint8Array): Promise<OpenedDocument> {
@@ -303,7 +327,7 @@ export async function openXlsx(bytes: Uint8Array): Promise<OpenedDocument> {
   // Au plus une page de plus que le plafond : l'import sait ainsi que le classeur a été tronqué.
   let tiles: Tile[] = [];
   for (const ws of sheets) if (tiles.length <= MAX_PAGES) tiles = tiles.concat(tilesOf(ws, MAX_PAGES + 1 - tiles.length));
-  if (!tiles.length && sheets[0]) tiles = [{ ws: sheets[0], r0: 1, r1: 20, c0: 1, c1: 8 }];
+  if (!tiles.length && sheets[0]) tiles = [{ ws: sheets[0], r0: 1, r1: 20, c0: 1, c1: 8, scale: 2 }];
   return {
     pages: tiles.length,
     async render(index) {

@@ -324,6 +324,9 @@ export const fr = {
     ] as [string, string][],
     zoomOut: 'Zoom arrière',
     zoomIn: 'Zoom avant',
+    wheelZoom: (mod: string) => [`${mod} + molette`, 'zoom'] as [string, string],
+    hidePages: 'Masquer les pages',
+    showPages: 'Afficher les pages',
     screenTitle: (index: number, points: number) => `Écran ${index} · ${plural(points, 'point')}`,
     docLabel: (format: string, page: number, sheet?: string, range?: string) =>
       format === 'xlsx' ? `${sheet} ${range}` : `${format === 'pptx' ? 'Diapositive' : 'Page'} ${page}`,

@@ -135,7 +135,7 @@ describe('copie commentée Office', { timeout: 30_000 }, () => {
     const { zip, copy } = await commentedCopy('budget.xlsx', await createSampleXlsx(), async (center) => [
       [0, await center(0, '100'), 'Chiffre à vérifier'],
       [0, await center(0, 'Magasin 3'), 'Fermé en mars'],
-      [3, await center(3, 'Chiffres'), 'À mettre à jour'], // feuille « Notes »
+      [1, await center(1, 'Chiffres'), 'À mettre à jour'], // feuille « Notes »
     ]);
     const comments = await read(zip, 'xl/comments1.xml');
     expect(comments).toContain('<comment ref="C2" authorId="0">');

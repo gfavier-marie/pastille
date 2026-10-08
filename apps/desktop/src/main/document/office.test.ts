@@ -8,7 +8,7 @@ import { anchorOf, cellAt, type TextMap } from './anchor.ts';
 import { createSampleDocx, createSamplePptx, createSampleXlsx, DOCX_FIRST, DOCX_TITLE } from './fixture.ts';
 import { openDocx, openPptx } from './office.ts';
 import { createDocuments, DocumentError, documentFormat, type OpenedDocument } from './open.ts';
-import { formatNumber, openXlsx } from './xlsx.ts';
+import { formatNumber, MAX_AREA, MAX_SIDE, openXlsx, tileRange, tilesOf, type Tile } from './xlsx.ts';
 
 /** Centre de la boîte du premier morceau dont le texte commence ainsi. */
 function centerOf(map: TextMap, start: string) {
@@ -45,23 +45,49 @@ describe('documents Office', { timeout: 30_000 }, () => {
     await doc.close();
   });
 
-  it('Excel : feuilles découpées en morceaux, cellule et valeur visées', async () => {
+  it('Excel : une page par feuille, cellule et valeur visées', async () => {
     const doc = await openXlsx(await createSampleXlsx());
-    expect(doc.pages).toBe(4); // Ventes : 120 lignes en trois morceaux ; Notes : un
+    expect(doc.pages).toBe(2); // Ventes (120 lignes) et Notes : une page chacune
     const first = await doc.render(0);
-    expect([first.sheet, first.range]).toEqual(['Ventes', 'A1:J50']);
+    expect([first.sheet, first.range]).toEqual(['Ventes', 'A1:J120']);
+    expect([first.width, first.height]).toEqual([1360, 4840]); // 2× pour un texte net une fois zoomé
     expect(first.map.grid).toMatchObject({ sheet: 'Ventes', col0: 0, row0: 0 });
     const c2 = centerOf(first.map, '100');
     expect(cellAt(first.map.grid!, c2.x, c2.y)).toEqual([2, 1]);
     expect(anchorOf({ kind: 'point', ...c2 }, first.map)).toEqual({ cells: 'C2', sheet: 'Ventes', text: '100' });
     const g2 = centerOf(first.map, '20');
-    expect(anchorOf({ kind: 'zone', x: c2.x, y: c2.y, w: g2.x - c2.x, h: 0.05 }, first.map)).toMatchObject({ cells: expect.stringMatching(/^C2:G\d+$/) });
-    // Deuxième morceau : la numérotation des lignes continue.
-    const second = await doc.render(1);
-    expect(second.range).toBe('A51:J100');
-    const p = centerOf(second.map, 'Magasin 50');
-    expect(anchorOf({ kind: 'point', ...p }, second.map)).toMatchObject({ cells: 'B51' });
-    expect((await doc.render(3)).sheet).toBe('Notes');
+    expect(anchorOf({ kind: 'zone', x: c2.x, y: c2.y, w: g2.x - c2.x, h: 0.01 }, first.map)).toMatchObject({ cells: expect.stringMatching(/^C2:G\d+$/) });
+    const p = centerOf(first.map, 'Magasin 50');
+    expect(anchorOf({ kind: 'point', ...p }, first.map)).toMatchObject({ cells: 'B51' });
+    expect((await doc.render(1)).sheet).toBe('Notes');
+  });
+
+  it('Excel : une très grande feuille en bandes de lignes, dans les limites d’une image', () => {
+    const sheet = (rows: number, cols: number) =>
+      ({
+        rows: Array.from({ length: rows }, (_, r) => ({
+          index: r + 1,
+          cells: Array.from({ length: cols }, (_, c) => ({ row: r + 1, col: c + 1, value: { type: 'number', number: r } })),
+        })),
+        colWidths: {},
+        rowHeights: {},
+        defaultColWidth: 8.43, // 64 px
+        defaultRowHeight: 15, // 20 px
+      }) as unknown as Parameters<typeof tilesOf>[0];
+    const size = (t: Tile) => [(40 + 64 * (t.c1 - t.c0 + 1)) * t.scale, (20 + 20 * (t.r1 - t.r0 + 1)) * t.scale] as const;
+    expect(tilesOf(sheet(5, 3)).map(({ ws, ...t }) => t)).toEqual([{ r0: 1, r1: 5, c0: 1, c1: 10, scale: 2 }]);
+    const medium = tilesOf(sheet(300, 30));
+    expect(medium.map(tileRange)).toEqual(['A1:AD300']);
+    expect(medium[0]!.scale).toBeGreaterThan(1);
+    const big = tilesOf(sheet(2000, 30));
+    expect(big.length).toBeGreaterThan(1);
+    expect(big.map((t) => [t.r0, t.c0, t.c1, t.scale])).toEqual(big.map((_, i) => [i ? big[i - 1]!.r1 + 1 : 1, 1, 30, 1]));
+    expect(big.at(-1)!.r1).toBe(2000);
+    for (const t of big) {
+      const [w, h] = size(t);
+      expect(Math.max(w, h)).toBeLessThanOrEqual(MAX_SIDE);
+      expect(w * h).toBeLessThanOrEqual(MAX_AREA);
+    }
   });
 
   it('formats de nombres Excel courants', () => {
@@ -87,11 +113,11 @@ describe('documents Office', { timeout: 30_000 }, () => {
     await writeFile(file, await createSampleXlsx());
     await documents.importDocument(file, () => {});
     const s = store.get()!;
-    expect(s.captures.map((c) => c.source?.document?.range)).toEqual(['A1:J50', 'A51:J100', 'A101:J120', 'A1:J2']);
-    const id = store.addAnnotation(s.captures[1]!.id, { kind: 'point', x: 0.2, y: 0.03 });
-    store.update((x) => (x.captures[1]!.annotations.find((a) => a.id === id)!.text = 'Vérifier ce magasin'));
+    expect(s.captures.map((c) => c.source?.document?.range)).toEqual(['A1:J120', 'A1:J2']);
+    const id = store.addAnnotation(s.captures[0]!.id, { kind: 'point', x: 0.2, y: 1030 / 2420 }); // milieu de la ligne 51
+    store.update((x) => (x.captures[0]!.annotations.find((a) => a.id === id)!.text = 'Vérifier ce magasin'));
     const doc = await buildExport(store.get()!, store.dir(s), await mkdtemp(join(tmpdir(), 'pastille-out-')));
-    expect(doc.screens[0]!.title).toBe('Feuille Ventes (A51:J100) — budget.xlsx');
+    expect(doc.screens[0]!.title).toBe('Feuille Ventes (A1:J120) — budget.xlsx');
     expect(doc.points[0]!.position).toMatch(/^cellule B51 de la feuille Ventes \(« Magasin 50 »\)/);
   });
 });

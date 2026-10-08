@@ -332,6 +332,9 @@ export const it: Texts = {
     ] as [string, string][],
     zoomOut: 'Riduci',
     zoomIn: 'Ingrandisci',
+    wheelZoom: (mod: string) => [`${mod} + rotellina`, 'zoom'] as [string, string],
+    hidePages: 'Nascondi le pagine',
+    showPages: 'Mostra le pagine',
     screenTitle: (index: number, points: number) => `Schermata ${index} · ${plural(points, 'punto', 'punti')}`,
     docLabel: (format: string, page: number, sheet?: string, range?: string) =>
       format === 'xlsx' ? `${sheet} ${range}` : `${format === 'pptx' ? 'Diapositiva' : 'Pagina'} ${page}`,

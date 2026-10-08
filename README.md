@@ -62,7 +62,7 @@ Le point dicté est envoyé à la tablette pendant l'enregistrement. Le bouton *
 
 ## Documents
 
-Un PDF, un Word, un Excel ou un PowerPoint se commente comme une capture. Pour l'ouvrir : menu de l'icône > « Commenter un document… », le bouton de l'éditeur, ou un glisser-déposer sur l'éditeur. Chaque page (diapositive, morceau de feuille Excel) devient un écran : on pose des points, on dicte, et les exports pour l'IA citent le passage ou la cellule visés.
+Un PDF, un Word, un Excel ou un PowerPoint se commente comme une capture. Pour l'ouvrir : menu de l'icône > « Commenter un document… », le bouton de l'éditeur, ou un glisser-déposer sur l'éditeur. Chaque page (diapositive, feuille Excel) devient un écran : on pose des points, on dicte, et les exports pour l'IA citent le passage ou la cellule visés.
 
 **Exporter > Copie commentée du document** écrit « rapport (commenté).docx » dans le dossier d'export, avec les commentaires au format du document :
 - notes PDF avec la pastille numérotée ;

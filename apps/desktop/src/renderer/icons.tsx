@@ -152,6 +152,13 @@ export const Info = (p: Props) => (
     <path d="M8 7.2v4M8 4.8h0" />
   </Stroke>
 );
+/** Fenêtre et sa barre du bas : vignettes des pages affichées ou masquées. */
+export const PanelBottom = (p: Props) => (
+  <Stroke {...p}>
+    <rect x="2" y="3" width="12" height="10" rx="1.5" />
+    <path d="M2 10h12" />
+  </Stroke>
+);
 export const ChevronLeft = (p: Props) => (
   <Stroke {...p} width={1.7}>
     <path d="M10 3.5 5.5 8l4.5 4.5" />

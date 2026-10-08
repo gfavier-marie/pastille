@@ -1,5 +1,5 @@
 // Éditeur d'annotations (§4.3) : en haut la session et l'export, au centre la capture,
-// à droite les points de la capture, en bas les vignettes de la session.
+// à droite les points de la capture, en bas les vignettes de la session (masquables sur un document).
 
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -157,6 +157,7 @@ function App() {
   const [tablet, setTablet] = useState(false);
   const [zoomed, setZoomed] = useState<string | null>(null); // croquis ou inspiration agrandi
   const [opening, setOpening] = useState<{ name: string; done: number; total: number } | null>(null); // document en cours d'ouverture
+  const [pagesHidden, setPagesHidden] = useState(false); // document : vignettes masquées, toute la place pour les pages
   const [newNoteId, setNewNoteId] = useState<string | null>(null); // remarque juste ajoutée, à mettre au focus
   const activeNote = useRef<string | null>(null); // remarque en cours de saisie
   const [commentMode, setCommentMode] = useState<SettingsState['commentMode']>('auto');
@@ -760,6 +761,22 @@ function App() {
             autoDictation(id);
           }}
           onMove={(id, geometry) => api.updateAnnotation(id, { geometry })}
+          tools={
+            doc && (
+              <>
+                <i />
+                <button
+                  type="button"
+                  aria-label={pagesHidden ? T.editor.showPages : T.editor.hidePages}
+                  title={pagesHidden ? T.editor.showPages : T.editor.hidePages}
+                  aria-pressed={pagesHidden}
+                  onClick={() => setPagesHidden((h) => !h)}
+                >
+                  <I.PanelBottom size={15} />
+                </button>
+              </>
+            )
+          }
           bubble={(pin, stage) => {
             if (!bubbleOpen || !selected) return null;
             // À droite de la pastille, ou à gauche si la place manque ; toujours dans la scène.
@@ -998,7 +1015,7 @@ function App() {
         </aside>
       </main>
 
-      <nav aria-label={T.editor.captures}>
+      <nav aria-label={T.editor.captures} hidden={!!doc && pagesHidden}>
         {captures.map((c, i) => (
           <div className="shot" key={c.id}>
             <button

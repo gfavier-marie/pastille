@@ -28,10 +28,10 @@ export type DocumentPage = {
   id: string;
   name: string; // « rapport.pdf »
   format: DocumentFormat;
-  page: number; // à partir de 1 : page, diapositive ou morceau de feuille
+  page: number; // à partir de 1 : page, diapositive ou feuille (bande d'une très grande feuille)
   pages: number; // pages ouvertes
-  sheet?: string; // Excel : feuille du morceau
-  range?: string; // Excel : cellules du morceau (« A1:L50 »)
+  sheet?: string; // Excel : nom de la feuille
+  range?: string; // Excel : cellules de la page (« A1:L120 »)
 };
 
 // Coordonnées normalisées 0–1, relatives à l'image

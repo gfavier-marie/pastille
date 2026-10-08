@@ -321,6 +321,9 @@ export const de: Texts = {
     ] as [string, string][],
     zoomOut: 'Verkleinern',
     zoomIn: 'Vergrößern',
+    wheelZoom: (mod: string) => [`${mod} + Mausrad`, 'Zoom'] as [string, string],
+    hidePages: 'Seiten ausblenden',
+    showPages: 'Seiten einblenden',
     screenTitle: (index: number, points: number) => `Screen ${index} · ${plural(points, 'Punkt', 'Punkte')}`,
     docLabel: (format: string, page: number, sheet?: string, range?: string) =>
       format === 'xlsx' ? `${sheet} ${range}` : `${format === 'pptx' ? 'Folie' : 'Seite'} ${page}`,

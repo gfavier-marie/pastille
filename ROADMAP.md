@@ -462,7 +462,7 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 
 ### Défilement continu (demandé le 8 oct.)
 
-- [x] Les pages d'un document se suivent dans une seule vue, comme dans Word ou un lecteur PDF (morceaux d'une feuille Excel compris) :
+- [x] Les pages d'un document se suivent dans une seule vue, comme dans Word ou un lecteur PDF (feuilles Excel comprises) :
   - la molette fait défiler d'une page à l'autre, ⌘ / Ctrl + molette zoome ;
   - la page au milieu de l'écran devient la page en cours (panneau des points, vignette en surbrillance) ;
   - un clic sur une vignette, Page préc./suiv. ou un point de la liste y saute, au même zoom ;
@@ -477,6 +477,19 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 - [x] Windows 0.14.2 et `latest.json` : publiés par la CI sur le tag, qui a finalement tourné
 
 **Plus tard [C], non prévu** : « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
+
+### Excel lisible, vignettes masquables (demandé le 8 oct.)
+
+Retour : une feuille coupée en morceaux de 50 lignes et 1200 px de large, sur plusieurs pages ; on ne voyait ni toutes les colonnes ni la suite des lignes.
+
+- [x] Une page par feuille : toute sa zone utilisée, à 2× (texte net une fois zoomé) et réduite jusqu'à 1× pour tenir en une image d'au plus 16 000 px de côté et 40 Mpx. Au-delà (≈ 800 lignes de 30 colonnes), bandes de lignes ; colonnes coupées seulement au-delà de ≈ 250
+  - Mesures : 300 lignes × 30 colonnes en une page 3606 × 11077 (2 s, dont 1,5 s d'encodage PNG hors du fil principal) ; 2000 lignes × 60 colonnes en 4 bandes
+  - Police posée seulement quand elle change (dessin 3× plus rapide), pause toutes les 40 lignes : le processus principal reste réactif
+- [x] Exports et MCP : capture réduite aussi à 8000 px de haut (limite des images de l'API de Claude)
+- [x] Éditeur, documents : ⇧ + molette défile de côté (souris sous Windows), « ⌘ + molette zoom » dans la barre d'aide, bouton de la barre d'aide qui masque ou réaffiche les vignettes du bas
+- [x] Vérifié dans l'éditeur construit (navigateur, faux preload) sur une feuille de 300 lignes × 30 colonnes : zoom, défilement dans les deux sens borné aux bords, vignettes masquées puis réaffichées
+- [ ] Essai réel dans l'app sur tes classeurs
+- [x] Version **0.14.4** (8 oct.) : publiée pour Mac sans la CI (quota GitHub épuisé) ; `latest.json` reste à 0.14.3, faute d'installeur Windows
 
 ### Site : section Documents (demandée le 8 oct.)
 
