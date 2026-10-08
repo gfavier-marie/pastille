@@ -474,7 +474,7 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
   - .dmg construit sur le Mac et envoyé sur dl.vibescreener.dev avec wrangler ;
   - `latest.json` reste à 0.14.1 : il vaut aussi pour Windows, qui n'a pas de nouvel installeur (pas de boucle de mise à jour chez les utilisateurs Windows) ;
   - sur Mac, la mise à jour passe par la commande d'installation du site.
-- [ ] Windows 0.14.2 et `latest.json` : quand la CI (ou un PC Windows) sera de nouveau disponible
+- [x] Windows 0.14.2 et `latest.json` : publiés par la CI sur le tag, qui a finalement tourné
 
 **Plus tard [C], non prévu** : « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
 
@@ -482,4 +482,4 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 
 - [x] Section « Et aussi · Documents » entre le calculateur et les tarifs, reprise du canevas Claude Design « VibeScreener — landing, section Documents » : encart gris, deux sorties (pour l'IA, pour les relecteurs), formats, illustration d'un Word commenté dans l'éditeur ; identique dans les deux modes, absente de la navigation. Question « Quels documents peut-on ouvrir ? » dans la FAQ, « Documents » dans la ligne du bandeau final ; cinq langues ; vérifiée en local à 375 px et au bureau
 - [x] Site déployé sur vibescreener.dev le 8 oct. (`pnpm site:deploy`)
-- [ ] Correctifs Windows (micro, barre des tâches) : à publier avec le prochain installeur Windows, quand la CI (ou un PC Windows) sera de nouveau disponible
+- [x] Version **0.14.3** (8 oct.) : correctifs Windows (micro autorisé, éditeur ouvert au lancement), publiée par la CI sur le tag
