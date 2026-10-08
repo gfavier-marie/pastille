@@ -469,6 +469,10 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
   - seules les images des pages proches de l'écran sont chargées (200 pages possibles).
 
   Vérifié dans l'éditeur construit (navigateur, faux preload), sur un PDF de 6 pages et un Excel.
-- [ ] Prochaine version : à construire et publier (la CI Windows est indisponible, quota GitHub atteint)
+- [x] Version **0.14.2** pour Mac, publiée le 8 oct. sans la CI (quota GitHub atteint) :
+  - .dmg construit sur le Mac et envoyé sur dl.vibescreener.dev avec wrangler ;
+  - `latest.json` reste à 0.14.1 : il vaut aussi pour Windows, qui n'a pas de nouvel installeur (pas de boucle de mise à jour chez les utilisateurs Windows) ;
+  - sur Mac, la mise à jour passe par la commande d'installation du site.
+- [ ] Windows 0.14.2 et `latest.json` : quand la CI (ou un PC Windows) sera de nouveau disponible
 
 **Plus tard [C], non prévu** : « Ouvrir avec VibeScreener » (associations de fichiers), relecture des commentaires déjà présents dans le document, ⌘O.
