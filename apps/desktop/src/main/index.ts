@@ -518,7 +518,9 @@ async function openDocument(path?: string) {
     const r = await documents.importDocument(path, (captureId) => showEditor({ captureId }));
     if (r.truncated) void dialog.showMessageBox({ type: 'info', message: T.main.document.truncated(MAX_PAGES) });
   } catch (err) {
-    void dialog.showMessageBox({ type: 'warning', message: err instanceof DocumentError ? err.message : T.main.document.unreadable(String(err)) });
+    const message = err instanceof DocumentError ? err.message : T.main.document.unreadable(String(err));
+    if (autotest) console.log('DOCUMENT', JSON.stringify({ path, message })); // lisible dans le journal de la CI
+    void dialog.showMessageBox({ type: 'warning', message });
   }
 }
 

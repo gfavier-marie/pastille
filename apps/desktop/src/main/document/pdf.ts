@@ -2,7 +2,7 @@
 // (@napi-rs/canvas) : une image par page et la carte de son texte.
 
 import { createRequire } from 'node:module';
-import { dirname, join, sep } from 'node:path';
+import { dirname, join } from 'node:path';
 import { createCanvas } from '@napi-rs/canvas';
 import { T } from '../../texts/index.ts';
 import type { TextRun } from './anchor.ts';
@@ -14,14 +14,16 @@ const round = (v: number) => Math.round(v * 10000) / 10000;
 export async function openPdf(bytes: Uint8Array): Promise<OpenedDocument> {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   // Polices standard, CMaps, décodeurs et profils lus sur le disque (polices non incorporées, textes asiatiques, scans).
+  // pdf.js exige un « / » final, même sous Windows (« C:\…\standard_fonts/ » se lit très bien).
   const root = dirname(createRequire(import.meta.url).resolve('pdfjs-dist/package.json'));
+  const dir = (name: string) => `${join(root, name)}/`;
   const task = pdfjs.getDocument({
     data: bytes.slice(), // pdf.js garde le tampon qu'on lui donne
-    standardFontDataUrl: join(root, 'standard_fonts') + sep,
-    cMapUrl: join(root, 'cmaps') + sep,
+    standardFontDataUrl: dir('standard_fonts'),
+    cMapUrl: dir('cmaps'),
     cMapPacked: true,
-    wasmUrl: join(root, 'wasm') + sep, // images JPEG 2000 et JBIG2 (scans)
-    iccUrl: join(root, 'iccs') + sep,
+    wasmUrl: dir('wasm'), // images JPEG 2000 et JBIG2 (scans)
+    iccUrl: dir('iccs'),
     verbosity: pdfjs.VerbosityLevel.ERRORS,
   });
   let pdf: Awaited<typeof task.promise>;
