@@ -481,4 +481,5 @@ Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installée
 ### Site : section Documents (demandée le 8 oct.)
 
 - [x] Section « Et aussi · Documents » entre le calculateur et les tarifs, reprise du canevas Claude Design « VibeScreener — landing, section Documents » : encart gris, deux sorties (pour l'IA, pour les relecteurs), formats, illustration d'un Word commenté dans l'éditeur ; identique dans les deux modes, absente de la navigation. Question « Quels documents peut-on ouvrir ? » dans la FAQ, « Documents » dans la ligne du bandeau final ; cinq langues ; vérifiée en local à 375 px et au bureau
-- [ ] Déploiement (`pnpm site:deploy`) sur ton feu vert
+- [x] Site déployé sur vibescreener.dev le 8 oct. (`pnpm site:deploy`)
+- [ ] Correctifs Windows (micro, barre des tâches) : à publier avec le prochain installeur Windows, quand la CI (ou un PC Windows) sera de nouveau disponible
