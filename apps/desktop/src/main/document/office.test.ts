@@ -19,7 +19,7 @@ function centerOf(map: TextMap, start: string) {
 describe('documents Office', { timeout: 30_000 }, () => {
   it('Word : pages A4, texte et paragraphe d’origine de chaque morceau', async () => {
     const doc = await openDocx(await createSampleDocx());
-    expect(doc.pages).toBe(3);
+    expect(doc.pages).toBeGreaterThanOrEqual(3); // le nombre exact dépend des polices installées
     const page = await doc.render(0);
     expect([page.width, page.height]).toEqual([1191, 1684]);
     const title = page.map.runs.find((r) => r.t.startsWith('Rapport'))!;
@@ -27,9 +27,10 @@ describe('documents Office', { timeout: 30_000 }, () => {
     const first = centerOf(page.map, "Le");
     expect(anchorOf({ kind: 'point', ...first }, page.map)).toEqual({ text: DOCX_FIRST });
     expect(anchorOf({ kind: 'zone', x: 0, y: 0, w: 1, h: title.y + title.h + 0.001 }, page.map)).toEqual({ text: DOCX_TITLE });
-    // Page 2 : le tableau (paragraphe d'une cellule : tableau, ligne, cellule, paragraphe).
-    const second = await doc.render(1);
-    expect(second.map.runs.find((r) => r.p?.split('.').length === 4)!.p).toMatch(/^\d+\.0\.0\.0$/);
+    // Le tableau (paragraphe d'une cellule : tableau, ligne, cellule, paragraphe), sur l'une des pages suivantes.
+    const cells = [];
+    for (let i = 1; i < doc.pages; i++) cells.push(...(await doc.render(i)).map.runs.filter((r) => r.p?.split('.').length === 4));
+    expect(cells[0]!.p).toMatch(/^\d+\.0\.0\.0$/);
     await doc.close();
   });
 

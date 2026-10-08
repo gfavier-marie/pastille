@@ -18,13 +18,16 @@ export const canvasFactory = {
   loadImage: (bytes: ArrayBuffer | Uint8Array) => loadImage(Buffer.from(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes))),
 } as unknown as NodeCanvasFactory;
 
-// Polices Office : celles de Word quand il est installé (Mac), sinon des polices système proches.
-// Windows a déjà Calibri, Cambria, Segoe… dans ses polices système.
+// Polices Office : celles de Word quand il est installé (Mac), sinon des polices système proches (la première
+// présente : Arial sur Mac et Windows, Liberation ou DejaVu sous Linux). Windows a déjà Calibri, Cambria, Segoe…
 const OFFICE_FONTS = ['Word', 'PowerPoint', 'Excel'].map((app) => `/Applications/Microsoft ${app}.app/Contents/Resources/DFonts`);
-const SUBSTITUTES: [string, string[]][] = [
-  ['Arial', ['Calibri', 'Calibri Light', 'Aptos', 'Aptos Display', 'Aptos Narrow', 'Segoe UI', 'Segoe UI Light', 'Candara', 'Corbel', 'Tahoma', 'Verdana']],
-  ['Times New Roman', ['Cambria', 'Constantia', 'Book Antiqua', 'Garamond']],
-  ['Courier New', ['Consolas', 'Lucida Console']],
+const SUBSTITUTES: [string[], string[]][] = [
+  [
+    ['Arial', 'Liberation Sans', 'Helvetica', 'DejaVu Sans'],
+    ['Calibri', 'Calibri Light', 'Aptos', 'Aptos Display', 'Aptos Narrow', 'Segoe UI', 'Segoe UI Light', 'Candara', 'Corbel', 'Tahoma', 'Verdana', 'Arial'],
+  ],
+  [['Times New Roman', 'Liberation Serif', 'Times', 'DejaVu Serif'], ['Cambria', 'Constantia', 'Book Antiqua', 'Garamond', 'Times New Roman']],
+  [['Courier New', 'Liberation Mono', 'Courier', 'DejaVu Sans Mono'], ['Consolas', 'Lucida Console', 'Courier New']],
 ];
 let fontsReady = false;
 
@@ -33,7 +36,10 @@ export function prepareFonts() {
   fontsReady = true;
   const dir = process.platform === 'darwin' ? OFFICE_FONTS.find((d) => existsSync(d)) : undefined;
   if (dir) GlobalFonts.loadFontsFromDir(dir);
-  for (const [target, names] of SUBSTITUTES) for (const name of names) if (!GlobalFonts.has(name)) GlobalFonts.setAlias(target, name);
+  for (const [targets, names] of SUBSTITUTES) {
+    const target = targets.find((t) => GlobalFonts.has(t));
+    if (target) for (const name of names) if (!GlobalFonts.has(name)) GlobalFonts.setAlias(target, name);
+  }
 }
 
 /** Erreur de la bibliothèque → message lisible (fichier protégé, ancien format, autre chose qu'un fichier Office). */

@@ -16,7 +16,7 @@ import { openXlsx } from './xlsx.ts';
 const openers: Record<string, (b: Uint8Array) => Promise<OpenedDocument>> = { docx: openDocx, pptx: openPptx, xlsx: openXlsx };
 
 type Center = (page: number, start: string, keep?: (run: TextRun) => boolean) => Promise<Geometry>;
-type Place = (center: Center) => Promise<[number, Geometry, string][]>;
+type Place = (center: Center, pages: number) => Promise<[number, Geometry, string][]>;
 
 /** Document factice ouvert en session, points posés par `place`, copie commentée exportée et dézippée. */
 async function commentedCopy(name: string, bytes: Uint8Array, place: Place) {
@@ -29,10 +29,11 @@ async function commentedCopy(name: string, bytes: Uint8Array, place: Place) {
   const dir = store.dir(s);
   // Centre du premier morceau de texte qui commence ainsi, sur une page donnée (à partir de 0).
   const center: Center = async (page, start, keep = () => true) => {
-    const run = (await loadTextMap(dir, s.captures[page]!))!.runs.find((r) => r.t.startsWith(start) && keep(r))!;
+    const run = (await loadTextMap(dir, s.captures[page]!))!.runs.find((r) => r.t.startsWith(start) && keep(r));
+    if (!run) throw new Error(`« ${start} » absent de la page ${page + 1}`);
     return { kind: 'point', x: run.x + run.w / 2, y: run.y + run.h / 2 };
   };
-  for (const [page, geometry, comment] of await place(center)) {
+  for (const [page, geometry, comment] of await place(center, s.captures.length)) {
     const id = store.addAnnotation(s.captures[page]!.id, geometry);
     store.update((x) => (x.captures[page]!.annotations.find((a) => a.id === id)!.text = comment));
   }
@@ -49,11 +50,17 @@ const count = (xml: string, pattern: RegExp) => xml.match(pattern)?.length ?? 0;
 
 describe('copie commentée Office', { timeout: 30_000 }, () => {
   it('Word : commentaires dans la marge, autour des paragraphes visés', async () => {
-    const { path, outDir, copy, zip, original } = await commentedCopy('rapport.docx', await createSampleDocx(), async (center) => [
-      [0, await center(0, 'Le'), 'Mettre 15 %'],
-      [1, await center(1, 'Sud', (r) => r.p?.split('.').length === 4), 'Vérifier ce chiffre'], // cellule du tableau, page 2
-      [2, { kind: 'point', x: 0.5, y: 0.9 }, 'Page presque vide'], // aucun texte sous le point
-    ]);
+    const { path, outDir, copy, zip, original } = await commentedCopy('rapport.docx', await createSampleDocx(), async (center, pages) => {
+      // Page du tableau : elle dépend des polices installées (Calibri ici, une autre police sur la CI).
+      const inTable = (r: TextRun) => r.p?.split('.').length === 4;
+      let table = 1;
+      while (table < pages - 1 && !(await center(table, 'Sud', inTable).then(() => true, () => false))) table++;
+      return [
+        [0, await center(0, 'Le'), 'Mettre 15 %'],
+        [table, await center(table, 'Sud', inTable), 'Vérifier ce chiffre'], // cellule du tableau
+        [pages - 1, { kind: 'point', x: 0.5, y: 0.9 }, 'Page presque vide'], // aucun texte sous le point
+      ];
+    });
     expect(path).toBe(join(outDir, 'rapport (commenté).docx'));
     const comments = await read(zip, 'word/comments.xml');
     expect(count(comments, /<w:comment /g)).toBe(3);
@@ -68,7 +75,7 @@ describe('copie commentée Office', { timeout: 30_000 }, () => {
     expect(body).toMatch(/<w:commentRangeStart w:id="0"\/><w:r>.{0,200}Le chiffre d'affaires.{0,200}<w:commentRangeEnd w:id="0"\/>/s);
     expect(body).toMatch(/<w:tc>(?:(?!<\/w:tc>).)*w:commentRangeStart w:id="1"(?:(?!<\/w:tc>).)*>Sud</s);
     // La copie se relit ; l'original n'a pas bougé.
-    expect((await openDocx(copy)).pages).toBe(3);
+    expect((await openDocx(copy)).pages).toBeGreaterThanOrEqual(3);
     expect(await read(await JSZip.loadAsync(original), 'word/document.xml')).not.toContain('commentRangeStart');
   });
 
