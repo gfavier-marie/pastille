@@ -163,7 +163,7 @@ Un PDF, un Word, un Excel ou un PowerPoint s'ouvre dans l'app et se commente com
   - un morceau de feuille Excel d'environ 50 lignes, avec ses en-têtes A, B, C et 1, 2, 3.
 
   Au-delà de 200 pages, seules les premières sont ouvertes.
-- L'éditeur sert de visionneuse. La page est ajustée à la largeur, la molette la fait défiler et ⌘ / Ctrl + molette zoome. Points, zones, flèches, dictée, croquis et inspirations marchent comme sur une capture.
+- L'éditeur sert de visionneuse. Les pages se suivent dans une seule vue, ajustées à la largeur, comme dans Word ou un lecteur PDF : la molette fait défiler d'une page à l'autre et ⌘ / Ctrl + molette zoome. La page au milieu de l'écran est la page en cours. Points, zones, flèches, dictée, croquis et inspirations marchent comme sur une capture.
 - Exports pour l'IA et MCP :
   - les pages sans point sont sautées ;
   - les titres sont du type « Page 3 / 12 — rapport.pdf », « Diapositive 4 / 20 — deck.pptx », « Feuille Ventes (A51:G100) — budget.xlsx » ;
