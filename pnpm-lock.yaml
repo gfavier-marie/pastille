@@ -26,9 +26,18 @@ importers:
       '@pastille/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@silurus/ooxml':
+        specifier: ^0.88.0
+        version: 0.88.0
+      '@xmldom/xmldom':
+        specifier: ^0.8.15
+        version: 0.8.15
       get-windows:
         specifier: ^9.3.0
         version: 9.3.0(encoding@0.1.13)(supports-color@10.2.2)
+      jszip:
+        specifier: ^3.10.2
+        version: 3.10.2
       pdf-lib:
         specifier: 1.17.1
         version: 1.17.1
@@ -1239,6 +1248,9 @@ packages:
     resolution: {integrity: sha512-nl+CTWIgOGszQmUz/kanfgrfFZ4qiwxKIfT/ryl3N3Ewk5tqizmYtNXiqb7Bu/fDtNgu1kyxdFiAUJNur3iysg==}
     cpu: [x64]
     os: [win32]
+
+  '@silurus/ooxml@0.88.0':
+    resolution: {integrity: sha512-dhMs1/U5fB5bh/Hv8BNTgCsHVNOl+qkquohsROblku7jghsmd1BZAE//LR6omB7aCVLGJ3sp4IqzqdkgT5wicQ==}
 
   '@sindresorhus/is@4.6.0':
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
@@ -3985,6 +3997,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.64.0':
     optional: true
+
+  '@silurus/ooxml@0.88.0': {}
 
   '@sindresorhus/is@4.6.0': {}
 

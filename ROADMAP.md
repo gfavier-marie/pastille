@@ -393,19 +393,29 @@ Dépendances : `pdfjs-dist` et `pdf-lib`. Le rendu se fait dans le processus pri
 
 *Critère : un PDF de 20 pages ouvert par glisser-déposer, 10 points dictés sur 4 pages en < 3 min ; l'export PDF pour l'IA ne contient que les 4 pages et cite le texte visé ; la copie commentée montre les 10 pastilles et leurs notes dans Aperçu et Acrobat.*
 
-### Lot DOC0 — Risques Office (avant DOC2, sur tes fichiers)
+### Lot DOC0 — Risques Office
 
-- [ ] Fidélité de `@silurus/ooxml` sur 3 de tes fichiers (.docx, .xlsx, .pptx), comparée à Word, Excel et PowerPoint. À regarder : polices Office absentes du Mac, tableaux, graphiques, SmartArt
-- [ ] Mode Node (`@silurus/ooxml/node` avec `@napi-rs/canvas`) : pages Word et diapositives rendues dans le processus principal comme les PDF, et position du texte (`onTextRun`). Excel n'a pas de rendu Node : rendu de la grille à faire, ou fenêtre cachée
-- [ ] PowerPoint 365 : commentaires modernes (`p188:cm` + `pos`) ou classiques (`p:cm`) ? Un fichier n'en montre qu'un type
-- [ ] Une copie commentée de chaque format ouverte sans réparation dans Word, Excel et PowerPoint (Mac et web)
+Mesuré le 8 oct. sans tes fichiers, sur des modèles Office des apps installées et des fichiers de test fabriqués :
 
-*Repli si la fidélité ne tient pas : LibreOffice s'il est installé, sinon « exportez en PDF ».*
+- [x] **Mode Node** (`@silurus/ooxml/node`) avec `@napi-rs/canvas` : pages Word et diapositives rendues dans le processus principal, comme les PDF. Pas de fenêtre cachée.
+  - Word : 10 à 20 ms par page. Chaque morceau de texte connaît son paragraphe d'origine (`source.path`, y compris dans un tableau), ce qui permet d'ancrer un commentaire Word.
+  - PowerPoint : ≈ 100 ms par diapositive. Le texte vient des formes.
+- [x] **Excel** : la bibliothèque ne dessine les feuilles que dans un navigateur (Worker). On dessine donc la grille nous-mêmes à partir du classeur qu'elle lit (`document/xlsx.ts`) :
+  - valeurs, formats de nombres et de dates courants, gras/italique/couleurs, fonds, bordures, fusions, largeurs, en-têtes A, B, C et 1, 2, 3 ;
+  - position exacte de chaque cellule, donc un point vise « B12 » ;
+  - les graphiques et images posés sur les feuilles ne sont pas dessinés.
+- [x] **Polices** :
+  - si Office est installé (Mac), ses polices (Calibri, Cambria, Aptos…) sont chargées ;
+  - sinon, les polices Office manquantes sont remplacées par Arial, Times New Roman et Courier New ;
+  - sans cela, des lettres accentuées en gras manquaient.
+- [ ] Fidélité sur tes vrais fichiers (tableaux complexes, SmartArt, graphiques) : à voir à l'essai réel
 
 ### Lot DOC2 — Word, Excel, PowerPoint à l'affichage
 
-- [ ] Pages Word, diapositives, feuilles Excel en morceaux (≈ 50 lignes × 15 colonnes, grille des cellules dans la carte)
-- [ ] Titres « Diapositive 4 / 20 », « Feuille Ventes (A1:O50) » ; ancre « cellule B12 » ou « plage B12:D20 »
+- [x] .docx/.docm/.dotx, .pptx/.pptm/.potx, .xlsx/.xlsm/.xltx ouverts comme les PDF : par le menu, par un bouton ou par glisser-déposer ; anciens formats (.doc, .xls, .ppt) refusés avec un message
+- [x] Feuilles Excel découpées en morceaux d'au plus 1200 × 1000 px (≈ 50 lignes) ; feuilles masquées et feuilles de graphique ignorées ; « Ventes A1:G50 » dans l'éditeur
+- [x] Titres « Diapositive 4 / 20 — deck.pptx », « Feuille Ventes (A51:G100) — budget.xlsx » ; ancre « cellule B51 de la feuille Ventes (« Magasin 50 ») » ou « plage C2:G10 » ; texte de la forme visée dans PowerPoint
+- [x] Tests `document/office.test.ts` : rendu des trois formats, paragraphes Word, cellules Excel, formats de nombres, import en session et export
 
 ### Lot DOC3 — Copie commentée Office
 

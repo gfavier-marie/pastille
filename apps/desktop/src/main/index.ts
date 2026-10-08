@@ -29,8 +29,10 @@ import { createCapture, listWindows, windowTarget, type CapturedImage } from './
 import { createClicks } from './clicks.ts';
 import { createDictation } from './dictation.ts';
 import { createDock } from './dock.ts';
-import { createDocuments, DOCUMENT_FORMATS, DocumentError, MAX_PAGES } from './document/open.ts';
+import { openDocx, openPptx } from './document/office.ts';
+import { createDocuments, DOCUMENT_EXTENSIONS, DocumentError, MAX_PAGES } from './document/open.ts';
 import { openPdf } from './document/pdf.ts';
+import { openXlsx } from './document/xlsx.ts';
 import { createMenubar } from './menubar.ts';
 import { exportSession } from './export/index.ts';
 import { createFakeSession } from './export/fixture.ts';
@@ -483,12 +485,13 @@ async function stopVideo() {
 }
 
 // ——— Documents ———
-// « Commenter un document » : le PDF choisi ou déposé sur l'éditeur devient une session dont chaque page est
-// une capture (voir document/open.ts). Pas de fenêtre en plus : pdf.js rend les pages ici même.
+// « Commenter un document » : le PDF, Word, Excel ou PowerPoint choisi ou déposé sur l'éditeur devient une
+// session dont chaque page est une capture (voir document/open.ts). Pas de fenêtre en plus : pdf.js et
+// @silurus/ooxml rendent les pages ici même.
 
 const documents = createDocuments({
   store,
-  open: (bytes) => openPdf(bytes),
+  open: (bytes, format) => ({ pdf: openPdf, docx: openDocx, pptx: openPptx, xlsx: openXlsx })[format](bytes),
   onProgress: (p) => editor?.webContents.send('editor:document-progress', p),
 });
 
@@ -505,7 +508,7 @@ async function openDocument(path?: string) {
     showEditor();
     const r = await dialog.showOpenDialog(editor!, {
       properties: ['openFile'],
-      filters: [{ name: T.main.document.filter, extensions: DOCUMENT_FORMATS }],
+      filters: [{ name: T.main.document.filter, extensions: DOCUMENT_EXTENSIONS }],
     });
     path = r.filePaths[0];
     if (r.canceled || !path) return;

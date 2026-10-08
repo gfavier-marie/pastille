@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { allAnnotations, type Annotation, type Note, type Session } from '@pastille/shared';
+import { allAnnotations, type Annotation, type DocumentPage, type Note, type Session } from '@pastille/shared';
 import { imageUrl, type ExportFormat, type MenuAction, type MenuState, type SessionSummary, type SettingsState } from '../../ipc.ts';
 import * as I from '../icons.tsx';
 import { MenuItems } from '../menu/items.tsx';
@@ -21,9 +21,11 @@ const BUBBLE_WIDTH = 312;
 const Badge = ({ a }: { a: Annotation }) => (
   <span className={`badge ${a.geometry.kind === 'point' ? 'point' : ''} ${a.number > 99 ? 'wide' : ''}`}>{a.number}</span>
 );
+/** « Page 3 », « Diapositive 3 » ou « Ventes A1:L50 » : où se trouve une page de document. */
+const docLabel = (d: DocumentPage) => T.editor.docLabel(d.format, d.page, d.sheet, d.range);
 const isTyping = (t: EventTarget | null) => t instanceof HTMLTextAreaElement || t instanceof HTMLInputElement;
 /** Document déposé (PDF ou Office) : ouvert comme une session ; le processus principal refuse ce qu'il ne lit pas. */
-const isDocumentFile = (f: File) => /\.(pdf|docx?|xlsx?|pptx?)$/i.test(f.name);
+const isDocumentFile = (f: File) => /\.(pdf|doc[xm]?|dotx?|xl[st][xm]?|pp[st][xm]?|potx?)$/i.test(f.name);
 
 /** Image collée ou déposée (PNG, JPEG, WebP…) convertie en PNG ; null si illisible. */
 async function toPng(file: File): Promise<Uint8Array | null> {
@@ -835,7 +837,7 @@ function App() {
               <div className="aside-head">
                 <div className="titles">
                   <div className="title">
-                    {doc ? T.editor.pageTitle(doc.page, capture.annotations.length) : T.editor.screenTitle(index + 1, capture.annotations.length)}
+                    {doc ? T.editor.pageTitle(docLabel(doc), capture.annotations.length) : T.editor.screenTitle(index + 1, capture.annotations.length)}
                   </div>
                   {doc ? (
                     <div className="sub">{doc.name}</div>
@@ -1003,7 +1005,7 @@ function App() {
               className="thumb"
               aria-label={
                 c.source?.document
-                  ? T.editor.pageThumbLabel(c.source.document.page, c.annotations.length, c.id === capture.id)
+                  ? T.editor.pageThumbLabel(docLabel(c.source.document), c.annotations.length, c.id === capture.id)
                   : T.editor.thumbLabel(i + 1, c.annotations.length, c.id === capture.id)
               }
               aria-current={c.id === capture.id || undefined}
@@ -1014,7 +1016,7 @@ function App() {
               </span>
               <span className="cap">
                 {c.source?.document
-                  ? T.editor.pageThumb(c.source.document.page, c.annotations[0]?.number, c.annotations.at(-1)?.number)
+                  ? T.editor.pageThumb(docLabel(c.source.document), c.annotations[0]?.number, c.annotations.at(-1)?.number)
                   : T.editor.thumb(i + 1, c.annotations[0]?.number, c.annotations.at(-1)?.number)}
               </span>
             </button>

@@ -12,20 +12,26 @@ import { textMapPath, type TextMap } from './anchor.ts';
 /** Erreur à montrer telle quelle à l'utilisateur (format refusé, fichier protégé ou illisible). */
 export class DocumentError extends Error {}
 
-export type RenderedPage = { png: Uint8Array; width: number; height: number; map: TextMap };
+export type RenderedPage = { png: Uint8Array; width: number; height: number; map: TextMap; sheet?: string; range?: string };
 export type OpenedDocument = { pages: number; render(index: number): Promise<RenderedPage>; close(): Promise<void> };
 export type DocumentOpener = (bytes: Uint8Array, format: DocumentFormat) => Promise<OpenedDocument>;
 export type DocumentProgress = { name: string; done: number; total: number } | null;
 
-/** Formats ouverts aujourd'hui (Word, Excel et PowerPoint suivront). */
-export const DOCUMENT_FORMATS: DocumentFormat[] = ['pdf'];
-const LEGACY = ['doc', 'xls', 'ppt'];
+/** Extensions ouvertes et leur format : modèles et fichiers à macros se lisent comme les autres. */
+const FORMATS: Record<string, DocumentFormat> = {
+  pdf: 'pdf',
+  docx: 'docx', docm: 'docx', dotx: 'docx',
+  xlsx: 'xlsx', xlsm: 'xlsx', xltx: 'xlsx',
+  pptx: 'pptx', pptm: 'pptx', potx: 'pptx',
+};
+export const DOCUMENT_EXTENSIONS = Object.keys(FORMATS);
+const LEGACY = ['doc', 'xls', 'ppt', 'dot', 'xlt', 'pot', 'pps'];
 export const MAX_PAGES = 200;
 
 /** Format d'un fichier d'après son extension ; une erreur lisible s'il n'est pas pris en charge. */
 export function documentFormat(path: string): DocumentFormat {
   const ext = extname(path).slice(1).toLowerCase();
-  if (DOCUMENT_FORMATS.includes(ext as DocumentFormat)) return ext as DocumentFormat;
+  if (FORMATS[ext]) return FORMATS[ext];
   if (LEGACY.includes(ext)) throw new DocumentError(T.main.document.legacy(basename(path)));
   throw new DocumentError(T.main.document.unsupported(basename(path)));
 }
@@ -68,7 +74,7 @@ export function createDocuments(deps: {
             await mkdir(join(store.dir(s), 'documents'), { recursive: true });
             await writeFile(join(store.dir(s), 'documents', `${id}.${format}`), bytes);
           } else if (store.get()?.id !== sessionId) break; // autre session ouverte entre-temps : l'import s'arrête
-          const document: DocumentPage = { id, name, format, page: i + 1, pages: total };
+          const document: DocumentPage = { id, name, format, page: i + 1, pages: total, ...(page.sheet ? { sheet: page.sheet, range: page.range } : {}) };
           const capture = await store.addCapture(page.png, { width: page.width, height: page.height, scaleFactor: 2, source: { document } });
           await writeFile(join(store.dir(store.get()!), textMapPath(capture)), JSON.stringify(page.map));
           if (i === 0) onFirstPage(capture.id);

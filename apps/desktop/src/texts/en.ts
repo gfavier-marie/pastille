@@ -322,7 +322,9 @@ export const en: Texts = {
     zoomOut: 'Zoom out',
     zoomIn: 'Zoom in',
     screenTitle: (index: number, points: number) => `Screen ${index} · ${plural(points, 'point', 'points')}`,
-    pageTitle: (page: number, points: number) => `Page ${page} · ${plural(points, 'point', 'points')}`,
+    docLabel: (format: string, page: number, sheet?: string, range?: string) =>
+      format === 'xlsx' ? `${sheet} ${range}` : `${format === 'pptx' ? 'Slide' : 'Page'} ${page}`,
+    pageTitle: (label: string, points: number) => `${label} · ${plural(points, 'point', 'points')}`,
     previous: 'Previous capture',
     next: 'Next capture',
     noPoints: 'Click the capture to drop a point.',
@@ -374,10 +376,10 @@ export const en: Texts = {
       `Screen ${index} · ${first === undefined ? 'no points' : first === last ? `#${first}` : `#${first}–${last}`}`,
     thumbLabel: (index: number, points: number, current: boolean) =>
       `Screen ${index}, ${plural(points, 'point', 'points')}${current ? ', shown' : ''}`,
-    pageThumb: (page: number, first?: number, last?: number) =>
-      `Page ${page} · ${first === undefined ? 'no points' : first === last ? `#${first}` : `#${first}–${last}`}`,
-    pageThumbLabel: (page: number, points: number, current: boolean) =>
-      `Page ${page}, ${plural(points, 'point', 'points')}${current ? ', shown' : ''}`,
+    pageThumb: (label: string, first?: number, last?: number) =>
+      `${label} · ${first === undefined ? 'no points' : first === last ? `#${first}` : `#${first}–${last}`}`,
+    pageThumbLabel: (label: string, points: number, current: boolean) =>
+      `${label}, ${plural(points, 'point', 'points')}${current ? ', shown' : ''}`,
     captures: 'Session captures',
     deleteScreen: (index: number) => `Delete screen ${index} and its points`,
     screenDeleted: (index: number, mod: string) => `Screen ${index} deleted · ${mod}Z to undo`,
@@ -388,7 +390,7 @@ export const en: Texts = {
     emptyVideoBefore: 'For a video, press',
     emptyVideoAfter: `then browse: ${isMac ? '⌘' : 'Ctrl'}-click an element and speak to make it a point.`,
     openDocument: 'Comment on a document',
-    emptyDocument: 'To comment on a PDF, drop it into this window.',
+    emptyDocument: 'To comment on a PDF, Word, Excel or PowerPoint file, drop it into this window.',
     opening: (name: string, done: number, total: number) => `${name}: page ${done} / ${total}`,
     micError: (err: unknown) => `Microphone unavailable: ${err}`,
     zoomedImage: 'Enlarged image',
@@ -432,11 +434,11 @@ export const en: Texts = {
     // Documents opened in the app
     document: {
       filter: 'Documents',
-      legacy: (name: string) => `${name} uses an old Office format: save it as a PDF to comment on it.`,
+      legacy: (name: string) => `${name} uses an old Office format: save it as .docx, .xlsx or .pptx, or as a PDF.`,
       unsupported: (name: string) =>
-        `${name}: format not supported. VibeScreener opens PDFs; for Word, Excel or PowerPoint, export to PDF first.`,
+        `${name}: format not supported. VibeScreener opens PDF, Word (.docx), Excel (.xlsx) and PowerPoint (.pptx) files.`,
       busy: 'A document is already opening.',
-      encrypted: 'This PDF is password-protected: save an unprotected copy to comment on it.',
+      encrypted: 'This document is password-protected: save an unprotected copy to comment on it.',
       unreadable: (err: string) => `Can’t read the document: ${err}`,
       truncated: (max: number) => `Long document: only the first ${max} pages are open.`,
       protectedPdf: (name: string) => `${name} is protected against changes: no commented copy. Exports for the AI still work.`,
@@ -514,6 +516,9 @@ export const en: Texts = {
     arrow: (x1: number, y1: number, x2: number, y2: number, size: string) => `arrow from (${x1}, ${y1}) to (${x2}, ${y2}) ${size}`,
     on: (w: number, h: number) => `on ${w} × ${h}`,
     page: (page: number, pages: number, name: string) => `Page ${page} / ${pages} — ${name}`,
+    slide: (page: number, pages: number, name: string) => `Slide ${page} / ${pages} — ${name}`,
+    sheet: (sheet: string, range: string, name: string) => `Sheet ${sheet} (${range}) — ${name}`,
+    anchorCells: (cells: string, sheet: string, value?: string) => `cell ${cells} of sheet ${sheet}${value ? ` (“${value}”)` : ''}`,
     anchor: (text: string) => `target text: “${text}”`,
     commented: (i: number) => (i > 1 ? `commented ${i}` : 'commented'),
     sketchCount: (n: number) => plural(n, 'sketch', 'sketches'),

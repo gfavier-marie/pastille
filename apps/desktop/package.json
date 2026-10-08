@@ -14,7 +14,10 @@
   "dependencies": {
     "@napi-rs/canvas": "^1.0.10",
     "@pastille/shared": "workspace:*",
+    "@silurus/ooxml": "^0.88.0",
+    "@xmldom/xmldom": "^0.8.15",
     "get-windows": "^9.3.0",
+    "jszip": "^3.10.2",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.4.299",
     "pptxgenjs": "^4.0.1",

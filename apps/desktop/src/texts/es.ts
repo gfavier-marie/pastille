@@ -322,7 +322,9 @@ export const es: Texts = {
     zoomOut: 'Alejar',
     zoomIn: 'Acercar',
     screenTitle: (index: number, points: number) => `Pantalla ${index} · ${plural(points, 'punto', 'puntos')}`,
-    pageTitle: (page: number, points: number) => `Página ${page} · ${plural(points, 'punto', 'puntos')}`,
+    docLabel: (format: string, page: number, sheet?: string, range?: string) =>
+      format === 'xlsx' ? `${sheet} ${range}` : `${format === 'pptx' ? 'Diapositiva' : 'Página'} ${page}`,
+    pageTitle: (label: string, points: number) => `${label} · ${plural(points, 'punto', 'puntos')}`,
     previous: 'Captura anterior',
     next: 'Captura siguiente',
     noPoints: 'Haz clic en la captura para colocar un punto.',
@@ -374,10 +376,10 @@ export const es: Texts = {
       `Pantalla ${index} · ${first === undefined ? 'sin puntos' : first === last ? `#${first}` : `#${first}–${last}`}`,
     thumbLabel: (index: number, points: number, current: boolean) =>
       `Pantalla ${index}, ${plural(points, 'punto', 'puntos')}${current ? ', mostrada' : ''}`,
-    pageThumb: (page: number, first?: number, last?: number) =>
-      `Página ${page} · ${first === undefined ? 'sin puntos' : first === last ? `#${first}` : `#${first}–${last}`}`,
-    pageThumbLabel: (page: number, points: number, current: boolean) =>
-      `Página ${page}, ${plural(points, 'punto', 'puntos')}${current ? ', mostrada' : ''}`,
+    pageThumb: (label: string, first?: number, last?: number) =>
+      `${label} · ${first === undefined ? 'sin puntos' : first === last ? `#${first}` : `#${first}–${last}`}`,
+    pageThumbLabel: (label: string, points: number, current: boolean) =>
+      `${label}, ${plural(points, 'punto', 'puntos')}${current ? ', mostrada' : ''}`,
     captures: 'Capturas de la sesión',
     deleteScreen: (index: number) => `Eliminar la pantalla ${index} y sus puntos`,
     screenDeleted: (index: number, mod: string) => `Pantalla ${index} eliminada · ${mod}Z para deshacer`,
@@ -388,7 +390,7 @@ export const es: Texts = {
     emptyVideoBefore: 'Para un vídeo, pulsa',
     emptyVideoAfter: `y navega: ${isMac ? '⌘' : 'Ctrl'} + clic en un elemento seguido de voz se convierte en un punto.`,
     openDocument: 'Comentar un documento',
-    emptyDocument: 'Para comentar un PDF, suéltalo en esta ventana.',
+    emptyDocument: 'Para comentar un PDF, un Word, un Excel o un PowerPoint, suéltalo en esta ventana.',
     opening: (name: string, done: number, total: number) => `${name}: página ${done} / ${total}`,
     micError: (err: unknown) => `Micro no disponible: ${err}`,
     zoomedImage: 'Imagen ampliada',
@@ -431,11 +433,11 @@ export const es: Texts = {
     // Documentos abiertos en la app
     document: {
       filter: 'Documentos',
-      legacy: (name: string) => `${name} tiene un formato antiguo de Office: guárdalo como PDF para comentarlo.`,
+      legacy: (name: string) => `${name} tiene un formato antiguo de Office: guárdalo como .docx, .xlsx o .pptx, o como PDF.`,
       unsupported: (name: string) =>
-        `${name}: formato no compatible. VibeScreener abre PDF; para Word, Excel o PowerPoint, exporta primero a PDF.`,
+        `${name}: formato no compatible. VibeScreener abre PDF, Word (.docx), Excel (.xlsx) y PowerPoint (.pptx).`,
       busy: 'Ya se está abriendo un documento.',
-      encrypted: 'Este PDF está protegido con contraseña: guarda una copia sin protección para comentarlo.',
+      encrypted: 'Este documento está protegido con contraseña: guarda una copia sin protección para comentarlo.',
       unreadable: (err: string) => `No se puede leer el documento: ${err}`,
       truncated: (max: number) => `Documento largo: solo se abren las ${max} primeras páginas.`,
       protectedPdf: (name: string) => `${name} está protegido contra modificaciones: no se puede crear la copia comentada. Las exportaciones para la IA siguen disponibles.`,
@@ -511,6 +513,9 @@ export const es: Texts = {
     arrow: (x1: number, y1: number, x2: number, y2: number, size: string) => `flecha de (${x1}, ${y1}) a (${x2}, ${y2}) ${size}`,
     on: (w: number, h: number) => `sobre ${w} × ${h}`,
     page: (page: number, pages: number, name: string) => `Página ${page} / ${pages} — ${name}`,
+    slide: (page: number, pages: number, name: string) => `Diapositiva ${page} / ${pages} — ${name}`,
+    sheet: (sheet: string, range: string, name: string) => `Hoja ${sheet} (${range}) — ${name}`,
+    anchorCells: (cells: string, sheet: string, value?: string) => `celda ${cells} de la hoja ${sheet}${value ? ` («${value}»)` : ''}`,
     anchor: (text: string) => `texto señalado: «${text}»`,
     commented: (i: number) => (i > 1 ? `comentado ${i}` : 'comentado'),
     sketchCount: (n: number) => plural(n, 'boceto', 'bocetos'),
